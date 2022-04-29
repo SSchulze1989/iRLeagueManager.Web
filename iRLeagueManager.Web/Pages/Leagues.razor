@@ -1,16 +1,13 @@
 ﻿@page "/leagues"
-
-@using iRleagueManager.Web.Server.ViewModels;
+@using iRLeagueApiCore.Communication.Models;
+@using System.Text;
+@using iRleagueManager.Web.ViewModels;
 @inherits MvvmBlazor.Components.MvvmComponentBase<LeaguesViewModel>
 
 
 <h1>Leagues</h1>
 
-@if (@Bind(x => x.Status) == "Not Found")
-{
-    <p><em>Not Found!</em></p>
-}
-else if (@Bind(x => x.Leagues) == null)
+@if (@Bind(x => x.Leagues) == null)
 {
     <p><em>Loading ...</em></p>
 }

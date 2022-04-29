@@ -1,5 +1,8 @@
 using Blazored.LocalStorage;
+using iRLeagueApiCore.Client;
+using iRLeagueApiCore.Client.Http;
 using iRleagueManager.Web.Server.Data;
+using iRleagueManager.Web.Server.ViewModels;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -7,9 +10,12 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace iRleagueManager.Web.Server
@@ -33,6 +39,14 @@ namespace iRleagueManager.Web.Server
             services.AddHttpClient();
             services.AddBlazoredLocalStorage();
             services.AddScoped<ApiAuthentication>();
+            services.AddMvvm();
+
+            var apiHttpClient = new HttpClient();
+            apiHttpClient.BaseAddress = new Uri("https://irleaguemanager.net/irleagueapi/");
+            services.AddScoped<LeagueApiClientFactory>();
+            services.AddScoped<ITokenStore, AsyncTokenStore>();
+            services.AddScoped(sp => sp.GetRequiredService<LeagueApiClientFactory>().CreateClient());
+            services.AddScoped<LeaguesViewModel>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

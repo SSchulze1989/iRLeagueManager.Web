@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace iRleagueManager.Web.Server
 {
@@ -13,7 +14,7 @@ namespace iRleagueManager.Web.Server
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            var builder = CreateHostBuilder(args);
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

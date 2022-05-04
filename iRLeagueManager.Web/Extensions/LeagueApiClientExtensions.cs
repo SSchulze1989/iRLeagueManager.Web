@@ -12,7 +12,11 @@ namespace iRleagueManager.Web.Extensions
             {
                 return clientActionResult.Content;
             }
-            throw new ActionResultException<T>(clientActionResult, "Action result did not indicate success");
+            if (clientActionResult.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return default(T);
+            }
+            throw new ActionResultException<T>(clientActionResult);
         }
     }
 
@@ -20,7 +24,7 @@ namespace iRleagueManager.Web.Extensions
     {
         public ClientActionResult<T> ActionResult;
 
-        public ActionResultException(ClientActionResult<T> actionResult) : this(actionResult, default)
+        public ActionResultException(ClientActionResult<T> actionResult) : this(actionResult, $"Action result did not indicate success: {actionResult.Status} -> {actionResult.Message} -- from Request: {actionResult.RequestUrl}")
         {
         }
 

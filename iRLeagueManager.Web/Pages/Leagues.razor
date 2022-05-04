@@ -1,13 +1,19 @@
 ﻿@page "/leagues"
-@using iRLeagueApiCore.Communication.Models;
-@using System.Text;
+
+@using iRLeagueApiCore.Client
+@using iRLeagueApiCore.Client.Http
 @using iRleagueManager.Web.ViewModels;
 @inherits MvvmBlazor.Components.MvvmComponentBase<LeaguesViewModel>
+@inject ILeagueApiClient apiClient
 
 
 <h1>Leagues</h1>
 
-@if (@Bind(x => x.Leagues) == null)
+@if (@Bind(x => x.Status) == "Not Found")
+{
+    <p><em>Not Found!</em></p>
+}
+else if (@Bind(x => x.Leagues) == null)
 {
     <p><em>Loading ...</em></p>
 }
@@ -33,4 +39,12 @@ else
 }
 
 @code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await apiClient.LogIn("testuser", "TestPass123!");
+            await BindingContext.Test();
+        }
+    }
 }

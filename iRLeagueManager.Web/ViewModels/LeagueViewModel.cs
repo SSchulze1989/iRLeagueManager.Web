@@ -6,59 +6,63 @@ using MvvmBlazor.ViewModel;
 using iRleagueManager.Web.Extensions;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
+using Microsoft.AspNetCore.Identity;
 
-namespace iRleagueManager.Web.ViewModels
+namespace iRleagueManager.Web.ViewModels;
+
+public partial class LeagueViewModel : ViewModelBase
 {
-    public partial class LeagueViewModel : ViewModelBase
+    private readonly ILogger<LeagueViewModel> logger;
+    private readonly ILeagueApiClient apiClient;
+
+    public LeagueViewModel(ILogger<LeagueViewModel> logger, ILeagueApiClient apiClient, GetLeagueModel model)
     {
-        private readonly ILogger<LeagueViewModel> logger;
-        private readonly ILeagueApiClient apiClient;
+        this.logger = logger;
+        this.apiClient = apiClient;
+        _model = model;
+        _seasons = new ObservableCollection<SeasonViewModel>();
+    }
 
-        public LeagueViewModel(ILogger<LeagueViewModel> logger, ILeagueApiClient apiClient, GetLeagueModel model)
+    private readonly GetLeagueModel _model;
+
+    public long LeagueId => _model.Id;
+    public string LeagueName
+    {
+        get => _model.Name;
+        set
         {
-            this.logger = logger;
-            this.apiClient = apiClient;
-            _model = model;
+            _model.Name = value;
+            OnPropertyChanged(nameof(LeagueName));
         }
+    }
 
-        private readonly GetLeagueModel _model;
-
-        public long LeagueId => _model.Id;
-        public string LeagueName
+    public string NameFull
+    {
+        get => _model.NameFull;
+        set
         {
-            get => _model.Name;
-            set
-            {
-                _model.Name = value;
-                OnPropertyChanged(nameof(LeagueName));
-            }
+            _model.NameFull = value;
+            OnPropertyChanged(nameof(NameFull));
         }
+    }
 
-        public string NameFull
-        {
-            get => _model.NameFull;
-            set
-            {
-                _model.NameFull = value;
-                OnPropertyChanged(nameof(NameFull));
-            }
-        }
+    private ObservableCollection<SeasonViewModel> _seasons;
+    public ObservableCollection<SeasonViewModel> Seasons
+    {
+        get => _seasons;
+        set => Set(ref _seasons, value);
+    }
 
-        private ObservableCollection<SeasonViewModel> _seasons;
-        public ObservableCollection<SeasonViewModel> Seasons
-        {
-            get => _seasons;
-            set => Set(ref _seasons, value);
-        }
+    private bool _isLoading;
+    public bool IsLoading
+    {
+        get => _isLoading;
+        set => Set(ref _isLoading, value);
+    }
 
-        private bool _isLoading;
-        public bool IsLoading
-        {
-            get => _isLoading;
-            set => Set(ref _isLoading, value);
-        }
-
-        public override async Task OnInitializedAsync()
+    public override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
             IsLoading = true;
             try

@@ -16,10 +16,11 @@ namespace iRleagueManager.Web.Server.Data
         private readonly ILocalStorageService localStorage;
         private readonly ITokenStore tokenStore;
 
-        private readonly string BaseAddress = "https://irleaguemanager.net/irleagueapi/";
+        private readonly string baseAddress;
 
-        public LeagueApiClientFactory(ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, ILocalStorageService localStorage, ITokenStore tokenStore)
+        public LeagueApiClientFactory(IConfiguration configuration, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, ILocalStorageService localStorage, ITokenStore tokenStore)
         {
+            baseAddress = configuration["APIServer"];
             this.loggerFactory = loggerFactory;
             logger = loggerFactory.CreateLogger<LeagueApiClientFactory>();
             this.httpClientFactory = httpClientFactory;
@@ -30,7 +31,7 @@ namespace iRleagueManager.Web.Server.Data
         public ILeagueApiClient CreateClient()
         {
             var httpClient = httpClientFactory.CreateClient();
-            httpClient.BaseAddress = new Uri(BaseAddress);
+            httpClient.BaseAddress = new Uri(baseAddress);
             var client = new LeagueApiClient(loggerFactory.CreateLogger<LeagueApiClient>(), httpClient, tokenStore);
 
             return client;

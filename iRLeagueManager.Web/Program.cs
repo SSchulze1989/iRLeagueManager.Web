@@ -30,7 +30,7 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options => options.Cookie.IsEssential = true);
 
 var apiHttpClient = new HttpClient();
-apiHttpClient.BaseAddress = new Uri("https://irleaguemanager.net/irleagueapi/");
+apiHttpClient.BaseAddress = new Uri(builder.Configuration["APIServer"]);
 builder.Services.AddScoped<LeagueApiClientFactory>();
 builder.Services.AddScoped<ITokenStore, AsyncTokenStore>();
 builder.Services.AddScoped(sp => sp.GetRequiredService<LeagueApiClientFactory>().CreateClient());

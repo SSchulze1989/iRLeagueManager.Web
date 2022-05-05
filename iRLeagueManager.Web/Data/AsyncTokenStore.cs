@@ -32,8 +32,12 @@ namespace iRleagueManager.Web.Data
             logger.LogDebug("Reading token from local browser store");
             try
             {
-                string token = contextAccessor.HttpContext?.Session.GetString(tokenKey) ?? String.Empty;
-                return await Task.FromResult(token);
+                if (contextAccessor.HttpContext?.Session.IsAvailable == true)
+                {
+                    string token = contextAccessor.HttpContext?.Session.GetString(tokenKey) ?? string.Empty;
+                    return await Task.FromResult(token);
+                }
+                return string.Empty;
             }
             catch (InvalidOperationException ex)
             {
@@ -47,7 +51,7 @@ namespace iRleagueManager.Web.Data
             logger.LogDebug("Set token to local browser store: {Token}", token);
             if (await GetTokenAsync() != token)
                 contextAccessor.HttpContext?.Session?.SetString(tokenKey, token);
-            await Task.FromResult(true);
+            await contextAccessor.HttpContext?.Session.CommitAsync();
         }
     }
 }

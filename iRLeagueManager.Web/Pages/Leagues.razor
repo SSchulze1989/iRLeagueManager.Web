@@ -3,6 +3,7 @@
 @using iRLeagueApiCore.Client
 @using iRLeagueApiCore.Client.Http
 @using iRleagueManager.Web.ViewModels;
+@attribute [Authorize]
 @inherits MvvmBlazor.Components.MvvmComponentBase<LeaguesViewModel>
 @inject ILeagueApiClient apiClient
 
@@ -43,7 +44,6 @@ else
     {
         if (firstRender)
         {
-            await apiClient.LogIn("testuser", "TestPass123!");
             await BindingContext.Test();
         }
     }

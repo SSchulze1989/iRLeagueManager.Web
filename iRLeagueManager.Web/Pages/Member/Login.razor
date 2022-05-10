@@ -1,7 +1,8 @@
 ﻿@page "/member/login"
 @using iRLeagueApiCore.Client
 @using iRLeagueApiCore.Client.Http
-@using iRleagueManager.Web.Extensions
+@using iRLeagueManager.Web.Extensions
+@inject IConfiguration configuration
 @inject ITokenStore tokenStore
 @inject ILeagueApiClient ApiClient
 @inject NavigationManager NavigationManager
@@ -51,6 +52,16 @@
             var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";
             NavigationManager.NavigateTo(returnUrl);
         }
+
+#if DEBUG
+        if (firstRender && configuration["DefaultUser"] != null)
+        {
+        model.Username = configuration["DefaultUser"];
+        model.Password = configuration["DefaultPassword"];
+        await OnValidSubmit();
+        return;
+        }
+#endif
     }
 
     public async Task OnValidSubmit()
@@ -60,7 +71,11 @@
             try 
             {
                 Loading = true;
-                await ApiClient.LogIn(model.Username, model.Password);
+                var success = await ApiClient.LogIn(model.Username, model.Password);
+                if (success == false)
+                {
+                    return;
+                }
                 var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";
                 NavigationManager.NavigateTo(returnUrl);
             }

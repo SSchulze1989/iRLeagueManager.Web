@@ -1,12 +1,12 @@
 ﻿using iRLeagueApiCore.Client;
-using iRleagueManager.Web.Extensions;
+using iRLeagueManager.Web.Extensions;
 using Microsoft.Extensions.Logging;
 using MvvmBlazor.ViewModel;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace iRleagueManager.Web.ViewModels
+namespace iRLeagueManager.Web.ViewModels
 {
     public class LeaguesViewModel : ViewModelBase
     {
@@ -17,22 +17,25 @@ namespace iRleagueManager.Web.ViewModels
         private string _status;
         public string Status { get => _status; set => Set(ref _status, value); }
 
-        public LeaguesViewModel(ILoggerFactory loggerFactory)
+        public LeaguesViewModel(ILoggerFactory loggerFactory, ILeagueApiClient apiClient)
         {
             this.loggerFactory = loggerFactory;
             logger = loggerFactory.CreateLogger<LeaguesViewModel>();
+            _status = string.Empty;
+            leagues = new ObservableCollection<LeagueViewModel>();
+            this.apiClient = apiClient;
         }
 
-        public ObservableCollection<LeagueViewModel> Leagues { get; set; }
+        private ObservableCollection<LeagueViewModel> leagues;
+        public ObservableCollection<LeagueViewModel> Leagues { get => leagues; set => Set(ref leagues, value); }
 
-        public override async Task OnInitializedAsync()
-        {
-            this.apiClient = RootServiceProvider.GetRequiredService<ILeagueApiClient>();
-            await Task.FromResult(true);
-        }
+        //public override void OnInitialized()
+        //{
+        //    apiClient = RootServiceProvider.GetRequiredService<ILeagueApiClient>();
+        //}
 
         //public override async Task OnAfterRenderAsync(bool firstRender)
-        public async Task Test(bool firstRender = true)
+        public override async Task OnAfterRenderAsync(bool firstRender)
         {
             if (firstRender)
             {
@@ -46,7 +49,7 @@ namespace iRleagueManager.Web.ViewModels
                         leagueModels.Select(x => new LeagueViewModel(loggerFactory.CreateLogger<LeagueViewModel>(), apiClient, x))
                     );
                 }
-                StateHasChanged();
+                //StateHasChanged();
             }
         }
     }

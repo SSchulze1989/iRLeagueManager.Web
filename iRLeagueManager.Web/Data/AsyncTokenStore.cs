@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using Microsoft.AspNetCore.Identity;
 
-namespace iRleagueManager.Web.Data
+namespace iRLeagueManager.Web.Data
 {
     public class AsyncTokenStore : ITokenStore
     {
@@ -41,17 +41,19 @@ namespace iRleagueManager.Web.Data
             }
             catch (InvalidOperationException ex)
             {
-                logger.LogError("Could not read from local browser storage: {Exception}", ex);
+                logger.LogError("Could not read from local browser session: {Exception}", ex);
                 return string.Empty;
             }
         }
 
         public async Task SetTokenAsync(string token)
         {
-            logger.LogDebug("Set token to local browser store: {Token}", token);
-            if (await GetTokenAsync() != token)
-                contextAccessor.HttpContext?.Session?.SetString(tokenKey, token);
-            await contextAccessor.HttpContext?.Session.CommitAsync();
+            logger.LogDebug("Set token to local browser session: {Token}", token);
+            if (await GetTokenAsync() != token && contextAccessor.HttpContext?.Session != null)
+            {
+                contextAccessor.HttpContext.Session.SetString(tokenKey, token);
+                await contextAccessor.HttpContext.Session.CommitAsync();
+            }
         }
     }
 }

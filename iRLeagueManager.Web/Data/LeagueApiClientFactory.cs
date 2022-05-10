@@ -6,7 +6,7 @@ using Blazored.LocalStorage;
 using System.Threading.Tasks;
 using iRLeagueApiCore.Client.Http;
 
-namespace iRleagueManager.Web.Server.Data
+namespace iRLeagueManager.Web.Server.Data
 {
     public class LeagueApiClientFactory
     {

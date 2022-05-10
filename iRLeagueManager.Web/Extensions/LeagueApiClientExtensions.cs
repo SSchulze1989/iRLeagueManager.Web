@@ -5,7 +5,7 @@ using System.Collections.Specialized;
 using System.Runtime.Serialization;
 using System.Web;
 
-namespace iRleagueManager.Web.Extensions
+namespace iRLeagueManager.Web.Extensions
 {
     public static class LeagueApiClientExtensions
     {

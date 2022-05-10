@@ -1,6 +1,6 @@
 ﻿using System.Net.Http;
 
-namespace iRleagueManager.Web.Server.Data
+namespace iRLeagueManager.Web.Server.Data
 {
     public class AuthenticatedHttpClientFactory : IHttpClientFactory
     {

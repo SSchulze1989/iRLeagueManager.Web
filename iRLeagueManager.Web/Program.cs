@@ -1,9 +1,8 @@
 using Blazored.LocalStorage;
 using iRLeagueApiCore.Client.Http;
-using iRleagueManager.Web.Data;
-using iRleagueManager.Web.Server.Data;
-using iRleagueManager.Web.ViewModels;
 using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Server.Data;
+using iRLeagueManager.Web.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -28,13 +27,16 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddMvvm();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options => options.Cookie.IsEssential = true);
+builder.Services.AddLeagueApiService();
 
 var apiHttpClient = new HttpClient();
 apiHttpClient.BaseAddress = new Uri(builder.Configuration["APIServer"]);
 builder.Services.AddScoped<LeagueApiClientFactory>();
 builder.Services.AddScoped<ITokenStore, AsyncTokenStore>();
 builder.Services.AddScoped(sp => sp.GetRequiredService<LeagueApiClientFactory>().CreateClient());
+builder.Services.AddScoped<SharedStateService>();
 builder.Services.AddScoped<LeaguesViewModel>();
+builder.Services.AddScoped<SeasonsViewModel>();
 
 var app = builder.Build();
 

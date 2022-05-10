@@ -2,19 +2,20 @@
 
 @using iRLeagueApiCore.Client
 @using iRLeagueApiCore.Client.Http
-@using iRleagueManager.Web.ViewModels;
+@using iRLeagueManager.Web.ViewModels;
 @attribute [Authorize]
-@inherits MvvmBlazor.Components.MvvmComponentBase<LeaguesViewModel>
+@inherits MvvmBlazor.Components.MvvmComponentBase
+@inject LeaguesViewModel vm
 @inject ILeagueApiClient apiClient
 
 
 <h1>Leagues</h1>
 
-@if (@Bind(x => x.Status) == "Not Found")
+@if (@Bind(vm, x => x.Status) == "Not Found")
 {
     <p><em>Not Found!</em></p>
 }
-else if (@Bind(x => x.Leagues) == null)
+else if (@Bind(vm, x => x.Leagues) == null || @Bind(vm, x => x.Leagues).Count == 0)
 {
     <p><em>Loading ...</em></p>
 }
@@ -28,11 +29,11 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var league in @Bind(x => x.Leagues))
+            @foreach (var league in @Bind(vm, x => x.Leagues))
             {
                 <tr>
-                    <td>@league.LeagueId</td>
-                    <td><NavLink class="nav-link" href="@($"{Bind(league, x => x.LeagueName)}/seasons")">@Bind(league, x => x.LeagueName)</NavLink></td>
+                    <td>@Bind(league, x => x.LeagueId)</td>
+                    <td><NavLink class="nav-link" href="@($"{@Bind(league, x => x.LeagueName)}/Seasons")">@Bind(league, x => x.LeagueName)</NavLink></td>
                 </tr>
             }
         </tbody>
@@ -40,11 +41,8 @@ else
 }
 
 @code {
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            await BindingContext.Test();
-        }
+        return vm.OnAfterRenderAsync(firstRender);
     }
 }

@@ -2,19 +2,35 @@
 
 <PageTitle>iRLeagueManager.Web</PageTitle>
 
+<div class="page-header">
+    <Header/>
+</div>
+
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+
+    <CascadingValue Value="LeagueName">
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+    </CascadingValue>
 
     <main>
-        <div class="top-row px-4 auth">
-            <LoginDisplay />
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
-
         <article class="content px-4">
+            <h1>@LeagueName</h1>
             @Body
         </article>
     </main>
 </div>
+
+@code {
+    [CascadingParameter]
+    public RouteData? RouteData { get; set; }
+
+    public string? LeagueName { get; set; }
+    public long SeasonId { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        LeagueName = (string?)RouteData?.RouteValues?.GetValueOrDefault("LeagueName");
+    }
+}

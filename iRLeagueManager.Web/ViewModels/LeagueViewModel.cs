@@ -3,12 +3,12 @@ using iRLeagueApiCore.Client;
 using System.Threading.Tasks;
 using MvvmBlazor;
 using MvvmBlazor.ViewModel;
-using iRleagueManager.Web.Extensions;
+using iRLeagueManager.Web.Extensions;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using Microsoft.AspNetCore.Identity;
 
-namespace iRleagueManager.Web.ViewModels;
+namespace iRLeagueManager.Web.ViewModels;
 
 public partial class LeagueViewModel : ViewModelBase
 {
@@ -32,7 +32,7 @@ public partial class LeagueViewModel : ViewModelBase
         set
         {
             _model.Name = value;
-            OnPropertyChanged(nameof(LeagueName));
+            OnPropertyChanged();
         }
     }
 
@@ -42,7 +42,7 @@ public partial class LeagueViewModel : ViewModelBase
         set
         {
             _model.NameFull = value;
-            OnPropertyChanged(nameof(NameFull));
+            OnPropertyChanged();
         }
     }
 

@@ -1,0 +1,31 @@
+﻿@page "/{LeagueName}/Seasons/{SeasonId:long}/Schedules"
+@attribute [Authorize]
+@inject LeagueApiService apiService
+
+<h3>Schedules</h3>
+
+@code {
+    [Parameter]
+    public string LeagueName { get; set; } = string.Empty;
+    [Parameter]
+    public long SeasonId { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // set season state
+        await apiService.SetCurrentSeasonAsync(LeagueName, SeasonId);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender == false) return;
+
+        // load schedules data
+        if (apiService.CurrentSeason == null)
+        {
+            return;
+        }
+        var schedules = (await apiService.CurrentSeason.Schedules().Get()).EnsureSuccess();
+
+    }
+}

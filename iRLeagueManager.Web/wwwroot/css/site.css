@@ -8,6 +8,12 @@ h1:focus {
     outline: none;
 }
 
+.page-header {
+    background: #000000;
+    color: #ffffff;
+    text-align: center;
+}
+
 a, .btn-link {
     color: #0071c1;
 }

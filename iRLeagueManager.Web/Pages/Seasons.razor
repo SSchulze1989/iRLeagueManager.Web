@@ -1,0 +1,56 @@
+﻿@page "/{LeagueName}/Seasons"
+@page "/{LeagueName}/Seasons/{SeasonId:long}"
+@using iRLeagueManager.Web.ViewModels
+@attribute [Authorize]
+@inherits MvvmComponentBase
+@inject LeagueApiService apiService
+@inject SeasonsViewModel vm
+
+<h1>Seasons</h1>
+
+@if (@Bind(vm, x => x.Loading))
+{
+    <p><em>Loading ...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var league in @Bind(vm, x => x.Seasons))
+            {
+                <tr>
+                    <td>@Bind(league, x => x.SeasonId)</td>
+                    <td>@Bind(league, x => x.SeasonName)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public string LeagueName { get; set; } = string.Empty;
+
+    [Parameter]
+    public long? SeasonId { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await apiService.SetCurrentLeagueAsync(LeagueName);
+        if (SeasonId != null)
+        {
+            await apiService.SetCurrentSeasonAsync(LeagueName, SeasonId.Value);
+        }
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        return vm.OnAfterRenderAsync(firstRender);
+    }
+}

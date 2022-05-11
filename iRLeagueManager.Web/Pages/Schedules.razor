@@ -4,6 +4,7 @@
 @inherits MvvmComponentBase
 @inject LeagueApiService apiService
 @inject SchedulesPageViewModel vm
+@inject NavigationManager navigationManager
 
 <h3>Schedules</h3>
 
@@ -55,18 +56,15 @@ else
     [Parameter]
     public long SeasonId { get; set; }
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender == false) return;
+
         // set season state
         if (SeasonId != 0)
         {
             await apiService.SetCurrentSeasonAsync(LeagueName, SeasonId);
         }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender == false) return;
 
         // load schedules data
         if (apiService.CurrentSeason == null)

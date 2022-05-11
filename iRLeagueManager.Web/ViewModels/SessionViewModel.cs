@@ -20,8 +20,8 @@ namespace iRLeagueManager.Web.ViewModels
             this.model = model;
         }
 
-        public long SessionId { get => model.SessionId; set => SetProp(model.SessionId, value => model.SessionId = value, value); }
-        public string Name { get => model.Name; set => SetProp(model.Name, value => model.Name = value, value); }
+        public long SessionId { get => model.SessionId; set => SetP(model.SessionId, value => model.SessionId = value, value); }
+        public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
 
         public void SetModel(GetSessionModel model)
         {

@@ -17,6 +17,9 @@ namespace iRLeagueManager.Web.ViewModels
         protected ILogger<T> Logger { get; }
         protected LeagueApiService ApiService { get; }
 
+        private bool loading;
+        public bool Loading { get => loading; set => Set(ref loading, value); }
+
         /// <summary>
         /// Set a value on a model property and call OnPropertyChanged() if value changed
         /// </summary>
@@ -26,7 +29,7 @@ namespace iRLeagueManager.Web.ViewModels
         /// <param name="value">new value to set</param>
         /// <param name="propertyName">Name of the property for OnPropertyChanged()</param>
         /// <returns></returns>
-        protected bool SetProp<TProperty>(TProperty get, Action<TProperty> set, TProperty value, [CallerMemberName] string? propertyName = null)
+        protected bool SetP<TProperty>(TProperty get, Action<TProperty> set, TProperty value, [CallerMemberName] string? propertyName = null)
         {
             if (get == null && value != null || (get != null && get.Equals(value) == false))
             {

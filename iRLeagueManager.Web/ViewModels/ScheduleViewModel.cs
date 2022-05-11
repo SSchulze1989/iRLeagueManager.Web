@@ -10,13 +10,19 @@ namespace iRLeagueManager.Web.ViewModels
         private GetScheduleModel model;
 
         public ScheduleViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+            this(loggerFactory, apiService, new GetScheduleModel())
+        {
+        }
+
+        public ScheduleViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, GetScheduleModel model) : 
             base(loggerFactory, apiService)
         {
             sessions = new ObservableCollection<SessionViewModel>();
-            model = new GetScheduleModel();
+            this.model = model;
         }
 
-        public long ScheduleId { get => model.ScheduleId; set => SetProp(model.ScheduleId, value => model.ScheduleId = value, value); }
+        public long ScheduleId { get => model.ScheduleId; set => SetP(model.ScheduleId, value => model.ScheduleId = value, value); }
+        public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
 
         private ObservableCollection<SessionViewModel> sessions;
         public ObservableCollection<SessionViewModel> Sessions { get => sessions; set => Set(ref sessions, value); }
@@ -31,6 +37,9 @@ namespace iRLeagueManager.Web.ViewModels
         public async Task LoadSessions(CancellationToken cancellationToken = default)
         {
             if (ApiService.CurrentLeague == null) return;
+            Loading = true;
+
+            //await Task.Delay(500);
 
             var result = await ApiService.CurrentLeague.Schedules().WithId(ScheduleId).Sessions().Get(cancellationToken);
             if (result.Success == false)
@@ -41,6 +50,8 @@ namespace iRLeagueManager.Web.ViewModels
             var sessions = result.Content;
             Sessions = new ObservableCollection<SessionViewModel>(sessions.Select(x =>
                 new SessionViewModel(LoggerFactory, ApiService, x)));
+
+            Loading = false;
         }
     }
 }

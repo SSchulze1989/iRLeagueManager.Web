@@ -3,8 +3,10 @@
 @using iRLeagueManager.Web.ViewModels
 @attribute [Authorize]
 @inherits MvvmComponentBase
+@inject NavigationManager navigationManager
 @inject LeagueApiService apiService
 @inject SeasonsViewModel vm
+@inject SharedStateService sharedState
 
 <h1>Seasons</h1>
 
@@ -14,23 +16,9 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var league in @Bind(vm, x => x.Seasons))
-            {
-                <tr>
-                    <td>@Bind(league, x => x.SeasonId)</td>
-                    <td>@Bind(league, x => x.SeasonName)</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div>
+        <p>@sharedState.SeasonName</p>
+    </div>
 }
 
 @code {
@@ -46,6 +34,19 @@ else
         if (SeasonId != null)
         {
             await apiService.SetCurrentSeasonAsync(LeagueName, SeasonId.Value);
+            return;
+        }
+
+        // navigate to first season
+        if (apiService.CurrentLeague == null)
+        {
+            return;
+        }
+        var result = await apiService.CurrentLeague.Seasons().Get();
+        if (result.Success)
+        {
+            var seasons = result.Content;
+            navigationManager.NavigateTo($"/{LeagueName}/Seasons/{seasons.First().SeasonId}");
         }
     }
 

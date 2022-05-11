@@ -4,26 +4,33 @@ using Blazored.LocalStorage;
 using Microsoft.Extensions.Logging;
 using System;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace iRLeagueManager.Web.Data
 {
     public class AsyncTokenStore : ITokenStore
     {
         private readonly ILogger<AsyncTokenStore> logger;
-        private readonly IHttpContextAccessor contextAccessor;
+        private readonly ProtectedLocalStorage localStore;
 
         private const string tokenKey = "LeagueApiToken";
 
-        public AsyncTokenStore(ILogger<AsyncTokenStore> logger, IHttpContextAccessor contextAccessor)
+        public bool IsLoggedIn { get; private set; }
+
+        public AsyncTokenStore(ILogger<AsyncTokenStore> logger, ProtectedLocalStorage localStorage)
         {
             this.logger = logger;
-            this.contextAccessor = contextAccessor;
+            this.localStore = localStorage;
         }
 
         public async Task ClearTokenAsync()
         {
             logger.LogDebug("Clear token in local browser store");
-            contextAccessor.HttpContext?.Session.Remove(tokenKey);
+            await localStore.DeleteAsync(tokenKey);
             await Task.FromResult(true);
         }
 
@@ -32,28 +39,52 @@ namespace iRLeagueManager.Web.Data
             logger.LogDebug("Reading token from local browser store");
             try
             {
-                if (contextAccessor.HttpContext?.Session.IsAvailable == true)
+                //if (contextAccessor.HttpContext?.Session.IsAvailable == true)
+                //{
+                //    string token = contextAccessor.HttpContext?.Session.GetString(tokenKey) ?? string.Empty;
+                //    return await Task.FromResult(token);
+                //}
+                var token = await localStore.GetAsync<string>(tokenKey);
+                if (token.Success)
                 {
-                    string token = contextAccessor.HttpContext?.Session.GetString(tokenKey) ?? string.Empty;
-                    return await Task.FromResult(token);
+                    IsLoggedIn = true;
+                    return token.Value ?? string.Empty;
                 }
                 return string.Empty;
             }
-            catch (InvalidOperationException ex)
+            catch (Exception ex)
             {
                 logger.LogError("Could not read from local browser session: {Exception}", ex);
                 return string.Empty;
             }
         }
 
+        //private Task<AuthenticationState> AuthenticationTask(string token)
+        //{
+        //    var state = new AuthenticationState(CreatePrincipal(token));
+        //    return Task.FromResult());
+        //}
+
+        //private ClaimsPrincipal CreatePrincipal(string token)
+        //{
+        //    // decode token
+        //    var handler = new JwtSecurityTokenHandler();
+        //    var jsonToken = handler.ReadToken(token);
+        //    var tokenS = jsonToken as JwtSecurityToken;
+        //    if (tokenS != null)
+        //    {
+        //        var claims = tokenS.Claims.ToList();
+        //        claims.Add(new Claim("ApiToken", token));
+        //        return new ClaimsPrincipal(new ClaimsIdentity(claims));
+        //    }
+        //    return new ClaimsPrincipal();
+        //}
+
         public async Task SetTokenAsync(string token)
         {
             logger.LogDebug("Set token to local browser session: {Token}", token);
-            if (await GetTokenAsync() != token && contextAccessor.HttpContext?.Session != null)
-            {
-                contextAccessor.HttpContext.Session.SetString(tokenKey, token);
-                await contextAccessor.HttpContext.Session.CommitAsync();
-            }
+            await localStore.SetAsync(tokenKey, token);
+            await Task.FromResult(true);
         }
     }
 }

@@ -6,6 +6,7 @@ using iRLeagueManager.Web.Server.Data;
 using iRLeagueManager.Web.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
@@ -18,16 +19,15 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddScoped<ServerAuthenticationStateProvider>();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddHttpClient();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddMvvm();
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options => options.Cookie.IsEssential = true);
 builder.Services.AddLeagueApiService();
 
 var apiHttpClient = new HttpClient();
@@ -40,7 +40,9 @@ builder.Services.AddViewModels();
 
 var app = builder.Build();
 
-app.UseSession();
+app.UsePathBase("/app");
+
+//app.UseSession();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -54,15 +56,15 @@ else
     app.UseHsts();
 }
 
-app.Use(async delegate (HttpContext Context, Func<Task> Next)
-{
-    //this throwaway session variable will "prime" the SetString() method
-    //to allow it to be called after the response has started
-    var TempKey = Guid.NewGuid().ToString(); //create a random key
-    Context.Session.Set(TempKey, Array.Empty<byte>()); //set the throwaway session variable
-    Context.Session.Remove(TempKey); //remove the throwaway session variable
-    await Next(); //continue on with the request
-});
+//app.Use(async delegate (HttpContext Context, Func<Task> Next)
+//{
+//    //this throwaway session variable will "prime" the SetString() method
+//    //to allow it to be called after the response has started
+//    var TempKey = Guid.NewGuid().ToString(); //create a random key
+//    Context.Session.Set(TempKey, Array.Empty<byte>()); //set the throwaway session variable
+//    Context.Session.Remove(TempKey); //remove the throwaway session variable
+//    await Next(); //continue on with the request
+//});
 
 app.UseHttpsRedirection();
 

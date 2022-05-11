@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,11 @@ var app = builder.Build();
 
 app.UsePathBase("/app");
 
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
 //app.UseSession();
 
 // Configure the HTTP request pipeline.
@@ -58,11 +64,12 @@ else
 
 //app.Use(async delegate (HttpContext Context, Func<Task> Next)
 //{
-//    //this throwaway session variable will "prime" the SetString() method
-//    //to allow it to be called after the response has started
-//    var TempKey = Guid.NewGuid().ToString(); //create a random key
-//    Context.Session.Set(TempKey, Array.Empty<byte>()); //set the throwaway session variable
-//    Context.Session.Remove(TempKey); //remove the throwaway session variable
+//    //    //this throwaway session variable will "prime" the SetString() method
+//    //    //to allow it to be called after the response has started
+//    //    var TempKey = Guid.NewGuid().ToString(); //create a random key
+//    //    Context.Session.Set(TempKey, Array.Empty<byte>()); //set the throwaway session variable
+//    //    Context.Session.Remove(TempKey); //remove the throwaway session variable
+//    Context.Request.PathBase = "/app";
 //    await Next(); //continue on with the request
 //});
 

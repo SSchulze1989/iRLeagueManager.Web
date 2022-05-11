@@ -46,7 +46,7 @@ else
         if (result.Success)
         {
             var seasons = result.Content;
-            navigationManager.NavigateTo($"/{LeagueName}/Seasons/{seasons.First().SeasonId}");
+            navigationManager.NavigateTo($"./{LeagueName}/Seasons/{seasons.First().SeasonId}");
         }
     }
 

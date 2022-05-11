@@ -35,7 +35,7 @@
         @if (sharedState.LeagueName != null && string.IsNullOrEmpty(sharedState.SeasonName) == false)
         {
             <div class="nav-item">
-                <NavLink class="nav-link" href="@($"{sharedState.LeagueName}/Schedules")">
+                <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Schedules")">
                     <span class="oi oi-list" aria-hidden="true"></span> Schedules
                 </NavLink>
             </div>
@@ -69,7 +69,7 @@
 
     private void OnSeasonSelectChanged(long value)
     {
-        navigationManager.NavigateTo($"/{sharedState.LeagueName}/Seasons/{value}");
+        navigationManager.NavigateTo($"./{sharedState.LeagueName}/Seasons/{value}");
         StateHasChanged();
     }
 }

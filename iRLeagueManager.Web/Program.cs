@@ -48,8 +48,6 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
 
-//app.UseSession();
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -61,19 +59,6 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
-//app.Use(async delegate (HttpContext Context, Func<Task> Next)
-//{
-//    //    //this throwaway session variable will "prime" the SetString() method
-//    //    //to allow it to be called after the response has started
-//    //    var TempKey = Guid.NewGuid().ToString(); //create a random key
-//    //    Context.Session.Set(TempKey, Array.Empty<byte>()); //set the throwaway session variable
-//    //    Context.Session.Remove(TempKey); //remove the throwaway session variable
-//    Context.Request.PathBase = "/app";
-//    await Next(); //continue on with the request
-//});
-
-app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 

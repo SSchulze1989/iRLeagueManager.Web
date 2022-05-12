@@ -32,15 +32,24 @@ else
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Id</th>
-                                <th>Name</th>
+                                <th>Nr.</th>
+                                <th>Date</th>
+                                <th>Track</th>
+                                <th>Laps</th>
+                                <th>Start</th>
+                                <th>Practice</th>
+                                <th>Qualy</th>
+                                <th>Race</th>
                             </tr>
                         </thead>
-                        @foreach(var session in @Bind(schedule, x => x.Sessions))
+                        @foreach((var session, var index) in @Bind(schedule, x => x.Sessions).Select((x, i) => (x, i)))
                         {
                             <tr>
-                                <td>@Bind(session, x => x.SessionId)</td>
-                                <td>@Bind(session, x => x.Name)</td>
+                                <td>@(index + 1).</td>
+                                <td>@Bind(session, x => x.Date).ToString(@"mm:dd:yyyy")</td>
+                                <td>@Bind(session, x => x.TrackId)</td>
+                                <td>@Bind(session, x => x.Laps)</td>
+                                <td>@Bind(session, x => x.SessionStart)</td>
                             </tr>
                         }
                     </table>

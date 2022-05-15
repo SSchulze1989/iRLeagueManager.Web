@@ -147,17 +147,20 @@ else
         if (SessionId != null)
         {
             await LoadFromSessionAsync(LeagueName, SessionId.Value);
+            return;
         }
 
         if (SeasonId != null)
         {
             await LoadFromSeasonAsync(LeagueName, SeasonId.Value);
+            return;
         }
 
         if (apiService.CurrentSeason != null)
         {
             SeasonId = apiService.CurrentSeason.Id;
             await LoadFromSeasonAsync(LeagueName, SeasonId.Value);
+            return;
         }
     }
 

@@ -11,6 +11,7 @@ namespace iRLeagueManager.Web
             services.AddScoped<SchedulesPageViewModel>();
             services.AddScoped<ScheduleViewModel>();
             services.AddScoped<SessionViewModel>();
+            services.AddScoped<ResultsPageViewModel>();
         }
     }
 }

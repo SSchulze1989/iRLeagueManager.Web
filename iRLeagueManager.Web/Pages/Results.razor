@@ -1,0 +1,191 @@
+﻿@page "/{LeagueName}/Results/Session/{SessionId:long}"
+@page "/{LeagueName}/Results/Season/{SeasonId:long}"
+@page "/{LeagueName}/Results"
+@using System.ComponentModel
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.Extensions.Primitives
+@using iRLeagueManager.Web.ViewModels
+@attribute [Authorize]
+@inherits MvvmComponentBase
+@inject LeagueApiService apiService
+@inject ResultsPageViewModel vm
+@inject NavigationManager navigationManager
+
+<h3>Results</h3>
+
+@if (@Bind(vm, x => x.Loading))
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div>
+        <div>
+            <select @bind="vm.SelectedSessionId">
+                @foreach((var session, var index) in @Bind(vm, x => x.SessionList).Select((x, i) => (x, i)))
+                {
+                    <option value="@session.SessionId">@((index + 1).ToString("00")). @Bind(session, x => x.Date) - @Bind(session, x => x.Name)</option>
+                }
+            </select>
+        </div>
+        <div>
+            @foreach(var result in @Bind(vm, x => x.Results))
+            {
+                <div class="results-tab" id="results-scoring-@Bind(result, x => x.ScoringName)">
+                    <p class="results-scoring">@Bind(result, x => x.ScoringName)</p>
+                    <table class="table alternate">
+                        <thead>
+                            <tr class="results-head">
+                                <th>Pos.</th>
+                                <th>Chg.</th>
+                                <th>Start</th>
+                                <th>Name</th>
+                                <th>Team</th>
+                                <th>Qualy Lap</th>
+                                <th>Fastest Lap</th>
+                                <th>Avg. Lap</th>
+                                <th>Interval</th>
+                                <th>Laps Lead</th>
+                                <th>Laps Compl.</th>
+                                <th>Race Pts.</th>
+                                <th>Bonus Pts.</th>
+                                <th>Penalty</th>
+                                <th>Incs.</th>
+                                <th>Total Pts.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach(var row in result.ResultRows)
+                            {
+                                <tr class="results-row">
+                                    <td>@row.FinalPosition</td>
+                                    <td>@row.FinalPositionChange</td>
+                                    <td>@row.StartPosition</td>
+                                    <td>@row.Firstname @row.Lastname</td>
+                                    <td>@row.TeamName</td>
+                                    <td>@row.QualifyingTime</td>
+                                    <td>@row.FastestLapTime (@row.FastLapNr)</td>
+                                    <td>@row.AvgLapTime</td>
+                                    <td>@row.Interval</td>
+                                    <td>@row.LeadLaps</td>
+                                    <td>@row.CompletedLaps</td>
+                                    <td>@row.RacePoints</td>
+                                    <td>@row.BonusPoints</td>
+                                    <td>@row.PenaltyPoints</td>
+                                    <td>@row.Incidents</td>
+                                    <td>@row.TotalPoints</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+}
+
+@code {
+    [Parameter]
+    public string? LeagueName { get; set; }
+    [Parameter]
+    public long? SeasonId { get; set; }
+    [Parameter]
+    public long? SessionId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        vm.SelectedSessionChanged += OnSessionChanged;
+        await Task.FromResult(true);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (SeasonId == null && SessionId == null)
+        {
+            OnSessionChanged(vm.SelectedSessionId);
+        }
+    }
+
+    private void OnSessionChanged(long? sessionId)
+    {
+        if (sessionId != null)
+        {
+            navigationManager.NavigateTo($"/{LeagueName}/Results/Session/{sessionId}");
+        }
+    }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender == false) return;
+
+        if (LeagueName == null)
+        {
+            return;
+        }
+
+        // catch query parameters
+        var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue(nameof(SeasonId), out StringValues values))
+        {
+            if (values.Any() && long.TryParse(values.First(), out long seasonId))
+            {
+                SeasonId = seasonId;
+            }
+        }
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue(nameof(SessionId), out values))
+        {
+            if (values.Any() && long.TryParse(values.First(), out long sessionId))
+            {
+                SessionId = sessionId;
+            }
+        }
+
+        // set league state
+        await apiService.SetCurrentLeagueAsync(LeagueName);
+
+        if (SessionId != null)
+        {
+            await LoadFromSessionAsync(LeagueName, SessionId.Value);
+        }
+
+        if (SeasonId != null)
+        {
+            await LoadFromSeasonAsync(LeagueName, SeasonId.Value);
+        }
+
+        if (apiService.CurrentSeason != null)
+        {
+            SeasonId = apiService.CurrentSeason.Id;
+            await LoadFromSeasonAsync(LeagueName, SeasonId.Value);
+        }
+    }
+
+    private async Task LoadFromSessionAsync(string leagueName, long sessionId)
+    {
+        // load results data
+        await vm.LoadFromSessionAsync(sessionId);
+
+        // set season state
+        if (vm.Results.Any())
+        {
+            var seasonId = vm.Results.First().SeasonId;
+            await apiService.SetCurrentSeasonAsync(leagueName, seasonId);
+            await vm.LoadSessionListAsync();
+        }
+    }
+
+    private async Task LoadFromSeasonAsync(string leagueName, long seasonId)
+    {
+        // load session list
+        await apiService.SetCurrentSeasonAsync(leagueName, seasonId);
+        await vm.LoadSessionListAsync();
+
+        // select last session with result
+        var lastResultSession = vm.SessionList.LastOrDefault(x => x.HasResult);
+        if (lastResultSession != null)
+        {
+            vm.SelectedSessionId = lastResultSession.SessionId;
+        }
+    }
+}

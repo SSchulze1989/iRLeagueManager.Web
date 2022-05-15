@@ -35,8 +35,13 @@
         @if (sharedState.LeagueName != null && string.IsNullOrEmpty(sharedState.SeasonName) == false && sharedState.SeasonId != 0)
         {
             <div class="nav-item">
-                <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Seasons/{sharedState.SeasonId}/Schedules")">
+                <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Schedules/Season/{sharedState.SeasonId}")">
                     <span class="oi oi-list" aria-hidden="true"></span> Schedules
+                </NavLink>
+            </div>
+            <div class="nav-item">
+                <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Results")">
+                    <span class="oi oi-list" aria-hidden="true"></span> Results
                 </NavLink>
             </div>
         }

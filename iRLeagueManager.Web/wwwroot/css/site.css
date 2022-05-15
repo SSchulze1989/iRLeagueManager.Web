@@ -8,10 +8,23 @@ h1:focus {
     outline: none;
 }
 
+h3 {
+    font-weight: bold;
+    border-bottom: 0.5px solid gray;
+}
+
 .page-header {
     background: #000000;
     color: #ffffff;
     text-align: center;
+}
+
+.alternate > tbody > tr:nth-child(odd) {
+    background: #f0f0f0;
+}
+
+.select-table > tbody > tr:hover {
+    background: #e1f5ff
 }
 
 a, .btn-link {
@@ -68,3 +81,18 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+/* results styles */
+.results-tab {
+    margin: 0.75rem;
+    padding: 0.5rem;
+    border: 0.5px solid gray;
+}
+
+.results-scoring {
+    padding: 0.5rem 1.25rem;
+    font-weight: bold;
+    font-size: 1.3rem;
+    border: 2px solid black;
+    align-content: start;
+}

@@ -20,6 +20,7 @@ namespace iRLeagueManager.Web.Data
         private const string tokenKey = "LeagueApiToken";
 
         public bool IsLoggedIn { get; private set; }
+        public DateTime Expiration { get; private set; }
 
         public AsyncTokenStore(ILogger<AsyncTokenStore> logger, ProtectedLocalStorage localStorage)
         {
@@ -30,6 +31,7 @@ namespace iRLeagueManager.Web.Data
         public async Task ClearTokenAsync()
         {
             logger.LogDebug("Clear token in local browser store");
+            IsLoggedIn = false;
             await localStore.DeleteAsync(tokenKey);
             await Task.FromResult(true);
         }
@@ -47,9 +49,29 @@ namespace iRLeagueManager.Web.Data
                 var token = await localStore.GetAsync<string>(tokenKey);
                 if (token.Success)
                 {
+                    if (IsLoggedIn == false)
+                    {
+                        // set expiration date
+                        var handler = new JwtSecurityTokenHandler();
+                        var jsonToken = handler.ReadJwtToken(token.Value);
+                        if (jsonToken.Claims.Any(x => x.Type == "exp"))
+                        {
+                            var expSeconds = Convert.ToInt64(jsonToken.Claims.First(x => x.Type == "exp").Value);
+                            Expiration = new DateTime(1970, 1, 1).AddSeconds(expSeconds);
+                        }
+                    }
+
+                    // check if token is still valid
+                    if (Expiration < DateTime.UtcNow.AddMinutes(5))
+                    {
+                        await ClearTokenAsync();
+                        logger.LogInformation("Token read from token store has expired");
+                        return string.Empty;
+                    }
                     IsLoggedIn = true;
                     return token.Value ?? string.Empty;
                 }
+                IsLoggedIn = false;
                 return string.Empty;
             }
             catch (Exception ex)
@@ -84,7 +106,6 @@ namespace iRLeagueManager.Web.Data
         {
             logger.LogDebug("Set token to local browser session: {Token}", token);
             await localStore.SetAsync(tokenKey, token);
-            await Task.FromResult(true);
         }
     }
 }

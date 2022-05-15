@@ -34,6 +34,28 @@ namespace iRLeagueManager.Web.ViewModels
             get => model.Date.GetValueOrDefault().TimeOfDay;
             set => SetP(model.Date.GetValueOrDefault().TimeOfDay, value => model.Date = model.Date.GetValueOrDefault().Date.Add(value), value); 
         }
+        public TimeSpan PracticeLength 
+        { 
+            get => model.PracticeLength.GetValueOrDefault(); 
+            set => SetP(model.PracticeLength.GetValueOrDefault(), value => model.PracticeLength = value, value); 
+        }
+        public TimeSpan QualyLength
+        {
+            get => model.QualyLength.GetValueOrDefault();
+            set => SetP(model.QualyLength.GetValueOrDefault(), value => model.QualyLength = value, value);
+        }
+        public TimeSpan RaceLength
+        {
+            get => model.RaceLength.GetValueOrDefault();
+            set => SetP(model.RaceLength, value => model.RaceLength = value, value);
+        }
+        public TimeSpan Duration
+        {
+            get => model.Duration;
+            set => SetP(model.Duration, value => model.Duration = value, value);
+        }
+
+        public bool HasResult => model.HasResult;
 
         public void SetModel(GetSessionModel model)
         {

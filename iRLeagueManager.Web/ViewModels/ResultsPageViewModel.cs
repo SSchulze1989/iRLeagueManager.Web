@@ -12,26 +12,31 @@ namespace iRLeagueManager.Web.ViewModels
             results = new ObservableCollection<ResultViewModel>();
         }
 
+        private long? loadedSeasonId;
+        public long? LoadedSeasonId { get => loadedSeasonId; set => Set(ref loadedSeasonId, value); }
+
         private ObservableCollection<SessionViewModel> sessionList;
         public ObservableCollection<SessionViewModel> SessionList { get => sessionList; set => Set(ref sessionList, value); }
 
         private long? selectedSessionId;
         public long? SelectedSessionId { get => selectedSessionId; set { if (Set(ref selectedSessionId, value)) _ = OnSelectedSessionChanged(value); } }
 
-        //public SessionViewModel? Session => SessionList.SingleOrDefault(x => x.SessionId == selectedSessionId);
+        public SessionViewModel? Session => SessionList.SingleOrDefault(x => x.SessionId == selectedSessionId);
 
         private ObservableCollection<ResultViewModel> results;
         public ObservableCollection<ResultViewModel> Results { get => results; set => Set(ref results, value); }
 
-        public event Action<long?> SelectedSessionChanged;
+        public event Action<long?>? SelectedSessionChanged;
 
         public async Task LoadSessionListAsync()
         {
             if (ApiService.CurrentSeason == null)
             {
+                LoadedSeasonId = null;
                 SessionList.Clear();
                 return;
             }
+            LoadedSeasonId = ApiService.CurrentSeason.Id;
 
             var sessionsEndpoint = ApiService.CurrentSeason.Sessions();
             var result = await sessionsEndpoint.Get();

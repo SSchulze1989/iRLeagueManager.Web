@@ -23,8 +23,12 @@ h3 {
     background: #f0f0f0;
 }
 
+.alternate > tbody > tr:nth-child(even) {
+    background: #fafafa;
+}
+
 .select-table > tbody > tr:hover {
-    background: #e1f5ff
+    background: #effaff;
 }
 
 a, .btn-link {
@@ -95,4 +99,9 @@ a, .btn-link {
     font-size: 1.3rem;
     border: 2px solid black;
     align-content: start;
+}
+
+.results-row:hover {
+    outline: solid gray 1px;
+    filter: brightness(110%)
 }

@@ -101,7 +101,10 @@ else
 
     protected override void OnParametersSet()
     {
-        if (SeasonId == null && SessionId == null)
+        // if routed directly to /Results page without season or session set:
+        // 1. Compare previous season to current season -> if seaon changed, trigger reload
+        // 2. If season is the same keep session as selected
+        if (SeasonId == null && SessionId == null && vm.LoadedSeasonId == apiService.CurrentSeason?.Id)
         {
             OnSessionChanged(vm.SelectedSessionId);
         }
@@ -124,42 +127,29 @@ else
             return;
         }
 
-        // catch query parameters
-        var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue(nameof(SeasonId), out StringValues values))
-        {
-            if (values.Any() && long.TryParse(values.First(), out long seasonId))
-            {
-                SeasonId = seasonId;
-            }
-        }
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue(nameof(SessionId), out values))
-        {
-            if (values.Any() && long.TryParse(values.First(), out long sessionId))
-            {
-                SessionId = sessionId;
-            }
-        }
-
         // set league state
         await apiService.SetCurrentLeagueAsync(LeagueName);
+        await LoadPage(LeagueName);
+    }
 
+    private async Task LoadPage(string leagueName)
+    {
         if (SessionId != null)
         {
-            await LoadFromSessionAsync(LeagueName, SessionId.Value);
+            await LoadFromSessionAsync(leagueName, SessionId.Value);
             return;
         }
 
         if (SeasonId != null)
         {
-            await LoadFromSeasonAsync(LeagueName, SeasonId.Value);
+            await LoadFromSeasonAsync(leagueName, SeasonId.Value);
             return;
         }
 
         if (apiService.CurrentSeason != null)
         {
             SeasonId = apiService.CurrentSeason.Id;
-            await LoadFromSeasonAsync(LeagueName, SeasonId.Value);
+            await LoadFromSeasonAsync(leagueName, SeasonId.Value);
             return;
         }
     }

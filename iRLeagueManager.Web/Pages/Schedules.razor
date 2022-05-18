@@ -6,64 +6,68 @@
 @inject SchedulesPageViewModel vm
 @inject NavigationManager navigationManager
 
-<h3>Schedules</h3>
+<div style="display:inline-block">
+    <div style="display:inline-block">
+        <h3>Schedules</h3>
+    </div>
+    @if (Bind(vm, x => x.Loading))
+    {
+        <div class="lds-ring">
+            <div></div>
+        </div>
+    }
+</div>
 
-@if (@Bind(vm, x => x.Loading))
-{
-    <p><em>Loading...</em></p>
-}
-else if (apiService.CurrentSeason == null)
-{
-    <p><em>No season selected</em></p>
-}
-else
-{
-    <div>
-        @foreach(var schedule in @Bind(vm, x => x.Schedules))
-        {
-            <div class="container">
-                <h3>@Bind(schedule, x => x.Name)</h3>
-                @if (@Bind(schedule, x => x.Loading))
+<div>
+    @foreach(var schedule in @Bind(vm, x => x.Schedules))
+    {
+        <div class="container">
+            <div style="display:inline-block">
+                <div style="display:inline-block">
+                    <h3>@Bind(schedule, x => x.Name)</h3>
+                </div>
+                @if (Bind(schedule, x => x.Loading))
                 {
-                    <p><em>Loading...</em></p>
-                }
-                else 
-                {
-                    <table class="table alternate select-table">
-                        <thead>
-                            <tr>
-                                <th>Nr.</th>
-                                <th>Date</th>
-                                <th>Track</th>
-                                <th>Laps</th>
-                                <th>Start</th>
-                                <th>Practice</th>
-                                <th>Qualy</th>
-                                <th>Race</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @foreach((var session, var index) in @Bind(schedule, x => x.Sessions).Select((x, i) => (x, i)))
-                        {
-                            var sessionId = session.SessionId;
-                            <tr @onclick="e => OnTableRowClick(sessionId)">
-                                <td>@(index + 1).</td>
-                                <td>@Bind(session, x => x.Date).ToString(@"dd:MM:yyyy")</td>
-                                <td>@Bind(session, x => x.TrackId)</td>
-                                <td>@Bind(session, x => x.Laps)</td>
-                                <td>@Bind(session, x => x.SessionStart)</td>
-                                <td>@Bind(session, x => x.PracticeLength)</td>
-                                <td>@Bind(session, x => x.QualyLength)</td>
-                                <td>@Bind(session, x => x.RaceLength)</td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
+                    <div class="lds-ring">
+                        <div></div>
+                    </div>
                 }
             </div>
-        }
-    </div>
-}
+            <div>
+                <table class="table alternate select-table">
+                    <thead>
+                        <tr>
+                            <th>Nr.</th>
+                            <th>Date</th>
+                            <th>Track</th>
+                            <th>Laps</th>
+                            <th>Start</th>
+                            <th>Practice</th>
+                            <th>Qualy</th>
+                            <th>Race</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach((var session, var index) in @Bind(schedule, x => x.Sessions).Select((x, i) => (x, i)))
+                    {
+                        var sessionId = session.SessionId;
+                        <tr @onclick="e => OnTableRowClick(sessionId)">
+                            <td>@(index + 1).</td>
+                            <td>@Bind(session, x => x.Date).ToString(@"dd:MM:yyyy")</td>
+                            <td>@Bind(session, x => x.TrackId)</td>
+                            <td>@Bind(session, x => x.Laps)</td>
+                            <td>@Bind(session, x => x.SessionStart)</td>
+                            <td>@Bind(session, x => x.PracticeLength)</td>
+                            <td>@Bind(session, x => x.QualyLength)</td>
+                            <td>@Bind(session, x => x.RaceLength)</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
 
 @code {
     [Parameter]

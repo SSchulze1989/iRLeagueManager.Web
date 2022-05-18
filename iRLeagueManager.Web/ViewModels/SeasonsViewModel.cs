@@ -8,12 +8,8 @@ using System.Collections.ObjectModel;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class SeasonsViewModel : ViewModelBase
+public class SeasonsViewModel : LeagueViewModelBase<SeasonsViewModel>
 {
-    private readonly ILoggerFactory loggerFactory;
-    private readonly ILogger<SeasonsViewModel> logger;
-    private readonly LeagueApiService apiService;
-
     private string status = string.Empty;
     public string Status { get => status; set => Set(ref status, value); }
 
@@ -24,10 +20,8 @@ public class SeasonsViewModel : ViewModelBase
     public ObservableCollection<SeasonViewModel> Seasons { get => seasons; set => Set(ref seasons, value); }
 
     public SeasonsViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService)
+        : base(loggerFactory, apiService)
     {
-        this.loggerFactory = loggerFactory;
-        logger = loggerFactory.CreateLogger<SeasonsViewModel>();
-        this.apiService = apiService;
         seasons = new ObservableCollection<SeasonViewModel>();
     }
 
@@ -35,14 +29,22 @@ public class SeasonsViewModel : ViewModelBase
     {
         if (firstRender == false) return;
 
-        // load seasons
-        if (apiService.CurrentLeague == null)
+        try
         {
-            return;
+            Loading = true;
+            // load seasons
+            if (ApiService.CurrentLeague == null)
+            {
+                return;
+            }
+            var seasons = (await ApiService.CurrentLeague.Seasons().Get()).EnsureSuccess();
+            Seasons = new ObservableCollection<SeasonViewModel>(seasons.Select(x =>
+                new SeasonViewModel(LoggerFactory, ApiService, x)
+            ));
         }
-        var seasons = (await apiService.CurrentLeague.Seasons().Get()).EnsureSuccess();
-        Seasons = new ObservableCollection<SeasonViewModel>(seasons.Select(x =>
-            new SeasonViewModel(loggerFactory, apiService, x)
-        ));
+        finally
+        {
+            Loading = false;
+        }
     }
 }

@@ -15,7 +15,7 @@ public partial class LeagueViewModel : ViewModelBase
     private readonly ILogger<LeagueViewModel> logger;
     private readonly ILeagueApiClient apiClient;
 
-    public LeagueViewModel(ILogger<LeagueViewModel> logger, ILeagueApiClient apiClient, GetLeagueModel model)
+    public LeagueViewModel(ILogger<LeagueViewModel> logger, ILeagueApiClient apiClient, LeagueModel model)
     {
         this.logger = logger;
         this.apiClient = apiClient;
@@ -23,7 +23,7 @@ public partial class LeagueViewModel : ViewModelBase
         _seasons = new ObservableCollection<SeasonViewModel>();
     }
 
-    private readonly GetLeagueModel _model;
+    private readonly LeagueModel _model;
 
     public long LeagueId => _model.Id;
     public string LeagueName
@@ -70,7 +70,7 @@ public partial class LeagueViewModel : ViewModelBase
                 Seasons = new ObservableCollection<SeasonViewModel>();
                 await Task.FromResult(true);
             }
-            catch (ActionResultException<GetLeagueModel> ex)
+            catch (ActionResultException<LeagueModel> ex)
             {
                 logger.LogError(ex.ActionResult.Message);
             }

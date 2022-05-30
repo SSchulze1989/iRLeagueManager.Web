@@ -22,14 +22,14 @@ public class SharedStateService
     private string? seasonName;
     public string? SeasonName { get => seasonName; set => Set(ref seasonName, value); }
 
-    private ObservableCollection<GetSeasonModel> seasonList;
-    public ObservableCollection<GetSeasonModel> SeasonList { get => seasonList; set => Set(ref seasonList, value); }
+    private ObservableCollection<SeasonModel> seasonList;
+    public ObservableCollection<SeasonModel> SeasonList { get => seasonList; set => Set(ref seasonList, value); }
 
     public event EventHandler? StateChanged;
 
     public SharedStateService()
     {
-        seasonList = new ObservableCollection<GetSeasonModel>();
+        seasonList = new ObservableCollection<SeasonModel>();
     }
 
     private void Set<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

@@ -40,7 +40,7 @@ public class LeagueApiService
         if (result.Success)
         {
             var seasons = result.Content;
-            Shared.SeasonList = new ObservableCollection<GetSeasonModel>(seasons);
+            Shared.SeasonList = new ObservableCollection<SeasonModel>(seasons);
         }
     }
 

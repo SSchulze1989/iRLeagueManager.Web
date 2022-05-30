@@ -9,7 +9,7 @@ namespace iRLeagueManager.Web.Extensions
 {
     public static class LeagueApiClientExtensions
     {
-        public static T EnsureSuccess<T>(this ClientActionResult<T> clientActionResult)
+        public static T? EnsureSuccess<T>(this ClientActionResult<T> clientActionResult)
         {
             if (clientActionResult.Success == true)
             {
@@ -32,7 +32,17 @@ namespace iRLeagueManager.Web.Extensions
 
         public static string QueryString(this NavigationManager navigationManager, string key)
         {
-            return navigationManager.QueryString()[key];
+            return navigationManager.QueryString()[key] ?? string.Empty;
+        }
+
+        public static T? QueryParameter<T>(this NavigationManager navigationManager, string key)
+        {
+            var paramString = navigationManager.QueryString()[key];
+            if (string.IsNullOrEmpty(paramString))
+            {
+                return default(T);
+            }
+            return (T)Convert.ChangeType(paramString, typeof(T));
         }
     }
 
@@ -48,7 +58,7 @@ namespace iRLeagueManager.Web.Extensions
         {
         }
 
-        public ActionResultException(ClientActionResult<T> actionResult, string message, Exception innerException) : base(message, innerException)
+        public ActionResultException(ClientActionResult<T> actionResult, string message, Exception? innerException) : base(message, innerException)
         {
             ActionResult = actionResult;
         }

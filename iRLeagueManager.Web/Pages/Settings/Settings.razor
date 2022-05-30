@@ -1,0 +1,75 @@
+﻿@page "/{LeagueName}/Settings"
+@page "/{LeagueName}/Settings/Season/{SeasonId:long}"
+@using System.Text
+@inherits MvvmComponentBase
+@inject NavigationManager navigationManager
+
+<h3>Settings</h3>
+<div>
+    <NavLink class="nav-link" href="@GetTabLink(0)">Season</NavLink>
+    <NavLink class="nav-link" href="@GetTabLink(1)">Scorings</NavLink>
+</div>
+
+<div>
+    @switch (selectedTabIndex)
+    {
+        case 0:
+            <p>Seasons</p>
+            break;
+        case 1:
+            <p>Scorings</p>
+            break;
+        default:
+            <p><em>Index out of bounds!</em></p>
+            break;
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? LeagueName { get; set; }
+    [Parameter]
+    public long? SeasonId { get; set; }
+
+    // Query parameters
+    private int selectedTabIndex;
+
+    protected override void OnInitialized()
+    {
+        navigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    public void ChangeTab(int tabIndex)
+    {
+        if (selectedTabIndex != tabIndex)
+        {
+            selectedTabIndex = tabIndex;
+            SelectedTabChanged();
+        }
+    }
+
+    public void SelectedTabChanged()
+    {
+        StateHasChanged();
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        var tabIndex = navigationManager.QueryParameter<int>("tabIndex");
+        if (tabIndex != selectedTabIndex)
+        {
+            ChangeTab(tabIndex);
+        }
+    }
+
+    private string GetTabLink(int tabIndex)
+    {
+        var url = navigationManager.GetUriWithQueryParameter("tabIndex", tabIndex);
+        return url;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        navigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

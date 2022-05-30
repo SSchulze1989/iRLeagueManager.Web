@@ -3,7 +3,10 @@
 @page "/{LeagueName}/Results"
 @using System.ComponentModel
 @using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore.Query
 @using Microsoft.Extensions.Primitives
+@using System.Linq.Expressions
+@using iRLeagueApiCore.Communication.Models
 @using iRLeagueManager.Web.ViewModels
 @attribute [Authorize]
 @inherits MvvmComponentBase
@@ -33,6 +36,12 @@
         </select>
     </div>
     <div>
+        @if (@Bind(vm, x => x.Results)?.Count == 0)
+        {
+            <div class="results-tab">
+                <p class="results-scoring"><em>No Results</em></p>
+            </div>
+        }
         @foreach(var result in @Bind(vm, x => x.Results))
         {
             <div class="results-tab" id="results-scoring-@Bind(result, x => x.ScoringName)">
@@ -40,22 +49,22 @@
                 <table class="table alternate">
                     <thead>
                         <tr class="results-head">
-                            <th>Pos.</th>
-                            <th>Chg.</th>
-                            <th>Start</th>
-                            <th>Name</th>
-                            <th>Team</th>
-                            <th>Qualy Lap</th>
-                            <th>Fastest Lap</th>
-                            <th>Avg. Lap</th>
-                            <th>Interval</th>
-                            <th>Laps Lead</th>
-                            <th>Laps Compl.</th>
-                            <th>Race Pts.</th>
-                            <th>Bonus Pts.</th>
-                            <th>Penalty</th>
-                            <th>Incs.</th>
-                            <th>Total Pts.</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.FinalPosition)">Pos.</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.FinalPositionChange)">Chg.</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.StartPosition)">Start</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.Firstname)">Name</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.TeamName)">Team</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.QualifyingTime)">Qualy Lap</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.FastestLapTime)">Fastest Lap</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.AvgLapTime)">Avg. Lap</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.Interval)">Interval</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.LeadLaps)">Laps Lead</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.CompletedLaps)">Laps Compl.</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.RacePoints)">Race Pts.</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.BonusPoints)">Bonus Pts.</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.PenaltyPoints)">Penalty</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.Incidents)">Incs.</th>
+                            <th @onclick="() => SetOrderProperty(result, row => row.TotalPoints)">Total Pts.</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -148,6 +157,16 @@
             return;
         }
 
+        if (apiService.CurrentSeason == null)
+        {
+            var lastSeason = apiService.Shared.SeasonList.LastOrDefault();
+            if (lastSeason == null)
+            {
+                return;
+            }
+            await apiService.SetCurrentSeasonAsync(leagueName, lastSeason.SeasonId);
+        }
+
         if (apiService.CurrentSeason != null)
         {
             SeasonId = apiService.CurrentSeason.Id;
@@ -182,5 +201,10 @@
         {
             vm.SelectedSessionId = lastResultSession.SessionId;
         }
+    }
+
+    private void SetOrderProperty(ResultViewModel result, Func<ResultRowModel, IComparable> selector, bool descending = false)
+    {
+        result.OrderByPropertySelector = selector;
     }
 }

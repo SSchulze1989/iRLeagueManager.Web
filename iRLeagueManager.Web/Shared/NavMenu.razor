@@ -38,6 +38,11 @@
             @if (sharedState.LeagueName != null && string.IsNullOrEmpty(sharedState.SeasonName) == false && sharedState.SeasonId != 0)
             {
                 <div class="nav-item">
+                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Settings")">
+                        <span class="oi oi-wrench" aria-hidden="true"></span> Settings
+                    </NavLink>
+                </div>
+                <div class="nav-item">
                     <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Schedules/Season/{sharedState.SeasonId}")">
                         <span class="oi oi-list" aria-hidden="true"></span> Schedules
                     </NavLink>
@@ -75,6 +80,7 @@
     protected override void OnInitialized()
     {
         sharedState.StateChanged += (sender, e) => StateHasChanged();
+
     }
 
     private void ToggleNavMenu()

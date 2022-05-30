@@ -1,0 +1,17 @@
+﻿@using iRLeagueManager.Web.ViewModels
+@inject SeasonViewModel season
+@inject ILogger<SeasonSettings> logger
+
+<h3>SeasonSettings</h3>
+
+<EditForm Model="@season" OnValidSubmit="@HandleSubmit">
+    <InputText id="name" @bind-Value="season.SeasonName" />
+</EditForm>
+
+@code {
+    private async Task HandleSubmit()
+    {
+        logger.LogInformation("Handle submit called!");
+        await season.SaveCurrentModel();
+    }
+}

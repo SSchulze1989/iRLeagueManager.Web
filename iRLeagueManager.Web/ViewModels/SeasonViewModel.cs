@@ -1,4 +1,5 @@
 ﻿using iRLeagueApiCore.Client;
+using iRLeagueApiCore.Client.Results;
 using iRLeagueApiCore.Communication.Models;
 using iRLeagueManager.Web.Data;
 using MvvmBlazor.ViewModel;
@@ -11,7 +12,11 @@ public class SeasonViewModel : ViewModelBase
     private readonly ILoggerFactory loggerFactory;
     private readonly ILogger<SeasonViewModel> logger;
     private readonly LeagueApiService apiService;
-    private readonly SeasonModel model;
+    private SeasonModel model;
+
+    public SeasonViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
+        this(loggerFactory, apiService, new SeasonModel())
+    { }
 
     public SeasonViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, SeasonModel model)
     {
@@ -74,9 +79,33 @@ public class SeasonViewModel : ViewModelBase
         }
     }
 
-
     public IEnumerable<long> ScheduleIds
     {
         get => model.ScheduleIds;
+    }
+
+    public void SetModel(SeasonModel model)
+    {
+        model ??= new SeasonModel();
+        this.model = model;
+        OnPropertyChanged();
+    }
+
+    public async Task<bool> SaveCurrentModel()
+    {
+        if (model.SeasonId == 0 || apiService.CurrentLeague == null)
+        {
+            return false;
+        }
+        var result = await apiService.CurrentLeague
+            .Seasons()
+            .WithId(model.SeasonId)
+            .Put(model);
+        if (result.Success)
+        {
+            model = result.Content;
+            return true;
+        }
+        return false;
     }
 }

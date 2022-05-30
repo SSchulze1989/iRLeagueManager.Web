@@ -34,6 +34,16 @@ namespace iRLeagueManager.Web.Extensions
         {
             return navigationManager.QueryString()[key] ?? string.Empty;
         }
+
+        public static T? QueryParameter<T>(this NavigationManager navigationManager, string key)
+        {
+            var paramString = navigationManager.QueryString()[key];
+            if (string.IsNullOrEmpty(paramString))
+            {
+                return default(T);
+            }
+            return (T)Convert.ChangeType(paramString, typeof(T));
+        }
     }
 
     public class ActionResultException<T> : InvalidOperationException

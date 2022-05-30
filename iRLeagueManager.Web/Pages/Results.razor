@@ -29,6 +29,12 @@ else
             </select>
         </div>
         <div>
+            @if (@Bind(vm, x => x.Results).Count == 0)
+            {
+                <div class="results-tab">
+                    <p><em>No Results ...</em></p>
+                </div>
+            }
             @foreach(var result in @Bind(vm, x => x.Results))
             {
                 <div class="results-tab" id="results-scoring-@Bind(result, x => x.ScoringName)">
@@ -144,6 +150,16 @@ else
         {
             await LoadFromSeasonAsync(leagueName, SeasonId.Value);
             return;
+        }
+
+        if (apiService.CurrentSeason == null)
+        {
+            var lastSeason = apiService.Shared.SeasonList.LastOrDefault();
+            if (lastSeason == null)
+            {
+                return;
+            }
+            await apiService.SetCurrentSeasonAsync(leagueName, lastSeason.SeasonId);
         }
 
         if (apiService.CurrentSeason != null)

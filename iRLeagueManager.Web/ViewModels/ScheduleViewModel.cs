@@ -7,14 +7,14 @@ namespace iRLeagueManager.Web.ViewModels
 {
     public class ScheduleViewModel : LeagueViewModelBase<ScheduleViewModel>
     {
-        private GetScheduleModel model;
+        private ScheduleModel model;
 
         public ScheduleViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
-            this(loggerFactory, apiService, new GetScheduleModel())
+            this(loggerFactory, apiService, new ScheduleModel())
         {
         }
 
-        public ScheduleViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, GetScheduleModel model) : 
+        public ScheduleViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, ScheduleModel model) : 
             base(loggerFactory, apiService)
         {
             sessions = new ObservableCollection<SessionViewModel>();
@@ -27,7 +27,7 @@ namespace iRLeagueManager.Web.ViewModels
         private ObservableCollection<SessionViewModel> sessions;
         public ObservableCollection<SessionViewModel> Sessions { get => sessions; set => Set(ref sessions, value); }
 
-        public async Task SetModel(GetScheduleModel model)
+        public async Task SetModel(ScheduleModel model)
         {
             this.model = model;
             OnPropertyChanged(null);

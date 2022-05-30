@@ -11,9 +11,9 @@ public class SeasonViewModel : ViewModelBase
     private readonly ILoggerFactory loggerFactory;
     private readonly ILogger<SeasonViewModel> logger;
     private readonly LeagueApiService apiService;
-    private readonly GetSeasonModel model;
+    private readonly SeasonModel model;
 
-    public SeasonViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, GetSeasonModel model)
+    public SeasonViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, SeasonModel model)
     {
         this.loggerFactory = loggerFactory;
         logger = loggerFactory.CreateLogger<SeasonViewModel>();

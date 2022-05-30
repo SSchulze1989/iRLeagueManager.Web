@@ -50,11 +50,11 @@ else
                                 <td>@(index + 1).</td>
                                 <td>@Bind(session, x => x.Date).ToString(@"dd:MM:yyyy")</td>
                                 <td>@Bind(session, x => x.TrackId)</td>
-                                <td>@Bind(session, x => x.Laps)</td>
+                                <td>@(Bind(session, x => x.Race)?.Laps ?? 0)</td>
                                 <td>@Bind(session, x => x.SessionStart)</td>
-                                <td>@Bind(session, x => x.PracticeLength)</td>
-                                <td>@Bind(session, x => x.QualyLength)</td>
-                                <td>@Bind(session, x => x.RaceLength)</td>
+                                <td>@((Bind(session, x => x.Practice)?.Duration.ToString() ?? "-").ToString())</td>
+                                <td>@((Bind(session, x => x.Qualifying)?.Duration.ToString() ?? "-").ToString())</td>
+                                <td>@((Bind(session, x => x.Race)?.Duration.ToString() ?? "-").ToString())</td>
                             </tr>
                         }
                         </tbody>

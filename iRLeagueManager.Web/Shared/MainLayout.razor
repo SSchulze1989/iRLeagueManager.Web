@@ -1,0 +1,35 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>iRLeagueManager.Web</PageTitle>
+
+<div class="page-header">
+    <Header/>
+</div>
+
+<div class="page">
+
+    <CascadingValue Value="LeagueName">
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+    </CascadingValue>
+
+    <main>
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+    [CascadingParameter]
+    public RouteData? RouteData { get; set; }
+
+    public string? LeagueName { get; set; }
+    public long SeasonId { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        LeagueName = (string?)RouteData?.RouteValues?.GetValueOrDefault("LeagueName");
+    }
+}

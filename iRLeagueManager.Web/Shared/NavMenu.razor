@@ -1,0 +1,95 @@
+﻿@using System.Net
+@inject LeagueApiService apiService
+@inject SharedStateService sharedState
+@inject NavigationManager navigationManager
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">iRLeagueManager.Web</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    @*<h1>@sharedState.LeagueName</h1>
+    <h1>@sharedState.SeasonId</h1>
+    <h1>@sharedState.SeasonName</h1>*@
+    <nav class="flex-column">
+        <div class="nav-item">
+            <NavLink class="nav-link" href="leagues">
+                <span class="oi oi-aperture" aria-hidden="true"></span> Leagues
+            </NavLink>
+        </div>
+        @if (apiService.Client.IsLoggedIn)
+        {
+            @if (string.IsNullOrEmpty(sharedState.LeagueName) == false)
+            {
+                <div class="nav-item">
+                    <select @bind="SeasonSelect" class="form-select no-radius px-0">
+                        @foreach (var season in sharedState.SeasonList)
+                        {
+                            <option value="@season.SeasonId" class="nav-option">@season.SeasonName</option>
+                        }
+                    </select>
+                </div>
+            }
+            @if (sharedState.LeagueName != null && string.IsNullOrEmpty(sharedState.SeasonName) == false && sharedState.SeasonId != 0)
+            {
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Schedules/Season/{sharedState.SeasonId}")">
+                        <span class="oi oi-list" aria-hidden="true"></span> Schedules
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Results")">
+                        <span class="oi oi-list" aria-hidden="true"></span> Results
+                    </NavLink>
+                </div>
+            }
+
+            <div class="nav-item">
+                <a class="nav-link" href="@($"./member/logout?returnUrl={GetCurrentUrl()}")">
+                    <span class="oi oi-account-logout" aria-hidden="true"></span> Logout
+                </a>
+            </div>
+        }
+    </nav>
+</div>
+
+@code {
+    [CascadingParameter]
+    public RouteData? RouteData { get; set; }
+
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private long SeasonSelect
+    {
+        get => sharedState.SeasonId;
+        set => OnSeasonSelectChanged(value);
+    }
+
+    protected override void OnInitialized()
+    {
+        sharedState.StateChanged += (sender, e) => StateHasChanged();
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private void OnSeasonSelectChanged(long value)
+    {
+        navigationManager.NavigateTo($"./{sharedState.LeagueName}/Seasons/{value}");
+        StateHasChanged();
+    }
+
+    private string GetCurrentUrl()
+    {
+        return WebUtility.UrlEncode(new Uri(navigationManager.Uri).PathAndQuery);
+    }
+}

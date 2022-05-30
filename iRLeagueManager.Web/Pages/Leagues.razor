@@ -9,18 +9,19 @@
 @inject ILeagueApiClient apiClient
 
 
-<h1>Leagues</h1>
+<div style="display:inline-block">
+    <div style="display:inline-block">
+        <h3>Leagues</h3>
+    </div>
+    @if (Bind(vm, x => x.Loading))
+    {
+        <div class="lds-ring">
+            <div></div>
+        </div>
+    }
+</div>
 
-@if (@Bind(vm, x => x.Status) == "Not Found")
-{
-    <p><em>Not Found!</em></p>
-}
-else if (@Bind(vm, x => x.Leagues) == null || @Bind(vm, x => x.Leagues).Count == 0)
-{
-    <p><em>Loading ...</em></p>
-}
-else
-{
+<div>
     <table class="table alternate select-table">
         <thead>
             <tr>
@@ -38,7 +39,7 @@ else
             }
         </tbody>
     </table>
-}
+</div>
 
 @code {
     protected override Task OnAfterRenderAsync(bool firstRender)

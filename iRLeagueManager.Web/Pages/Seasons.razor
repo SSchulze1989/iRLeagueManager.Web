@@ -8,18 +8,21 @@
 @inject SeasonsViewModel vm
 @inject SharedStateService sharedState
 
-<h1>Seasons</h1>
-
-@if (@Bind(vm, x => x.Loading))
-{
-    <p><em>Loading ...</em></p>
-}
-else
-{
-    <div>
-        <p>@sharedState.SeasonName</p>
+<div style="display:inline-block">
+    <div style="display:inline-block">
+        <h3>Seasons</h3>
     </div>
-}
+    @if (Bind(vm, x => x.Loading))
+    {
+        <div class="lds-ring">
+            <div></div>
+        </div>
+    }
+</div>
+
+<div>
+    <p>@sharedState.SeasonName</p>
+</div>
 
 @code {
     [Parameter]

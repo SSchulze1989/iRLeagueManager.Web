@@ -1,4 +1,5 @@
 ﻿using iRLeagueApiCore.Client;
+using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 using Microsoft.Extensions.Logging;
 using MvvmBlazor.ViewModel;
@@ -8,22 +9,16 @@ using System.Threading.Tasks;
 
 namespace iRLeagueManager.Web.ViewModels
 {
-    public class LeaguesViewModel : ViewModelBase
+    public class LeaguesViewModel : LeagueViewModelBase<LeaguesViewModel>
     {
-        private readonly ILoggerFactory loggerFactory;
-        private readonly ILogger<LeaguesViewModel> logger;
-        private ILeagueApiClient apiClient;
-
         private string _status;
         public string Status { get => _status; set => Set(ref _status, value); }
 
-        public LeaguesViewModel(ILoggerFactory loggerFactory, ILeagueApiClient apiClient)
+        public LeaguesViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+            base(loggerFactory, apiService)
         {
-            this.loggerFactory = loggerFactory;
-            logger = loggerFactory.CreateLogger<LeaguesViewModel>();
             _status = string.Empty;
             leagues = new ObservableCollection<LeagueViewModel>();
-            this.apiClient = apiClient;
         }
 
         private ObservableCollection<LeagueViewModel> leagues;
@@ -39,16 +34,18 @@ namespace iRLeagueManager.Web.ViewModels
         {
             if (firstRender)
             {
+                Loading = true;
                 Status = string.Empty;
-                var result = await apiClient.Leagues().Get();
+                var result = await ApiService.Client.Leagues().Get();
                 Status = result.Status;
                 if (result.Success)
                 {
                     var leagueModels = result.Content;
                     Leagues = new ObservableCollection<LeagueViewModel>(
-                        leagueModels.Select(x => new LeagueViewModel(loggerFactory.CreateLogger<LeagueViewModel>(), apiClient, x))
+                        leagueModels.Select(x => new LeagueViewModel(LoggerFactory.CreateLogger<LeagueViewModel>(), ApiService.Client, x))
                     );
                 }
+                Loading = false;
                 //StateHasChanged();
             }
         }

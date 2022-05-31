@@ -10,7 +10,7 @@ namespace iRLeagueManager.Web.ViewModels
         {
             LoggerFactory = loggerFactory;
             Logger = loggerFactory.CreateLogger<T>();
-            ApiService = apiService;
+            this.ApiService = apiService;
         }
 
         protected ILoggerFactory LoggerFactory { get; }

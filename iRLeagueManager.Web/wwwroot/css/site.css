@@ -103,7 +103,21 @@ a, .btn-link {
 
 .results-row:hover {
     outline: solid gray 1px;
-    filter: brightness(110%)
+    filter: brightness(110%);
+}
+
+/* Tabs style */
+.tab-header {
+    display: inline;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 5fr 10fr;
+}
+
+.grid-item {
+
 }
 
 /* Loading animation */

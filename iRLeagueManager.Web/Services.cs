@@ -8,6 +8,7 @@ namespace iRLeagueManager.Web
         {
             services.AddScoped<LeaguesViewModel>();
             services.AddScoped<SeasonsViewModel>();
+            services.AddScoped<SeasonViewModel>();
             services.AddScoped<SchedulesPageViewModel>();
             services.AddScoped<ScheduleViewModel>();
             services.AddScoped<SessionViewModel>();

@@ -1,51 +1,53 @@
 ﻿@page "/{LeagueName}/Settings"
 @page "/{LeagueName}/Settings/Season/{SeasonId:long}"
+@attribute [Authorize]
 @using System.Text
-@inherits MvvmComponentBase
+@inherits LeagueComponentBase
 @inject NavigationManager navigationManager
 
 <h3>Settings</h3>
 <div>
-    <NavLink class="nav-link" href="@GetTabLink(0)">Season</NavLink>
-    <NavLink class="nav-link" href="@GetTabLink(1)">Scorings</NavLink>
+    <NavLink class="nav-link tab-header" href="@GetTabLink(0)">Season</NavLink>
+    <NavLink class="nav-link tab-header" href="@GetTabLink(1)">Scorings</NavLink>
 </div>
 
-<div>
-    @switch (selectedTabIndex)
-    {
-        case 0:
-            <p>Seasons</p>
-            break;
-        case 1:
-            <p>Scorings</p>
-            break;
-        default:
-            <p><em>Index out of bounds!</em></p>
-            break;
-    }
-</div>
+@if (HasRendered)
+{
+    <div>
+        @switch (selectedTabIndex)
+        {
+            case 0:
+                <SeasonSettings/>
+                break;
+            case 1:
+                <ScoringSettings/>
+                break;
+            default:
+                <p><em>Index out of bounds!</em></p>
+                break;
+        }
+    </div>
+}
 
 @code {
-    [Parameter]
-    public string? LeagueName { get; set; }
-    [Parameter]
-    public long? SeasonId { get; set; }
-
     // Query parameters
     private int selectedTabIndex;
+    private int SelectedTabIndex 
+    {
+        get => selectedTabIndex;
+        set
+        {
+            if (selectedTabIndex != value)
+            {
+                selectedTabIndex = value;
+                SelectedTabChanged();
+            }
+        }
+    }
 
     protected override void OnInitialized()
     {
         navigationManager.LocationChanged += OnLocationChanged;
-    }
-
-    public void ChangeTab(int tabIndex)
-    {
-        if (selectedTabIndex != tabIndex)
-        {
-            selectedTabIndex = tabIndex;
-            SelectedTabChanged();
-        }
     }
 
     public void SelectedTabChanged()
@@ -53,13 +55,24 @@
         StateHasChanged();
     }
 
+    protected override void RedirectUrl()
+    {
+        navigationManager.NavigateTo($"./{LeagueName}/Settings/Season/{SeasonId}");
+    }
+
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        var tabIndex = navigationManager.QueryParameter<int>("tabIndex");
-        if (tabIndex != selectedTabIndex)
+        SelectedTabIndex = navigationManager.QueryParameter<int>("tabIndex");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
         {
-            ChangeTab(tabIndex);
+            return;
         }
+        SelectedTabIndex = navigationManager.QueryParameter<int>("tabIndex");
     }
 
     private string GetTabLink(int tabIndex)

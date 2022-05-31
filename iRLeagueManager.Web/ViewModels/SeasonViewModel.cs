@@ -7,22 +7,17 @@ using System.Runtime.CompilerServices;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class SeasonViewModel : ViewModelBase
+public class SeasonViewModel : LeagueViewModelBase<SeasonViewModel>
 {
-    private readonly ILoggerFactory loggerFactory;
-    private readonly ILogger<SeasonViewModel> logger;
-    private readonly LeagueApiService apiService;
     private SeasonModel model;
 
     public SeasonViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         this(loggerFactory, apiService, new SeasonModel())
     { }
 
-    public SeasonViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, SeasonModel model)
+    public SeasonViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, SeasonModel model) :
+        base (loggerFactory, apiService)
     {
-        this.loggerFactory = loggerFactory;
-        logger = loggerFactory.CreateLogger<SeasonViewModel>();
-        this.apiService = apiService;
         this.model = model;
     }
 
@@ -91,21 +86,56 @@ public class SeasonViewModel : ViewModelBase
         OnPropertyChanged();
     }
 
+    public async Task Load(long seasonId)
+    {
+        try
+        {
+            Loading = true;
+            if (ApiService.CurrentLeague == null)
+            {
+                return;
+            }
+            await ApiService.SetCurrentSeasonAsync(ApiService.CurrentLeague.Name, seasonId);
+            if (ApiService.CurrentSeason == null)
+            {
+                return;
+            }
+            var result = await ApiService.CurrentSeason.Get();
+            if (result.Success)
+            {
+                SetModel(result.Content);
+            }
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
     public async Task<bool> SaveCurrentModel()
     {
-        if (model.SeasonId == 0 || apiService.CurrentLeague == null)
+        try
         {
+            Loading = true;
+            await Task.Delay(1000);
+            if (model.SeasonId == 0 || ApiService.CurrentLeague == null)
+            {
+                return false;
+            }
+            var result = await ApiService.CurrentLeague
+                .Seasons()
+                .WithId(model.SeasonId)
+                .Put(model);
+            if (result.Success)
+            {
+                model = result.Content;
+                return true;
+            }
             return false;
         }
-        var result = await apiService.CurrentLeague
-            .Seasons()
-            .WithId(model.SeasonId)
-            .Put(model);
-        if (result.Success)
+        finally
         {
-            model = result.Content;
-            return true;
+            Loading = false;
         }
-        return false;
     }
 }

@@ -6,27 +6,25 @@
 @inject NavigationManager navigationManager
 
 <h3>Settings</h3>
-<div>
+<div class="position-relative">
     <NavLink class="nav-link tab-header" href="@GetTabLink(0)">Season</NavLink>
     <NavLink class="nav-link tab-header" href="@GetTabLink(1)">Scorings</NavLink>
 </div>
 
 @if (HasRendered)
 {
-    <div>
-        @switch (selectedTabIndex)
-        {
-            case 0:
-                <SeasonSettings/>
-                break;
-            case 1:
-                <ScoringSettings/>
-                break;
-            default:
-                <p><em>Index out of bounds!</em></p>
-                break;
-        }
-    </div>
+    @switch (selectedTabIndex)
+    {
+        case 0:
+            <SeasonSettings/>
+            break;
+        case 1:
+            <ResultSettings/>
+            break;
+        default:
+            <p><em>Index out of bounds!</em></p>
+            break;
+    }
 }
 
 @code {

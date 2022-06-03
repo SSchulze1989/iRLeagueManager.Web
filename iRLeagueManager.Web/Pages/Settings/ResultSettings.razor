@@ -1,0 +1,78 @@
+﻿@using iRLeagueManager.Web.ViewModels
+@inherits MvvmComponentBase
+@inject ScoringsViewModel vm
+@inject LeagueApiService apiService
+@inject ILogger<SeasonSettings> logger
+
+<h3>Results</h3>
+
+<div class="grid-container" id="main-grid">
+    <div>
+        <div class="grid-item" id="scoring-list-container">
+            <select @bind="@SelectedScoringIndex" name="selected-scoring" id="scoring-select" size="2">
+                @foreach((var scoring, var index) in @Bind(vm, x => x.Scorings).Select((x,i) => (x,i)))
+                {
+                    <option value="@index" selected="@(index == 0)">@Bind(scoring, x => x.Name)</option>
+                }
+            </select>
+        </div>
+        <div class="grid-item" id="scoring-list-buttons-container">
+             <button class="btn btn-primary">Add</button>
+             <button class="btn btn-secondary">Delete</button>
+        </div>
+    </div>
+    <EditForm Model="@Selected" OnValidSubmit="@HandleSubmit">
+        <div class="grid-item" id="settings-container">
+            <p>Name</p><p>@Selected.Name</p>
+            <button class="btn btn-primary">Save</button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private ScoringViewModel Selected => vm.Selected;
+
+    private int selectedScoringIndex;
+    private int SelectedScoringIndex
+    {
+        get => selectedScoringIndex;
+        set
+        {
+            selectedScoringIndex = value;
+            vm.Selected = vm.Scorings.ElementAt(selectedScoringIndex);
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        logger.LogInformation("Handle submit called!");
+        if (vm.Selected == null)
+        {
+            return;
+        }
+        await vm.Selected.SaveCurrentModelAsync();
+    }
+
+    private void OnSelectedScoringChange(ChangeEventArgs e)
+    {
+        if (e.Value == null)
+        {
+            return;
+        }
+        SelectedScoringIndex = (int)e.Value;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+        if (apiService.CurrentLeague != null && apiService.Shared.SeasonId != 0)
+        {
+            await vm.LoadFromSeason(apiService.Shared.SeasonId);            
+        }
+        StateHasChanged();
+    }
+}

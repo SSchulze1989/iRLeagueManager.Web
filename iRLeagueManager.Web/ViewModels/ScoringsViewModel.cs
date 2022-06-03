@@ -8,6 +8,7 @@ namespace iRLeagueManager.Web.ViewModels
         public ScoringsViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : base(loggerFactory, apiService)
         {
             scorings = new ObservableCollection<ScoringViewModel>();
+            selected = new ScoringViewModel(loggerFactory, apiService);
         }
 
         private ObservableCollection<ScoringViewModel> scorings;

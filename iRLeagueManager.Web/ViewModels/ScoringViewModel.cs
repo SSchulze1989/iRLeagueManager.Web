@@ -40,5 +40,26 @@ namespace iRLeagueManager.Web.ViewModels
             get => model.ShowResults;
             set => SetP(model.ShowResults, value => model.ShowResults = value, value);
         }
+
+        public void SetModel(ScoringModel model)
+        {
+            this.model = model;
+            OnPropertyChanged(null);
+        }
+
+        public async Task<bool> SaveCurrentModelAsync()
+        {
+            if (ApiService.CurrentLeague == null || model.Id == 0)
+            {
+                return false;
+            }
+            Logger.LogInformation("Begin saving Scoring {ScoringId} ...", model.Id);
+            var result = await ApiService.CurrentLeague
+                .Scorings()
+                .WithId(model.Id)
+                .Put(model);
+            Logger.LogInformation("Result: {Status}|{StatusCode} - {ResultMessage}", result.Status, result.HttpStatusCode, result.Message);
+            return result.Success;
+        }
     }
 }

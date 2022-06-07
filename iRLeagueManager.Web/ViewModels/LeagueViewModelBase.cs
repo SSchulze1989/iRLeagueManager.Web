@@ -20,6 +20,9 @@ namespace iRLeagueManager.Web.ViewModels
         private bool loading;
         public bool Loading { get => loading; set => Set(ref loading, value); }
 
+        private bool saving;
+        public bool Saving { get => saving; set => Set(ref saving, value); }
+
         /// <summary>
         /// Set a value on a model property and call OnPropertyChanged() if value changed
         /// </summary>

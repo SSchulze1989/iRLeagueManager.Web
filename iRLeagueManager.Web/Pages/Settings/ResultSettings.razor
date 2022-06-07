@@ -1,4 +1,5 @@
-﻿@using iRLeagueManager.Web.ViewModels
+﻿@using iRLeagueApiCore.Communication.Enums
+@using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
 @inject ScoringsViewModel vm
 @inject LeagueApiService apiService
@@ -7,26 +8,64 @@
 <h3>Results</h3>
 
 <div class="grid-container" id="main-grid">
-    <div>
-        <div class="grid-item" id="scoring-list-container">
-            <select @bind="@SelectedScoringIndex" name="selected-scoring" id="scoring-select" size="2">
-                @foreach((var scoring, var index) in @Bind(vm, x => x.Scorings).Select((x,i) => (x,i)))
-                {
-                    <option value="@index" selected="@(index == 0)">@Bind(scoring, x => x.Name)</option>
-                }
-            </select>
-        </div>
-        <div class="grid-item" id="scoring-list-buttons-container">
-             <button class="btn btn-primary">Add</button>
-             <button class="btn btn-secondary">Delete</button>
-        </div>
+    <div class="grid-item" id="scoring-list-container">
+        <select @bind="@SelectedScoringIndex" name="selected-scoring" id="scoring-select" size="2">
+            @foreach((var scoring, var index) in @Bind(vm, x => x.Scorings).Select((x,i) => (x,i)))
+            {
+                <option value="@index" selected="@(index == 0)">@Bind(scoring, x => x.Name)</option>
+            }
+        </select>
     </div>
-    <EditForm Model="@Selected" OnValidSubmit="@HandleSubmit">
-        <div class="grid-item" id="settings-container">
-            <p>Name</p><p>@Selected.Name</p>
-            <button class="btn btn-primary">Save</button>
-        </div>
-    </EditForm>
+    <div class="grid-item" id="scoring-list-buttons-container">
+        <button class="btn btn-primary">Add</button>
+        <button class="btn btn-secondary">Delete</button>
+    </div>
+    <div class="grid-item" id="settings-container">
+        <EditForm Model="@Selected" OnValidSubmit="@HandleSubmit">
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            <div class="form-grid">
+                <label>Scoring Id</label>
+                <label>@Bind(Selected, x => x.Id)</label>
+            </div>
+            <div class="form-grid">
+                <label>Name</label>
+                <InputText @bind-Value="Selected.Name" class="form-control"/>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <InputTextArea @bind-Value="Selected.Description" class="form-control"/>
+            </div>
+            <div class="form-grid">
+                <label>Member or Team Scoring</label>
+                <InputSelect @bind-Value="Selected.ScoringKind" class="form-select">
+                    @foreach(var scoringKind in Enum.GetValues(typeof(ScoringKind)))
+                    {
+                        <option value=@scoringKind>@scoringKind</option>
+                    }
+                </InputSelect>
+            </div>
+            <div class="form-check-grid">
+                <label>Results from other scoring</label>
+                <InputCheckbox @bind-Value="Selected.TakeResultsFromExtSource" class="form-check"/>
+                <label>Get Team from raw Result</label>
+                <InputCheckbox @bind-Value="Selected.UseResultSetTeam" class="form-check"/>
+                <label>Update Teams on recalcualtion</label>
+                <InputCheckbox @bind-Value="Selected.UpdateTeamOnRecalculation" class="form-check"/>
+                <label>Show results</label>
+                <InputCheckbox @bind-Value="Selected.ShowResults" class="form-check"/>
+            </div>
+            <div class="form-group">
+                <button disabled="@Selected.Loading" class="btn btn-primary">
+                    @if (@Selected.Saving) 
+                    {
+                        <span class="spinner-border spinner-border-sm mr-1"></span>
+                    }
+                    Save
+                </button>
+            </div>
+        </EditForm>
+    </div>
 </div>
 
 @code {
@@ -73,6 +112,7 @@
         {
             await vm.LoadFromSeason(apiService.Shared.SeasonId);            
         }
+        SelectedScoringIndex = 0;
         StateHasChanged();
     }
 }

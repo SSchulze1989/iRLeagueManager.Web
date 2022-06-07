@@ -1,6 +1,7 @@
 ﻿using iRLeagueApiCore.Communication.Enums;
 using iRLeagueApiCore.Communication.Models;
 using iRLeagueManager.Web.Data;
+using System.ComponentModel.DataAnnotations;
 
 namespace iRLeagueManager.Web.ViewModels
 {
@@ -20,6 +21,7 @@ namespace iRLeagueManager.Web.ViewModels
         public long Id => model.Id;
         public long LeagueId => model.LeagueId;
         public long SeasonId => model.SeasonId;
+        [Required]
         public string Name
         {
             get => model.Name;
@@ -40,6 +42,21 @@ namespace iRLeagueManager.Web.ViewModels
             get => model.ShowResults;
             set => SetP(model.ShowResults, value => model.ShowResults = value, value);
         }
+        public bool TakeResultsFromExtSource
+        {
+            get => model.TakeResultsFromExtSource;
+            set => SetP(model.TakeResultsFromExtSource, value => model.TakeResultsFromExtSource = value, value);
+        }
+        public bool UseResultSetTeam
+        {
+            get => model.UseResultSetTeam;
+            set => SetP(model.UseResultSetTeam, value => model.UseResultSetTeam = value, value);
+        }
+        public bool UpdateTeamOnRecalculation
+        {
+            get => model.UpdateTeamOnRecalculation;
+            set => SetP(model.UpdateTeamOnRecalculation, value => model.UpdateTeamOnRecalculation = value, value);
+        }
 
         public void SetModel(ScoringModel model)
         {
@@ -49,17 +66,26 @@ namespace iRLeagueManager.Web.ViewModels
 
         public async Task<bool> SaveCurrentModelAsync()
         {
-            if (ApiService.CurrentLeague == null || model.Id == 0)
+            try
             {
-                return false;
+                Loading = Saving = true;
+                if (ApiService.CurrentLeague == null || model.Id == 0)
+                {
+                    return false;
+                }
+                await Task.Delay(500);
+                Logger.LogInformation("Begin saving Scoring {ScoringId} ...", model.Id);
+                var result = await ApiService.CurrentLeague
+                    .Scorings()
+                    .WithId(model.Id)
+                    .Put(model);
+                Logger.LogInformation("Result: {Status}|{StatusCode} - {ResultMessage}", result.Status, result.HttpStatusCode, result.Message);
+                return result.Success;
             }
-            Logger.LogInformation("Begin saving Scoring {ScoringId} ...", model.Id);
-            var result = await ApiService.CurrentLeague
-                .Scorings()
-                .WithId(model.Id)
-                .Put(model);
-            Logger.LogInformation("Result: {Status}|{StatusCode} - {ResultMessage}", result.Status, result.HttpStatusCode, result.Message);
-            return result.Success;
+            finally
+            {
+                Loading = Saving = false;
+            }
         }
     }
 }

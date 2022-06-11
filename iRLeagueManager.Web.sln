@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iRLeagueApiCore.Client", "..\iRLeagueApiCore\iRLeagueApiCore.Client\iRLeagueApiCore.Client.csproj", "{771C51F9-EEF1-4DB9-B5D7-872AABBEF85A}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iRLeagueManager.Web", "iRLeagueManager.Web\iRLeagueManager.Web.csproj", "{0E1210B9-CB90-497D-9B67-D084D7DFE768}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iRLeagueApiCore.Client", "..\iRLeagueApiCore\iRLeagueApiCore.Client\iRLeagueApiCore.Client.csproj", "{771C51F9-EEF1-4DB9-B5D7-872AABBEF85A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

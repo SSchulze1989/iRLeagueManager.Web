@@ -203,7 +203,7 @@
         }
     }
 
-    private void SetOrderProperty(ResultViewModel result, Func<ResultRowModel, IComparable> selector, bool descending = false)
+    private void SetOrderProperty(ResultViewModel result, Expression<Func<ResultRowModel, IComparable>> selector, bool descending = false)
     {
         result.OrderByPropertySelector = selector;
     }

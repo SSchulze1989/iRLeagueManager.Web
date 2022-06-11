@@ -1,7 +1,9 @@
 ﻿using iRLeagueApiCore.Communication.Enums;
 using iRLeagueApiCore.Communication.Models;
 using iRLeagueManager.Web.Data;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
 
 namespace iRLeagueManager.Web.ViewModels
 {
@@ -15,6 +17,7 @@ namespace iRLeagueManager.Web.ViewModels
 
         public ScoringViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, ScoringModel model) : base (loggerFactory, apiService)
         {
+            selectedSessions = new ObservableCollection<SessionModel>();
             this.model = model;
         }
 
@@ -57,6 +60,34 @@ namespace iRLeagueManager.Web.ViewModels
             get => model.UpdateTeamOnRecalculation;
             set => SetP(model.UpdateTeamOnRecalculation, value => model.UpdateTeamOnRecalculation = value, value);
         }
+        public int MaxResultsPerGroup
+        {
+            get => model.MaxResultsPerGroup;
+            set => SetP(model.MaxResultsPerGroup, value => model.MaxResultsPerGroup = value, value);
+        }
+        public bool TakeGroupAverage
+        {
+            get => model.TakeGroupAverage;
+            set => SetP(model.TakeGroupAverage, value => model.TakeGroupAverage = value, value);
+        }
+        public SessionType ScoringSessionType
+        {
+            get => model.ScoringSessionType;
+            set => SetP(model.ScoringSessionType, value => model.ScoringSessionType = value, value);
+        }
+        public ScoringSessionSelectionType SessionSelectType
+        {
+            get => model.SessionSelectType;
+            set => SetP(model.SessionSelectType, value => model.SessionSelectType = value, value);
+        }
+        public IEnumerable<long> SessionIds => model.SessionIds;
+
+        private ObservableCollection<SessionModel> selectedSessions;
+        public ObservableCollection<SessionModel> SelectedSessions
+        {
+            get => selectedSessions;
+            set => Set(ref selectedSessions, value);
+        }
 
         public void SetModel(ScoringModel model)
         {
@@ -80,6 +111,10 @@ namespace iRLeagueManager.Web.ViewModels
                     .WithId(model.Id)
                     .Put(model);
                 Logger.LogInformation("Result: {Status}|{StatusCode} - {ResultMessage}", result.Status, result.HttpStatusCode, result.Message);
+                if (result.Success)
+                {
+                    HasChanged = false;
+                }
                 return result.Success;
             }
             finally

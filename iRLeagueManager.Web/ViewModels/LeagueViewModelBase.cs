@@ -18,10 +18,25 @@ namespace iRLeagueManager.Web.ViewModels
         protected LeagueApiService ApiService { get; }
 
         private bool loading;
-        public bool Loading { get => loading; set => Set(ref loading, value); }
+        public bool Loading 
+        { 
+            get => loading;
+            protected set => Set(ref loading, value);
+        }
 
         private bool saving;
-        public bool Saving { get => saving; set => Set(ref saving, value); }
+        public bool Saving
+        {
+            get => saving;
+            protected set => Set(ref saving, value);
+        }
+
+        private bool hasChanged = false;
+        public bool HasChanged
+        {
+            get => hasChanged;
+            protected set => Set(ref hasChanged, value);
+        }
 
         /// <summary>
         /// Set a value on a model property and call OnPropertyChanged() if value changed
@@ -34,9 +49,10 @@ namespace iRLeagueManager.Web.ViewModels
         /// <returns></returns>
         protected bool SetP<TProperty>(TProperty get, Action<TProperty> set, TProperty value, [CallerMemberName] string? propertyName = null)
         {
-            if (get == null && value != null || (get != null && get.Equals(value) == false))
+            if (!EqualityComparer<TProperty>.Default.Equals(get, value))
             {
                 set.Invoke(value);
+                HasChanged = true;
                 OnPropertyChanged(propertyName);
                 return true;
             }

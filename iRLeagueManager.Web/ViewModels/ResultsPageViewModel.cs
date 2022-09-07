@@ -1,5 +1,7 @@
-﻿using iRLeagueManager.Web.Data;
+﻿using iRLeagueApiCore.Common.Models.Results;
+using iRLeagueManager.Web.Data;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace iRLeagueManager.Web.ViewModels
 {
@@ -8,23 +10,23 @@ namespace iRLeagueManager.Web.ViewModels
         public ResultsPageViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
             base(loggerFactory, apiService)
         {
-            sessionList = new ObservableCollection<SessionViewModel>();
-            results = new ObservableCollection<ResultViewModel>();
+            eventList = new ObservableCollection<EventViewModel>();
+            results = new ObservableCollection<EventResultViewModel>();
         }
 
         private long? loadedSeasonId;
         public long? LoadedSeasonId { get => loadedSeasonId; set => Set(ref loadedSeasonId, value); }
 
-        private ObservableCollection<SessionViewModel> sessionList;
-        public ObservableCollection<SessionViewModel> SessionList { get => sessionList; set => Set(ref sessionList, value); }
+        private ObservableCollection<EventViewModel> eventList;
+        public ObservableCollection<EventViewModel> EventList { get => eventList; set => Set(ref eventList, value); }
 
         private long? selectedSessionId;
         public long? SelectedSessionId { get => selectedSessionId; set { if (Set(ref selectedSessionId, value)) _ = OnSelectedSessionChanged(value); } }
 
-        public SessionViewModel? Session => SessionList.SingleOrDefault(x => x.SessionId == selectedSessionId);
+        public EventViewModel? Session => EventList.SingleOrDefault(x => x.EventId == selectedSessionId);
 
-        private ObservableCollection<ResultViewModel> results;
-        public ObservableCollection<ResultViewModel> Results { get => results; set => Set(ref results, value); }
+        private ObservableCollection<EventResultViewModel> results;
+        public ObservableCollection<EventResultViewModel> Results { get => results; set => Set(ref results, value); }
 
         public event Action<long?>? SelectedSessionChanged;
 
@@ -33,21 +35,21 @@ namespace iRLeagueManager.Web.ViewModels
             if (ApiService.CurrentSeason == null)
             {
                 LoadedSeasonId = null;
-                SessionList.Clear();
+                EventList.Clear();
                 return;
             }
             LoadedSeasonId = ApiService.CurrentSeason.Id;
 
-            var sessionsEndpoint = ApiService.CurrentSeason.Sessions();
+            var sessionsEndpoint = ApiService.CurrentSeason.Events();
             var result = await sessionsEndpoint.Get();
             if (result.Success == false)
             {
-                SessionList.Clear();
+                EventList.Clear();
                 return;
             }
 
             var sessions = result.Content;
-            SessionList = new ObservableCollection<SessionViewModel>(sessions.Select(x => new SessionViewModel(LoggerFactory, ApiService, x)));
+            EventList = new ObservableCollection<EventViewModel>(sessions.Select(x => new EventViewModel(LoggerFactory, ApiService, x)));
             OnPropertyChanged(nameof(SelectedSessionId));
         }
 
@@ -62,10 +64,11 @@ namespace iRLeagueManager.Web.ViewModels
             try
             {
                 Loading = true;
-                var sessionEndpoint = ApiService.CurrentLeague.Sessions().WithId(sessionId);
+                var sessionEndpoint = ApiService.CurrentLeague.Events().WithId(sessionId);
                 selectedSessionId = sessionId;
 
-                var requestResult = await sessionEndpoint.Results().Get();
+                var resultEndpoint = sessionEndpoint.Results();
+                var requestResult = await resultEndpoint.Get();
                 if (requestResult.Success == false)
                 {
                     Results.Clear();
@@ -73,7 +76,7 @@ namespace iRLeagueManager.Web.ViewModels
                 }
 
                 var results = requestResult.Content;
-                Results = new ObservableCollection<ResultViewModel>(results.Select(x => new ResultViewModel(LoggerFactory, ApiService, x)));
+                Results = new ObservableCollection<EventResultViewModel>(results.Select(x => new EventResultViewModel(LoggerFactory, ApiService, x)));
             }
             finally
             {

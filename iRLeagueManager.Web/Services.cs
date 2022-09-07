@@ -11,10 +11,11 @@ namespace iRLeagueManager.Web
             services.AddScoped<SeasonViewModel>();
             services.AddScoped<SchedulesPageViewModel>();
             services.AddScoped<ScheduleViewModel>();
-            services.AddScoped<SessionViewModel>();
+            services.AddScoped<EventViewModel>();
             services.AddScoped<ResultsPageViewModel>();
             services.AddScoped<ScoringsViewModel>();
             services.AddScoped<ScoringViewModel>();
+            services.AddScoped<ResultConfigSettingsViewModel>();
         }
     }
 }

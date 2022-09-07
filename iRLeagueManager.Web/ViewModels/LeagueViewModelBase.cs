@@ -1,5 +1,7 @@
 ﻿using iRLeagueManager.Web.Data;
 using MvvmBlazor.ViewModel;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace iRLeagueManager.Web.ViewModels
@@ -52,6 +54,26 @@ namespace iRLeagueManager.Web.ViewModels
             if (!EqualityComparer<TProperty>.Default.Equals(get, value))
             {
                 set.Invoke(value);
+                HasChanged = true;
+                OnPropertyChanged(propertyName);
+                return true;
+            }
+            return false;
+        }
+
+        protected bool Set<TModel, TProperty>(TModel model, Expression<Func<TModel, TProperty>> property, TProperty value, [CallerMemberName] string ? propertyName = null)
+        {
+            ArgumentNullException.ThrowIfNull(model);
+            ArgumentNullException.ThrowIfNull(property);
+
+            var propertyValue = property.Compile().Invoke(model);
+            if (!EqualityComparer<TProperty>.Default.Equals(propertyValue, value))
+            {
+                var propertyExpression = property.Body as MemberExpression
+                    ?? throw new ArgumentException("Argument must be a member Expression", nameof(property));
+                var propertyInfo = propertyExpression.Member as PropertyInfo
+                    ?? throw new ArgumentException("Expression must target a Property", nameof(property));
+                propertyInfo.SetValue(model, value);
                 HasChanged = true;
                 OnPropertyChanged(propertyName);
                 return true;

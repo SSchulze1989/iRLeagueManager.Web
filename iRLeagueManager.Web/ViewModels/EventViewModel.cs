@@ -1,27 +1,27 @@
-﻿using iRLeagueApiCore.Communication.Enums;
-using iRLeagueApiCore.Communication.Models;
+﻿using iRLeagueApiCore.Common.Enums;
+using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using MvvmBlazor.ViewModel;
 
 namespace iRLeagueManager.Web.ViewModels
 {
-    public class SessionViewModel : LeagueViewModelBase<SessionViewModel>
+    public class EventViewModel : LeagueViewModelBase<EventViewModel>
     {
-        private SessionModel model;
+        private EventModel model;
 
-        public SessionViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+        public EventViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
             base(loggerFactory, apiService)
         {
-            this.model = new SessionModel();
+            this.model = new EventModel();
         }
 
-        public SessionViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, SessionModel model) :
+        public EventViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, EventModel model) :
             base(loggerFactory, apiService)
         {
             this.model = model;
         }
 
-        public long SessionId { get => model.SessionId; set => SetP(model.SessionId, value => model.SessionId = value, value); }
+        public long EventId { get => model.Id; }
         public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
         public DateTime Date 
         { 
@@ -30,7 +30,7 @@ namespace iRLeagueManager.Web.ViewModels
         }
         public long? TrackId { get => model.TrackId; set => SetP(model.TrackId, value => model.TrackId = value, value); }
 
-        public TimeSpan SessionStart 
+        public TimeSpan StartTime 
         { 
             get => model.Date.GetValueOrDefault().TimeOfDay;
             set => SetP(model.Date.GetValueOrDefault().TimeOfDay, value => model.Date = model.Date.GetValueOrDefault().Date.Add(value), value); 
@@ -42,24 +42,28 @@ namespace iRLeagueManager.Web.ViewModels
             set => SetP(model.Duration, value => model.Duration = value, value);
         }
 
-        public SubSessionModel? Practice
+        public ICollection<SessionModel> Sessions { get => model.Sessions; }
+
+        public SessionModel? Practice
         {
-            get => model.SubSessions.FirstOrDefault(x => x.SessionType == SimSessionType.OpenPractice);
+            get => model.Sessions.FirstOrDefault(x => x.SessionType == SessionType.Practice);
         }
 
-        public SubSessionModel? Qualifying
+        public SessionModel? Qualifying
         {
-            get => model.SubSessions.FirstOrDefault(x => x.SessionType == SimSessionType.LoneQualifying || x.SessionType == SimSessionType.OpenQualifying);
+            get => model.Sessions.FirstOrDefault(x => x.SessionType == SessionType.Qualifying);
         }
 
-        public SubSessionModel? Race
+        public SessionModel? Race
         {
-            get => model.SubSessions.FirstOrDefault(x => x.SessionType == SimSessionType.Race);
+            get => model.Sessions.FirstOrDefault(x => x.SessionType == SessionType.Race);
         }
 
         public bool HasResult => model.HasResult;
 
-        public void SetModel(SessionModel model)
+        public int Laps => Race?.Laps ?? Qualifying?.Laps ?? Practice?.Laps ?? 0;
+
+        public void SetModel(EventModel model)
         {
             this.model = model;
             OnPropertyChanged(null);

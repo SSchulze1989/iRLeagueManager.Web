@@ -2,6 +2,7 @@
 @page "/{LeagueName}/Settings/Season/{SeasonId:long}"
 @attribute [Authorize]
 @using System.Text
+@using iRLeagueManager.Web.Components.Settings
 @inherits LeagueComponentBase
 @inject NavigationManager navigationManager
 
@@ -20,7 +21,7 @@
                 <SeasonSettings/>
                 break;
             case 1:
-                <ResultSettings/>
+                <ResultConfigSettings/>
                 break;
             default:
                 <p><em>Index out of bounds!</em></p>

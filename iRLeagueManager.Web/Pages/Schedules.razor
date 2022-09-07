@@ -48,18 +48,18 @@
                             </tr>
                         </thead>
                         <tbody>
-                        @foreach((var session, var index) in @Bind(schedule, x => x.Sessions).Select((x, i) => (x, i)))
+                        @foreach((var @event, var index) in @Bind(schedule, x => x.Events).Select((x, i) => (x, i)))
                         {
-                            var sessionId = session.SessionId;
-                            <tr @onclick="e => OnTableRowClick(sessionId)">
+                            var eventId = @event.EventId;
+                            <tr @onclick="e => OnTableRowClick(eventId)">
                                 <td>@(index + 1).</td>
-                                <td>@Bind(session, x => x.Date).ToString(@"dd:MM:yyyy")</td>
-                                <td>@Bind(session, x => x.TrackId)</td>
-                                <td>@(Bind(session, x => x.Race)?.Laps ?? 0)</td>
-                                <td>@Bind(session, x => x.SessionStart)</td>
-                                <td>@((Bind(session, x => x.Practice)?.Duration.ToString() ?? "-").ToString())</td>
-                                <td>@((Bind(session, x => x.Qualifying)?.Duration.ToString() ?? "-").ToString())</td>
-                                <td>@((Bind(session, x => x.Race)?.Duration.ToString() ?? "-").ToString())</td>
+                                <td>@Bind(@event, x => x.Date).ToString(@"dd:MM:yyyy")</td>
+                                <td>@Bind(@event, x => x.TrackId)</td>
+                                <td>@Bind(@event, x => x.Laps)</td>
+                                <td>@Bind(@event, x => x.StartTime)</td>
+                                <td>@((Bind(@event, x => x.Practice)?.Duration.ToString() ?? "-").ToString())</td>
+                                <td>@((Bind(@event, x => x.Qualifying)?.Duration.ToString() ?? "-").ToString())</td>
+                                <td>@((Bind(@event, x => x.Race)?.Duration.ToString() ?? "-").ToString())</td>
                             </tr>
                         }
                         </tbody>
@@ -96,7 +96,7 @@
         // load sessions to display
         foreach(var schedule in vm.Schedules)
         {
-            await schedule.LoadSessions();
+            await schedule.LoadEvents();
         }
     }
 

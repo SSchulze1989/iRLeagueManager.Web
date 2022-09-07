@@ -1,4 +1,4 @@
-﻿using iRLeagueApiCore.Communication.Models;
+﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueApiCore.Client;
 using System.Threading.Tasks;
 using MvvmBlazor;

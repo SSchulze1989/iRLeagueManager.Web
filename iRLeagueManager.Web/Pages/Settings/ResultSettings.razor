@@ -1,4 +1,4 @@
-﻿@using iRLeagueApiCore.Communication.Enums
+﻿@using iRLeagueApiCore.Common.Enums
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
 @inject ScoringsViewModel vm
@@ -33,10 +33,6 @@
                     <label>Name</label>
                     <InputText @bind-Value="Selected.Name" class="form-control"/>
                 </div>
-                <div class="form-group" id="description">
-                    <label>Description</label>
-                    <InputTextArea @bind-Value="Selected.Description" class="form-control"/>
-                </div>
                 <div class="form-grid" id="scoring_kind">
                     <label>Member or Team Scoring</label>
                     <InputSelect @bind-Value="Selected.ScoringKind" class="form-select">
@@ -47,49 +43,12 @@
                     </InputSelect>
                 </div>
                 <div class="form-check-grid" id="check_values">
-                    <label>Results from other scoring</label>
-                    <InputCheckbox @bind-Value="Selected.TakeResultsFromExtSource" class="form-check"/>
                     <label>Get Team from raw Result</label>
                     <InputCheckbox @bind-Value="Selected.UseResultSetTeam" class="form-check"/>
                     <label>Update Teams on recalcualtion</label>
                     <InputCheckbox @bind-Value="Selected.UpdateTeamOnRecalculation" class="form-check"/>
                     <label>Show results</label>
                     <InputCheckbox @bind-Value="Selected.ShowResults" class="form-check"/>
-                </div>
-                <div class="form-grid" id="session_type">
-                    <label>Session Type</label>
-                    <InputSelect @bind-Value="Selected.ScoringSessionType" class="form-select">
-                        @foreach(var sessionType in Enum.GetValues<SessionType>())
-                        {
-                            <option value="@sessionType">@sessionType</option>
-                        }
-                    </InputSelect>
-                </div>
-                <div class="grid c2" id="select_type">
-                    <InputRadioGroup TValue="ScoringSessionSelectionType" @bind-Value="Selected.SessionSelectType">
-                        <div>
-                            <label>By Schedule</label>
-                            <InputRadio TValue="ScoringSessionSelectionType" Value="ScoringSessionSelectionType.SelectSchedule" class="form-radio"/>
-                        </div>
-                        <div>
-                            <label>By Sessions</label>
-                            <InputRadio TValue="ScoringSessionSelectionType" Value="ScoringSessionSelectionType.SelectSessions" class="form-radio"/>
-                        </div>
-                    </InputRadioGroup>
-                </div>
-                <div class="grid c2" id="session_select">
-                    <div>
-                        <label>Selected</label>
-                        <select name="selected-sessions" id="session-select" size="2">
-                            @foreach(var session in @Bind(Selected, x => x.SelectedSessions))
-                            {
-                                <option value="@session.SessionId">@session.Name</option>
-                            }
-                        </select>
-                    </div>
-                    <div>
-
-                    </div>
                 </div>
                 <div class="form-group">
                     <button disabled="@(Selected.Loading || !Selected.HasChanged)" class="btn btn-primary">

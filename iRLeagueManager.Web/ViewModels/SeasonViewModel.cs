@@ -1,6 +1,6 @@
 ﻿using iRLeagueApiCore.Client;
 using iRLeagueApiCore.Client.Results;
-using iRLeagueApiCore.Communication.Models;
+using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using MvvmBlazor.ViewModel;
 using System.Runtime.CompilerServices;
@@ -34,50 +34,11 @@ public class SeasonViewModel : LeagueViewModelBase<SeasonViewModel>
     public long LeagueId => model.LeagueId;
     public DateTime? SeasonStart => model.SeasonStart;
     public DateTime? SeasonEnd => SeasonEnd;
-
-    public string SeasonName
-    {
-        get => model.SeasonName;
-        set
-        {
-            SetProperty(model.SeasonName, x => model.SeasonName = x, value);
-        }
-    }
-
-    public long? MainScoringId
-    {
-        get => model.MainScoringId;
-        set
-        {
-            model.MainScoringId = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public bool HideComments
-    {
-        get => HideComments;
-        set
-        {
-            model.HideComments = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public bool Finished
-    {
-        get => model.Finished;
-        set
-        {
-            model.Finished = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public IEnumerable<long> ScheduleIds
-    {
-        get => model.ScheduleIds;
-    }
+    public string? SeasonName { get => model.SeasonName; set => Set(model, x => x.SeasonName, value); }
+    public long? MainScoringId { get => model.MainScoringId; set => Set(model, x => x.MainScoringId, value); }
+    public bool HideComments { get => model.HideComments; set => Set(model, x => x.HideComments, value); }
+    public bool Finished { get => model.Finished; set => Set(model, x => x.Finished, value); }
+    public IEnumerable<long> ScheduleIds => model.ScheduleIds;
 
     public void SetModel(SeasonModel model)
     {

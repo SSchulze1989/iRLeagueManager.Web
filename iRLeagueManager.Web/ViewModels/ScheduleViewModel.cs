@@ -1,4 +1,4 @@
-﻿using iRLeagueApiCore.Communication.Models;
+﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using MvvmBlazor.ViewModel;
 using System.Collections.ObjectModel;
@@ -17,39 +17,39 @@ namespace iRLeagueManager.Web.ViewModels
         public ScheduleViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, ScheduleModel model) : 
             base(loggerFactory, apiService)
         {
-            sessions = new ObservableCollection<SessionViewModel>();
+            events = new ObservableCollection<EventViewModel>();
             this.model = model;
         }
 
-        public long ScheduleId { get => model.ScheduleId; set => SetP(model.ScheduleId, value => model.ScheduleId = value, value); }
-        public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
+        public long ScheduleId { get => model.ScheduleId; set => Set(model, x => x.ScheduleId, value); }
+        public string Name { get => model.Name; set => Set(model, x => model.Name, value); }
 
-        private ObservableCollection<SessionViewModel> sessions;
-        public ObservableCollection<SessionViewModel> Sessions { get => sessions; set => Set(ref sessions, value); }
+        private ObservableCollection<EventViewModel> events;
+        public ObservableCollection<EventViewModel> Events { get => events; set => Set(ref events, value); }
 
         public async Task SetModel(ScheduleModel model)
         {
             this.model = model;
             OnPropertyChanged(null);
-            await LoadSessions();
+            await LoadEvents();
         }
 
-        public async Task LoadSessions(CancellationToken cancellationToken = default)
+        public async Task LoadEvents(CancellationToken cancellationToken = default)
         {
             if (ApiService.CurrentLeague == null) return;
             Loading = true;
 
             //await Task.Delay(500);
 
-            var result = await ApiService.CurrentLeague.Schedules().WithId(ScheduleId).Sessions().Get(cancellationToken);
+            var result = await ApiService.CurrentLeague.Schedules().WithId(ScheduleId).Events().Get(cancellationToken);
             if (result.Success == false)
             {
                 return;
             }
 
             var sessions = result.Content;
-            Sessions = new ObservableCollection<SessionViewModel>(sessions.Select(x =>
-                new SessionViewModel(LoggerFactory, ApiService, x)));
+            Events = new ObservableCollection<EventViewModel>(sessions.Select(x =>
+                new EventViewModel(LoggerFactory, ApiService, x)));
 
             Loading = false;
         }

@@ -1,17 +1,45 @@
 ﻿@using iRLeagueManager.Web.ViewModels
-@inject SeasonViewModel season
+@inherits MvvmComponentBase
+@inject SeasonViewModel vm
+@inject LeagueApiService apiService
 @inject ILogger<SeasonSettings> logger
 
 <h3>SeasonSettings</h3>
 
-<EditForm Model="@season" OnValidSubmit="@HandleSubmit">
-    <InputText id="name" @bind-Value="season.SeasonName" />
+<EditForm Model="@vm" OnValidSubmit="@HandleSubmit">
+    <div class="grid-container">
+        <div class="grid-item">
+            Name
+        </div>
+        <div class="grid-item">
+            <InputText id="name" @bind-Value="vm.SeasonName" />
+        </div>
+    </div>
+    <button disabled="@Bind(vm, x => x.Loading)" class="btn btn-primary">
+        @if (@Bind(vm, x => x.Loading))
+        {
+            <span class="spinner-border spinner-border-sm mr-1"></span>
+        }
+        Save
+    </button>
 </EditForm>
 
 @code {
     private async Task HandleSubmit()
     {
         logger.LogInformation("Handle submit called!");
-        await season.SaveCurrentModel();
+        await vm.SaveCurrentModel();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;        }
+        if (apiService.CurrentLeague != null && apiService.Shared.SeasonId != 0)
+        {
+            await vm.Load(apiService.Shared.SeasonId);            
+        }
+        StateHasChanged();
     }
 }

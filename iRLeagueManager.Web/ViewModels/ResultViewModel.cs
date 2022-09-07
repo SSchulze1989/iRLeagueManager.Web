@@ -20,8 +20,8 @@ namespace iRLeagueManager.Web.ViewModels
             orderByPropertySelector = x => x.FinalPosition;
         }
 
-        private Func<ResultRowModel, IComparable> orderByPropertySelector;
-        public Func<ResultRowModel, IComparable> OrderByPropertySelector
+        private Expression<Func<ResultRowModel, IComparable>> orderByPropertySelector;
+        public Expression<Func<ResultRowModel, IComparable>> OrderByPropertySelector
         {
             get => orderByPropertySelector;
             set
@@ -29,13 +29,26 @@ namespace iRLeagueManager.Web.ViewModels
                 if (Set(ref orderByPropertySelector, value))
                 {
                     OnPropertyChanged(nameof(ResultRows));
+                    return;
                 }
+                OrderDescending = !OrderDescending;
             }
         }
+        public bool OrderDescending { get; private set; }
 
         public long SeasonId => model.SeasonId;
         public long ScoringId => model.ScoringId;
         public string ScoringName => model.ScoringName;
-        public IEnumerable<ResultRowModel> ResultRows => model.ResultRows.OrderBy(OrderByPropertySelector);
+        public IEnumerable<ResultRowModel> ResultRows
+        {
+            get
+            {
+                if (OrderDescending)
+                {
+                    return model.ResultRows.OrderByDescending(OrderByPropertySelector.Compile());
+                }
+                return model.ResultRows.OrderBy(OrderByPropertySelector.Compile());
+            }
+        }
     }
 }

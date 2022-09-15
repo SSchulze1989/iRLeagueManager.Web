@@ -87,6 +87,14 @@ a, .btn-link {
     }
 
 /* results styles */
+.event-result-tab {
+    display: inline-block;
+    margin: 0.75rem;
+    padding: 0.5rem;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
 .results-tab {
     margin: 0.75rem;
     padding: 0.5rem;

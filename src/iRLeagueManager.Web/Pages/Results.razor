@@ -42,11 +42,15 @@
                 <p class="results-scoring"><em>No Results</em></p>
             </div>
         }
-        @foreach(var eventResult in @Bind(vm, x => x.Results))
+        @foreach((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x,i)))
         {
-            <div class="event-result-tab">
+            <div class="event-result-tab @(i == Bind(vm, x => x.SelectedResultIndex) ? " text-decoration-underline" : "")" @onclick="() => SetSelectedResultIndex(i)">
                 <p><em>@Bind(eventResult, x => x.Name)</em></p>
-            @foreach(var result in @Bind(eventResult, x => x.SessionResults))
+            </div>
+        }
+        @if (vm.SelectedEventResult != null)
+        {
+            @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults))
             {
                 <div class="results-tab" id="results-session-@Bind(result, x => x.SessionName)">
                     <p class="results-scoring">@Bind(result, x => x.SessionName)</p>
@@ -97,7 +101,6 @@
                     </table>
                 </div>
             }
-            </div>
         }
     </div>
 </div>
@@ -110,9 +113,12 @@
     [Parameter]
     public long? SessionId { get; set; }
 
+    private const string resultTabParam = "resultTab";
+
     protected override async Task OnInitializedAsync()
     {
         vm.SelectedSessionChanged += OnSessionChanged;
+        navigationManager.LocationChanged += OnLocationChanged;
         await Task.FromResult(true);
     }
 
@@ -135,6 +141,11 @@
         }
     }
 
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        vm.SelectedResultIndex = navigationManager.QueryParameter<int>(resultTabParam);
+    }
+
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender == false) return;
@@ -147,6 +158,7 @@
         // set league state
         await apiService.SetCurrentLeagueAsync(LeagueName);
         await LoadPage(LeagueName);
+        vm.SelectedResultIndex = navigationManager.QueryParameter<int>(resultTabParam);
     }
 
     private async Task LoadPage(string leagueName)
@@ -212,5 +224,16 @@
     private void SetOrderProperty(SessionResultViewModel result, Expression<Func<ResultRowModel, IComparable>> selector, bool descending = false)
     {
         result.OrderByPropertySelector = selector;
+    }
+
+    private void SetSelectedResultIndex(int index)
+    {
+        navigationManager.NavigateTo(GetTabLink(index));
+    }
+
+    private string GetTabLink(int index)
+    {
+        var url = navigationManager.GetUriWithQueryParameter(resultTabParam, index);
+        return url;
     }
 }

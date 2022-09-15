@@ -1,4 +1,4 @@
-﻿using iRLeagueApiCore.Common.Models.Results;
+﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -20,6 +20,9 @@ namespace iRLeagueManager.Web.ViewModels
         private ObservableCollection<EventViewModel> eventList;
         public ObservableCollection<EventViewModel> EventList { get => eventList; set => Set(ref eventList, value); }
 
+        private int selectedResultIndex;
+        public int SelectedResultIndex { get => selectedResultIndex; set { if (Set(ref selectedResultIndex, value)) OnPropertyChanged(nameof(SelectedEventResult)); } }
+        
         private long? selectedSessionId;
         public long? SelectedSessionId { get => selectedSessionId; set { if (Set(ref selectedSessionId, value)) _ = OnSelectedSessionChanged(value); } }
 
@@ -29,6 +32,8 @@ namespace iRLeagueManager.Web.ViewModels
         public ObservableCollection<EventResultViewModel> Results { get => results; set => Set(ref results, value); }
 
         public event Action<long?>? SelectedSessionChanged;
+
+        public EventResultViewModel? SelectedEventResult => Results.ElementAtOrDefault(SelectedResultIndex);
 
         public async Task LoadSessionListAsync()
         {
@@ -77,6 +82,10 @@ namespace iRLeagueManager.Web.ViewModels
 
                 var results = requestResult.Content;
                 Results = new ObservableCollection<EventResultViewModel>(results.Select(x => new EventResultViewModel(LoggerFactory, ApiService, x)));
+                if (SelectedResultIndex > Results.Count)
+                {
+                    SelectedResultIndex = Results.Count;
+                }
             }
             finally
             {

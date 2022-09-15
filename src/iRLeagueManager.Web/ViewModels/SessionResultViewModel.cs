@@ -29,7 +29,7 @@ namespace iRLeagueManager.Web.ViewModels
             get => orderByPropertySelector;
             set
             {
-                if (Set(ref orderByPropertySelector, value))
+                if (Set(ref orderByPropertySelector, value, new SamePropertyEqualityComparer<ResultRowModel>()))
                 {
                     OnPropertyChanged(nameof(ResultRows));
                     return;

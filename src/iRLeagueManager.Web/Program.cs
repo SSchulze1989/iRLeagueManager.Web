@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using Blazored.Modal;
 using iRLeagueApiCore.Client.Http;
 using iRLeagueManager.Web;
 using iRLeagueManager.Web.Data;
@@ -40,6 +41,8 @@ builder.Services.AddScoped<ITokenStore, AsyncTokenStore>();
 builder.Services.AddScoped(sp => sp.GetRequiredService<LeagueApiClientFactory>().CreateClient());
 builder.Services.AddScoped<SharedStateService>();
 builder.Services.AddViewModels();
+
+builder.Services.AddBlazoredModal();
 
 var app = builder.Build();
 

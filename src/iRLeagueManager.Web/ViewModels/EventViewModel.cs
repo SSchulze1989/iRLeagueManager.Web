@@ -2,6 +2,7 @@
 using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using MvvmBlazor.ViewModel;
+using System.Collections.ObjectModel;
 
 namespace iRLeagueManager.Web.ViewModels
 {
@@ -16,9 +17,9 @@ namespace iRLeagueManager.Web.ViewModels
         }
 
         public EventViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, EventModel model) :
-            base(loggerFactory, apiService)
+            this(loggerFactory, apiService)
         {
-            this.model = model;
+            SetModel(model);
         }
 
         public long EventId { get => model.Id; }
@@ -52,21 +53,44 @@ namespace iRLeagueManager.Web.ViewModels
             set => SetP(model.Duration, value => model.Duration = value, value.TimeOfDay);
         }
 
-        public ICollection<SessionModel> Sessions { get => model.Sessions; }
+        public ObservableCollection<SessionViewModel> Sessions { get; private set; } = new ObservableCollection<SessionViewModel>();
 
-        public SessionModel? Practice
+        public bool HasPractice
         {
-            get => model.Sessions.FirstOrDefault(x => x.SessionType == SessionType.Practice);
+            get => Practice != null;
+            set
+            {
+                if (value && Practice == null)
+                {
+                    var practice = new SessionModel()
+                    {
+                        Name = "Practice",
+                        SessionType = SessionType.Practice
+                    };
+                    model.Sessions.Add(practice);
+                    Sessions.Add(new SessionViewModel(LoggerFactory, ApiService, practice));
+                    return;
+                }
+                if (value == false && Practice != null)
+                {
+                    model.Sessions.Remove(Practice.GetModel());
+                    Sessions.Remove(Practice);
+                }
+            }
+        }
+        public SessionViewModel? Practice
+        {
+            get => Sessions.FirstOrDefault(x => x.SessionType == SessionType.Practice);
         }
 
-        public SessionModel? Qualifying
+        public SessionViewModel? Qualifying
         {
-            get => model.Sessions.FirstOrDefault(x => x.SessionType == SessionType.Qualifying);
+            get => Sessions.FirstOrDefault(x => x.SessionType == SessionType.Qualifying);
         }
 
-        public SessionModel? Race
+        public SessionViewModel? Race
         {
-            get => model.Sessions.FirstOrDefault(x => x.SessionType == SessionType.Race);
+            get => Sessions.FirstOrDefault(x => x.SessionType == SessionType.Race);
         }
 
         public bool HasResult => model.HasResult;
@@ -112,7 +136,9 @@ namespace iRLeagueManager.Web.ViewModels
 
         public void SetModel(EventModel model)
         {
+            _ = model ?? throw new ArgumentNullException(nameof(model));
             this.model = model;
+            Sessions = new ObservableCollection<SessionViewModel>(model.Sessions.Select(x => new SessionViewModel(LoggerFactory, ApiService, x)));
             OnPropertyChanged();
         }
 

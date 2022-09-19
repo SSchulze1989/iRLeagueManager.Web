@@ -22,6 +22,58 @@
     <InputGroup Label="Duration">
         <input class="form-control" type="time" aria-label="Duration" @bind="Event.Duration"/>
     </InputGroup>
+    <div class="card m-2">
+        <div class="card-body">
+            <div class="card-card-title">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">
+                            <InputCheckbox @bind-Value="Event.HasPractice"/>
+                        </div>
+                    </div>
+                    <label class="form-control">Practice</label>
+                </div>
+            </div>
+            @if (@Bind(Event, x => x.Practice) != null)
+            {
+                <InputGroup Label="Duration">
+                    <input class="form-control" type="time" arial-label="StartTime" @bind="Event.Practice!.Duration"/>
+                </InputGroup>
+            }
+        </div>
+    </div>
+    @if (@Bind(Event, x => x.Qualifying) != null)
+    {
+        <div class="card m-2">
+            <div class="card-body">
+                <h5 class="cart-title">Qualifying</h5>
+                <InputGroup Label="Duration">
+                    <input class="form-control" type="time" arial-label="StartTime" @bind="Event.Qualifying!.Duration"/>
+                </InputGroup>
+            </div>
+        </div>
+    }
+    @if (@Bind(Event, x => x.Race) != null)
+    {
+        <div class="card m-2">
+            <div class="card-body">
+                <h5 class="card-Title">Race</h5>
+                <InputGroup Label="Duration">
+                    <input class="form-control" type="time" arial-label="StartTime" @bind="Event.Race!.Duration"/>
+                </InputGroup>
+            </div>
+        </div>
+    }
+    @*@foreach(var session in @Bind(Event, x => x.Sessions))
+    {
+        <div class="p-2 m-2 border border-primary">
+            <label>@Bind(session, x => x.SessionNr)</label>
+            <InputGroup Label="Name">
+                <InputText class="form-control" placeholder="Session Name" aria-label="@($"Session{@session.SessionNr}")" id="@($"session_{session.SessionNr}_name")"
+                    @bind-Value="session.Name" />
+            </InputGroup>
+        </div>
+    }*@
     <CancelSubmitButtons ModelState=Event OnCancel=Cancel/>
 </EditForm>
 

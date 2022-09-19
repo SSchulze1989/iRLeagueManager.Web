@@ -63,11 +63,11 @@
                                 <td>@Bind(@event, x => x.Name)</td>
                                 <td>@Bind(@event, x => x.TrackId)</td>
                                 <td>@Bind(@event, x => x.Laps)</td>
-                                <td>@Bind(@event, x => x.StartTime).ToString(@"hh:mm")</td>
-                                <td>@Bind(@event, x => x.Duration).ToString(@"hh:mm")</td>
-                                <td>@((Bind(@event, x => x.Practice)?.Duration.ToString() ?? "-").ToString())</td>
-                                <td>@((Bind(@event, x => x.Qualifying)?.Duration.ToString() ?? "-").ToString())</td>
-                                <td>@((Bind(@event, x => x.Race)?.Duration.ToString() ?? "-").ToString())</td>
+                                <td>@Bind(@event, x => x.StartTime).ToString(@"HH:mm")</td>
+                                <td>@Bind(@event, x => x.Duration).ToString(@"HH:mm")</td>
+                                <td>@((Bind(@event, x => x.Practice)?.Duration.ToString(@"HH:mm") ?? "-").ToString())</td>
+                                <td>@((Bind(@event, x => x.Qualifying)?.Duration.ToString(@"HH:mm") ?? "-").ToString())</td>
+                                <td>@((Bind(@event, x => x.Race)?.Duration.ToString(@"HH:mm") ?? "-").ToString())</td>
                             </tr>
                         }
                         </tbody>

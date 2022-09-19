@@ -25,21 +25,31 @@ namespace iRLeagueManager.Web.ViewModels
         public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
         public DateTime Date 
         { 
-            get => model.Date.GetValueOrDefault().Date; 
+            get => model.Date.GetValueOrDefault(); 
             set => SetP(model.Date, value => model.Date = value.GetValueOrDefault().Add(model.Date.GetValueOrDefault().TimeOfDay), value); 
         }
-        public long? TrackId { get => model.TrackId; set => SetP(model.TrackId, value => model.TrackId = value, value); }
-
-        public TimeSpan StartTime 
+        public long? TrackId 
         { 
-            get => model.Date.GetValueOrDefault().TimeOfDay;
-            set => SetP(model.Date.GetValueOrDefault().TimeOfDay, value => model.Date = model.Date.GetValueOrDefault().Date.Add(value), value); 
+            get => model.TrackId; 
+            set => SetP(model.TrackId, value => model.TrackId = value, value); 
         }
 
-        public TimeSpan Duration
+        public string TrackIdString
         {
-            get => model.Duration;
-            set => SetP(model.Duration, value => model.Duration = value, value);
+            get => TrackId?.ToString() ?? string.Empty;
+            set => TrackId = long.TryParse(value, out long trackId) ? trackId : null;
+        }
+
+        public DateTime StartTime 
+        { 
+            get => model.Date.GetValueOrDefault();
+            set => SetP(model.Date.GetValueOrDefault().TimeOfDay, value => model.Date = model.Date.GetValueOrDefault().Date.Add(value), value.TimeOfDay); 
+        }
+
+        public DateTime Duration
+        {
+            get => DateTime.MinValue.Add(model.Duration);
+            set => SetP(model.Duration, value => model.Duration = value, value.TimeOfDay);
         }
 
         public ICollection<SessionModel> Sessions { get => model.Sessions; }
@@ -63,10 +73,52 @@ namespace iRLeagueManager.Web.ViewModels
 
         public int Laps => Race?.Laps ?? Qualifying?.Laps ?? Practice?.Laps ?? 0;
 
+        public async Task Load(long eventId, CancellationToken cancellationToken = default)
+        {
+            if (ApiService.CurrentLeague == null)
+            {
+                return;
+            }
+
+            var result = await ApiService.CurrentLeague.Events().WithId(eventId).Get(cancellationToken);
+            if (result.Success == false)
+            {
+                return;
+            }
+
+            SetModel(result.Content);
+        }
+
+        public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            if (model == null)
+                return true;
+            if (ApiService.CurrentLeague == null)
+                return false;
+            try
+            {
+                Loading = true;
+                var result = await ApiService.CurrentLeague
+                    .Events()
+                    .WithId(model.Id)
+                    .Put(model, cancellationToken);
+                return result.Success;
+            }
+            finally
+            {
+                Loading = false;
+            }
+        }
+
         public void SetModel(EventModel model)
         {
             this.model = model;
-            OnPropertyChanged(null);
+            OnPropertyChanged();
+        }
+
+        public EventModel GetModel()
+        {
+            return model;
         }
     }
 }

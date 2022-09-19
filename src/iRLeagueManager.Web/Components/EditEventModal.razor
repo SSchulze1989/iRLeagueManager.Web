@@ -1,0 +1,82 @@
+﻿@using System.Text.Json
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.ViewModels
+@inherits MvvmComponentBase
+@inject EventViewModel Event
+@inject JsonSerializerOptions jsonOptions
+
+
+<EditForm Model=Event OnValidSubmit=Submit>
+    <InputGroup Label="Name"> 
+        <InputText class="form-control" placeholder="Event Name" aria-label="EventName" id="name" @bind-Value="Event.Name"/>
+    </InputGroup>
+    <InputGroup Label="Date">
+        <InputDate class="form-control" aria-label="Date" id="date" @bind-Value="Event.Date" />
+    </InputGroup>
+    <InputGroup Label="Start-Time">
+        <input class="form-control" type="time" arial-label="StartTime" @bind="Event.StartTime"/>
+    </InputGroup>
+    <InputGroup Label="TrackId">
+        <input class="form-control" type="number" placholder="123" aria-label="TrackId" @bind="Event.TrackIdString"/>
+    </InputGroup>
+    <InputGroup Label="Duration">
+        <input class="form-control" type="time" aria-label="Duration" @bind="Event.Duration"/>
+    </InputGroup>
+    <CancelSubmitButtons ModelState=Event OnCancel=Cancel/>
+</EditForm>
+
+@code {
+    private CancellationTokenSource cts = new();
+
+    [CascadingParameter]
+    public BlazoredModalInstance? ModalInstance { get; set; }
+    //[Parameter]
+    //public EventViewModel Event { get; set; } = default!;
+    [Parameter]
+    public EventModel EventModel { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        _ = EventModel ?? throw new InvalidOperationException($"Error while setting parameters on {nameof(EditEventModal)}. ${nameof(EventModel)} is not allowed to be null but was null");
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+        // create deep copy of model
+        var modelCopy = JsonSerializer.Deserialize<EventModel>(JsonSerializer.Serialize(EventModel, jsonOptions), jsonOptions)
+            ?? throw new InvalidOperationException("Could not create copy of EventModel while opening Modal");
+        Event.SetModel(modelCopy);
+    }
+
+    private async Task Submit()
+    {
+        var success = await Event.SaveChangesAsync(cts.Token);
+        if (success && ModalInstance != null)
+        {
+            var result = ModalResult.Ok(Event.GetModel());
+            await ModalInstance.CloseAsync(result);
+        }
+    }
+
+    private async Task Cancel()
+    {
+        if (ModalInstance != null)
+        {
+            await ModalInstance.CancelAsync();   
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing == false)
+        {
+            cts.Cancel();
+            cts.Dispose();
+        }
+        base.Dispose(disposing);
+    }
+}

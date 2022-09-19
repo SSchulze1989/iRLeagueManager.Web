@@ -1,0 +1,13 @@
+﻿<div class="input-group m-2">
+    <div class="input-group-prepend w-25">
+        <label class="input-group-text">@Label</label>
+    </div>
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    [Parameter]
+    public string Label { get; set; } = string.Empty;
+}

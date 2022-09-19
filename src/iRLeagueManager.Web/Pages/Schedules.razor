@@ -1,10 +1,14 @@
 ﻿@page "/{LeagueName}/Schedules/Season/{SeasonId:long}"
+@using System.Text.Json
+@using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
+@using iRLeagueManager.Web.Components
 @attribute [Authorize]
 @inherits MvvmComponentBase
 @inject LeagueApiService apiService
 @inject SchedulesPageViewModel vm
 @inject NavigationManager navigationManager
+@inject JsonSerializerOptions jsonOptions
 
 <div style="display:inline-block">
     <div style="display:inline-block">
@@ -39,9 +43,11 @@
                             <tr>
                                 <th>Nr.</th>
                                 <th>Date</th>
+                                <th>Name</th>
                                 <th>Track</th>
                                 <th>Laps</th>
                                 <th>Start</th>
+                                <th>Duration</th>
                                 <th>Practice</th>
                                 <th>Qualy</th>
                                 <th>Race</th>
@@ -51,12 +57,14 @@
                         @foreach((var @event, var index) in @Bind(schedule, x => x.Events).Select((x, i) => (x, i)))
                         {
                             var eventId = @event.EventId;
-                            <tr @onclick="e => OnTableRowClick(eventId)">
+                            <tr @onclick="@(() => OnTableRowClick(@event))">
                                 <td>@(index + 1).</td>
-                                <td>@Bind(@event, x => x.Date).ToString(@"dd:MM:yyyy")</td>
+                                <td>@Bind(@event, x => x.Date).ToString(@"dd.MM.yyyy")</td>
+                                <td>@Bind(@event, x => x.Name)</td>
                                 <td>@Bind(@event, x => x.TrackId)</td>
                                 <td>@Bind(@event, x => x.Laps)</td>
-                                <td>@Bind(@event, x => x.StartTime)</td>
+                                <td>@Bind(@event, x => x.StartTime).ToString(@"hh:mm")</td>
+                                <td>@Bind(@event, x => x.Duration).ToString(@"hh:mm")</td>
                                 <td>@((Bind(@event, x => x.Practice)?.Duration.ToString() ?? "-").ToString())</td>
                                 <td>@((Bind(@event, x => x.Qualifying)?.Duration.ToString() ?? "-").ToString())</td>
                                 <td>@((Bind(@event, x => x.Race)?.Duration.ToString() ?? "-").ToString())</td>
@@ -75,6 +83,8 @@
     public string LeagueName { get; set; } = string.Empty;
     [Parameter]
     public long SeasonId { get; set; }
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -91,7 +101,11 @@
         {
             return;
         }
+        await LoadSchedules();
+    }
 
+    private async Task LoadSchedules()
+    {
         await vm.Load();
         // load sessions to display
         foreach(var schedule in vm.Schedules)
@@ -100,8 +114,20 @@
         }
     }
 
-    private void OnTableRowClick(long sessionId)
+    private async Task OnTableRowClick(EventViewModel eventViewModel)
     {
-        navigationManager.NavigateTo($"{LeagueName}/Results/Session/{sessionId}");
+        //navigationManager.NavigateTo($"{LeagueName}/Results/Session/{sessionId}");
+        var parameters = new ModalParameters()
+            .Add(nameof(EditEventModal.EventModel), eventViewModel.GetModel());
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true,
+        };
+        var modal = ModalService.Show<EditEventModal>("Edit Event", parameters, options);
+        var result = await modal.Result;
+        if (result.Confirmed && result.Data is EventModel eventModel)
+        {
+            eventViewModel.SetModel(eventModel);
+        }
     }
 }

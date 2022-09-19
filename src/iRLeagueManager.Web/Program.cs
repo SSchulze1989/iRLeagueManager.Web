@@ -1,6 +1,7 @@
 using Blazored.LocalStorage;
 using Blazored.Modal;
 using iRLeagueApiCore.Client.Http;
+using iRLeagueApiCore.Common.Converters;
 using iRLeagueManager.Web;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Server.Data;
@@ -36,6 +37,14 @@ builder.Services.AddLeagueApiService();
 
 var apiHttpClient = new HttpClient();
 apiHttpClient.BaseAddress = new Uri(builder.Configuration["APIServer"]);
+builder.Services.AddScoped<JsonSerializerOptions>(configure =>
+{
+    var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+    jsonOptions.Converters.Add(new JsonStringEnumConverter());
+    jsonOptions.Converters.Add(new JsonTimeSpanConverter());
+    jsonOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    return jsonOptions;
+});
 builder.Services.AddScoped<LeagueApiClientFactory>();
 builder.Services.AddScoped<ITokenStore, AsyncTokenStore>();
 builder.Services.AddScoped(sp => sp.GetRequiredService<LeagueApiClientFactory>().CreateClient());

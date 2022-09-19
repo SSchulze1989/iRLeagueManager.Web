@@ -57,7 +57,7 @@
                         @foreach((var @event, var index) in @Bind(schedule, x => x.Events).Select((x, i) => (x, i)))
                         {
                             var eventId = @event.EventId;
-                            <tr @onclick="@(() => OnTableRowClick(@event))">
+                            <tr @onclick="@(() => OnTableRowClick(@event))" class="pointer">
                                 <td>@(index + 1).</td>
                                 <td>@Bind(@event, x => x.Date).ToString(@"dd.MM.yyyy")</td>
                                 <td>@Bind(@event, x => x.Name)</td>

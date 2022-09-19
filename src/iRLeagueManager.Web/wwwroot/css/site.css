@@ -13,6 +13,10 @@ h3 {
     border-bottom: 0.5px solid gray;
 }
 
+.pointer {
+    cursor:pointer;
+}
+
 .page-header {
     background: #000000;
     color: #ffffff;

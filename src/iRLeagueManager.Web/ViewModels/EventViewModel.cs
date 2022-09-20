@@ -62,18 +62,11 @@ namespace iRLeagueManager.Web.ViewModels
             {
                 if (value && Practice == null)
                 {
-                    var practice = new SessionModel()
-                    {
-                        Name = "Practice",
-                        SessionType = SessionType.Practice
-                    };
-                    model.Sessions.Add(practice);
-                    Sessions.Add(new SessionViewModel(LoggerFactory, ApiService, practice));
+                    AddSession("Practice", SessionType.Practice, onlyOnce: true);
                     return;
                 }
                 if (value == false && Practice != null)
                 {
-                    model.Sessions.Remove(Practice.GetModel());
                     Sessions.Remove(Practice);
                 }
             }
@@ -83,9 +76,43 @@ namespace iRLeagueManager.Web.ViewModels
             get => Sessions.FirstOrDefault(x => x.SessionType == SessionType.Practice);
         }
 
+        public bool HasQualifying
+        {
+            get => Qualifying != null;
+            set 
+            {
+                if (value && Qualifying == null)
+                {
+                    AddSession("Qualifying", SessionType.Qualifying, onlyOnce: true);
+                    return;
+                }
+                if (value == false && Qualifying != null)
+                {
+                    Sessions.Remove(Qualifying);
+                }
+            }
+        }
+
         public SessionViewModel? Qualifying
         {
             get => Sessions.FirstOrDefault(x => x.SessionType == SessionType.Qualifying);
+        }
+
+        public bool HasRace
+        {
+            get => Race != null;
+            set
+            {
+                if (value && Race == null)
+                {
+                    AddSession("Race", SessionType.Race, onlyOnce: true);
+                    return;
+                }
+                if (value == false && Race != null)
+                {
+                    Sessions.Remove(Race);
+                }
+            }
         }
 
         public SessionViewModel? Race
@@ -121,6 +148,14 @@ namespace iRLeagueManager.Web.ViewModels
                 return false;
             try
             {
+                // Delete sessions that were removed from the SessionViewModel collection
+                foreach(var sessionModel in model.Sessions.ToList())
+                {
+                    if (Sessions.Any(x => x.GetModel() == sessionModel) == false)
+                    {
+                        model.Sessions.Remove(sessionModel);
+                    }
+                }
                 Loading = true;
                 var result = await ApiService.CurrentLeague
                     .Events()
@@ -132,6 +167,30 @@ namespace iRLeagueManager.Web.ViewModels
             {
                 Loading = false;
             }
+        }
+
+        private SessionViewModel AddSession(string name, SessionType sessionType, bool onlyOnce=false)
+        {
+            // if onlyOnce is true check if a session of that type exists inside model
+            SessionModel sessionModel = default!;
+            if (onlyOnce)
+            {
+                sessionModel = model.Sessions
+                    .FirstOrDefault(x => x.SessionType == sessionType)!;
+            }
+            if (sessionModel == null)
+            {
+                sessionModel = new SessionModel()
+                {
+                    Name = name,
+                    SessionType = sessionType,
+                };
+                model.Sessions.Add(sessionModel);
+            }
+
+            var session = new SessionViewModel(LoggerFactory, ApiService, sessionModel);
+            Sessions.Add(session);
+            return session;
         }
 
         public void SetModel(EventModel model)

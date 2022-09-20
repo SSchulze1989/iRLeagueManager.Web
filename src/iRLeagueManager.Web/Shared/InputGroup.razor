@@ -1,11 +1,11 @@
-﻿<div class="input-group p-2">
-    <div class="input-group-prepend w-25">
-        <label class="input-group-text">@Label</label>
-    </div>
+﻿<div class="input-group @Class">
+    <label class="input-group-text w-25">@Label</label>
     @ChildContent
 </div>
 
 @code {
+    [Parameter]
+    public string Class { get; set; } = "p-2";
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
     [Parameter]

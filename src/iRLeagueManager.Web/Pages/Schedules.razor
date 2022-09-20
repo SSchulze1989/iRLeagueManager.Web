@@ -121,6 +121,7 @@
             .Add(nameof(EditEventModal.EventModel), eventViewModel.GetModel());
         var options = new ModalOptions()
         {
+            Size = ModalSize.Medium,
             DisableBackgroundCancel = true,
         };
         var modal = ModalService.Show<EditEventModal>("Edit Event", parameters, options);

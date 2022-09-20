@@ -30,6 +30,12 @@ namespace iRLeagueManager.Web.ViewModels
         }
         public int Laps { get => model.Laps; set => SetP(model.Laps, value => model.Laps = value, value); }
 
+        public string LapsString
+        {
+            get => Laps.ToString();
+            set => Laps = int.TryParse(value, out int laps) ? laps : 0;
+        }
+
         public SessionModel GetModel()
         {
             return model;

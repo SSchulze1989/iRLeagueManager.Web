@@ -3,7 +3,7 @@
 <div class="pt-5 pb-2">
     <div class="row">
         <div class="col-sm-6 d-flex justify-content-center">
-            <button class="btn btn-primary" disabled="@ModelState?.Loading">
+            <button class="btn btn-primary" disabled="@ModelState?.Loading" type="submit">
                 @if (@ModelState?.Loading == true)
                 {
                     <span class="spinner-border spinner-border-sm mr-1"></span>
@@ -12,7 +12,7 @@
             </button>
         </div>
         <div class="col-sm-6 d-flex justify-content-center">
-            <div class="btn btn-secondary" @onclick="Cancel">@CancelText</div>
+            <button class="btn btn-secondary" @onclick="Cancel" type="button">@CancelText</button>
         </div>
     </div>
 </div>

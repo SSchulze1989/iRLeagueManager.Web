@@ -49,19 +49,32 @@
             <EditSession Session=Event.Qualifying />
         </div>
     </div>
-    @foreach(var session in @Bind(Event, x => x.Sessions).Where(x => x.SessionType == SessionType.Race))
+    <div class="p-2" name="spacer">
+
+    </div>
+    @foreach((var session, var index) in @Bind(Event, x => x.Sessions).Select((session, i) => (session, i)).Where(x => x.session.SessionType == SessionType.Race))
     {
         <div class="card m-2">
             <div class="card-body">
                 <div class="card-card-title">
                     <div class="input-group">
                         <InputText class="form-control" @bind-Value="session.Name"/>
+                        <button class="btn btn-outline-danger" type="button" @onclick="@(() => Event.Sessions.Remove(session))">X</button>
                     </div>
                 </div>
                 <EditSession Session=session />
             </div>
         </div>
+        @if (@Event.CanMoveSessionDown(session))
+        {
+            <div class="container d-flex justify-content-center my-0 py-0">
+                <button class="btn btn-outline-secondary fw-bold px-5 py-0 align-content-center" style="height: 1.5rem; font-size: 0.75rem" type="button" @onclick="@(() => Event.MoveSessionDown(session))">&uarr; &darr;</button>
+            </div>
+        }
     }
+    <div class="my-2 mx-4">
+        <button class="btn btn-outline-dark" type="button" @onclick="@(() => Event.AddSession("Race", SessionType.Race, onlyOnce: false))">Add Race</button>
+    </div>
     <CancelSubmitButtons ModelState=Event OnCancel=Cancel/>
 </EditForm>
 

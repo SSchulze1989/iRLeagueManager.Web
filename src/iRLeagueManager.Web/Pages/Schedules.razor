@@ -71,14 +71,14 @@
                                 <td>@Bind(@event, x => x.Laps)</td>
                                 <td>@Bind(@event, x => x.StartTime).ToString(@"HH:mm")</td>
                                 <td>@Bind(@event, x => x.Duration).ToString(@"HH:mm")</td>
-                                <td>@((Bind(@event, x => x.Practice)?.Duration.ToString(@"HH:mm") ?? "-").ToString())</td>
-                                <td>@((Bind(@event, x => x.Qualifying)?.Duration.ToString(@"HH:mm") ?? "-").ToString())</td>
+                                <td>@(DurationString(Bind(@event, x=> x.Practice)))</td>
+                                <td>@(DurationString(Bind(@event, x=> x.Qualifying)))</td>
                                 @for(int i=0; i<maxRaceCount; i++)
                                 {
                                     var race = races.ElementAtOrDefault(i);
                                     @if (race != null)
                                     {
-                                        <td>@(race?.Duration.ToString(@"HH:mm") ?? "-".ToString())</td>
+                                        <td>@DurationString(race)</td>
                                     }
                                     else 
                                     {
@@ -147,5 +147,30 @@
         {
             eventViewModel.SetModel(eventModel);
         }
+    }
+
+    private string DurationString(SessionViewModel? session)
+    {
+        if (session == null)
+        {
+            return "-";
+        }
+
+        var parts = new List<string>();
+        if (session.Duration.TimeOfDay != TimeSpan.Zero)
+        {
+            parts.Add(session.Duration.ToString(@"HH:mm"));
+        }
+        if (session.Laps > 0)
+        {
+            parts.Add(session.Laps.ToString() + " Laps");
+        }
+
+        if (parts.Count == 0)
+        {
+            return "-";
+        }
+
+        return string.Join(" / ", parts);
     }
 }

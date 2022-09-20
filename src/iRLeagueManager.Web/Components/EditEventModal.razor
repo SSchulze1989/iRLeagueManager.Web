@@ -51,7 +51,7 @@
     </div>
     <div class="card mx-1 mb-2">
         <div class="card-body">
-            @foreach((var session, var index) in @Bind(Event, x => x.Sessions).Select((session, i) => (session, i)).Where(x => x.session.SessionType == SessionType.Race))
+            @foreach(var session in @Bind(Event, x => x.Races))
             {
                         <div class="card-card-title">
                             <div class="input-group">

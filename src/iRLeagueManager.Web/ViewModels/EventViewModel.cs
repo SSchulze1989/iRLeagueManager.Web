@@ -53,6 +53,10 @@ namespace iRLeagueManager.Web.ViewModels
             set => SetP(model.Duration, value => model.Duration = value, value.TimeOfDay);
         }
 
+        public IEnumerable<SessionViewModel> Races => Sessions.Where(x => x.SessionType == SessionType.Race);
+
+        public int RaceCount => Races.Count();
+
         public ObservableCollection<SessionViewModel> Sessions { get; private set; } = new ObservableCollection<SessionViewModel>();
 
         public bool HasPractice

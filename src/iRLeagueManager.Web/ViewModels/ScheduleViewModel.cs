@@ -24,6 +24,8 @@ namespace iRLeagueManager.Web.ViewModels
         public long ScheduleId { get => model.ScheduleId; set => Set(model, x => x.ScheduleId, value); }
         public string Name { get => model.Name; set => Set(model, x => model.Name, value); }
 
+        public int MaxRaceCount => Events.Count > 0 ? Events.Max(x => x.RaceCount) : 0;
+
         private ObservableCollection<EventViewModel> events;
         public ObservableCollection<EventViewModel> Events { get => events; set => Set(ref events, value); }
 

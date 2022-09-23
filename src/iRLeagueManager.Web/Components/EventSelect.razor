@@ -98,5 +98,6 @@
     private async Task OnSelectionChanged()
     {
         Selected = Events.ElementAtOrDefault(SelectedIndex) ?? Selected;
+        await Task.FromResult(true);
     }
 }

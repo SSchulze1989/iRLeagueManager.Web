@@ -62,7 +62,7 @@ namespace iRLeagueManager.Web.ViewModels
             //{
             //    Loading = Saving = false;
             //}
-            return true;
+            return await Task.FromResult(true);
         }
     }
 }

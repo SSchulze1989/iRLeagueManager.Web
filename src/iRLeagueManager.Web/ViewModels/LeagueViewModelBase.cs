@@ -36,7 +36,6 @@ namespace iRLeagueManager.Web.ViewModels
         }
 
         private bool hasChanged = false;
-        private bool disposedValue;
 
         public bool HasChanged
         {

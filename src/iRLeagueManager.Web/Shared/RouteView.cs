@@ -9,9 +9,9 @@ namespace iRLeagueManager.Web.Shared
     public class AppRouteView : RouteView
     {
         [Inject]
-        public NavigationManager NavigationManager { get; set; }
+        public NavigationManager NavigationManager { get; set; } = default!;
         [Inject]
-        public ILeagueApiClient ApiClient { get; set; }
+        public ILeagueApiClient ApiClient { get; set; } = default!;
 
         protected override void Render(RenderTreeBuilder builder)
         {

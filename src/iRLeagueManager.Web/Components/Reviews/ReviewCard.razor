@@ -1,0 +1,12 @@
+﻿@using System.ComponentModel
+
+<div class="card" @attributes=AdditionalAttributes>
+    <div>
+
+    </div>
+</div>
+
+@code {
+    [Parameter(CaptureUnmatchedValues=true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+}

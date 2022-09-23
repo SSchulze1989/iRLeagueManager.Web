@@ -20,8 +20,4 @@
     <PackageReference Include="MvvmBlazor" Version="6.0.6" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Components\Reviews\" />
-  </ItemGroup>
-
 </Project>

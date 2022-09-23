@@ -1,17 +1,23 @@
 ﻿@using System.Collections.Specialized
+@using System.Globalization
 @using iRLeagueManager.Web.ViewModels
 @using System.Linq
 
-<div class="input-group w-50">
+<div @attributes=AdditionalAttributes class=@CssClass >
+    <label class="input-group-text">Select Event</label>
     <select @bind=SelectedIndex class="form-select">
         @foreach((var @event, var index) in Events.Select((x, i) => (x, i)))
         {
             <option value="@(index)">@((index + 1).ToString("00")). @(@event.Date) - @(@event.Name)</option>
         }
     </select>
+    <button class="btn btn-outline-secondary" type="button" @onclick=EventMovePrevious disabled=@(SelectedIndex == 0)><span class="oi oi-chevron-left"></span></button>
+    <button class="btn btn-outline-secondary" type="button" @onclick=EventMoveNext disabled=@(SelectedIndex == Events.Count-1)><span class="oi oi-chevron-right"></span></button>
 </div>
 
 @code {
+    [Parameter(CaptureUnmatchedValues=true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
     private IList<EventViewModel> events = default!;
     [Parameter, EditorRequired]
     public IList<EventViewModel> Events
@@ -35,20 +41,6 @@
         }
     }
 
-    private int selectedIndex = 0;
-    public int SelectedIndex
-    {
-        get => selectedIndex;
-        set
-        {
-            if (selectedIndex != value)
-            {
-                selectedIndex = value;
-                _ =OnSelectionChanged();
-            }
-        }
-    }
-
     private EventViewModel? selected = default;
     [Parameter]
     public EventViewModel? Selected 
@@ -66,6 +58,34 @@
 
     [Parameter]
     public EventCallback<EventViewModel?> SelectedChanged { get; set; }
+
+    private const string BaseClass = "input-group w-50";
+    private string CssClass
+    {
+        get
+        {
+            if (AdditionalAttributes == null || AdditionalAttributes.TryGetValue("class", out var @class) == false)
+            {
+                return BaseClass;
+            }
+            var classAttributeValue = Convert.ToString(@class, CultureInfo.InvariantCulture);
+            return $"{BaseClass} {classAttributeValue}";
+        }
+    }
+
+    private int selectedIndex = 0;
+    public int SelectedIndex
+    {
+        get => selectedIndex;
+        set
+        {
+            if (selectedIndex != value)
+            {
+                selectedIndex = value;
+                _ =OnSelectionChanged();
+            }
+        }
+    }
 
     protected override void OnParametersSet()
     {
@@ -99,5 +119,21 @@
     {
         Selected = Events.ElementAtOrDefault(SelectedIndex) ?? Selected;
         await Task.FromResult(true);
+    }
+
+    private void EventMoveNext()
+    {
+        if (SelectedIndex < Events.Count-1)
+        {
+            SelectedIndex++;
+        }
+    }
+
+    private void EventMovePrevious()
+    {
+        if (SelectedIndex > 0)
+        {
+            SelectedIndex--;
+        }
     }
 }

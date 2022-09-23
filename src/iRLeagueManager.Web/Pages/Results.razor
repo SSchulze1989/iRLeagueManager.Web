@@ -17,21 +17,25 @@
 
 <LoadingHeader StateProvider=vm>Results</LoadingHeader>
 
-<div>
-    <EventSelect @bind-Selected=vm.SelectedEvent Events=vm.EventList/>
-    <div>
+<div class="card">
+    <div class="card-header">
+        <EventSelect class="my-2 mx-n2" @bind-Selected=vm.SelectedEvent Events=vm.EventList/>
         @if (@Bind(vm, x => x.Results)?.Count == 0)
         {
-            <div class="results-tab">
+            <div class="card-body">
                 <p class="results-scoring"><em>No Results</em></p>
             </div>
         }
+        <ul class="nav nav-tabs card-header-tabs">
         @foreach((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x,i)))
         {
-            <div class="event-result-tab @(i == Bind(vm, x => x.SelectedResultIndex) ? " text-decoration-underline" : "")" @onclick="() => SetSelectedResultIndex(i)">
-                <p><em>@Bind(eventResult, x => x.Name)</em></p>
-            </div>
+            <li class="nav-item">
+                <a class="nav-link @((i==Bind(vm, x => x.SelectedResultIndex)) ? "active" : "")" href="@(GetTabLink(i))">@Bind(eventResult, x => x.Name)</a>
+            </li>
         }
+        </ul>
+    </div>
+    <div class="card-body">
         @if (@Bind(vm, x => x.SelectedEvent) != null && @Bind(vm, x => x.SelectedEventResult) != null)
         {
             @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults))

@@ -1,0 +1,132 @@
+﻿@using System.Text.Json
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.ViewModels
+@inherits MvvmComponentBase
+@inject EventViewModel Event
+@inject JsonSerializerOptions jsonOptions
+
+
+<EditForm Model=Event OnValidSubmit=Submit>
+    <InputGroup Label="Name"> 
+        <InputText class="form-control" placeholder="Event Name" aria-label="EventName" id="name" @bind-Value="Event.Name"/>
+    </InputGroup>
+    <InputGroup Label="Date">
+        <InputDate class="form-control" aria-label="Date" id="date" @bind-Value="Event.Date" />
+    </InputGroup>
+    <InputGroup Label="Start-Time">
+        <input class="form-control" type="time" arial-label="StartTime" @bind="Event.StartTime"/>
+    </InputGroup>
+    <InputGroup Label="TrackId">
+        <input class="form-control" type="number" placholder="123" aria-label="TrackId" @bind="Event.TrackIdString"/>
+    </InputGroup>
+    <InputGroup Label="Duration">
+        <input class="form-control" type="time" aria-label="Duration" @bind="Event.Duration"/>
+    </InputGroup>
+    <div class="card m-1 mb-2">
+        <div class="card-body">
+            <div class="card-card-title">
+                <div class="input-group">
+                    <div class="input-group-text">
+                        <InputCheckbox class="form-check-input mt-0" @bind-Value="Event.HasPractice"/>
+                    </div>
+                    <label class="form-control">Practice</label>
+                </div>
+            </div>
+            <EditSession Session=Event.Practice />
+        </div>
+    </div>
+    <div class="card m-1 mb-2">
+        <div class="card-body">
+            <div class="card-card-title">
+                <div class="input-group">
+                    <div class="input-group-text">
+                        <InputCheckbox class="form-check-input mt-0" @bind-Value="Event.HasQualifying"/>
+                    </div>
+                    <label class="form-control">Qualifying</label>
+                </div>
+            </div>
+            <EditSession Session=Event.Qualifying />
+        </div>
+    </div>
+    <div class="card mx-1 mb-2">
+        <div class="card-body">
+            @foreach(var session in @Bind(Event, x => x.Races))
+            {
+                        <div class="card-card-title">
+                            <div class="input-group">
+                                <InputText class="form-control" @bind-Value="session.Name"/>
+                                <button class="btn btn-outline-danger" type="button" @onclick="@(() => Event.Sessions.Remove(session))">X</button>
+                            </div>
+                        </div>
+                        <EditSession Session=session />
+                @if (@Event.CanMoveSessionDown(session))
+                {
+                    <div class="container d-flex justify-content-center my-1 py-0">
+                        <button class="btn btn-outline-secondary fw-bold px-5 py-0 align-content-center" style="height: 1.5rem; font-size: 0.75rem" type="button" @onclick="@(() => Event.MoveSessionDown(session))">&uarr; &darr;</button>
+                    </div>
+                }
+            }
+            <div class="mt-3">
+                <button class="btn btn-outline-secondary" type="button" @onclick="@(() => Event.AddSession("Race", SessionType.Race, onlyOnce: false))">Add Race</button>
+            </div>
+        </div>
+    </div>
+    <CancelSubmitButtons ModelState=Event SubmitText="Save" OnCancel=Cancel/>
+</EditForm>
+
+@code {
+    private CancellationTokenSource cts = new();
+
+    [CascadingParameter]
+    public BlazoredModalInstance? ModalInstance { get; set; }
+    //[Parameter]
+    //public EventViewModel Event { get; set; } = default!;
+    [Parameter]
+    public EventModel EventModel { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        _ = EventModel ?? throw new InvalidOperationException($"Error while setting parameters on {nameof(EditEventModal)}. ${nameof(EventModel)} is not allowed to be null but was null");
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+        // create deep copy of model
+        var modelCopy = JsonSerializer.Deserialize<EventModel>(JsonSerializer.Serialize(EventModel, jsonOptions), jsonOptions)
+            ?? throw new InvalidOperationException("Could not create copy of EventModel while opening Modal");
+        Event.SetModel(modelCopy);
+    }
+
+    private async Task Submit()
+    {
+        var success = await Event.SaveChangesAsync(cts.Token);
+        if (success && ModalInstance != null)
+        {
+            var result = ModalResult.Ok(Event.GetModel());
+            await ModalInstance.CloseAsync(result);
+        }
+    }
+
+    private async Task Cancel()
+    {
+        if (ModalInstance != null)
+        {
+            await ModalInstance.CancelAsync();   
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing == false)
+        {
+            cts.Cancel();
+            cts.Dispose();
+        }
+        base.Dispose(disposing);
+    }
+}

@@ -1,5 +1,4 @@
 ﻿using iRLeagueApiCore.Common.Models;
-using iRLeagueApiCore.Common.Models.Results;
 using iRLeagueManager.Web.Data;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
@@ -22,7 +21,9 @@ namespace iRLeagueManager.Web.ViewModels
             sessionResults = new ObservableCollection<SessionResultViewModel>(model.SessionResults.Select(x => new SessionResultViewModel(loggerFactory, ApiService, x)));
         }
 
+        public long ResultId => model.ResultId;
         public long SeasonId => model.SeasonId;
+        public long EventId => model.EventId;
         public string Name => model.DisplayName;
 
         private ObservableCollection<SessionResultViewModel> sessionResults;

@@ -12,9 +12,9 @@ namespace iRLeagueManager.Web.Shared
         }
 
         [Inject]
-        public SharedStateService Shared { get; set; }
+        public SharedStateService Shared { get; set; } = default!;
         [Inject]
-        public LeagueApiService ApiService { get; set; }
+        public LeagueApiService ApiService { get; set; } = default!;
 
         [Parameter]
         public string? LeagueName { get; set; }

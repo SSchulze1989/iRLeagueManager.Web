@@ -1,72 +1,22 @@
 ﻿@page "/{LeagueName}/Schedules/Season/{SeasonId:long}"
+@using System.Text.Json
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
+@using iRLeagueManager.Web.Components
 @attribute [Authorize]
 @inherits MvvmComponentBase
 @inject LeagueApiService apiService
 @inject SchedulesPageViewModel vm
 @inject NavigationManager navigationManager
+@inject JsonSerializerOptions jsonOptions
 
-<div style="display:inline-block">
-    <div style="display:inline-block">
-        <h3>Schedules</h3>
-    </div>
-    @if (Bind(vm, x => x.Loading))
-    {
-        <div class="lds-ring">
-            <div></div>
-        </div>
-    }
-</div>
+<LoadingHeader StateProvider=vm>Schedules</LoadingHeader>
 
 <div>
     @foreach(var schedule in @Bind(vm, x => x.Schedules))
     {
-        <div class="container">
-            <div style="display:inline-block">
-                <div style="display:inline-block">
-                    <h3>@Bind(schedule, x => x.Name)</h3>
-                </div>
-                @if (Bind(schedule, x => x.Loading))
-                {
-                    <div class="lds-ring">
-                        <div></div>
-                    </div>
-                }
-                else 
-                {
-                    <table class="table alternate select-table">
-                        <thead>
-                            <tr>
-                                <th>Nr.</th>
-                                <th>Date</th>
-                                <th>Track</th>
-                                <th>Laps</th>
-                                <th>Start</th>
-                                <th>Practice</th>
-                                <th>Qualy</th>
-                                <th>Race</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @foreach((var @event, var index) in @Bind(schedule, x => x.Events).Select((x, i) => (x, i)))
-                        {
-                            var eventId = @event.EventId;
-                            <tr @onclick="e => OnTableRowClick(eventId)">
-                                <td>@(index + 1).</td>
-                                <td>@Bind(@event, x => x.Date).ToString(@"dd:MM:yyyy")</td>
-                                <td>@Bind(@event, x => x.TrackId)</td>
-                                <td>@Bind(@event, x => x.Laps)</td>
-                                <td>@Bind(@event, x => x.StartTime)</td>
-                                <td>@((Bind(@event, x => x.Practice)?.Duration.ToString() ?? "-").ToString())</td>
-                                <td>@((Bind(@event, x => x.Qualifying)?.Duration.ToString() ?? "-").ToString())</td>
-                                <td>@((Bind(@event, x => x.Race)?.Duration.ToString() ?? "-").ToString())</td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                }
-            </div>
-        </div>
+        <DisplaySchedule Schedule=schedule/>
     }
 </div>
 
@@ -91,17 +41,16 @@
         {
             return;
         }
+        await LoadSchedules();
+    }
 
+    private async Task LoadSchedules()
+    {
         await vm.Load();
         // load sessions to display
         foreach(var schedule in vm.Schedules)
         {
             await schedule.LoadEvents();
         }
-    }
-
-    private void OnTableRowClick(long sessionId)
-    {
-        navigationManager.NavigateTo($"{LeagueName}/Results/Session/{sessionId}");
     }
 }

@@ -13,9 +13,6 @@ public class SeasonsViewModel : LeagueViewModelBase<SeasonsViewModel>
     private string status = string.Empty;
     public string Status { get => status; set => Set(ref status, value); }
 
-    private bool loading = false;
-    public bool Loading { get => loading; set => Set(ref loading, value); }
-
     private ObservableCollection<SeasonViewModel> seasons;
     public ObservableCollection<SeasonViewModel> Seasons { get => seasons; set => Set(ref seasons, value); }
 
@@ -38,6 +35,10 @@ public class SeasonsViewModel : LeagueViewModelBase<SeasonsViewModel>
                 return;
             }
             var seasons = (await ApiService.CurrentLeague.Seasons().Get()).EnsureSuccess();
+            if (seasons == null)
+            {
+                return;
+            }
             Seasons = new ObservableCollection<SeasonViewModel>(seasons.Select(x =>
                 new SeasonViewModel(LoggerFactory, ApiService, x)
             ));

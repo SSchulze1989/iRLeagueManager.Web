@@ -1,0 +1,53 @@
+﻿@using System.ComponentModel
+<div @attributes=@AdditionalAttributes>
+    <div style="display:inline-block">
+        <h3>@ChildContent</h3>
+    </div>
+    @if (StateProvider.Loading)
+    {
+        <div class="lds-ring">
+            <div></div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+    [Parameter]
+    public RenderFragment ChildContent { get; set; } = default!;
+
+    private IModelState stateProvider  = default!;
+    [Parameter, EditorRequired]
+    public IModelState StateProvider 
+    {
+        get => stateProvider;
+        set
+        {
+            if (stateProvider != null)
+            {
+                stateProvider.PropertyChanged -= OnStatePropertyChanged;
+            }
+            stateProvider = value;
+            if (stateProvider != null)
+            {
+                stateProvider.PropertyChanged += OnStatePropertyChanged;
+            }
+        } 
+    }
+
+    protected override void OnParametersSet()
+    {
+        _ = StateProvider ?? throw new InvalidOperationException($"Parameter {nameof(StateProvider)} must have a value");
+    }
+
+    private void OnStatePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
+        {
+            case nameof(StateProvider.Loading):
+                StateHasChanged();
+                break;
+        }
+    }
+}

@@ -2,6 +2,7 @@
 
 @using iRLeagueApiCore.Client
 @using iRLeagueApiCore.Client.Http
+@using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.ViewModels;
 @attribute [Authorize]
 @inherits MvvmBlazor.Components.MvvmComponentBase
@@ -9,17 +10,7 @@
 @inject ILeagueApiClient apiClient
 
 
-<div style="display:inline-block">
-    <div style="display:inline-block">
-        <h3>Leagues</h3>
-    </div>
-    @if (Bind(vm, x => x.Loading))
-    {
-        <div class="lds-ring">
-            <div></div>
-        </div>
-    }
-</div>
+<LoadingHeader StateProvider=vm>Leagues</LoadingHeader>
 
 <div>
     <table class="table alternate select-table">

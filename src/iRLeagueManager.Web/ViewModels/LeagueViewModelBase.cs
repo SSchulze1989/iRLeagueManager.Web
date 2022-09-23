@@ -1,4 +1,5 @@
 ﻿using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Shared;
 using MvvmBlazor.ViewModel;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -6,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace iRLeagueManager.Web.ViewModels
 {
-    public class LeagueViewModelBase<T> : ViewModelBase
+    public class LeagueViewModelBase<T> : ViewModelBase, IModelState
     {
         public LeagueViewModelBase(ILoggerFactory loggerFactory, LeagueApiService apiService)
         {
@@ -18,6 +19,7 @@ namespace iRLeagueManager.Web.ViewModels
         protected ILoggerFactory LoggerFactory { get; }
         protected ILogger<T> Logger { get; }
         protected LeagueApiService ApiService { get; }
+        protected CancellationTokenSource Cts { get; } = new();
 
         private bool loading;
         public bool Loading 
@@ -34,6 +36,7 @@ namespace iRLeagueManager.Web.ViewModels
         }
 
         private bool hasChanged = false;
+
         public bool HasChanged
         {
             get => hasChanged;

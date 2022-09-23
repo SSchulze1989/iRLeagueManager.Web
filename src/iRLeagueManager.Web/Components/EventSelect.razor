@@ -1,0 +1,103 @@
+﻿@using System.Collections.Specialized
+@using iRLeagueManager.Web.ViewModels
+@using System.Linq
+
+<div class="input-group w-50">
+    <select @bind=SelectedIndex class="form-select">
+        @foreach((var @event, var index) in Events.Select((x, i) => (x, i)))
+        {
+            <option value="@(index)">@((index + 1).ToString("00")). @(@event.Date) - @(@event.Name)</option>
+        }
+    </select>
+</div>
+
+@code {
+    private IList<EventViewModel> events = default!;
+    [Parameter, EditorRequired]
+    public IList<EventViewModel> Events
+    {
+        get => events;
+        set
+        {
+            if (events is INotifyCollectionChanged oldCollectionChanged)
+            {
+                oldCollectionChanged.CollectionChanged -= OnEventsCollectionChanged;
+            }
+            if (events != value)
+            {
+                events = value;
+                OnEventsChanged();
+            }
+            if (events is INotifyCollectionChanged newCollectionChanged)
+            {
+                newCollectionChanged.CollectionChanged += OnEventsCollectionChanged;
+            }
+        }
+    }
+
+    private int selectedIndex = 0;
+    public int SelectedIndex
+    {
+        get => selectedIndex;
+        set
+        {
+            if (selectedIndex != value)
+            {
+                selectedIndex = value;
+                _ =OnSelectionChanged();
+            }
+        }
+    }
+
+    private EventViewModel? selected = default;
+    [Parameter]
+    public EventViewModel? Selected 
+    { 
+        get => selected;
+        set
+        {
+            if (value != this.selected)
+            {
+                this.selected = value;
+                _ = SelectedChanged.InvokeAsync(value);
+            }
+        }
+    }
+
+    [Parameter]
+    public EventCallback<EventViewModel?> SelectedChanged { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (Selected != null && Events.IndexOf(Selected) != selectedIndex)
+        {
+            SelectedIndex = Events.IndexOf(Selected);
+        }
+    }
+
+    private void OnEventsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        // Update selectedIndex
+        if (Selected != null && Events.IndexOf(Selected) != selectedIndex)
+        {
+            SelectedIndex = Events.IndexOf(Selected);
+        }
+        StateHasChanged();
+    }
+
+    private void OnEventsChanged()
+    {
+        // Update selectedIndex
+        if (Selected != null && Events.IndexOf(Selected) != selectedIndex)
+        {
+            SelectedIndex = Events.IndexOf(Selected);
+        }
+        StateHasChanged();
+    }
+
+    private async Task OnSelectionChanged()
+    {
+        Selected = Events.ElementAtOrDefault(SelectedIndex) ?? Selected;
+        await Task.FromResult(true);
+    }
+}

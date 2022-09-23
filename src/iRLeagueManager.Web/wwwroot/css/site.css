@@ -13,6 +13,10 @@ h3 {
     border-bottom: 0.5px solid gray;
 }
 
+.pointer {
+    cursor:pointer;
+}
+
 .page-header {
     background: #000000;
     color: #ffffff;
@@ -87,6 +91,14 @@ a, .btn-link {
     }
 
 /* results styles */
+.event-result-tab {
+    display: inline-block;
+    margin: 0.75rem;
+    padding: 0.5rem;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
 .results-tab {
     margin: 0.75rem;
     padding: 0.5rem;

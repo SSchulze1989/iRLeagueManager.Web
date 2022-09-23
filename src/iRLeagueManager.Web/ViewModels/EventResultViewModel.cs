@@ -23,6 +23,7 @@ namespace iRLeagueManager.Web.ViewModels
 
         public long ResultId => model.ResultId;
         public long SeasonId => model.SeasonId;
+        public long EventId => model.EventId;
         public string Name => model.DisplayName;
 
         private ObservableCollection<SessionResultViewModel> sessionResults;

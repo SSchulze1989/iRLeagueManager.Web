@@ -1,5 +1,6 @@
 ﻿@page "/{LeagueName}/Seasons"
 @page "/{LeagueName}/Seasons/{SeasonId:long}"
+@using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.ViewModels
 @attribute [Authorize]
 @inherits MvvmComponentBase
@@ -8,17 +9,7 @@
 @inject SeasonsViewModel vm
 @inject SharedStateService sharedState
 
-<div style="display:inline-block">
-    <div style="display:inline-block">
-        <h3>Seasons</h3>
-    </div>
-    @if (Bind(vm, x => x.Loading))
-    {
-        <div class="lds-ring">
-            <div></div>
-        </div>
-    }
-</div>
+<LoadingHeader StateProvider=vm>Seasons</LoadingHeader>
 
 <div>
     <p>@sharedState.SeasonName</p>

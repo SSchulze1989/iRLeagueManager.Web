@@ -1,5 +1,5 @@
-﻿@page "/{LeagueName}/Results/Session/{SessionId:long}"
-@page "/{LeagueName}/Results/Season/{SeasonId:long}"
+﻿@page "/{LeagueName}/Results/Events/{EventId:long}"
+@page "/{LeagueName}/Results/Seasons/{SeasonId:long}"
 @page "/{LeagueName}/Results"
 @using System.ComponentModel
 @using Microsoft.AspNetCore.WebUtilities
@@ -7,6 +7,7 @@
 @using Microsoft.Extensions.Primitives
 @using System.Linq.Expressions
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.ViewModels
 @attribute [Authorize]
 @inherits MvvmComponentBase
@@ -14,27 +15,10 @@
 @inject ResultsPageViewModel vm
 @inject NavigationManager navigationManager
 
-<div style="display:inline-block">
-    <div style="display:inline-block">
-        <h3>Results</h3>
-    </div>
-    @if (Bind(vm, x => x.Loading))
-    {
-        <div class="lds-ring">
-            <div></div>
-        </div>
-    }
-</div>
+<LoadingHeader StateProvider=vm>Results</LoadingHeader>
 
 <div>
-    <div>
-        <select @bind="vm.SelectedSessionId">
-            @foreach((var session, var index) in @Bind(vm, x => x.EventList).Select((x, i) => (x, i)))
-            {
-                <option value="@session.EventId">@((index + 1).ToString("00")). @Bind(session, x => x.Date) - @Bind(session, x => x.Name)</option>
-            }
-        </select>
-    </div>
+    <EventSelect @bind-Selected=vm.SelectedEvent Events=vm.EventList/>
     <div>
         @if (@Bind(vm, x => x.Results)?.Count == 0)
         {
@@ -48,7 +32,7 @@
                 <p><em>@Bind(eventResult, x => x.Name)</em></p>
             </div>
         }
-        @if (vm.SelectedEventResult != null)
+        @if (@Bind(vm, x => x.SelectedEvent) != null && @Bind(vm, x => x.SelectedEventResult) != null)
         {
             @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults))
             {
@@ -111,7 +95,7 @@
     [Parameter]
     public long? SeasonId { get; set; }
     [Parameter]
-    public long? SessionId { get; set; }
+    public long? EventId { get; set; }
 
     private const string resultTabParam = "resultTab";
 
@@ -127,17 +111,17 @@
         // if routed directly to /Results page without season or session set:
         // 1. Compare previous season to current season -> if seaon changed, trigger reload
         // 2. If season is the same keep session as selected
-        if (SeasonId == null && SessionId == null && vm.LoadedSeasonId == apiService.CurrentSeason?.Id)
+        if (SeasonId == null && EventId == null && vm.LoadedSeasonId == apiService.CurrentSeason?.Id)
         {
-            OnSessionChanged(vm.SelectedSessionId);
+            OnSessionChanged(vm.SelectedEvent);
         }
     }
 
-    private void OnSessionChanged(long? sessionId)
+    private void OnSessionChanged(EventViewModel? @event)
     {
-        if (sessionId != null)
+        if (@event?.EventId != null)
         {
-            navigationManager.NavigateTo($"./{LeagueName}/Results/Session/{sessionId}");
+            navigationManager.NavigateTo($"./{LeagueName}/Results/Events/{@event.EventId}");
         }
     }
 
@@ -163,9 +147,9 @@
 
     private async Task LoadPage(string leagueName)
     {
-        if (SessionId != null)
+        if (EventId != null)
         {
-            await LoadFromSessionAsync(leagueName, SessionId.Value);
+            await LoadFromEventAsync(leagueName, EventId.Value);
             return;
         }
 
@@ -193,31 +177,31 @@
         }
     }
 
-    private async Task LoadFromSessionAsync(string leagueName, long sessionId)
+    private async Task LoadFromEventAsync(string leagueName, long eventId)
     {
         // load results data
-        await vm.LoadFromSessionAsync(sessionId);
+        await vm.LoadFromEventAsync(eventId);
 
-        // set season state
-        if (vm.Results.Any())
-        {
-            var seasonId = vm.Results.First().SeasonId;
-            await apiService.SetCurrentSeasonAsync(leagueName, seasonId);
-            await vm.LoadSessionListAsync();
-        }
+        //// set season state
+        //if (vm.Results.Any())
+        //{
+        //    var seasonId = vm.Results.First().SeasonId;
+        //    await apiService.SetCurrentSeasonAsync(leagueName, seasonId);
+        //    await vm.LoadEventListAsync();
+        //}
     }
 
     private async Task LoadFromSeasonAsync(string leagueName, long seasonId)
     {
         // load session list
         await apiService.SetCurrentSeasonAsync(leagueName, seasonId);
-        await vm.LoadSessionListAsync();
+        await vm.LoadEventListAsync();
 
         // select last session with result
-        var lastResultSession = vm.EventList.LastOrDefault(x => x.HasResult);
-        if (lastResultSession != null)
+        var lastResultEvent = vm.EventList.LastOrDefault(x => x.HasResult);
+        if (lastResultEvent != null)
         {
-            vm.SelectedSessionId = lastResultSession.EventId;
+            vm.SelectedEvent = lastResultEvent;
         }
     }
 

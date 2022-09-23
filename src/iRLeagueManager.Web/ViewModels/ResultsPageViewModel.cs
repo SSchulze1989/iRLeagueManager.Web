@@ -23,19 +23,24 @@ namespace iRLeagueManager.Web.ViewModels
         private int selectedResultIndex;
         public int SelectedResultIndex { get => selectedResultIndex; set { if (Set(ref selectedResultIndex, value)) OnPropertyChanged(nameof(SelectedEventResult)); } }
         
-        private long? selectedSessionId;
-        public long? SelectedSessionId { get => selectedSessionId; set { if (Set(ref selectedSessionId, value)) _ = OnSelectedSessionChanged(value); } }
+        //private long? selectedSessionId;
+        //public long? SelectedSessionId { get => selectedSessionId; set { if (Set(ref selectedSessionId, value)) _ = OnSelectedSessionChanged(value); } }
 
-        public EventViewModel? Session => EventList.SingleOrDefault(x => x.EventId == selectedSessionId);
+        private EventViewModel? selectedEvent;
+        public EventViewModel? SelectedEvent 
+        { 
+            get => selectedEvent; 
+            set { if (Set(ref selectedEvent, value)) _ = OnSelectedSessionChanged(value); } 
+        }
 
         private ObservableCollection<EventResultViewModel> results;
         public ObservableCollection<EventResultViewModel> Results { get => results; set => Set(ref results, value); }
 
-        public event Action<long?>? SelectedSessionChanged;
+        public event Action<EventViewModel?>? SelectedSessionChanged;
 
         public EventResultViewModel? SelectedEventResult => Results.ElementAtOrDefault(SelectedResultIndex);
 
-        public async Task LoadSessionListAsync()
+        public async Task LoadEventListAsync()
         {
             if (ApiService.CurrentSeason == null)
             {
@@ -55,10 +60,10 @@ namespace iRLeagueManager.Web.ViewModels
 
             var sessions = result.Content;
             EventList = new ObservableCollection<EventViewModel>(sessions.Select(x => new EventViewModel(LoggerFactory, ApiService, x)));
-            OnPropertyChanged(nameof(SelectedSessionId));
+            OnPropertyChanged(nameof(SelectedEvent));
         }
 
-        public async Task LoadFromSessionAsync(long sessionId)
+        public async Task LoadFromEventAsync(long eventId)
         {
             if (ApiService.CurrentLeague == null)
             {
@@ -69,19 +74,36 @@ namespace iRLeagueManager.Web.ViewModels
             try
             {
                 Loading = true;
-                var sessionEndpoint = ApiService.CurrentLeague.Events().WithId(sessionId);
-                selectedSessionId = sessionId;
+                var eventEndpoint = ApiService.CurrentLeague.Events().WithId(eventId);
+                selectedEvent = EventList.FirstOrDefault(x => x.EventId == eventId);
+                
+                if (selectedEvent == null)
+                {
+                    // Load event list first if event is not in current event list
+                    var eventRequest = await eventEndpoint.Get();
+                    if (eventRequest.Success == false)
+                    {
+                        return;
+                    }
+                    var @event = eventRequest.Content;
+                    if (ApiService.CurrentSeason == null || ApiService.CurrentSeason.Id != @event.SeasonId)
+                    {
+                        await ApiService.SetCurrentSeasonAsync(ApiService.CurrentLeague.Name, @event.SeasonId);
+                    }
+                    await LoadEventListAsync();
+                    selectedEvent = EventList.FirstOrDefault(x => x.EventId == eventId);
+                }
 
-                var resultEndpoint = sessionEndpoint.Results();
+                var resultEndpoint = eventEndpoint.Results();
                 var requestResult = await resultEndpoint.Get();
                 if (requestResult.Success == false)
                 {
                     Results.Clear();
                     return;
                 }
-
                 var results = requestResult.Content;
                 Results = new ObservableCollection<EventResultViewModel>(results.Select(x => new EventResultViewModel(LoggerFactory, ApiService, x)));
+                
                 if (SelectedResultIndex > Results.Count)
                 {
                     SelectedResultIndex = Results.Count;
@@ -93,12 +115,12 @@ namespace iRLeagueManager.Web.ViewModels
             }
         }
 
-        private async Task OnSelectedSessionChanged(long? sessionId)
+        private async Task OnSelectedSessionChanged(EventViewModel? @event)
         {
-            SelectedSessionChanged?.Invoke(sessionId);
-            if (sessionId != null)
+            SelectedSessionChanged?.Invoke(@event);
+            if (@event != null)
             {
-                await LoadFromSessionAsync(sessionId.Value);
+                await LoadFromEventAsync(@event.EventId);
             }
         }
     }

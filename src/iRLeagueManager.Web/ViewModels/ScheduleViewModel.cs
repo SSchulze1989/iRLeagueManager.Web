@@ -32,8 +32,50 @@ namespace iRLeagueManager.Web.ViewModels
         public async Task SetModel(ScheduleModel model)
         {
             this.model = model;
-            OnPropertyChanged(null);
+            OnPropertyChanged();
             await LoadEvents();
+        }
+
+        public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            if (ApiService.CurrentLeague == null)
+            {
+                return false;
+            }
+            try
+            {
+                Loading = true;
+                var result = await ApiService.CurrentLeague.Schedules().WithId(ScheduleId).Put(model, cancellationToken);
+
+                if (result.Success)
+                {
+                    return true;
+                }
+                return false;
+            }
+            finally
+            {
+                Loading = false;
+            }
+        }
+
+        public async Task Reload(CancellationToken cancellationToken = default)
+        {
+            if (ApiService.CurrentLeague == null)
+            {
+                return;
+            }
+            if (ScheduleId == 0)
+            {
+                return;
+            }
+
+            var result = await ApiService.CurrentLeague.Schedules().WithId(ScheduleId).Get(cancellationToken);
+            if (result.Success == false)
+            {
+                return;
+            }
+            await SetModel(result.Content);
         }
 
         public async Task LoadEvents(CancellationToken cancellationToken = default)

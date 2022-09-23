@@ -84,4 +84,20 @@ namespace iRLeagueManager.Web.ViewModels
             return false;
         }
     }
+
+    public class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelBase<TViewModel>
+    {
+        protected TModel model;
+
+        public LeagueViewModelBase(ILoggerFactory loggerFactory, LeagueApiService apiService, TModel model) : 
+            base(loggerFactory, apiService)
+        {
+            this.model = model;
+        }
+
+        public TModel GetModel()
+        {
+            return model;
+        }
+    }
 }

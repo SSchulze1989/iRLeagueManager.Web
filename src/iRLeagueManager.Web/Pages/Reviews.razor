@@ -6,6 +6,7 @@
 @using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.Components.Reviews
 @using iRLeagueManager.Web.ViewModels
+@attribute [Authorize]
 @inherits MvvmComponentBase
 @inject ILoggerFactory loggerFactory
 @inject LeagueApiService apiService
@@ -130,7 +131,7 @@
         }
         SeasonId = apiService.CurrentSeason.Id;
         await EventList.LoadEventListAsync(SeasonId.Value);
-        selectedEvent = EventList.EventList.FirstOrDefault(x => x.EventId == eventId);
+        SelectedEvent = EventList.EventList.FirstOrDefault(x => x.EventId == eventId);
     }
 
     private async Task LoadFromSeasonAsync(string leagueName, long seasonId)

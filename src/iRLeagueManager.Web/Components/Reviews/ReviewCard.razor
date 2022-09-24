@@ -7,6 +7,7 @@
         <div class="btn card-header accordion-header" @onclick=ToggleCollapsed>
             <div class="row">
                 <div class="col d-md-flex justify-content-start review-header">
+                    <span>@Review.SessionName:</span>
                     <span>@Bind(Review, x => x.IncidentNr)</span>
                     <span class="oi oi-flag m-1" /><span>@Bind(Review, x => x.OnLap)</span>
                     <span class="oi oi-timer m-1" /><span>@Bind(Review, x => x.Corner)</span>
@@ -44,7 +45,7 @@
                         @foreach(var vote in @Bind(Review, x => x.Votes))
                         {
                             var member = @Bind(vote, x => x.MemberAtFault);
-                            <span class="badge rounded-pill bg-danger">@Bind(vote, x => x.VoteCategoryId): member.FirstName member.LastName</span>
+                            <span class="badge bg-danger">@Bind(vote, x => x.VoteCategoryId): @member.FirstName @member.LastName</span>
                         }
                     </div>
                 </div>
@@ -56,7 +57,7 @@
                         <ul>
                             @foreach(var member in @Bind(Review, x => x.InvolvedMembers))
                             {
-                                <li>@member.FirstName @member.LastName</li>
+                                <li><span class="badge bg-secondary">@member.FirstName @member.LastName</span></li>
                             }
                         </ul>
                     </div>
@@ -65,7 +66,7 @@
                         <ul>
                             @foreach(var vote in @Bind(Review, x => x.Comments).SelectMany(x => x.Votes))
                             {
-                                <li>@vote.VoteCategoryId: @vote.MemberAtFault.FirstName @vote.MemberAtFault.LastName</li>
+                                <li><span class="badge bg-warning">@vote.VoteCategoryId: @vote.MemberAtFault.FirstName @vote.MemberAtFault.LastName</span></li>
                             }
                         </ul>
                     </div>
@@ -73,6 +74,15 @@
                 <hr/>
                 <div>
                     <h5>Result</h5>
+                    <div>
+                        @foreach(var vote in @Bind(Review, x => x.Votes))
+                        {
+                            <span class="badge bg-danger">@vote.VoteCategoryId: @vote.MemberAtFault.FirstName @vote.MemberAtFault.LastName</span>
+                        }
+                    </div>
+                    <div>
+                        @Bind(Review, x => x.ResultText)
+                    </div>
                 </div>
                 <hr/>
                 <div>
@@ -99,7 +109,6 @@
 
     private ElementReference ReviewText { get; set; }
 
-    private bool collapsed;
     public bool Collapsed { get; set; } = true;
 
     protected override void OnParametersSet()

@@ -35,5 +35,16 @@ namespace iRLeagueManager.Web.ViewModels
             votes.Remove(vote);
             model.Votes.Remove(vote.GetModel());
         }
+
+        private void RefreshVoteList()
+        {
+            Votes = new ObservableCollection<VoteViewModel>(model.Votes.Select(x => new VoteViewModel(LoggerFactory, ApiService, x)));
+        }
+
+        public override void SetModel(ReviewCommentModel model)
+        {
+            base.SetModel(model);
+            RefreshVoteList();
+        }
     }
 }

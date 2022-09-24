@@ -17,6 +17,7 @@ namespace iRLeagueManager.Web.ViewModels
         public long EventId => model.EventId;
         public long SeasonId => model.SeasonId;
         public long SessionId => model.SessionId;
+        public string SessionName => model.SessionName;
         public string AuthorName => model.AuthorName;
         public string AuthorUserId => model.AuthorUserId;
         public DateTime CreatedOn => model.CreatedOn.GetValueOrDefault();
@@ -203,11 +204,17 @@ namespace iRLeagueManager.Web.ViewModels
             }
         }
 
+        private void RefreshVoteList()
+        {
+            Votes = new ObservableCollection<VoteViewModel>(model.VoteResults.Select(x => new VoteViewModel(LoggerFactory, ApiService, x)));
+        }
+
         public override void SetModel(ReviewModel model)
         {
             base.SetModel(model);
             RefreshMemberList();
             RefreshCommentList();
+            RefreshVoteList();
         }
     }
 }

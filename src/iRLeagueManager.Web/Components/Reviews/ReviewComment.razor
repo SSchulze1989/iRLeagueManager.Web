@@ -6,6 +6,12 @@
     <div class="m-1">
         @Bind(Comment, x=> x.Text)
     </div>
+    <div>
+        @foreach(var vote in @Bind(Comment, x => x.Votes))
+        {
+            <span class="badge bg-warning me-2">@vote.VoteCategoryId: @vote.MemberAtFault.FirstName @vote.MemberAtFault.LastName</span>
+        }
+    </div>
 </div>
 
 @code {

@@ -87,17 +87,22 @@ namespace iRLeagueManager.Web.ViewModels
 
     public class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelBase<TViewModel>
     {
-        protected TModel model;
+        protected TModel model = default!;
 
         public LeagueViewModelBase(ILoggerFactory loggerFactory, LeagueApiService apiService, TModel model) : 
             base(loggerFactory, apiService)
         {
-            this.model = model;
+            SetModel(model);
         }
 
         public TModel GetModel()
         {
             return model;
+        }
+
+        public virtual void SetModel(TModel model)
+        {
+            this.model = model;
         }
     }
 }

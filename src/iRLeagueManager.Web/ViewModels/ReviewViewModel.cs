@@ -29,7 +29,7 @@ namespace iRLeagueManager.Web.ViewModels
         public TimeSpan TimeStamp { get => model.TimeStamp; set => SetP(model.TimeStamp, value => model.TimeStamp = value, value); }
         public string IncidentNr { get => model.IncidentNr; set => SetP(model.IncidentNr, value => model.IncidentNr = value, value); }
 
-        private ObservableCollection<MemberInfoModel> involvedMembers;
+        private ObservableCollection<MemberInfoModel> involvedMembers = new();
         public ObservableCollection<MemberInfoModel> InvolvedMembers { get => involvedMembers; set => Set(ref involvedMembers, value); }
 
         private ObservableCollection<ReviewCommentViewModel> comments = new();
@@ -144,6 +144,26 @@ namespace iRLeagueManager.Web.ViewModels
             return ApiService.CurrentLeague?.Reviews().WithId(ReviewId);
         }
 
+        private void RefreshMemberList()
+        {
+            // Add comments from to list that are not already in there
+            foreach (var member in model.InvolvedMembers)
+            {
+                if (InvolvedMembers.Any(x => x.MemberId == member.MemberId) == false)
+                {
+                    InvolvedMembers.Add(member);
+                }
+            }
+            // Remove comments that are no longer in the model
+            foreach (var member in InvolvedMembers)
+            {
+                if (model.InvolvedMembers.Any(x => x.MemberId == member.MemberId) == false)
+                {
+                    InvolvedMembers.Remove(member);
+                }
+            }
+        }
+
         /// <summary>
         /// Refresh comment list with the current comment models
         /// </summary>
@@ -165,6 +185,13 @@ namespace iRLeagueManager.Web.ViewModels
                     Comments.Remove(commentViewModel);
                 }
             }
+        }
+
+        public override void SetModel(ReviewModel model)
+        {
+            base.SetModel(model);
+            RefreshMemberList();
+            RefreshCommentList();
         }
     }
 }

@@ -15,7 +15,7 @@
 @inject ResultsPageViewModel vm
 @inject NavigationManager navigationManager
 
-<LoadingHeader StateProvider=vm>Results</LoadingHeader>
+<LoadingHeader Loading=@Bind(vm, x => x.Loading)>Results</LoadingHeader>
 
 <div class="card">
     <div class="card-header">

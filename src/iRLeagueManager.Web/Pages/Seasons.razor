@@ -9,7 +9,7 @@
 @inject SeasonsViewModel vm
 @inject SharedStateService sharedState
 
-<LoadingHeader StateProvider=vm>Seasons</LoadingHeader>
+<LoadingHeader Loading=@Bind(vm, x => x.Loading)>Seasons</LoadingHeader>
 
 <div>
     <p>@sharedState.SeasonName</p>

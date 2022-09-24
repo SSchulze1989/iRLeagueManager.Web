@@ -13,7 +13,7 @@
                 <button type="button" class="btn btn-danger" @onclick=@ResetName>&#128473;</button>
             </div>
             <div class="@(EditName ? " d-none" : "")"> 
-                <LoadingHeader StateProvider=Schedule @onclick=@EditNameClick>@Bind(Schedule, x => x.Name)</LoadingHeader>
+                <LoadingHeader Loading=Schedule.Loading @onclick=@EditNameClick>@Bind(Schedule, x => x.Name)</LoadingHeader>
             </div>
         </div>
         @if (Bind(Schedule, x => x.Loading))

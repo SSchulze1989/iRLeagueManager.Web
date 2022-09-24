@@ -11,7 +11,7 @@
 @inject NavigationManager navigationManager
 @inject JsonSerializerOptions jsonOptions
 
-<LoadingHeader StateProvider=vm>Schedules</LoadingHeader>
+<LoadingHeader Loading=@Bind(vm, x => x.Loading)></LoadingHeader>
 
 <div>
     @foreach(var schedule in @Bind(vm, x => x.Schedules))

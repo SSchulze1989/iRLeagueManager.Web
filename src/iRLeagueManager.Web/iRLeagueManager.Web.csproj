@@ -9,6 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Components\Reviews\ReviewCard.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Components\Reviews\ReviewCard.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.2.0" />
     <PackageReference Include="Blazored.Modal" Version="7.0.0" />
     <PackageReference Include="iRLeagueApiCore.Client" Version="0.3.2-dev.1" />

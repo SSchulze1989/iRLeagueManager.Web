@@ -10,7 +10,7 @@
 @inject ILeagueApiClient apiClient
 
 
-<LoadingHeader StateProvider=vm>Leagues</LoadingHeader>
+<LoadingHeader Loading=@Bind(vm, x => x.Loading)>Leagues</LoadingHeader>
 
 <div>
     <table class="table alternate select-table">

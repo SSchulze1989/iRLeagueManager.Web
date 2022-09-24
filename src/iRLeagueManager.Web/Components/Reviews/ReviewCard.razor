@@ -1,12 +1,50 @@
-﻿@using System.ComponentModel
+﻿@inherits MvvmComponentBase
+@using System.ComponentModel
+@using iRLeagueManager.Web.ViewModels
 
-<div class="card" @attributes=AdditionalAttributes>
-    <div>
-
+<div @attributes=AdditionalAttributes>
+    <div class="card">
+        <div class="card-header review-header">
+            <span>@Bind(Review, x => x.IncidentNr)</span>
+            <span class="oi oi-flag m-1" /><span>@Bind(Review, x => x.OnLap)</span>
+            <span class="oi oi-timer m-1" /><span>@Bind(Review, x => x.Corner)</span>
+            <span class="oi oi-chevron-right m1" /><span>@Bind(Review, x => x.IncidentKind)</span>
+            <span class="oi oi-chat m1" /><span>@Bind(Review, x => x.Comments).Count</span>
+            <span class="oi oi-task" /><span>@Bind(Review, x => x.Comments).Where(x => x.Votes.Any()).Count()</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-1">
+                    <label>Involved</label>
+                </div>
+                <div class="col-6">
+                    @string.Join(", ", Bind(Review, x => x.InvolvedMembers).Select(x => $"{x.FirstName} {x.LastName}"))
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-1">
+                    <label>Result</label>
+                </div>
+                <div class="col-6">
+                    <label>...</label>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 @code {
     [Parameter(CaptureUnmatchedValues=true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+    [Parameter, EditorRequired]
+    public ReviewViewModel Review { get; set; } = default!;
+
+    private bool collapsed;
+    public bool Collapsed { get; set; } = true;
+
+    protected override void OnParametersSet()
+    {
+        _ = Review ?? throw new InvalidOperationException($"Parameter {nameof(Review)} must have a value");
+        base.OnParametersSet();
+    }
 }

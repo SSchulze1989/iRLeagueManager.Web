@@ -17,8 +17,8 @@
 
 <LoadingHeader Loading=@Bind(vm, x => x.Loading)>Results</LoadingHeader>
 
-<div class="card">
-    <div class="card-header">
+<div>
+    <div>
         <EventSelect class="my-2 mx-n2" @bind-Selected=vm.SelectedEvent Events=vm.EventList/>
         @if (@Bind(vm, x => x.Results)?.Count == 0)
         {
@@ -26,7 +26,7 @@
                 <p class="results-scoring"><em>No Results</em></p>
             </div>
         }
-        <ul class="nav nav-tabs card-header-tabs">
+        <ul class="nav nav-tabs">
         @foreach((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x,i)))
         {
             <li class="nav-item">
@@ -35,58 +35,62 @@
         }
         </ul>
     </div>
-    <div class="card-body">
+    <div>
         @if (@Bind(vm, x => x.SelectedEvent) != null && @Bind(vm, x => x.SelectedEventResult) != null)
         {
             @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults))
             {
-                <div class="results-tab" id="results-session-@Bind(result, x => x.SessionName)">
-                    <p class="results-scoring">@Bind(result, x => x.SessionName)</p>
-                    <table class="table alternate">
-                        <thead>
-                            <tr class="results-head">
-                                <th @onclick="() => SetOrderProperty(result, row => row.FinalPosition)">Pos.</th>
-                                <th @onclick="() => SetOrderProperty(result, row => row.FinalPositionChange)">Chg.</th>
-                                <th @onclick="() => SetOrderProperty(result, row => row.StartPosition)">Start</th>
-                                <th @onclick="() => SetOrderProperty(result, row => row.Firstname)">Name</th>
-                                <th @onclick="() => SetOrderProperty(result, row => row.TeamName)">Team</th>
-                                <th @onclick="() => SetOrderProperty(result, row => row.QualifyingTime)">Qualy Lap</th>
-                                <th @onclick="() => SetOrderProperty(result, row => row.FastestLapTime)">Fastest Lap</th>
-                                <th @onclick="() => SetOrderProperty(result, row => row.AvgLapTime)">Avg. Lap</th>
-                                <th @onclick="() => SetOrderProperty(result, row => row.Interval)">Interval</th>
-                                <th @onclick="() => SetOrderProperty(result, row => row.LeadLaps)">Laps Lead</th>
-                                <th @onclick="() => SetOrderProperty(result, row => row.CompletedLaps)">Laps Compl.</th>
-                                <th @onclick="() => SetOrderProperty(result, row => row.RacePoints)">Race Pts.</th>
-                                <th @onclick="() => SetOrderProperty(result, row => row.BonusPoints)">Bonus Pts.</th>
-                                <th @onclick="() => SetOrderProperty(result, row => row.PenaltyPoints)">Penalty</th>
-                                <th @onclick="() => SetOrderProperty(result, row => row.Incidents)">Incs.</th>
-                                <th @onclick="() => SetOrderProperty(result, row => row.TotalPoints)">Total Pts.</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach(var row in result.ResultRows)
-                            {
-                                <tr class="results-row">
-                                    <td>@row.FinalPosition</td>
-                                    <td>@row.FinalPositionChange</td>
-                                    <td>@row.StartPosition</td>
-                                    <td>@row.Firstname @row.Lastname</td>
-                                    <td>@row.TeamName</td>
-                                    <td>@row.QualifyingTime</td>
-                                    <td>@row.FastestLapTime (@row.FastLapNr)</td>
-                                    <td>@row.AvgLapTime</td>
-                                    <td>@row.Interval</td>
-                                    <td>@row.LeadLaps</td>
-                                    <td>@row.CompletedLaps</td>
-                                    <td>@row.RacePoints</td>
-                                    <td>@row.BonusPoints</td>
-                                    <td>@row.PenaltyPoints</td>
-                                    <td>@row.Incidents</td>
-                                    <td>@row.TotalPoints</td>
+                <div class="card my-2" id="results-session-@Bind(result, x => x.SessionName)">
+                    <div class="card-header">
+                        @Bind(result, x => x.SessionName)
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.FinalPosition)">Pos.</th>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.FinalPositionChange)">Chg.</th>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.StartPosition)">Start</th>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.Firstname)">Name</th>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.TeamName)">Team</th>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.QualifyingTime)">Qualy Lap</th>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.FastestLapTime)">Fastest Lap</th>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.AvgLapTime)">Avg. Lap</th>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.Interval)">Interval</th>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.LeadLaps)">Laps Lead</th>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.CompletedLaps)">Laps Compl.</th>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.RacePoints)">Race Pts.</th>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.BonusPoints)">Bonus Pts.</th>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.PenaltyPoints)">Penalty</th>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.Incidents)">Incs.</th>
+                                    <th @onclick="() => SetOrderProperty(result, row => row.TotalPoints)">Total Pts.</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach(var row in result.ResultRows)
+                                {
+                                    <tr>
+                                        <td>@row.FinalPosition</td>
+                                        <td>@row.FinalPositionChange</td>
+                                        <td>@row.StartPosition</td>
+                                        <td>@row.Firstname @row.Lastname</td>
+                                        <td>@row.TeamName</td>
+                                        <td>@row.QualifyingTime.LapTimeString()</td>
+                                        <td>@row.FastestLapTime.LapTimeString() (@row.FastLapNr)</td>
+                                        <td>@row.AvgLapTime.LapTimeString()</td>
+                                        <td>+@row.Interval.LapTimeString()</td>
+                                        <td>@row.LeadLaps</td>
+                                        <td>@row.CompletedLaps</td>
+                                        <td>@row.RacePoints</td>
+                                        <td>@row.BonusPoints</td>
+                                        <td>@row.PenaltyPoints</td>
+                                        <td>@row.Incidents</td>
+                                        <td>@row.TotalPoints</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             }
         }

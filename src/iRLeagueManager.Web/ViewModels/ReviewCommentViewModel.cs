@@ -21,13 +21,19 @@ namespace iRLeagueManager.Web.ViewModels
 
         public string Text { get => model.Text; set => SetP(model.Text, value => model.Text = value, value); }
         
-        private ObservableCollection<CommentVoteViewModel> votes = new();
-        public ObservableCollection<CommentVoteViewModel> Votes { get => votes; set => Set(ref votes, value); }
+        private ObservableCollection<VoteViewModel> votes = new();
+        public ObservableCollection<VoteViewModel> Votes { get => votes; set => Set(ref votes, value); }
 
-        public void AddVote(CommentVoteViewModel vote)
+        public void AddVote(VoteViewModel vote)
         {
             votes.Add(vote);
             model.Votes.Add(vote.GetModel());
+        }
+
+        public void RemoveVote(VoteViewModel vote)
+        {
+            votes.Remove(vote);
+            model.Votes.Remove(vote.GetModel());
         }
     }
 }

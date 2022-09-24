@@ -18,7 +18,7 @@
     <EventSelect @bind-Selected=SelectedEvent Events=EventList.EventList/>
     @foreach(var review in @Bind(ReviewsVm, x => x.Reviews))
     {
-        <ReviewCard class="py-2" Review=review />
+        <ReviewCard class="py-2 w-75" Review=review />
     }
 </div>
 
@@ -41,7 +41,7 @@
             if (selectedEvent != value)
             {
                 selectedEvent = value;
-                OnEventChanged(selectedEvent?.EventId);
+                _ = OnEventChanged(selectedEvent?.EventId);
             }
         }
     }
@@ -64,14 +64,14 @@
         base.OnInitialized();
     }
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
         // if routed directly to /Results page without season or session set:
         // 1. Compare previous season to current season -> if seaon changed, trigger reload
         // 2. If season is the same keep session as selected
         if (EventId == null && EventList.LoadedSeasonId == apiService.CurrentSeason?.Id)
         {
-            OnEventChanged(SelectedEvent?.EventId);
+            await OnEventChanged(SelectedEvent?.EventId);
         }
     }
 

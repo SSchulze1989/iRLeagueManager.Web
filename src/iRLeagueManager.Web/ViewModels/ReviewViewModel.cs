@@ -20,7 +20,7 @@ namespace iRLeagueManager.Web.ViewModels
         public string AuthorName => model.AuthorName;
         public string AuthorUserId => model.AuthorUserId;
         public DateTime CreatedOn => model.CreatedOn.GetValueOrDefault();
-        public DateTime LastModifiedON => model.LastModifiedOn.GetValueOrDefault();
+        public DateTime LastModifiedOn => model.LastModifiedOn.GetValueOrDefault();
 
         public string IncidentKind { get => model.IncidentKind; set => SetP(model.IncidentKind, value => model.IncidentKind = value, value); }
         public string FullDescription { get => model.FullDescription; set => SetP(model.FullDescription, value => model.FullDescription = value, value); }
@@ -28,12 +28,28 @@ namespace iRLeagueManager.Web.ViewModels
         public string Corner { get => model.Corner; set => SetP(model.Corner, value => model.Corner = value, value); }
         public TimeSpan TimeStamp { get => model.TimeStamp; set => SetP(model.TimeStamp, value => model.TimeStamp = value, value); }
         public string IncidentNr { get => model.IncidentNr; set => SetP(model.IncidentNr, value => model.IncidentNr = value, value); }
+        public string ResultText { get => model.ResultText; set => SetP(model.ResultText, value => model.ResultText = value, value); }
 
         private ObservableCollection<MemberInfoModel> involvedMembers = new();
         public ObservableCollection<MemberInfoModel> InvolvedMembers { get => involvedMembers; set => Set(ref involvedMembers, value); }
 
         private ObservableCollection<ReviewCommentViewModel> comments = new();
         public ObservableCollection<ReviewCommentViewModel> Comments { get => comments; set => Set(ref comments, value); }
+
+        private ObservableCollection<VoteViewModel> votes = new();
+        public ObservableCollection<VoteViewModel> Votes { get => votes; set => Set(ref votes, value); }
+
+        public void AddVote(VoteViewModel vote)
+        {
+            votes.Add(vote);
+            model.VoteResults.Add(vote.GetModel());
+        }
+
+        public void RemoveVote(VoteViewModel vote)
+        {
+            votes.Remove(vote);
+            model.VoteResults.Remove(vote.GetModel());
+        }
 
         /// <summary>
         /// Add one or more members to the <see cref="InvolvedMembers"/> selection"/>

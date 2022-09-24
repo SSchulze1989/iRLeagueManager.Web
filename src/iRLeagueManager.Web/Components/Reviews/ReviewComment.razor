@@ -1,0 +1,20 @@
+﻿@inherits MvvmComponentBase
+@using iRLeagueManager.Web.ViewModels
+
+<div class="container">
+    <h6 class="fw-bold">@Bind(Comment, x => x.AuthorName)</h6>
+    <div class="m-1">
+        @Bind(Comment, x=> x.Text)
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ReviewCommentViewModel Comment { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        _ = Comment ?? throw new InvalidOperationException($"Parameter {nameof(Comment)} must have a value");
+        base.OnParametersSet();
+    }
+}

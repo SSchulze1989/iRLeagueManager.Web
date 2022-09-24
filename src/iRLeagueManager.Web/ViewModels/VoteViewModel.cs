@@ -4,9 +4,9 @@ using iRLeagueManager.Web.Data;
 
 namespace iRLeagueManager.Web.ViewModels
 {
-    public class CommentVoteViewModel : LeagueViewModelBase<CommentVoteViewModel, CommentVoteModel>
+    public class VoteViewModel : LeagueViewModelBase<VoteViewModel, VoteModel>
     {
-        public CommentVoteViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, CommentVoteModel model) : 
+        public VoteViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, VoteModel model) : 
             base(loggerFactory, apiService, model)
         {
         }

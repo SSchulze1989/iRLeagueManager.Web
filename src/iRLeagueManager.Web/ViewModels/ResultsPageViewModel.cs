@@ -7,10 +7,10 @@ namespace iRLeagueManager.Web.ViewModels
 {
     public class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewModel>
     {
-        public ResultsPageViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+        public ResultsPageViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, EventListViewModel eventList) : 
             base(loggerFactory, apiService)
         {
-            eventList = new ObservableCollection<EventViewModel>();
+            this.eventList = eventList.EventList;
             results = new ObservableCollection<EventResultViewModel>();
         }
 

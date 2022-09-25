@@ -10,16 +10,14 @@
 @using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.ViewModels
 @attribute [Authorize]
-@inherits MvvmComponentBase
-@inject LeagueApiService apiService
+@inherits LeagueComponentBase
 @inject ResultsPageViewModel vm
-@inject NavigationManager navigationManager
 
 <LoadingHeader Loading=@Bind(vm, x => x.Loading)>Results</LoadingHeader>
 
 <div>
     <div>
-        <EventSelect class="my-2 mx-n2" @bind-Selected=vm.SelectedEvent Events=vm.EventList/>
+        <EventSelect class="my-2 mx-n2"/>
         @if (@Bind(vm, x => x.Results)?.Count == 0)
         {
             <div class="card-body">
@@ -98,119 +96,34 @@
 </div>
 
 @code {
-    [Parameter]
-    public string? LeagueName { get; set; }
-    [Parameter]
-    public long? SeasonId { get; set; }
-    [Parameter]
-    public long? EventId { get; set; }
-
     private const string resultTabParam = "resultTab";
 
     protected override async Task OnInitializedAsync()
     {
-        vm.SelectedSessionChanged += OnSessionChanged;
-        navigationManager.LocationChanged += OnLocationChanged;
+        NavigationManager.LocationChanged += OnLocationChanged;
         await Task.FromResult(true);
     }
 
-    protected override void OnParametersSet()
-    {
-        // if routed directly to /Results page without season or session set:
-        // 1. Compare previous season to current season -> if seaon changed, trigger reload
-        // 2. If season is the same keep session as selected
-        if (SeasonId == null && EventId == null && vm.LoadedSeasonId == apiService.CurrentSeason?.Id)
-        {
-            OnSessionChanged(vm.SelectedEvent);
-        }
-    }
-
-    private void OnSessionChanged(EventViewModel? @event)
+    protected override async Task OnEventChangedAsync(EventViewModel? @event)
     {
         if (@event?.EventId != null)
         {
-            navigationManager.NavigateTo($"./{LeagueName}/Results/Events/{@event.EventId}");
+            NavigationManager.NavigateTo($"./{LeagueName}/Results/Events/{@event.EventId}");
+            await vm.LoadFromEventAsync(@event.EventId);
         }
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        vm.SelectedResultIndex = navigationManager.QueryParameter<int>(resultTabParam);
+        vm.SelectedResultIndex = NavigationManager.QueryParameter<int>(resultTabParam);
     }
 
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
         if (firstRender == false) return;
 
-        if (LeagueName == null)
-        {
-            return;
-        }
-
-        // set league state
-        await apiService.SetCurrentLeagueAsync(LeagueName);
-        await LoadPage(LeagueName);
-        vm.SelectedResultIndex = navigationManager.QueryParameter<int>(resultTabParam);
-    }
-
-    private async Task LoadPage(string leagueName)
-    {
-        if (EventId != null)
-        {
-            await LoadFromEventAsync(leagueName, EventId.Value);
-            return;
-        }
-
-        if (SeasonId != null)
-        {
-            await LoadFromSeasonAsync(leagueName, SeasonId.Value);
-            return;
-        }
-
-        if (apiService.CurrentSeason == null)
-        {
-            var lastSeason = apiService.Shared.SeasonList.LastOrDefault();
-            if (lastSeason == null)
-            {
-                return;
-            }
-            await apiService.SetCurrentSeasonAsync(leagueName, lastSeason.SeasonId);
-        }
-
-        if (apiService.CurrentSeason != null)
-        {
-            SeasonId = apiService.CurrentSeason.Id;
-            await LoadFromSeasonAsync(leagueName, SeasonId.Value);
-            return;
-        }
-    }
-
-    private async Task LoadFromEventAsync(string leagueName, long eventId)
-    {
-        // load results data
-        await vm.LoadFromEventAsync(eventId);
-
-        //// set season state
-        //if (vm.Results.Any())
-        //{
-        //    var seasonId = vm.Results.First().SeasonId;
-        //    await apiService.SetCurrentSeasonAsync(leagueName, seasonId);
-        //    await vm.LoadEventListAsync();
-        //}
-    }
-
-    private async Task LoadFromSeasonAsync(string leagueName, long seasonId)
-    {
-        // load session list
-        await apiService.SetCurrentSeasonAsync(leagueName, seasonId);
-        await vm.LoadEventListAsync();
-
-        // select last session with result
-        var lastResultEvent = vm.EventList.LastOrDefault(x => x.HasResult);
-        if (lastResultEvent != null)
-        {
-            vm.SelectedEvent = lastResultEvent;
-        }
+        vm.SelectedResultIndex = NavigationManager.QueryParameter<int>(resultTabParam);
     }
 
     private void SetOrderProperty(SessionResultViewModel result, Expression<Func<ResultRowModel, IComparable>> selector, bool descending = false)
@@ -220,12 +133,12 @@
 
     private void SetSelectedResultIndex(int index)
     {
-        navigationManager.NavigateTo(GetTabLink(index));
+        NavigationManager.NavigateTo(GetTabLink(index));
     }
 
     private string GetTabLink(int index)
     {
-        var url = navigationManager.GetUriWithQueryParameter(resultTabParam, index);
+        var url = NavigationManager.GetUriWithQueryParameter(resultTabParam, index);
         return url;
     }
 }

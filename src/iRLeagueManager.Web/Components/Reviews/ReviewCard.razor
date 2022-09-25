@@ -3,10 +3,10 @@
 @using iRLeagueManager.Web.ViewModels
 
 <div @attributes=AdditionalAttributes>
-    <div class="card">
-        <div class="btn card-header accordion-header" @onclick=ToggleCollapsed>
+    <div class="card review-card">
+        <div class="btn card-header accordion-header review-header">
             <div class="row">
-                <div class="col d-md-flex justify-content-start review-header">
+                <div class="col d-md-flex justify-content-start">
                     <span>@Review.SessionName:</span>
                     <span>@Bind(Review, x => x.IncidentNr)</span>
                     <span class="oi oi-flag m-1" /><span>@Bind(Review, x => x.OnLap)</span>
@@ -16,13 +16,17 @@
                     <span class="oi oi-task" /><span>@Bind(Review, x => x.Comments).Where(x => x.Votes.Any()).Count()</span>
                 </div>
                 <div class="col d-grid d-md-flex justify-content-md-end">
+                    @if (EditClick.HasDelegate)
+                    {
+                        <button class="oi oi-pencil btn review-header-button" @onclick=EditClick />
+                    }
                     @if (Collapsed)
                     {
-                        <span class="oi oi-chevron-bottom"/>
+                        <button class="oi oi-chevron-bottom btn review-header-button" @onclick=ToggleCollapsed/>
                     }
                     else
                     {
-                        <span class="oi oi-chevron-top"/>
+                        <button class="oi oi-chevron-top btn review-header-button" @onclick=ToggleCollapsed/>
                     }
                 </div>
             </div>
@@ -106,6 +110,8 @@
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter, EditorRequired]
     public ReviewViewModel Review { get; set; } = default!;
+    [Parameter]
+    public EventCallback<MouseEventArgs> EditClick { get; set; } 
 
     private ElementReference ReviewText { get; set; }
 

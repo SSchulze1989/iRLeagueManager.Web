@@ -5,10 +5,8 @@
 @using iRLeagueManager.Web.ViewModels
 @using iRLeagueManager.Web.Components
 @attribute [Authorize]
-@inherits MvvmComponentBase
-@inject LeagueApiService apiService
+@inherits LeagueComponentBase
 @inject SchedulesPageViewModel vm
-@inject NavigationManager navigationManager
 @inject JsonSerializerOptions jsonOptions
 
 <LoadingHeader Loading=@Bind(vm, x => x.Loading)></LoadingHeader>
@@ -21,26 +19,10 @@
 </div>
 
 @code {
-    [Parameter]
-    public string LeagueName { get; set; } = string.Empty;
-    [Parameter]
-    public long SeasonId { get; set; }
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
         if (firstRender == false) return;
-
-        // set season state
-        if (SeasonId != 0)
-        {
-            await apiService.SetCurrentSeasonAsync(LeagueName, SeasonId);
-        }
-
-        // load schedules data
-        if (apiService.CurrentSeason == null)
-        {
-            return;
-        }
         await LoadSchedules();
     }
 

@@ -1,3 +1,19 @@
-﻿.review-header span {
+﻿.review-card {
+
+}
+
+.review-header span {
     margin-right: 1rem;
+}
+
+.review-card .review-header-button {
+    visibility: hidden;
+}
+
+.review-card:hover .review-header-button {
+    visibility: unset;
+}
+
+.review-header-button {
+
 }

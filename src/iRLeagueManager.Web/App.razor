@@ -1,7 +1,11 @@
 ﻿@using Blazored.Modal
+@using iRLeagueManager.Web.ViewModels
+@inject EventListViewModel EventList
+@inject LeagueApiService ApiService
 
 <CascadingBlazoredModal>
-    @*<CascadingAuthenticationState>*@
+    <CascadingValue Value="ApiService">
+    <CascadingValue Value="EventList">
         <Router AppAssembly="@typeof(App).Assembly">
             <Found Context="routeData">
                 <CascadingValue Value="routeData">
@@ -16,5 +20,6 @@
                 </LayoutView>
             </NotFound>
         </Router>
-    @*</CascadingAuthenticationState>*@
+    </CascadingValue>
+    </CascadingValue>
 </CascadingBlazoredModal>

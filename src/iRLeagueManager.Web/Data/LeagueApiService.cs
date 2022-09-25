@@ -68,6 +68,26 @@ public class LeagueApiService
             Shared.SeasonName = season.SeasonName;
         }
     }
+
+    public async Task SetCurrentSeasonByEventId(string leagueName, long eventId)
+    {
+        await SetCurrentLeagueAsync(leagueName);
+        if (CurrentLeague == null)
+        {
+            return;
+        }
+
+        var eventRequestResult = await CurrentLeague
+            .Events()
+            .WithId(eventId)
+            .Get();
+        if (eventRequestResult.Success == false)
+        {
+            return;
+        }
+        var @event = eventRequestResult.Content;
+        await SetCurrentSeasonAsync(leagueName, @event.SeasonId);
+    }
 }
 
 public static class LeagueApiServiceExtensions

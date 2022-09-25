@@ -1,5 +1,8 @@
-﻿@using System.Collections.Specialized
+﻿@implements IDisposable
+@using System.Collections.Specialized
 @using System.Globalization
+@using System.Collections.ObjectModel
+@using System.ComponentModel
 @using iRLeagueManager.Web.ViewModels
 @using System.Linq
 
@@ -18,39 +21,41 @@
 @code {
     [Parameter(CaptureUnmatchedValues=true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
-    private IList<EventViewModel> events = default!;
-    [Parameter, EditorRequired]
-    public IList<EventViewModel> Events
+    [CascadingParameter]
+    public LeagueApiService ApiService { get; set; } = default!;
+
+    private EventListViewModel eventList = default!;
+    [CascadingParameter]
+    public EventListViewModel EventList 
     {
-        get => events;
+        get => eventList;
         set
         {
-            if (events is INotifyCollectionChanged oldCollectionChanged)
+            if (eventList != null)
             {
-                oldCollectionChanged.CollectionChanged -= OnEventsCollectionChanged;
+                eventList.EventList.CollectionChanged -= OnEventsCollectionChanged;
+                eventList.PropertyChanged -= OnEventListPropertyChanged;
             }
-            if (events != value)
+            eventList = value;
+            if (eventList != null)
             {
-                events = value;
-                OnEventsChanged();
-            }
-            if (events is INotifyCollectionChanged newCollectionChanged)
-            {
-                newCollectionChanged.CollectionChanged += OnEventsCollectionChanged;
+                eventList.EventList.CollectionChanged += OnEventsCollectionChanged;
+                eventList.PropertyChanged += OnEventListPropertyChanged;
             }
         }
     }
 
-    private EventViewModel? selected = default;
+    private ObservableCollection<EventViewModel> Events => EventList.EventList;
+
     [Parameter]
     public EventViewModel? Selected 
     { 
-        get => selected;
+        get => eventList?.Selected;
         set
         {
-            if (value != this.selected)
+            if (eventList != null && value != eventList.Selected)
             {
-                this.selected = value;
+                eventList.Selected = value;
                 _ = SelectedChanged.InvokeAsync(value);
             }
         }
@@ -105,6 +110,16 @@
         StateHasChanged();
     }
 
+    private void OnEventListPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        switch (e?.PropertyName)
+        {
+            case nameof(EventListViewModel.Selected):
+                OnEventsChanged();
+                break;
+        }
+    }
+
     private void OnEventsChanged()
     {
         // Update selectedIndex
@@ -134,6 +149,15 @@
         if (SelectedIndex > 0)
         {
             SelectedIndex--;
+        }
+    }
+
+    public void Dispose()
+    {
+        if (eventList != null)
+        {
+            eventList.EventList.CollectionChanged -= OnEventsCollectionChanged;
+            eventList.PropertyChanged -= OnEventListPropertyChanged;
         }
     }
 }

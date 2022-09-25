@@ -7,152 +7,41 @@
 @using iRLeagueManager.Web.Components.Reviews
 @using iRLeagueManager.Web.ViewModels
 @attribute [Authorize]
-@inherits MvvmComponentBase
-@inject ILoggerFactory loggerFactory
-@inject LeagueApiService apiService
-@inject EventListViewModel EventList
+@inherits LeagueComponentBase
+@*@inherits MvvmComponentBase*@
 @inject ReviewsPageViewModel ReviewsVm
-@inject NavigationManager navigationManager
 
 <div>
-    <LoadingHeader Loading=@(Bind(EventList, x => x.Loading) || Bind(ReviewsVm, x => x.Loading))>Reviews</LoadingHeader>
-    <EventSelect @bind-Selected=SelectedEvent Events=EventList.EventList/>
+    <LoadingHeader Loading=@(Bind(ReviewsVm, x => x.Loading))>Reviews</LoadingHeader>
+    <EventSelect class="my-2 mx-n2"/>
     @foreach(var review in @Bind(ReviewsVm, x => x.Reviews))
     {
-        <ReviewCard class="py-2 w-75" Review=review />
+        <ReviewCard class="py-2 w-75" Review=review EditClick=@(async () => await OnEditClick(review)) />
     }
 </div>
 
 @code {
-    [Parameter]
-    public string LeagueName { get; set; } = default!;
-    [Parameter]
-    public long? SeasonId { get; set; }
-    [Parameter]
-    public long? EventId { get; set; }
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
 
-    private ReviewViewModel Review { get; set; } = default!;
-
-    private EventViewModel? selectedEvent { get; set; }
-    public EventViewModel? SelectedEvent
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        get => selectedEvent;
-        set
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected override async Task OnEventChangedAsync(EventViewModel? @event)
+    {
+        if (@event?.EventId != null)
         {
-            if (selectedEvent != value)
-            {
-                selectedEvent = value;
-                _ = OnEventChanged(selectedEvent?.EventId);
-            }
+            NavigationManager.NavigateTo($"./{LeagueName}/Reviews/Events/{@event.EventId}");
+            await ReviewsVm.LoadFromEventAsync(@event.EventId);
         }
     }
 
-    protected override void OnInitialized()
+    private async Task OnEditClick(ReviewViewModel review)
     {
-        //Review = new ReviewViewModel(loggerFactory, apiService, new ReviewModel()
-        //{
-        //    IncidentNr = "1.2.3",
-        //    OnLap = "12",
-        //    Corner = "3",
-        //    IncidentKind = "Kontakt in Kurve",
-        //    InvolvedMembers = new List<MemberInfoModel>()
-        //    {
-        //        new() { MemberId = 1, FirstName = "Member", LastName = "Eins"},
-        //        new() { MemberId = 2, FirstName = "Member", LastName = "Zwei"},
-        //    },
-        //    ReviewComments = new List<ReviewCommentModel>(),
-        //});
-        base.OnInitialized();
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        // if routed directly to /Results page without season or session set:
-        // 1. Compare previous season to current season -> if seaon changed, trigger reload
-        // 2. If season is the same keep session as selected
-        if (EventId == null && EventList.LoadedSeasonId == apiService.CurrentSeason?.Id)
-        {
-            await OnEventChanged(SelectedEvent?.EventId);
-        }
-    }
-
-    protected async override Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender == false) return;
-
-        if (LeagueName == null)
-        {
-            return;
-        }
-
-        // set league state
-        await apiService.SetCurrentLeagueAsync(LeagueName);
-        await LoadPage(LeagueName);
-    }
-
-    private async Task LoadPage(string leagueName)
-    {
-        if (EventId != null)
-        {
-            await LoadFromEventAsync(leagueName, EventId.Value);
-            return;
-        }
-
-        if (SeasonId != null)
-        {
-            await LoadFromSeasonAsync(leagueName, SeasonId.Value);
-            return;
-        }
-
-        if (apiService.CurrentSeason == null)
-        {
-            var lastSeason = apiService.Shared.SeasonList.LastOrDefault();
-            if (lastSeason == null)
-            {
-                return;
-            }
-            await apiService.SetCurrentSeasonAsync(leagueName, lastSeason.SeasonId);
-        }
-
-        if (apiService.CurrentSeason != null)
-        {
-            SeasonId = apiService.CurrentSeason.Id;
-            await LoadFromSeasonAsync(leagueName, SeasonId.Value);
-            return;
-        }
-    }
-
-    private async Task LoadFromEventAsync(string leagueName, long eventId)
-    {
-        await ReviewsVm.LoadFromEventAsync(eventId);
-        if (apiService.CurrentSeason == null)
-        {
-            return;
-        }
-        SeasonId = apiService.CurrentSeason.Id;
-        await EventList.LoadEventListAsync(SeasonId.Value);
-        SelectedEvent = EventList.EventList.FirstOrDefault(x => x.EventId == eventId);
-    }
-
-    private async Task LoadFromSeasonAsync(string leagueName, long seasonId)
-    {
-        // load session list
-        await EventList.LoadEventListAsync(seasonId);
-
-        // select last session with result
-        var lastResultEvent = EventList.EventList.LastOrDefault(x => x.HasResult);
-        if (lastResultEvent != null)
-        {
-            SelectedEvent = lastResultEvent;
-        }
-    }
-
-    private async Task OnEventChanged(long? eventId)
-    {
-        if (eventId != null)
-        {
-            navigationManager.NavigateTo($"./{LeagueName}/Reviews/Events/{eventId}");
-            await ReviewsVm.LoadFromEventAsync(eventId.Value);
-        }
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(ReviewCard.Review), review);
+        await ModalService.Show<ReviewCard>("Edit Review", parameters).Result;
     }
 }

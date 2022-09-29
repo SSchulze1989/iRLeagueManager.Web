@@ -1,6 +1,7 @@
 ﻿@page "/{LeagueName}/Reviews/Events/{EventId:long}"
 @page "/{LeagueName}/Reviews/Seasons/{SeasonId:long}"
 @page "/{LeagueName}/Reviews"
+@using iRLeagueManager.Web.Extensions
 @using iRLeagueApiCore.Common.Models.Members
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueManager.Web.Components
@@ -14,9 +15,9 @@
 <div>
     <LoadingHeader Loading=@(Bind(ReviewsVm, x => x.Loading))>Reviews</LoadingHeader>
     <EventSelect class="my-2 mx-n2"/>
-    @foreach(var review in @Bind(ReviewsVm, x => x.Reviews))
+    @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
     {
-        <ReviewCard class="py-2 w-75" Review=review EditClick=@(async () => await OnEditClick(review)) />
+        <ReviewCard class="pb-2 w-75" Review=review EditClick=@(async () => await OnEditClick(review)) />
     }
 </div>
 
@@ -40,8 +41,27 @@
 
     private async Task OnEditClick(ReviewViewModel review)
     {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(ReviewCard.Review), review);
-        await ModalService.Show<ReviewCard>("Edit Review", parameters).Result;
+        var parameters = new ModalParameters()
+            .Add(nameof(EditReviewModal.Model), review.GetModel())
+            .Add(nameof(EditReviewModal.EventMembers), ReviewsVm.EventMembers);
+        var options = new ModalOptions()
+        {
+            Size = ModalSize.Medium,
+            DisableBackgroundCancel = true,
+        };
+        var modal = ModalService.Show<EditReviewModal>("Edit Review", parameters, options);
+        var result = await modal.Result;
+        if (result.Confirmed && result.Data is ReviewModel revieModel)
+        {
+            review.SetModel(revieModel);
+        }
+    }
+
+    private IEnumerable<ReviewViewModel> OrderReviews(IEnumerable<ReviewViewModel> reviews)
+    {
+        return reviews.OrderBy(x => x.SessionNr)
+            .ThenBy(x => x.IncidentNr.PadNumbers())
+            .ThenBy(x => x.OnLap.PadNumbers())
+            .ThenBy(x => x.Corner.PadNumbers());
     }
 }

@@ -3,23 +3,24 @@
 @inject EventListViewModel EventList
 @inject LeagueApiService ApiService
 
+
+<CascadingValue Value="EventList">
 <CascadingBlazoredModal>
-    <CascadingValue Value="ApiService">
-    <CascadingValue Value="EventList">
-        <Router AppAssembly="@typeof(App).Assembly">
-            <Found Context="routeData">
-                <CascadingValue Value="routeData">
-                    <AppRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-                    <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-                </CascadingValue>
-            </Found>
-            <NotFound>
-                <PageTitle>Not found</PageTitle>
-                <LayoutView Layout="@typeof(MainLayout)">
-                    <p role="alert">Sorry, there's nothing at this address.</p>
-                </LayoutView>
-            </NotFound>
-        </Router>
-    </CascadingValue>
-    </CascadingValue>
+<CascadingValue Value="ApiService">
+    <Router AppAssembly="@typeof(App).Assembly">
+        <Found Context="routeData">
+            <CascadingValue Value="routeData">
+                <AppRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            </CascadingValue>
+        </Found>
+        <NotFound>
+            <PageTitle>Not found</PageTitle>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <p role="alert">Sorry, there's nothing at this address.</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingValue>
 </CascadingBlazoredModal>
+</CascadingValue>

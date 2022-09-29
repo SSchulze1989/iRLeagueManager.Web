@@ -4,12 +4,7 @@
     <div style="display:inline-block">
         <h3>@ChildContent</h3>
     </div>
-    @if (Loading)
-    {
-        <div class="lds-ring">
-            <div></div>
-        </div>
-    }
+    <div class="spinner-border mx-2" style="height:1.5rem; width:1.5rem; @(Loading == false ? "visibility:hidden" : "")" role="status" />
 </div>
 
 @code {

@@ -9,7 +9,7 @@
 @inject SchedulesPageViewModel vm
 @inject JsonSerializerOptions jsonOptions
 
-<LoadingHeader Loading=@Bind(vm, x => x.Loading)></LoadingHeader>
+<LoadingHeader Loading=@Bind(vm, x => x.Loading)>Schedules</LoadingHeader>
 
 <div>
     @foreach(var schedule in @Bind(vm, x => x.Schedules))

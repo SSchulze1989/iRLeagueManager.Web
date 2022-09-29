@@ -1,0 +1,140 @@
+﻿@using System.Text.Json
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models.Members
+@using iRLeagueApiCore.Common.Models.Reviews
+@using iRLeagueManager.Web.ViewModels
+@inherits MvvmComponentBase
+@inject ReviewViewModel Review
+@inject JsonSerializerOptions JsonOptions
+
+<EditForm Model=Review OnValidSubmit=Submit>
+    <InputGroup Label="Session">
+        <InputSelect class="form-select" placeholder="Select Session" ariaaria-label="Select Session" id="incident_session" @bind-Value="Review.SessionId"> 
+            @if (EventList.Selected != null)
+            {
+                @foreach(var session in EventList.Selected.Sessions)
+                {
+                    <option value=@session.SessionId>@session.Name</option>
+                }
+            }
+        </InputSelect>
+    </InputGroup>
+    <InputGroup Label="Nr.">
+        <InputText class="form-control" placeholder="Incident Nr." aria-label="IncidentNr" id="incident_nr" @bind-Value="Review.IncidentNr"/>
+    </InputGroup>
+    <InputGroup Label="Lap">
+        <InputText class="form-control" placeholder="Lap" aria-label="Lap" id="incident_lap" @bind-Value="Review.OnLap" />
+    </InputGroup>
+    <InputGroup Label="Corner">
+        <InputText class="form-control" placeholder="Corner" aria-label="Corner" id="incident_corner" @bind-Value="Review.Corner" />
+    </InputGroup>
+    <InputGroup Label="Incident">
+        <InputText class="form-control" placeholder="Incident Kind" aria-label="Incident Kind" id="incident_kind" @bind-Value="Review.IncidentKind" />
+    </InputGroup>
+    <div class="p-1 mt-2">
+        <div class="row g-0">
+            <div class="col px-2 input-group-text" style="border-bottom-left-radius:0; border-bottom-right-radius:0;">
+                <label>Involved Drivers</label>
+            </div>
+            <div class="col-md-auto">
+                <div class="m-0" style="visibility:hidden; width:2rem;"/>
+            </div>
+            <div class="col px-2 input-group-text" style="border-bottom-left-radius:0; border-bottom-right-radius:0;">
+                <label>Select</label>
+            </div>
+        </div>
+        <div class="row g-0">
+            <div class="col">
+                <InputMemberSelect class="form-select" style="height:12rem; border-top-left-radius:0; border-bottom-right-radius:0; border-top-right-radius:0;" @bind-Value=FromInvolvedMembers MemberList=Review.InvolvedMembers/>
+            </div>
+            <div class="col-md-auto">
+                <div class="row h-50 m-0">
+                    <button class="btn btn-outline-secondary p-1" style="width:2rem; border-radius:0;" type="button" @onclick=OnMoveToInvolvedMembersClick><span class="oi oi-chevron-left"/></button>
+                </div>
+                <div class="row h-50 m-0">
+                    <button class="btn btn-outline-secondary p-1" style="width:2rem; border-radius:0;" type="button" @onclick=OnMoveFromInvolvedMembersClick><span class="oi oi-chevron-right"/></button>
+                </div>
+            </div>
+            <div class="col">
+                <InputMemberSelect class="form-select" style="height:12rem; border-bottom-left-radius:0; border-top-left-radius:0; border-top-right-radius:0;" @bind-Value=ToInvolvedMembers MemberList=EventMembers/>
+            </div>
+        </div>
+    </div>
+    <CancelSubmitButtons ModelState=Review SubmitText="Save" OnCancel=Cancel/>
+</EditForm>
+
+@code {
+    private CancellationTokenSource cts = new();
+
+    [CascadingParameter]
+    public BlazoredModalInstance? ModalInstance { get; set; }
+    [CascadingParameter]
+    public EventListViewModel EventList { get; set; } = default!;
+    //[Parameter]
+    //public ReviewViewModel Review { get; set; } = default!;
+
+    [Parameter]
+    public ReviewModel Model { get; set; } = default!;
+
+    [Parameter]
+    public IEnumerable<MemberInfoModel> EventMembers { get; set; } = Array.Empty<MemberInfoModel>();
+
+    private IEnumerable<MemberInfoModel> ToInvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
+    private IEnumerable<MemberInfoModel> FromInvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
+
+    protected override void OnParametersSet()
+    {
+        _ = Model ?? throw new InvalidOperationException($"Parameter {nameof(Model)} must have a value");
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+        // create deep copy of model
+        var modelCopy = JsonSerializer.Deserialize<ReviewModel>(JsonSerializer.Serialize(Model, JsonOptions), JsonOptions)
+            ?? throw new InvalidOperationException("Could not create copy of EventModel while opening Modal");
+        // populate session list selection
+        Review.SetModel(modelCopy);
+    }
+
+    private void OnMoveToInvolvedMembersClick()
+    {
+        Review.AddMemberSelection(ToInvolvedMembers);
+    }
+
+    private void OnMoveFromInvolvedMembersClick()
+    {
+        Review.RemoveMemberSelection(FromInvolvedMembers);
+    }
+
+    private async Task Submit()
+    {
+        var success = await Review.SaveChangesAsync(cts.Token);
+        if (success && ModalInstance != null)
+        {
+            var result = ModalResult.Ok(Review.GetModel());
+            await ModalInstance.CloseAsync(result);
+        }
+    }
+
+    private async Task Cancel()
+    {
+        if (ModalInstance != null)
+        {
+            await ModalInstance.CancelAsync();   
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing == false)
+        {
+            cts.Cancel();
+            cts.Dispose();
+        }
+        base.Dispose(disposing);
+    }
+}

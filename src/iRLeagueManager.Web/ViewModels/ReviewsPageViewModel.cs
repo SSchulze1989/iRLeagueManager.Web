@@ -1,4 +1,5 @@
-﻿using iRLeagueManager.Web.Data;
+﻿using iRLeagueApiCore.Common.Models.Members;
+using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 using System.Collections.ObjectModel;
 
@@ -13,6 +14,9 @@ namespace iRLeagueManager.Web.ViewModels
 
         private ObservableCollection<ReviewViewModel> reviews = new();
         public ObservableCollection<ReviewViewModel> Reviews { get => reviews; set => Set(ref reviews, value); }
+
+        private IEnumerable<MemberInfoModel> eventMembers = Array.Empty<MemberInfoModel>();
+        public IEnumerable<MemberInfoModel> EventMembers { get => eventMembers; set => Set(ref eventMembers, value); }
 
         public async Task LoadFromEventAsync(long eventId, CancellationToken cancellationToken = default)
         {
@@ -47,6 +51,15 @@ namespace iRLeagueManager.Web.ViewModels
 
                 var reviewModels = result.Content;
                 Reviews = new(reviewModels.Select(x => new ReviewViewModel(LoggerFactory, ApiService, x)));
+                
+                var membersEndpoint = eventEndpoint
+                    .Members();
+                var membersResult = await membersEndpoint.Get(cancellationToken);
+                if (membersResult.Success == false)
+                {
+                    return;
+                }
+                EventMembers = membersResult.Content;
             }
             finally
             {

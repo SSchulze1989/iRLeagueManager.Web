@@ -21,6 +21,7 @@ namespace iRLeagueManager.Web.ViewModels
         }
 
         public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
+        public long SessionId { get => model.SessionId; set => SetP(model.SessionId, value => model.SessionId = value, value); }
         public int SessionNr { get => model.SessionNr; set => SetP(model.SessionNr, value => model.SessionNr = value, value); }        
         public SessionType SessionType { get => model.SessionType; set => SetP(model.SessionType, value => model.SessionType = value, value); }
         public DateTime Duration 

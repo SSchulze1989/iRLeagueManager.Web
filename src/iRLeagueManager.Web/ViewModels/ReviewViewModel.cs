@@ -2,6 +2,7 @@
 using iRLeagueApiCore.Common.Models.Members;
 using iRLeagueApiCore.Common.Models.Reviews;
 using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Extensions;
 using System.Collections.ObjectModel;
 
 namespace iRLeagueManager.Web.ViewModels
@@ -15,14 +16,16 @@ namespace iRLeagueManager.Web.ViewModels
 
         public long ReviewId => model.ReviewId;
         public long EventId => model.EventId;
+        public string SessionName => model.SessionName;   
+        public int SessionNr => model.SessionNr;
         public long SeasonId => model.SeasonId;
-        public long SessionId => model.SessionId;
-        public string SessionName => model.SessionName;
         public string AuthorName => model.AuthorName;
         public string AuthorUserId => model.AuthorUserId;
         public DateTime CreatedOn => model.CreatedOn.GetValueOrDefault();
         public DateTime LastModifiedOn => model.LastModifiedOn.GetValueOrDefault();
 
+        private long? sessionId;
+        public long? SessionId { get => sessionId; set => Set(ref sessionId, value); }
         public string IncidentKind { get => model.IncidentKind; set => SetP(model.IncidentKind, value => model.IncidentKind = value, value); }
         public string FullDescription { get => model.FullDescription; set => SetP(model.FullDescription, value => model.FullDescription = value, value); }
         public string OnLap { get => model.OnLap; set => SetP(model.OnLap, value => model.OnLap = value, value); }
@@ -58,9 +61,9 @@ namespace iRLeagueManager.Web.ViewModels
         /// <param name="selection"></param>
         public void AddMemberSelection(IEnumerable<MemberInfoModel> selection)
         {
-            foreach(var member in selection)
+            foreach (var member in selection)
             {
-                if (InvolvedMembers.Contains(member))
+                if (model.InvolvedMembers.Contains(member))
                 {
                     continue;
                 }
@@ -68,12 +71,13 @@ namespace iRLeagueManager.Web.ViewModels
                 {
                     continue;
                 }
-                if (InvolvedMembers.Any(x => x.MemberId == member.MemberId))
+                if (model.InvolvedMembers.Any(x => x.MemberId == member.MemberId))
                 {
                     continue;
                 }
-                InvolvedMembers.Add(member);
+                model.InvolvedMembers.Add(member);
             }
+            RefreshMemberList();
         }
 
         /// <summary>
@@ -82,24 +86,25 @@ namespace iRLeagueManager.Web.ViewModels
         /// <param name="selection"></param>
         public void RemoveMemberSelection(IEnumerable<MemberInfoModel> selection)
         {
-            foreach(var member in selection)
+            foreach (var member in selection)
             {
-                if (InvolvedMembers.Contains(member))
+                if (model.InvolvedMembers.Contains(member))
                 {
-                    InvolvedMembers.Remove(member);
+                    model.InvolvedMembers.Remove(member);
                     continue;
                 }
                 if (member.MemberId == 0)
                 {
                     continue;
                 }
-                var involvedMember = InvolvedMembers.FirstOrDefault(x => x.MemberId == member.MemberId);
+                var involvedMember = model.InvolvedMembers.FirstOrDefault(x => x.MemberId == member.MemberId);
                 if (involvedMember != null)
                 {
-                    InvolvedMembers.Remove(involvedMember);
+                    model.InvolvedMembers.Remove(involvedMember);
                     continue;
                 }
             }
+            RefreshMemberList();
         }
 
         /// <summary>
@@ -153,7 +158,7 @@ namespace iRLeagueManager.Web.ViewModels
         /// </summary>
         /// <returns></returns>
         private IReviewByIdEndpoint? GetReviewEndpoint()
-        { 
+        {
             if (ReviewId == 0)
             {
                 return null;
@@ -172,7 +177,7 @@ namespace iRLeagueManager.Web.ViewModels
                 }
             }
             // Remove comments that are no longer in the model
-            foreach (var member in InvolvedMembers)
+            foreach (var member in InvolvedMembers.ToArray())
             {
                 if (model.InvolvedMembers.Any(x => x.MemberId == member.MemberId) == false)
                 {
@@ -187,7 +192,7 @@ namespace iRLeagueManager.Web.ViewModels
         private void RefreshCommentList()
         {
             // Add comments from to list that are not already in there
-            foreach(var comment in model.ReviewComments)
+            foreach (var comment in model.ReviewComments)
             {
                 if (Comments.Any(x => x.GetModel() == comment) == false)
                 {
@@ -195,12 +200,60 @@ namespace iRLeagueManager.Web.ViewModels
                 }
             }
             // Remove comments that are no longer in the model
-            foreach(var commentViewModel in Comments)
+            foreach (var commentViewModel in Comments.ToArray())
             {
                 if (model.ReviewComments.Any(x => x == commentViewModel.GetModel()) == false)
                 {
                     Comments.Remove(commentViewModel);
                 }
+            }
+        }
+
+        public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            if (model == null)
+            {
+                return true;
+            }
+            if (ApiService.CurrentLeague == null || ReviewId == 0)
+            {
+                return false;
+            }
+
+            try
+            {
+                Loading = true;
+                // if session was changed -> move review
+                if (SessionId != null && SessionId != model.SessionId)
+                {
+                    var moveRequest = ApiService.CurrentLeague
+                        .Reviews()
+                        .WithId(ReviewId)
+                        .MoveToSession(SessionId.Value);
+                    var moveResult = await moveRequest.Post(cancellationToken);
+                    if (moveResult.Success == false)
+                    {
+                        moveResult.EnsureSuccess();
+                        return false;
+                    }
+                }
+
+                var request = ApiService.CurrentLeague
+                    .Reviews()
+                    .WithId(ReviewId)
+                    .Put(model, cancellationToken);
+                var result = await request;
+                if (result.Success == false)
+                {
+                    result.EnsureSuccess();
+                    return false;
+                }
+                SetModel(result.Content);
+                return true;
+            }
+            finally
+            {
+                Loading = false;
             }
         }
 
@@ -215,6 +268,7 @@ namespace iRLeagueManager.Web.ViewModels
             RefreshMemberList();
             RefreshCommentList();
             RefreshVoteList();
+            SessionId = model.SessionId;
         }
     }
 }

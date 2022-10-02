@@ -17,7 +17,7 @@
     <CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
         @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
         {
-            <ReviewCard class="pb-2 w-75" Review=review EditClick=@(async () => await OnEditClick(review)) DeleteClick=@(async () => await OnDeleteClick(review))/>
+            <ReviewCard class="pb-2" Review=review EditClick=@(async () => await OnEditClick(review)) DeleteClick=@(async () => await OnDeleteClick(review))/>
         }
     </CascadingValue>
     <button class="btn btn-outline-secondary" type="button" @onclick=OnAddClick>Add Review</button>

@@ -54,7 +54,7 @@
                         @foreach(var vote in @Bind(Review, x => x.Votes))
                         {
                             var member = @Bind(vote, x => x.MemberAtFault);
-                            <span class="badge bg-danger">@Bind(vote, x => x.VoteCategoryId): @member.FirstName @member.LastName</span>
+                            <span class="badge bg-danger">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
                         }
                     </div>
                 </div>
@@ -75,7 +75,10 @@
                         <ul>
                             @foreach(var vote in @Bind(Review, x => x.Comments).SelectMany(x => x.Votes))
                             {
-                                <li><span class="badge bg-warning">@vote.VoteCategoryId: @vote.MemberAtFault.FirstName @vote.MemberAtFault.LastName</span></li>
+                                var member = @Bind(vote, x => x.MemberAtFault);
+                                <li>
+                                    <span class="badge bg-warning">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
+                                </li>
                             }
                         </ul>
                     </div>
@@ -86,7 +89,8 @@
                     <div>
                         @foreach(var vote in @Bind(Review, x => x.Votes))
                         {
-                            <span class="badge bg-danger">@vote.VoteCategoryId: @vote.MemberAtFault.FirstName @vote.MemberAtFault.LastName</span>
+                            var member = @Bind(vote, x => x.MemberAtFault);
+                            <span class="badge bg-danger">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
                         }
                     </div>
                     <div>

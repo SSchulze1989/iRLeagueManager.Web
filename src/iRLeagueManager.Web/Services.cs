@@ -13,7 +13,8 @@ namespace iRLeagueManager.Web
             services.AddScoped<SchedulesPageViewModel>();
             services.AddScoped<ScheduleViewModel>();
             services.AddTransient<EventViewModel>();
-            services.AddTransient(x => new ReviewViewModel(x.GetRequiredService<ILoggerFactory>(), x.GetRequiredService<LeagueApiService>(), new iRLeagueApiCore.Common.Models.Reviews.ReviewModel()));
+            services.AddTransient<ReviewViewModel>();
+            services.AddTransient<ReviewCommentViewModel>();
             services.AddScoped<ResultsPageViewModel>();
             services.AddScoped<ScoringsViewModel>();
             services.AddScoped<ScoringViewModel>();

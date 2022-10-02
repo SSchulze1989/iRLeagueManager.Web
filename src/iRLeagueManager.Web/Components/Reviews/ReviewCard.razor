@@ -2,6 +2,7 @@
 @using System.ComponentModel
 @using iRLeagueManager.Web.ViewModels
 
+<CascadingValue Value=Review.InvolvedMembers>
 <div @attributes=AdditionalAttributes>
     <div class="card review-card">
         <div class="btn card-header accordion-header review-header">
@@ -27,6 +28,10 @@
                     else
                     {
                         <button class="oi oi-chevron-top btn review-header-button" @onclick=ToggleCollapsed/>
+                    }
+                    @if (DeleteClick.HasDelegate)
+                    {
+                        <button class="oi oi-x btn review-header-button" @onclick=DeleteClick/>
                     }
                 </div>
             </div>
@@ -104,6 +109,7 @@
         </div>
     </div>
 </div>
+</CascadingValue>
 
 @code {
     [Parameter(CaptureUnmatchedValues=true)]
@@ -112,6 +118,8 @@
     public ReviewViewModel Review { get; set; } = default!;
     [Parameter]
     public EventCallback<MouseEventArgs> EditClick { get; set; } 
+    [Parameter]
+    public EventCallback<MouseEventArgs> DeleteClick { get; set; }
 
     private ElementReference ReviewText { get; set; }
 
@@ -126,5 +134,10 @@
     private void ToggleCollapsed()
     {
         Collapsed = !Collapsed;
+    }
+
+    private async Task Delete()
+    {
+        await Review.DeleteAsync();
     }
 }

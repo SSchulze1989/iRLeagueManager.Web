@@ -154,7 +154,7 @@
     {
         //navigationManager.NavigateTo($"{LeagueName}/Results/Session/{sessionId}");
         var parameters = new ModalParameters()
-            .Add(nameof(EditEventModal.EventModel), eventViewModel.GetModel());
+            .Add(nameof(EditEventModal.EventModel), eventViewModel.CopyModel());
         var options = new ModalOptions()
         {
             Size = ModalSize.Medium,

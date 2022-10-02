@@ -96,10 +96,7 @@
         {
             return;
         }
-        // create deep copy of model
-        var modelCopy = JsonSerializer.Deserialize<EventModel>(JsonSerializer.Serialize(EventModel, jsonOptions), jsonOptions)
-            ?? throw new InvalidOperationException("Could not create copy of EventModel while opening Modal");
-        Event.SetModel(modelCopy);
+        Event.SetModel(EventModel);
     }
 
     private async Task Submit()

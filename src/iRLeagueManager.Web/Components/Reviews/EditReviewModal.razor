@@ -1,11 +1,9 @@
-﻿@using System.Text.Json
-@using iRLeagueApiCore.Common.Enums
+﻿@using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models.Members
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
 @inject ReviewViewModel Review
-@inject JsonSerializerOptions JsonOptions
 
 <EditForm Model=Review OnValidSubmit=Submit>
     <InputGroup Label="Session">
@@ -56,7 +54,7 @@
                 </div>
             </div>
             <div class="col">
-                <InputMemberSelect class="form-select" style="height:12rem; border-bottom-left-radius:0; border-top-left-radius:0; border-top-right-radius:0;" @bind-Value=ToInvolvedMembers MemberList=EventMembers/>
+                <InputMemberSelect class="form-select" style="height:12rem; border-bottom-left-radius:0; border-top-left-radius:0; border-top-right-radius:0;" @bind-Value=ToInvolvedMembers MemberList=InvolvedMembers/>
             </div>
         </div>
     </div>
@@ -77,7 +75,10 @@
     public ReviewModel Model { get; set; } = default!;
 
     [Parameter]
-    public IEnumerable<MemberInfoModel> EventMembers { get; set; } = Array.Empty<MemberInfoModel>();
+    public IEnumerable<MemberInfoModel> InvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
+
+    [Parameter]
+    public Func<ReviewViewModel, CancellationToken, Task<bool>>? OnSubmit { get; set; }
 
     private IEnumerable<MemberInfoModel> ToInvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
     private IEnumerable<MemberInfoModel> FromInvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
@@ -93,11 +94,7 @@
         {
             return;
         }
-        // create deep copy of model
-        var modelCopy = JsonSerializer.Deserialize<ReviewModel>(JsonSerializer.Serialize(Model, JsonOptions), JsonOptions)
-            ?? throw new InvalidOperationException("Could not create copy of EventModel while opening Modal");
-        // populate session list selection
-        Review.SetModel(modelCopy);
+        Review.SetModel(Model);
     }
 
     private void OnMoveToInvolvedMembersClick()
@@ -112,7 +109,12 @@
 
     private async Task Submit()
     {
-        var success = await Review.SaveChangesAsync(cts.Token);
+        //var success = await Review.SaveChangesAsync(cts.Token);
+        bool success = true;
+        if (OnSubmit != null)
+        {
+            success |= await OnSubmit.Invoke(Review, cts.Token);
+        }
         if (success && ModalInstance != null)
         {
             var result = ModalResult.Ok(Review.GetModel());

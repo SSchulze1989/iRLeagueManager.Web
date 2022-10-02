@@ -9,6 +9,10 @@ namespace iRLeagueManager.Web.ViewModels
 {
     public class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, ReviewModel>
     {
+        public ReviewViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+            base(loggerFactory, apiService, new())
+        {
+        }
         public ReviewViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, ReviewModel model) :
             base(loggerFactory, apiService, model)
         {
@@ -260,6 +264,69 @@ namespace iRLeagueManager.Web.ViewModels
         private void RefreshVoteList()
         {
             Votes = new ObservableCollection<VoteViewModel>(model.VoteResults.Select(x => new VoteViewModel(LoggerFactory, ApiService, x)));
+        }
+
+        public async Task<bool> AddToSessionAsync(long sessionId, CancellationToken cancellationToken = default)
+        {
+            if (model == null)
+            {
+                return true;
+            }
+            if (ApiService.CurrentLeague == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                Loading = true;
+                var endpoint = ApiService.CurrentLeague.Sessions()
+                    .WithId(sessionId)
+                    .Reviews();
+                var result = await endpoint.Post(model, cancellationToken);
+                if (result.Success == false)
+                {
+                    result.EnsureSuccess();
+                    return false;
+                }
+                SetModel(model);
+                return true;
+            }
+            finally
+            {
+                Loading = false;
+            }
+        }
+
+        public async Task<bool> DeleteAsync(CancellationToken cancellationToken = default)
+        {
+            if (model == null)
+            {
+                return true;
+            }
+            if (ApiService.CurrentLeague == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                Loading = true;
+                var request = ApiService.CurrentLeague.Reviews()
+                    .WithId(ReviewId)
+                    .Delete(cancellationToken);
+                var result = await request;
+                if (result.Success == false)
+                {
+                    result.EnsureSuccess();
+                    return false;
+                }
+                return true;
+            }
+            finally
+            {
+                Loading = false;
+            }
         }
 
         public override void SetModel(ReviewModel model)

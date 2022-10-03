@@ -66,9 +66,14 @@
         if (@event?.EventId != null)
         {
             var resultIndex = NavigationManager.QueryParameter<int>(resultTabParam);
+            await vm.LoadFromEventAsync(@event.EventId);
+
+            if (resultIndex >= vm.Results.Count())
+            {
+                resultIndex = 0;
+            }
             var navUri = $"./{LeagueName}/Results/Events/{@event.EventId}?{resultTabParam}={resultIndex}";
             NavigationManager.NavigateTo(navUri);
-            await vm.LoadFromEventAsync(@event.EventId);
         }
     }
 

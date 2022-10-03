@@ -65,7 +65,9 @@
     {
         if (@event?.EventId != null)
         {
-            NavigationManager.NavigateTo($"./{LeagueName}/Results/Events/{@event.EventId}");
+            var resultIndex = NavigationManager.QueryParameter<int>(resultTabParam);
+            var navUri = $"./{LeagueName}/Results/Events/{@event.EventId}?{resultTabParam}={resultIndex}";
+            NavigationManager.NavigateTo(navUri);
             await vm.LoadFromEventAsync(@event.EventId);
         }
     }

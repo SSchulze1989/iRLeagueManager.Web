@@ -8,6 +8,7 @@
 @using System.Linq.Expressions
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.Components.Results
 @using iRLeagueManager.Web.ViewModels
 @attribute [Authorize]
 @inherits LeagueComponentBase
@@ -38,58 +39,14 @@
         {
             @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults))
             {
-                <div class="card my-2" id="results-session-@Bind(result, x => x.SessionName)">
-                    <div class="card-header">
-                        @Bind(result, x => x.SessionName)
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-sm table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.FinalPosition)">Pos.</th>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.FinalPositionChange)">Chg.</th>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.StartPosition)">Start</th>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.Firstname)">Name</th>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.TeamName)">Team</th>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.QualifyingTime)">Qualy Lap</th>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.FastestLapTime)">Fastest Lap</th>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.AvgLapTime)">Avg. Lap</th>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.Interval)">Interval</th>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.LeadLaps)">Laps Lead</th>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.CompletedLaps)">Laps Compl.</th>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.RacePoints)">Race Pts.</th>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.BonusPoints)">Bonus Pts.</th>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.PenaltyPoints)">Penalty</th>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.Incidents)">Incs.</th>
-                                    <th @onclick="() => SetOrderProperty(result, row => row.TotalPoints)">Total Pts.</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach(var row in result.ResultRows)
-                                {
-                                    <tr>
-                                        <td>@row.FinalPosition</td>
-                                        <td>@row.FinalPositionChange</td>
-                                        <td>@row.StartPosition</td>
-                                        <td>@row.Firstname @row.Lastname</td>
-                                        <td>@row.TeamName</td>
-                                        <td>@row.QualifyingTime.LapTimeString()</td>
-                                        <td>@row.FastestLapTime.LapTimeString() (@row.FastLapNr)</td>
-                                        <td>@row.AvgLapTime.LapTimeString()</td>
-                                        <td>+@row.Interval.LapTimeString()</td>
-                                        <td>@row.LeadLaps</td>
-                                        <td>@row.CompletedLaps</td>
-                                        <td>@row.RacePoints</td>
-                                        <td>@row.BonusPoints</td>
-                                        <td>@row.PenaltyPoints</td>
-                                        <td>@row.Incidents</td>
-                                        <td>@row.TotalPoints</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                @if (result.TeamResultRows == null || result.TeamResultRows.Count() == 0)
+                {
+                    <DisplayResult Result=result/>
+                }
+                else
+                {
+                    <DisplayTeamResult Result=result/>
+                }
             }
         }
     </div>
@@ -124,11 +81,6 @@
         if (firstRender == false) return;
 
         vm.SelectedResultIndex = NavigationManager.QueryParameter<int>(resultTabParam);
-    }
-
-    private void SetOrderProperty(SessionResultViewModel result, Expression<Func<ResultRowModel, IComparable>> selector, bool descending = false)
-    {
-        result.OrderByPropertySelector = selector;
     }
 
     private void SetSelectedResultIndex(int index)

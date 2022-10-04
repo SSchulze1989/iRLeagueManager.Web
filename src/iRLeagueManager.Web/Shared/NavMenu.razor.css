@@ -53,6 +53,18 @@
         line-height: 3rem;
     }
 
+    .nav-item.disabled ::deep a {
+        color: #6c757d;
+        pointer-events: none;
+        cursor: default;
+    }
+
+    .nav-item.disabled ::deep select {
+        color: #6c757d;
+        pointer-events: none;
+        cursor: default;
+    }
+
 .nav-item ::deep a.active {
     background-color: rgba(255,255,255,0.25);
     color: white;

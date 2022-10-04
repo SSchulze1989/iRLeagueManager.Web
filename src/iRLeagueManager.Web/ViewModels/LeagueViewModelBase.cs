@@ -4,6 +4,7 @@ using MvvmBlazor.ViewModel;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace iRLeagueManager.Web.ViewModels
 {
@@ -82,6 +83,33 @@ namespace iRLeagueManager.Web.ViewModels
                 return true;
             }
             return false;
+        }
+    }
+
+    public class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelBase<TViewModel>
+    {
+        protected TModel model = default!;
+
+        public LeagueViewModelBase(ILoggerFactory loggerFactory, LeagueApiService apiService, TModel model) : 
+            base(loggerFactory, apiService)
+        {
+            SetModel(model);
+        }
+
+        public TModel GetModel()
+        {
+            return model;
+        }
+
+        public virtual void SetModel(TModel model)
+        {
+            this.model = model;
+        }
+
+        public virtual TModel CopyModel()
+        {
+            return JsonSerializer.Deserialize<TModel>(JsonSerializer.Serialize(model))
+                ?? throw new InvalidOperationException("Could not copy model");
         }
     }
 }

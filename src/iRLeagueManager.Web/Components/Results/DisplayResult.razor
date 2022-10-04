@@ -1,0 +1,89 @@
+﻿@using System.Linq.Expressions
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.ViewModels
+@inherits MvvmComponentBase
+
+<div class="card my-2" id="results-session-@Bind(Result, x => x.SessionName)">
+    <div class="card-header">
+        @Bind(Result, x => x.SessionName)
+    </div>
+    <div class="card-body">
+        <table class="table table-sm table-striped table-hover">
+            <thead>
+                <tr>
+                    <th @onclick="() => SetOrderProperty(Result, row => row.FinalPosition)">Pos.</th>
+                    @if (isTeamResult == false)
+                    {
+                        <th @onclick="() => SetOrderProperty(Result, row => row.FinalPositionChange)">Chg.</th>
+                        <th @onclick="() => SetOrderProperty(Result, row => row.StartPosition)">Start</th>
+                        <th @onclick="() => SetOrderProperty(Result, row => row.Firstname)">Name</th>
+                    }
+                    <th @onclick="() => SetOrderProperty(Result, row => row.TeamName)">Team</th>
+                    <th @onclick="() => SetOrderProperty(Result, row => row.QualifyingTime)">Qualy Lap</th>
+                    <th @onclick="() => SetOrderProperty(Result, row => row.FastestLapTime)">Fastest Lap</th>
+                    <th @onclick="() => SetOrderProperty(Result, row => row.AvgLapTime)">Avg. Lap</th>
+                    @if (isTeamResult == false)
+                    {
+                        <th @onclick="() => SetOrderProperty(Result, row => row.Interval)">Interval</th>
+                        <th @onclick="() => SetOrderProperty(Result, row => row.LeadLaps)">Laps Lead</th>
+                        <th @onclick="() => SetOrderProperty(Result, row => row.CompletedLaps)">Laps Compl.</th>
+                    }
+                    <th @onclick="() => SetOrderProperty(Result, row => row.RacePoints)">Race Pts.</th>
+                    <th @onclick="() => SetOrderProperty(Result, row => row.BonusPoints)">Bonus Pts.</th>
+                    <th @onclick="() => SetOrderProperty(Result, row => row.PenaltyPoints)">Penalty</th>
+                    <th @onclick="() => SetOrderProperty(Result, row => row.Incidents)">Incs.</th>
+                    <th @onclick="() => SetOrderProperty(Result, row => row.TotalPoints)">Total Pts.</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var row in Result.ResultRows)
+                {
+                    <tr>
+                        <td>@row.FinalPosition</td>
+                        @if (isTeamResult == false)
+                        {
+                            <td>@row.FinalPositionChange</td>
+                            <td>@row.StartPosition</td>
+                            <td>@row.Firstname @row.Lastname</td>
+                        }
+                        <td style="color:@row.TeamColor">@row.TeamName</td>
+                        <td>@row.QualifyingTime.LapTimeString()</td>
+                        <td>@row.FastestLapTime.LapTimeString() (@row.FastLapNr)</td>
+                        <td>@row.AvgLapTime.LapTimeString()</td>
+                        @if (isTeamResult == false)
+                        {
+                            <td>+@row.Interval.LapTimeString()</td>
+                            <td>@row.LeadLaps</td>
+                            <td>@row.CompletedLaps</td>
+                        }
+                        <td>@row.RacePoints</td>
+                        <td>@row.BonusPoints</td>
+                        <td style="@(@row.PenaltyPoints != 0 ? "color:red" : "")">
+                            @(row.PenaltyPoints != 0 ? "-" : "")@row.PenaltyPoints
+                        </td>
+                        <td>@row.Incidents</td>
+                        <td>@row.TotalPoints</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public SessionResultViewModel Result { get; set; } = default!;
+
+    private bool isTeamResult = false;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        isTeamResult = Result?.ResultRows.Any(x => x.MemberId == null) ?? false;
+    }
+
+    private void SetOrderProperty(SessionResultViewModel result, Expression<Func<ResultRowModel, IComparable>> selector, bool descending = false)
+    {
+        result.OrderByPropertySelector = selector;
+    }
+}

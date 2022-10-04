@@ -6,14 +6,11 @@ using System.Collections.ObjectModel;
 
 namespace iRLeagueManager.Web.ViewModels
 {
-    public class EventViewModel : LeagueViewModelBase<EventViewModel>
+    public class EventViewModel : LeagueViewModelBase<EventViewModel, EventModel>
     {
-        private EventModel model;
-
         public EventViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
-            base(loggerFactory, apiService)
+            base(loggerFactory, apiService, new EventModel())
         {
-            this.model = new EventModel();
         }
 
         public EventViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, EventModel model) :
@@ -299,18 +296,13 @@ namespace iRLeagueManager.Web.ViewModels
             SortSessions();
         }
 
-        public void SetModel(EventModel model)
+        public override void SetModel(EventModel model)
         {
             _ = model ?? throw new ArgumentNullException(nameof(model));
             this.model = model;
             Sessions = new ObservableCollection<SessionViewModel>(model.Sessions.Select(x => new SessionViewModel(LoggerFactory, ApiService, x)));
             SortSessions();
             OnPropertyChanged();
-        }
-
-        public EventModel GetModel()
-        {
-            return model;
         }
     }
 }

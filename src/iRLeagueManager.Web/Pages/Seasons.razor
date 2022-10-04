@@ -9,7 +9,9 @@
 @inject SeasonsViewModel vm
 @inject SharedStateService sharedState
 
-<LoadingHeader StateProvider=vm>Seasons</LoadingHeader>
+<LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+    <h3>Seasons</h3>
+</LoadingHeader>
 
 <div>
     <p>@sharedState.SeasonName</p>
@@ -40,7 +42,7 @@
         if (result.Success)
         {
             var seasons = result.Content;
-            navigationManager.NavigateTo($"./{LeagueName}/Seasons/{seasons.First().SeasonId}");
+            navigationManager.NavigateTo($"./{LeagueName}/Seasons/{seasons.Last().SeasonId}");
         }
     }
 

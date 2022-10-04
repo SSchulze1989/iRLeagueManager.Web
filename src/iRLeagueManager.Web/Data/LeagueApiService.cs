@@ -3,6 +3,7 @@ using iRLeagueApiCore.Client.Endpoints.Leagues;
 using iRLeagueApiCore.Client.Endpoints.Seasons;
 using iRLeagueApiCore.Common.Models;
 using System.Collections.ObjectModel;
+using System.Text.Json;
 
 namespace iRLeagueManager.Web.Data;
 
@@ -10,15 +11,17 @@ public class LeagueApiService
 {
     //private readonly ILogger<LeagueApiService> logger;
 
-    public LeagueApiService(ILeagueApiClient apiClient, SharedStateService sharedState)
+    public LeagueApiService(ILeagueApiClient apiClient, SharedStateService sharedState, JsonSerializerOptions jsonOptions)
     {
         //this.logger = logger;
         Client = apiClient;
         Shared = sharedState;
+        JsonOptions = jsonOptions;
     }
 
     public ILeagueApiClient Client { get; }
     public SharedStateService Shared { get; }
+    public JsonSerializerOptions JsonOptions { get; }
     public ILeagueByNameEndpoint? CurrentLeague { get; private set; }
     public ISeasonByIdEndpoint? CurrentSeason { get; private set; }
 
@@ -67,6 +70,26 @@ public class LeagueApiService
             Shared.SeasonId = seasonId;
             Shared.SeasonName = season.SeasonName;
         }
+    }
+
+    public async Task SetCurrentSeasonByEventId(string leagueName, long eventId)
+    {
+        await SetCurrentLeagueAsync(leagueName);
+        if (CurrentLeague == null)
+        {
+            return;
+        }
+
+        var eventRequestResult = await CurrentLeague
+            .Events()
+            .WithId(eventId)
+            .Get();
+        if (eventRequestResult.Success == false)
+        {
+            return;
+        }
+        var @event = eventRequestResult.Content;
+        await SetCurrentSeasonAsync(leagueName, @event.SeasonId);
     }
 }
 

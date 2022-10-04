@@ -1,0 +1,46 @@
+﻿@using System.Linq.Expressions
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.ViewModels
+@inherits MvvmComponentBase
+
+<div class="card my-2" id="results-session-@Bind(Result, x => x.SessionName)">
+    <div class="card-header">
+        @Bind(Result, x => x.SessionName)
+    </div>
+    <div class="card-body">
+        <table class="table table-sm table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Pos.</th>
+                    <th>Team</th>
+                    <th>Fastest Lap</th>
+                    <th>Avg. Lap</th>
+                    <th>Race Pts.</th>
+                    <th>Bonus Pts.</th>
+                    <th>Penalty</th>
+                    <th>Total Pts.</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Result.ResultRows.OrderBy(x => x.FinalPosition))
+                {
+                    <tr>
+                        <td>@row.FinalPosition</td>
+                        <td style="color:@row.TeamColor;">@row.TeamName</td>
+                        <td>@row.FastestLapTime.LapTimeString()</td>
+                        <td>@row.AvgLapTime.LapTimeString()</td>
+                        <td>@row.RacePoints</td>
+                        <td>@row.BonusPoints</td>
+                        <td>@row.PenaltyPoints</td>
+                        <td>@row.TotalPoints</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public SessionResultViewModel Result { get; set; } = default!;
+}

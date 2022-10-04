@@ -1,4 +1,5 @@
-﻿using iRLeagueManager.Web.ViewModels;
+﻿using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.ViewModels;
 
 namespace iRLeagueManager.Web
 {
@@ -11,11 +12,15 @@ namespace iRLeagueManager.Web
             services.AddScoped<SeasonViewModel>();
             services.AddScoped<SchedulesPageViewModel>();
             services.AddScoped<ScheduleViewModel>();
-            services.AddScoped<EventViewModel>();
+            services.AddTransient<EventViewModel>();
+            services.AddTransient<ReviewViewModel>();
+            services.AddTransient<ReviewCommentViewModel>();
             services.AddScoped<ResultsPageViewModel>();
             services.AddScoped<ScoringsViewModel>();
             services.AddScoped<ScoringViewModel>();
             services.AddScoped<ResultConfigSettingsViewModel>();
+            services.AddScoped<ReviewsPageViewModel>();
+            services.AddScoped<EventListViewModel>();
         }
     }
 }

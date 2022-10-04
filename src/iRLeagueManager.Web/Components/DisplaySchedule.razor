@@ -3,28 +3,21 @@
 @inherits MvvmComponentBase
 
 @{var maxRaceCount = @Schedule.MaxRaceCount;}
-<div class="container">
-    <div style="display:inline-block">
-        <div style="display:inline-block">
-            @*<div class="input-group @(EditName ? "" : " d-none")" @onfocusout=@(async () => await ResetName(Schedule))>*@
-            <div class="input-group @(EditName ? "" : " d-none")">
-                <input type="text" class="form-control" @bind="Schedule.Name" @ref="ScheduleNameInput"/>
-                <button type="button" class="btn btn-success" @onclick=@SaveName>&#10004</button>
-                <button type="button" class="btn btn-danger" @onclick=@ResetName>&#128473;</button>
-            </div>
-            <div class="@(EditName ? " d-none" : "")"> 
-                <LoadingHeader StateProvider=Schedule @onclick=@EditNameClick>@Bind(Schedule, x => x.Name)</LoadingHeader>
-            </div>
+<div class="card my-2 pb-0">
+    <LoadingHeader class="card-header">
+        <div class="input-group @(EditName ? "" : " d-none")">
+            <input type="text" class="form-control" @bind="Schedule.Name" @ref="ScheduleNameInput"/>
+            <button type="button" class="btn btn-success" @onclick=@SaveName>&#10004</button>
+            <button type="button" class="btn btn-danger" @onclick=@ResetName>&#128473;</button>
         </div>
-        @if (Bind(Schedule, x => x.Loading))
+        <div class="@(EditName ? " d-none" : "")"> 
+            <div class="pointer" @onclick=@EditNameClick>@Bind(Schedule, x => x.Name)</div>
+        </div>
+    </LoadingHeader>
+    <div class="card-body">
+        @if(Schedule.Events != null)
         {
-            <div class="lds-ring">
-                <div></div>
-            </div>
-        }
-        else 
-        {
-            <table class="table alternate select-table">
+            <table class="table table-striped table-hover">
                 <thead>
                     <tr>
                         <th>Nr.</th>
@@ -154,7 +147,7 @@
     {
         //navigationManager.NavigateTo($"{LeagueName}/Results/Session/{sessionId}");
         var parameters = new ModalParameters()
-            .Add(nameof(EditEventModal.EventModel), eventViewModel.GetModel());
+            .Add(nameof(EditEventModal.EventModel), eventViewModel.CopyModel());
         var options = new ModalOptions()
         {
             Size = ModalSize.Medium,

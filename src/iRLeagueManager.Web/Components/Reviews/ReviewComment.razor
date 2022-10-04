@@ -1,0 +1,53 @@
+﻿@inherits MvvmComponentBase
+@using iRLeagueApiCore.Common.Models.Members
+@using iRLeagueApiCore.Common.Models.Reviews
+@using iRLeagueManager.Web.ViewModels
+
+<div class="container">
+    <h6 class="fw-bold">@Bind(Comment, x => x.AuthorName)</h6>
+    <div class="m-1">
+        @Bind(Comment, x=> x.Text)
+    </div>
+    <div>
+        @foreach(var vote in @Bind(Comment, x => x.Votes))
+        {
+            var member = @Bind(vote, x => x.MemberAtFault);
+            <span class="badge bg-warning">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
+        }
+    </div>
+    @*<div class="mt-2">
+        <button class="btn btn-outline-secondary py-0" @onclick=EditClick>Edit</button>
+    </div>*@
+</div>
+
+@code {
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
+    [CascadingParameter]
+    public IEnumerable<MemberInfoModel> InvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
+    [Parameter, EditorRequired]
+    public ReviewCommentViewModel Comment { get; set; } = default!;
+
+    //[Parameter]
+    //public EventCallback<MouseEventArgs> EditClick { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _ = Comment ?? throw new InvalidOperationException($"Parameter {nameof(Comment)} must have a value");
+        base.OnParametersSet();
+    }
+
+    private async Task EditClick()
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(EditCommentModal.Model), Comment.CopyModel())
+            .Add(nameof(EditCommentModal.InvolvedMembers), InvolvedMembers)
+            .Add(nameof(EditCommentModal.OnSubmit), 
+                new Func<ReviewCommentViewModel, CancellationToken, Task<bool>>(async (comment, cancellationToken) => await comment.SaveChangesAsync(cancellationToken)));
+        var result = await ModalService.Show<EditCommentModal>("Edit Comment", parameters).Result;
+        if (result.Confirmed && result.Data is ReviewCommentModel comment)
+        {
+            Comment.SetModel(comment);
+        }
+    }
+}

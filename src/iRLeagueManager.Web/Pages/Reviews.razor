@@ -11,8 +11,11 @@
 @inherits LeagueComponentBase
 @inject ReviewsPageViewModel ReviewsVm
 
+<LoadingHeader Loading=@(Bind(ReviewsVm, x => x.Loading))>
+    <h3>Reviews</h3>
+</LoadingHeader>
+
 <div>
-    <LoadingHeader Loading=@(Bind(ReviewsVm, x => x.Loading))>Reviews</LoadingHeader>
     <EventSelect class="my-2 mx-n2"/>
     <CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
         @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))

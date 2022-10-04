@@ -2,7 +2,7 @@
 
 <div @attributes=@AdditionalAttributes>
     <div style="display:inline-block">
-        <h3>@ChildContent</h3>
+        @ChildContent
     </div>
     <div class="spinner-border mx-2" style="height:1.5rem; width:1.5rem; @(Loading == false ? "visibility:hidden" : "")" role="status" />
 </div>

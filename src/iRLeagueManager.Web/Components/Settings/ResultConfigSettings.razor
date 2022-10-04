@@ -1,0 +1,65 @@
+﻿@using iRLeagueApiCore.Common.Enums
+@using iRLeagueManager.Web.ViewModels
+@inherits MvvmComponentBase
+@inject ResultConfigSettingsViewModel vm
+@inject LeagueApiService apiService
+@inject ILogger<ResultConfigSettings> logger
+
+<h3>ResultsConfigSettings</h3>
+
+<div>
+    @foreach(var resultConfig in @Bind(vm, x => vm.ResultsConfigs))
+    {
+        <p>@Bind(resultConfig, x => x.Name)</p>
+    }
+</div>
+
+@code {
+    private ResultConfigViewModel Selected => vm.Selected;
+
+    private int selectedResultConfigIndex;
+    private int SelectedResultConfigIndex
+    {
+        get => selectedResultConfigIndex;
+        set
+        {
+            selectedResultConfigIndex = value;
+            vm.Selected = vm.ResultsConfigs.ElementAt(selectedResultConfigIndex);
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        logger.LogInformation("Handle submit called!");
+        if (vm.Selected == null)
+        {
+            return;
+        }
+        //await vm.Selected.SaveCurrentModelAsync();
+        await Task.FromResult(true);
+    }
+
+    private void OnSelectedScoringChange(ChangeEventArgs e)
+    {
+        if (e.Value == null)
+        {
+            return;
+        }
+        SelectedResultConfigIndex = (int)e.Value;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+        if (apiService.CurrentLeague != null)
+        {
+            await vm.LoadFromLeagueAsync();
+        }
+        SelectedResultConfigIndex = 0;
+        StateHasChanged();
+    }
+}

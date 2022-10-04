@@ -1,0 +1,13 @@
+﻿<div class="input-group @Class">
+    <label class="input-group-text w-25">@Label</label>
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public string Class { get; set; } = "p-1";
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    [Parameter]
+    public string Label { get; set; } = string.Empty;
+}

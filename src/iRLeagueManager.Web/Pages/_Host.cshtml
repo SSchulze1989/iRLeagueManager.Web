@@ -1,0 +1,10 @@
+﻿@page "/app/"
+@namespace iRLeagueManager.Web.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<base href="/app/"/>
+@{
+    Layout = "_Layout";
+}
+
+<component type="typeof(App)" render-mode="Server" />

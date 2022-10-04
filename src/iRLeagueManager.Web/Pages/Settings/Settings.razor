@@ -1,0 +1,89 @@
+﻿@page "/{LeagueName}/Settings"
+@page "/{LeagueName}/Settings/Season/{SeasonId:long}"
+@attribute [Authorize]
+@using System.Text
+@using iRLeagueManager.Web.Components.Settings
+@inherits LeagueComponentBase
+@inject NavigationManager navigationManager
+
+<h3>Settings</h3>
+<div style="height: 600px">
+    <div>
+        <NavLink class="nav-link tab-header" href="@GetTabLink(0)">Season</NavLink>
+        <NavLink class="nav-link tab-header" href="@GetTabLink(1)">Scorings</NavLink>
+    </div>
+
+    @if (HasRendered)
+    {
+        @switch (selectedTabIndex)
+        {
+            case 0:
+                <SeasonSettings/>
+                break;
+            case 1:
+                <ResultConfigSettings/>
+                break;
+            default:
+                <p><em>Index out of bounds!</em></p>
+                break;
+        }
+    }
+</div>
+
+@code {
+    // Query parameters
+    private int selectedTabIndex;
+    private int SelectedTabIndex 
+    {
+        get => selectedTabIndex;
+        set
+        {
+            if (selectedTabIndex != value)
+            {
+                selectedTabIndex = value;
+                SelectedTabChanged();
+            }
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        navigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    public void SelectedTabChanged()
+    {
+        StateHasChanged();
+    }
+
+    protected override void RedirectUrl()
+    {
+        navigationManager.NavigateTo($"./{LeagueName}/Settings/Season/{SeasonId}");
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        SelectedTabIndex = navigationManager.QueryParameter<int>("tabIndex");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        SelectedTabIndex = navigationManager.QueryParameter<int>("tabIndex");
+    }
+
+    private string GetTabLink(int tabIndex)
+    {
+        var url = navigationManager.GetUriWithQueryParameter("tabIndex", tabIndex);
+        return url;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        navigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

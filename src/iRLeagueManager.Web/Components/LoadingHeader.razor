@@ -1,0 +1,17 @@
+﻿@using System.ComponentModel
+
+<div @attributes=@AdditionalAttributes>
+    <div style="display:inline-block">
+        @ChildContent
+    </div>
+    <div class="spinner-border mx-2" style="height:1.5rem; width:1.5rem; @(Loading == false ? "visibility:hidden" : "")" role="status" />
+</div>
+
+@code {
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+    [Parameter]
+    public RenderFragment ChildContent { get; set; } = default!;
+    [Parameter]
+    public bool Loading { get; set; }
+}

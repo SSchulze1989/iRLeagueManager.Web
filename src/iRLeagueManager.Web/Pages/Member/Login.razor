@@ -1,0 +1,88 @@
+﻿@page "/member/login"
+@using iRLeagueApiCore.Client
+@using iRLeagueApiCore.Client.Http
+@using iRLeagueManager.Web.Extensions
+@inject IConfiguration configuration
+@inject ITokenStore tokenStore
+@inject ILeagueApiClient ApiClient
+@inject NavigationManager NavigationManager
+
+<div class="card">
+    <h4 class="card-header">Login</h4>
+    <div class="card-body">
+        <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <label>Username</label>
+                <InputText @bind-Value="model.Username" class="form-control" />
+                <ValidationMessage For="@(() => model.Username)" />
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <InputText @bind-Value="model.Password" type="password" class="form-control" />
+                <ValidationMessage For="@(() => model.Password)" />
+            </div>
+            <button disabled="@loading" class="btn btn-primary">
+                @if (loading) 
+                {
+                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                }
+                Login
+            </button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    public record User
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    private bool loading;
+    public bool Loading { get => loading; set { loading = value; StateHasChanged(); } }
+
+    public User model = new User();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (string.IsNullOrEmpty(await tokenStore.GetTokenAsync()) == false)
+        {
+            var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";
+            NavigationManager.NavigateTo(returnUrl);
+        }
+
+#if DEBUG
+        //if (firstRender && configuration["DefaultUser"] != null)
+        //{
+        //model.Username = configuration["DefaultUser"];
+        //model.Password = configuration["DefaultPassword"];
+        //await OnValidSubmit();
+        //return;
+        //}
+#endif
+    }
+
+    public async Task OnValidSubmit()
+    {
+        if (ApiClient.IsLoggedIn == false)
+        {
+            try 
+            {
+                Loading = true;
+                var success = await ApiClient.LogIn(model.Username, model.Password);
+                if (success == false)
+                {
+                    return;
+                }
+                var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";
+                NavigationManager.NavigateTo(returnUrl);
+            }
+            finally
+            {
+                Loading = false;
+            }
+        }
+    }
+}

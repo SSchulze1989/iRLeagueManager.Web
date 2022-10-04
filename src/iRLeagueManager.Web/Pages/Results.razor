@@ -1,0 +1,98 @@
+﻿@page "/{LeagueName}/Results/Events/{EventId:long}"
+@page "/{LeagueName}/Results/Seasons/{SeasonId:long}"
+@page "/{LeagueName}/Results"
+@using System.ComponentModel
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore.Query
+@using Microsoft.Extensions.Primitives
+@using System.Linq.Expressions
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.Components.Results
+@using iRLeagueManager.Web.ViewModels
+@attribute [Authorize]
+@inherits LeagueComponentBase
+@inject ResultsPageViewModel vm
+
+<LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+    <h3>Results</h3>
+</LoadingHeader>
+
+<div>
+    <div>
+        <EventSelect class="my-2 mx-n2"/>
+        @if (@Bind(vm, x => x.Results)?.Count == 0)
+        {
+            <div class="card-body">
+                <p class="results-scoring"><em>No Results</em></p>
+            </div>
+        }
+        <ul class="nav nav-tabs">
+        @foreach((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x,i)))
+        {
+            <li class="nav-item">
+                <a class="nav-link @((i==Bind(vm, x => x.SelectedResultIndex)) ? "active" : "")" href="@(GetTabLink(i))">@Bind(eventResult, x => x.Name)</a>
+            </li>
+        }
+        </ul>
+    </div>
+    <div>
+        @if (@Bind(vm, x => x.SelectedEvent) != null && @Bind(vm, x => x.SelectedEventResult) != null)
+        {
+            @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults))
+            {
+                <DisplayResult Result=result/>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private const string resultTabParam = "resultTab";
+
+    protected override async Task OnInitializedAsync()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+        await Task.FromResult(true);
+    }
+
+    protected override async Task OnEventChangedAsync(EventViewModel? @event)
+    {
+        if (@event?.EventId != null)
+        {
+            var resultIndex = NavigationManager.QueryParameter<int>(resultTabParam);
+            await vm.LoadFromEventAsync(@event.EventId);
+
+            if (resultIndex >= vm.Results.Count())
+            {
+                resultIndex = 0;
+            }
+            var navUri = $"./{LeagueName}/Results/Events/{@event.EventId}?{resultTabParam}={resultIndex}";
+            NavigationManager.NavigateTo(navUri);
+        }
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        vm.SelectedResultIndex = NavigationManager.QueryParameter<int>(resultTabParam);
+    }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false) return;
+
+        vm.SelectedResultIndex = NavigationManager.QueryParameter<int>(resultTabParam);
+    }
+
+    private void SetSelectedResultIndex(int index)
+    {
+        NavigationManager.NavigateTo(GetTabLink(index));
+    }
+
+    private string GetTabLink(int index)
+    {
+        var url = NavigationManager.GetUriWithQueryParameter(resultTabParam, index);
+        return url;
+    }
+}

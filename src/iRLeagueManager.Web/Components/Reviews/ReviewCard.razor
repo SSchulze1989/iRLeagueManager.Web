@@ -1,0 +1,147 @@
+﻿@inherits MvvmComponentBase
+@using System.ComponentModel
+@using iRLeagueManager.Web.ViewModels
+
+<CascadingValue Value=Review.InvolvedMembers>
+<div @attributes=AdditionalAttributes>
+    <div class="card review-card">
+        <div class="btn card-header accordion-header review-header">
+            <div class="row">
+                <div class="col d-md-flex justify-content-start">
+                    <span>@Review.SessionName:</span>
+                    <span>@Bind(Review, x => x.IncidentNr)</span>
+                    <span class="oi oi-flag m-1" /><span>@Bind(Review, x => x.OnLap)</span>
+                    <span class="oi oi-timer m-1" /><span>@Bind(Review, x => x.Corner)</span>
+                    <span class="oi oi-chevron-right m1" /><span>@Bind(Review, x => x.IncidentKind)</span>
+                    <span class="oi oi-chat m1" /><span>@Bind(Review, x => x.Comments).Count</span>
+                    <span class="oi oi-task" /><span>@Bind(Review, x => x.Comments).Where(x => x.Votes.Any()).Count()</span>
+                </div>
+                <div class="col-md-auto d-grid d-md-flex justify-content-md-end">
+                    @if (EditClick.HasDelegate)
+                    {
+                        <button class="oi oi-pencil btn review-header-button" @onclick=EditClick />
+                    }
+                    @if (Collapsed)
+                    {
+                        <button class="oi oi-chevron-bottom btn review-header-button" @onclick=ToggleCollapsed/>
+                    }
+                    else
+                    {
+                        <button class="oi oi-chevron-top btn review-header-button" @onclick=ToggleCollapsed/>
+                    }
+                    @if (DeleteClick.HasDelegate)
+                    {
+                        <button class="oi oi-x btn review-header-button" @onclick=DeleteClick/>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="container @(Collapsed ? "" : " collapse")">
+                <div class="row">
+                    <div class="col-md-auto">
+                        <h5>Involved</h5>
+                    </div>
+                    <div class="col">
+                        @string.Join(", ", Bind(Review, x => x.InvolvedMembers).Select(x => $"{x.FirstName} {x.LastName}"))
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-auto">
+                        <h5>Result</h5>
+                    </div>
+                    <div class="col">
+                        @foreach(var vote in @Bind(Review, x => x.Votes))
+                        {
+                            var member = @Bind(vote, x => x.MemberAtFault);
+                            <span class="badge bg-danger">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="container @(Collapsed ? " collapse" : "")" id="review_text_@Review.ReviewId" @ref=ReviewText>
+                <div class="row">
+                    <div class="col">
+                        <h5>Involved Drivers</h5>
+                        <ul>
+                            @foreach(var member in @Bind(Review, x => x.InvolvedMembers))
+                            {
+                                <li><span class="badge bg-secondary">@member.FirstName @member.LastName</span></li>
+                            }
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <h5>Votes</h5>
+                        <ul>
+                            @foreach(var vote in @Bind(Review, x => x.Comments).SelectMany(x => x.Votes))
+                            {
+                                var member = @Bind(vote, x => x.MemberAtFault);
+                                <li>
+                                    <span class="badge bg-warning">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <hr/>
+                <div>
+                    <h5>Result</h5>
+                    <div>
+                        @foreach(var vote in @Bind(Review, x => x.Votes))
+                        {
+                            var member = @Bind(vote, x => x.MemberAtFault);
+                            <span class="badge bg-danger">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
+                        }
+                    </div>
+                    <div>
+                        @Bind(Review, x => x.ResultText)
+                    </div>
+                </div>
+                <hr/>
+                <div>
+                    <h5>Comments</h5>
+                    <ul class="list-group">
+                        @foreach(var comment in @Bind(Review, x => x.Comments))
+                        {
+                            <li class="list-group-item">
+                                <ReviewComment Comment=comment />
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</CascadingValue>
+
+@code {
+    [Parameter(CaptureUnmatchedValues=true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+    [Parameter, EditorRequired]
+    public ReviewViewModel Review { get; set; } = default!;
+    [Parameter]
+    public EventCallback<MouseEventArgs> EditClick { get; set; } 
+    [Parameter]
+    public EventCallback<MouseEventArgs> DeleteClick { get; set; }
+
+    private ElementReference ReviewText { get; set; }
+
+    public bool Collapsed { get; set; } = true;
+
+    protected override void OnParametersSet()
+    {
+        _ = Review ?? throw new InvalidOperationException($"Parameter {nameof(Review)} must have a value");
+        base.OnParametersSet();
+    }
+
+    private void ToggleCollapsed()
+    {
+        Collapsed = !Collapsed;
+    }
+
+    private async Task Delete()
+    {
+        await Review.DeleteAsync();
+    }
+}

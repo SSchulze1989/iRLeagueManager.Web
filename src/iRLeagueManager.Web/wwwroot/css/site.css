@@ -18,9 +18,10 @@ h3 {
 }
 
 .page-header {
-    background: #000000;
+    background: #34495e;
     color: #ffffff;
     text-align: center;
+    padding: 0.5rem;
 }
 
 .alternate > tbody > tr:nth-child(odd) {

@@ -50,7 +50,5 @@ namespace iRLeagueManager.Web.ViewModels
                 return model.ResultRows.OrderBy(OrderByPropertySelector.Compile());
             }
         }
-        
-        public IEnumerable<TeamResultRowModel>? TeamResultRows => model.TeamResultRows;
     }
 }

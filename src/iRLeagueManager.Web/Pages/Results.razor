@@ -39,14 +39,7 @@
         {
             @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults))
             {
-                @if (result.TeamResultRows == null || result.TeamResultRows.Count() == 0)
-                {
-                    <DisplayResult Result=result/>
-                }
-                else
-                {
-                    <DisplayTeamResult Result=result/>
-                }
+                <DisplayResult Result=result/>
             }
         }
     </div>

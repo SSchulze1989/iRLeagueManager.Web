@@ -51,7 +51,7 @@
             case nameof(IModelState.Loading):
             case nameof(IModelState.Saving):
             case nameof(IModelState.HasChanged):
-                StateHasChanged();
+                InvokeAsync(StateHasChanged);
                 break;
             default:
                 break;

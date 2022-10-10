@@ -41,7 +41,7 @@
     }
 
     private bool loading;
-    public bool Loading { get => loading; set { loading = value; StateHasChanged(); } }
+    public bool Loading { get => loading; set { loading = value; InvokeAsync(StateHasChanged); } }
 
     public User model = new User();
 

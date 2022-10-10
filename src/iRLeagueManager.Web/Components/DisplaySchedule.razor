@@ -89,7 +89,7 @@
         set
         {
             editName = value;
-            StateHasChanged();
+            InvokeAsync(StateHasChanged);
         }
     }
 
@@ -135,7 +135,7 @@
     private void EditNameClick()
     {
         EditName = true;
-        StateHasChanged();
+        InvokeAsync(StateHasChanged);
     }
 
     private async Task SaveName()

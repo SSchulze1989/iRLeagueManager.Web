@@ -107,7 +107,7 @@
         {
             SelectedIndex = Events.IndexOf(Selected);
         }
-        StateHasChanged();
+        InvokeAsync(StateHasChanged);
     }
 
     private void OnEventListPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -127,7 +127,7 @@
         {
             SelectedIndex = Events.IndexOf(Selected);
         }
-        StateHasChanged();
+        InvokeAsync(StateHasChanged);
     }
 
     private async Task OnSelectionChanged()

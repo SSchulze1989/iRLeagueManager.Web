@@ -18,7 +18,7 @@
                     <span class="oi oi-chat m1" /><span>@Bind(Review, x => x.Comments).Count</span>
                     <span class="oi oi-task" /><span>@Bind(Review, x => x.Comments).Where(x => x.Votes.Any()).Count()</span>
                 </div>
-                <div class="col-md-auto d-grid d-md-flex justify-content-md-end">
+                <div class="col-md-auto d-grid d-flex flex-nowrap justify-content-end">
                     @if (EditClick.HasDelegate)
                     {
                         <button class="oi oi-pencil btn review-header-button" @onclick=EditClick />
@@ -45,7 +45,10 @@
                         <h5>Involved</h5>
                     </div>
                     <div class="col">
-                        @string.Join(", ", Bind(Review, x => x.InvolvedMembers).Select(x => $"{x.FirstName} {x.LastName}"))
+                        @foreach(var member in @Bind(Review, x => x.InvolvedMembers))
+                        {
+                            <span class="badge bg-secondary h-auto me-1">@member.FirstName @member.LastName</span>
+                        }
                     </div>
                 </div>
                 <div class="row">
@@ -56,7 +59,7 @@
                         @foreach(var vote in @Bind(Review, x => x.Votes))
                         {
                             var member = @Bind(vote, x => x.MemberAtFault);
-                            <span class="badge bg-danger">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
+                            <span class="badge bg-danger h-auto me-1">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
                         }
                     </div>
                 </div>
@@ -65,24 +68,25 @@
                 <div class="row">
                     <div class="col">
                         <h5>Involved Drivers</h5>
-                        <ul>
+                        <div class="d-flex flex-wrap">
                             @foreach(var member in @Bind(Review, x => x.InvolvedMembers))
                             {
-                                <li><span class="badge bg-secondary">@member.FirstName @member.LastName</span></li>
+                                <span class="badge bg-secondary me-1 mb-1">@member.FirstName @member.LastName</span>
                             }
-                        </ul>
+                        </div>
                     </div>
                     <div class="col">
                         <h5>Votes</h5>
-                        <ul>
-                            @foreach(var vote in @Bind(Review, x => x.Comments).SelectMany(x => x.Votes))
+                        <div class="d-flex flex-wrap">
+                            @foreach(var countedVote in @Bind(Review, x => x.CountedVotes))
                             {
-                                var member = @Bind(vote, x => x.MemberAtFault);
-                                <li>
-                                    <span class="badge bg-warning">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
-                                </li>
+                                var member = countedVote.Vote.MemberAtFault;
+                                <span class="badge bg-warning me-1 mb-1">
+                                    @countedVote.Vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty
+                                    <span class="badge rounded-pill bg-danger ms-1">@(countedVote.Count)x</span>
+                                </span>
                             }
-                        </ul>
+                        </div>
                     </div>
                 </div>
                 <hr/>
@@ -91,8 +95,10 @@
                     <div>
                         @foreach(var vote in @Bind(Review, x => x.Votes))
                         {
-                            var member = @Bind(vote, x => x.MemberAtFault);
-                            <span class="badge bg-danger">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
+                            var member = vote.MemberAtFault;
+                            <span class="badge bg-danger me-1 mb-1">
+                                @vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
+                            </span>
                         }
                     </div>
                     <div>

@@ -47,6 +47,8 @@ namespace iRLeagueManager.Web.ViewModels
         private ObservableCollection<VoteViewModel> votes = new();
         public ObservableCollection<VoteViewModel> Votes { get => votes; set => Set(ref votes, value); }
 
+        public IEnumerable<CountedVote> CountedVotes => GetCountedVotes();
+
         public void AddVote(VoteViewModel vote)
         {
             votes.Add(vote);
@@ -284,6 +286,28 @@ namespace iRLeagueManager.Web.ViewModels
         private void RefreshVoteList()
         {
             Votes = new ObservableCollection<VoteViewModel>(model.VoteResults.Select(x => new VoteViewModel(LoggerFactory, ApiService, x)));
+        }
+
+        private IEnumerable<CountedVote> GetCountedVotes()
+        {
+            List<CountedVote> countedVotes = new();
+            foreach(var vote in Comments.SelectMany(x => x.Votes))
+            {
+                CountedVote? countedVote = countedVotes
+                    .FirstOrDefault(x => CompareVotes(vote, x.Vote));
+                if (countedVote == null)
+                {
+                    countedVote = new(vote);
+                    countedVotes.Add(countedVote);
+                }
+                countedVote.Count++;
+            }
+            return countedVotes;
+        }
+
+        private bool CompareVotes(VoteViewModel vote1, VoteViewModel vote2)
+        {
+            return vote1.MemberAtFault?.MemberId == vote2.MemberAtFault?.MemberId && vote1.VoteCategoryId == vote2.VoteCategoryId;
         }
 
         public async Task<bool> AddToSessionAsync(long sessionId, CancellationToken cancellationToken = default)

@@ -82,7 +82,7 @@
                             {
                                 var member = countedVote.Vote.MemberAtFault;
                                 <span class="badge bg-warning me-1 mb-1">
-                                    @countedVote.Vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty
+                                    @countedVote.Vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
                                     <span class="badge rounded-pill bg-danger ms-1">@(countedVote.Count)x</span>
                                 </span>
                             }

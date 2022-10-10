@@ -1,10 +1,12 @@
 ﻿@inherits MvvmComponentBase
 @using System.ComponentModel
+@using Blazored.Typeahead
+@using iRLeagueApiCore.Common.Models.Members
 @using iRLeagueManager.Web.ViewModels
 
 <CascadingValue Value=Review.InvolvedMembers>
 <div @attributes=AdditionalAttributes>
-    <div class="card review-card">
+    <div class="card">
         <div class="btn card-header accordion-header review-header">
             <div class="row">
                 <div class="col d-md-flex justify-content-start">
@@ -116,6 +118,8 @@
 </CascadingValue>
 
 @code {
+    [CascadingParameter(Name = nameof(EventMembers))]
+    public IEnumerable<MemberInfoModel> EventMembers { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues=true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter, EditorRequired]

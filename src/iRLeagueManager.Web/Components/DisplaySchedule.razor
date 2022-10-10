@@ -3,70 +3,72 @@
 @inherits MvvmComponentBase
 
 @{var maxRaceCount = @Schedule.MaxRaceCount;}
-<div class="card my-2 pb-0">
-    <LoadingHeader class="card-header">
-        <div class="input-group @(EditName ? "" : " d-none")">
-            <input type="text" class="form-control" @bind="Schedule.Name" @ref="ScheduleNameInput"/>
-            <button type="button" class="btn btn-success" @onclick=@SaveName>&#10004</button>
-            <button type="button" class="btn btn-danger" @onclick=@ResetName>&#128473;</button>
-        </div>
-        <div class="@(EditName ? " d-none" : "")"> 
-            <div class="pointer" @onclick=@EditNameClick>@Bind(Schedule, x => x.Name)</div>
-        </div>
-    </LoadingHeader>
-    <div class="card-body">
-        @if(Schedule.Events != null)
-        {
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Nr.</th>
-                        <th>Date</th>
-                        <th>Name</th>
-                        <th>Track</th>
-                        <th>Laps</th>
-                        <th>Start</th>
-                        <th>Duration</th>
-                        <th>Practice</th>
-                        <th>Qualy</th>
-                        @for(int i=0; i<maxRaceCount; i++)
-                        {
-                            <th>Race @(i+1)</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach((var @event, var index) in @Bind(Schedule, x => x.Events).Select((x, i) => (x, i)))
-                {
-                    var eventId = @event.EventId;
-                    var races = @Bind(@event, x => x.Races);
-                    <tr @onclick="@(() => OnTableRowClick(@event))" class="pointer">
-                        <td>@(index + 1).</td>
-                        <td>@Bind(@event, x => x.Date).ToString(@"dd.MM.yyyy")</td>
-                        <td>@Bind(@event, x => x.Name)</td>
-                        <td>@Bind(@event, x => x.TrackId)</td>
-                        <td>@Bind(@event, x => x.Laps)</td>
-                        <td>@Bind(@event, x => x.StartTime).ToString(@"HH:mm")</td>
-                        <td>@Bind(@event, x => x.Duration).ToString(@"HH:mm")</td>
-                        <td>@(DurationString(Bind(@event, x=> x.Practice)))</td>
-                        <td>@(DurationString(Bind(@event, x=> x.Qualifying)))</td>
-                        @for(int i=0; i<maxRaceCount; i++)
-                        {
-                            var race = races.ElementAtOrDefault(i);
-                            @if (race != null)
+<div @attributes=AdditionalAttributes>
+    <div class="card my-2 pb-0">
+        <LoadingHeader class="card-header">
+            <div class="input-group @(EditName ? "" : " d-none")">
+                <input type="text" class="form-control" @bind="Schedule.Name" @ref="ScheduleNameInput"/>
+                <button type="button" class="btn btn-success" @onclick=@SaveName>&#10004</button>
+                <button type="button" class="btn btn-danger" @onclick=@ResetName>&#128473;</button>
+            </div>
+            <div class="@(EditName ? " d-none" : "")"> 
+                <div class="pointer" @onclick=@EditNameClick>@Bind(Schedule, x => x.Name)</div>
+            </div>
+        </LoadingHeader>
+        <div class="card-body overflow-scroll">
+            @if(Schedule.Events != null)
+            {
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nr.</th>
+                            <th>Date</th>
+                            <th>Name</th>
+                            <th>Track</th>
+                            <th>Laps</th>
+                            <th>Start</th>
+                            <th>Duration</th>
+                            <th>Practice</th>
+                            <th>Qualy</th>
+                            @for(int i=0; i<maxRaceCount; i++)
                             {
-                                <td>@DurationString(race)</td>
+                                <th>Race @(i+1)</th>
                             }
-                            else 
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach((var @event, var index) in @Bind(Schedule, x => x.Events).Select((x, i) => (x, i)))
+                    {
+                        var eventId = @event.EventId;
+                        var races = @Bind(@event, x => x.Races);
+                        <tr @onclick="@(() => OnTableRowClick(@event))" class="pointer">
+                            <td>@(index + 1).</td>
+                            <td>@Bind(@event, x => x.Date).ToString(@"dd.MM.yyyy")</td>
+                            <td>@Bind(@event, x => x.Name)</td>
+                            <td>@Bind(@event, x => x.TrackId)</td>
+                            <td>@Bind(@event, x => x.Laps)</td>
+                            <td>@Bind(@event, x => x.StartTime).ToString(@"HH:mm")</td>
+                            <td>@Bind(@event, x => x.Duration).ToString(@"HH:mm")</td>
+                            <td>@(DurationString(Bind(@event, x=> x.Practice)))</td>
+                            <td>@(DurationString(Bind(@event, x=> x.Qualifying)))</td>
+                            @for(int i=0; i<maxRaceCount; i++)
                             {
-                                <td></td>
+                                var race = races.ElementAtOrDefault(i);
+                                @if (race != null)
+                                {
+                                    <td>@DurationString(race)</td>
+                                }
+                                else 
+                                {
+                                    <td></td>
+                                }
                             }
-                        }
-                    </tr>
-                }
-                </tbody>
-            </table>
-        }
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
     </div>
 </div>
 
@@ -75,6 +77,8 @@
     public IModalService ModalService { get; set; } = default!;
     [Parameter, EditorRequired]
     public ScheduleViewModel Schedule { get; set; } = default!;
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IDictionary<string, object>? AdditionalAttributes { get; set; }
 
     private ElementReference ScheduleNameInput { get; set; }
 

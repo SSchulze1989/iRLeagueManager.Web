@@ -1,4 +1,5 @@
-﻿@using iRLeagueApiCore.Common.Enums
+﻿@using Blazored.Typeahead
+@using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models.Members
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueManager.Web.ViewModels
@@ -31,31 +32,30 @@
     </InputGroup>
     <div class="p-1 mt-2">
         <div class="row g-0">
-            <div class="col px-2 input-group-text" style="border-bottom-left-radius:0; border-bottom-right-radius:0;">
+            <div class="input-group-text" style="border-bottom-left-radius:0; border-bottom-right-radius:0;">
                 <label>Involved Drivers</label>
             </div>
-            <div class="col-md-auto">
-                <div class="m-0" style="visibility:hidden; width:2rem;"/>
-            </div>
-            <div class="col px-2 input-group-text" style="border-bottom-left-radius:0; border-bottom-right-radius:0;">
-                <label>Select</label>
-            </div>
         </div>
-        <div class="row g-0">
-            <div class="col">
-                <InputMemberSelect class="form-select" style="height:12rem; border-top-left-radius:0; border-bottom-right-radius:0; border-top-right-radius:0;" @bind-Value=FromInvolvedMembers MemberList=Review.InvolvedMembers/>
-            </div>
-            <div class="col-md-auto">
-                <div class="row h-50 m-0">
-                    <button class="btn btn-outline-secondary p-1" style="width:2rem; border-radius:0;" type="button" @onclick=OnMoveToInvolvedMembersClick><span class="oi oi-chevron-left"/></button>
-                </div>
-                <div class="row h-50 m-0">
-                    <button class="btn btn-outline-secondary p-1" style="width:2rem; border-radius:0;" type="button" @onclick=OnMoveFromInvolvedMembersClick><span class="oi oi-chevron-right"/></button>
-                </div>
-            </div>
-            <div class="col">
-                <InputMemberSelect class="form-select" style="height:12rem; border-bottom-left-radius:0; border-top-left-radius:0; border-top-right-radius:0;" @bind-Value=ToInvolvedMembers MemberList=InvolvedMembers/>
-            </div>
+        <div>
+            <BlazoredTypeahead
+                @bind-Values=Review.InvolvedMembers
+                EnableDropDown=true  
+                SearchMethod=SearchMembers 
+                MinimumLength=1
+                MaximumSuggestions=100
+                DeleteItemsOnBackspace=false
+                placeholder="Search driver by name...">
+
+                <SelectedTemplate Context=member>
+                    @member.FirstName @member.LastName
+                </SelectedTemplate>
+                <ResultTemplate Context=member>
+                    @member.FirstName @member.LastName
+                </ResultTemplate>
+                <NotFoundTemplate Context=name>
+                    <span>Driver <b>@name</b> Not found!</span>
+                </NotFoundTemplate>
+            </BlazoredTypeahead>
         </div>
     </div>
     <CancelSubmitButtons ModelState=Review SubmitText="Save" OnCancel=Cancel/>
@@ -75,13 +75,10 @@
     public ReviewModel Model { get; set; } = default!;
 
     [Parameter]
-    public IEnumerable<MemberInfoModel> InvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
+    public IEnumerable<MemberInfoModel> EventMembers { get; set; } = Array.Empty<MemberInfoModel>();
 
     [Parameter]
     public Func<ReviewViewModel, CancellationToken, Task<bool>>? OnSubmit { get; set; }
-
-    private IEnumerable<MemberInfoModel> ToInvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
-    private IEnumerable<MemberInfoModel> FromInvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
 
     protected override void OnParametersSet()
     {
@@ -95,16 +92,6 @@
             return;
         }
         Review.SetModel(Model);
-    }
-
-    private void OnMoveToInvolvedMembersClick()
-    {
-        Review.AddMemberSelection(ToInvolvedMembers);
-    }
-
-    private void OnMoveFromInvolvedMembersClick()
-    {
-        Review.RemoveMemberSelection(FromInvolvedMembers);
     }
 
     private async Task Submit()
@@ -128,6 +115,22 @@
         {
             await ModalInstance.CancelAsync();   
         }
+    }
+
+    private Task<IEnumerable<MemberInfoModel>> SearchMembers(string searchString)
+    {
+        var terms = searchString.ToLower().Split(',', ' ', ';')
+            .Where(x => string.IsNullOrWhiteSpace(x) == false)
+            .ToArray();
+        return Task.FromResult(EventMembers
+            .Where(x => MatchMemberSearchTerms(x, terms))
+            .Where(x => Review.InvolvedMembers.Any(r => r.MemberId == x.MemberId) == false));
+    }
+
+    private bool MatchMemberSearchTerms(MemberInfoModel member, params string[] terms)
+    {
+        var searchName = member.FirstName + member.LastName;
+        return terms.Any(x => searchName.Contains(x, StringComparison.OrdinalIgnoreCase));
     }
 
     protected override void Dispose(bool disposing)

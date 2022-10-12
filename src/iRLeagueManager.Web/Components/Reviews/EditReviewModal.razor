@@ -32,13 +32,15 @@
     </InputGroup>
     <div class="p-1 mt-2">
         <div class="row g-0">
-            <div class="input-group-text" style="border-bottom-left-radius:0; border-bottom-right-radius:0;">
+            <div class="input-group-text" style="border-bottom-left-radius:0; border-bottom-right-radius:0; border-bottom: none">
                 <label>Involved Drivers</label>
             </div>
         </div>
         <div>
             <BlazoredTypeahead
                 @bind-Values=Review.InvolvedMembers
+                class="form-control p-0"
+                style="border-top-right-radius:0; border-top-left-radius:0;"
                 EnableDropDown=true  
                 SearchMethod=SearchMembers 
                 MinimumLength=1
@@ -119,8 +121,14 @@
 
     private Task<IEnumerable<MemberInfoModel>> SearchMembers(string searchString)
     {
+        if (string.IsNullOrEmpty(searchString))
+        {
+            return Task.FromResult(EventMembers
+                .Where(x => Review.InvolvedMembers.Any(r => r.MemberId == x.MemberId) == false));
+        }
+
         var terms = searchString.ToLower().Split(',', ' ', ';')
-            .Where(x => string.IsNullOrWhiteSpace(x) == false)
+        .Where(x => string.IsNullOrWhiteSpace(x) == false)
             .ToArray();
         return Task.FromResult(EventMembers
             .Where(x => MatchMemberSearchTerms(x, terms))

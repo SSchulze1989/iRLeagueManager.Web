@@ -41,7 +41,7 @@
         {
             @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults))
             {
-                <DisplayResult Result=result/>
+                <DisplayResult class="px-0 mb-2 mx-0" Result=result/>
             }
         }
     </div>

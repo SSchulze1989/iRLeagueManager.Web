@@ -40,6 +40,6 @@
         {
             await vm.Load(apiService.Shared.SeasonId);            
         }
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 }

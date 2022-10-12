@@ -75,7 +75,7 @@
         {
             selectedScoringIndex = value;
             vm.Selected = vm.Scorings.ElementAt(selectedScoringIndex);
-            StateHasChanged();
+            InvokeAsync(StateHasChanged);
         }
     }
 
@@ -109,6 +109,6 @@
             await vm.LoadFromSeason(apiService.Shared.SeasonId);            
         }
         SelectedScoringIndex = 0;
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 }

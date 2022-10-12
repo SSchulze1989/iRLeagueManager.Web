@@ -12,9 +12,9 @@ namespace iRLeagueManager.Web.ViewModels
         }
 
         public long Id => model.Id;
-        public long VoteCategoryId { get => model.VoteCategoryId; set => SetP(model.VoteCategoryId, value => model.VoteCategoryId = value, value); }
-        public string VoteCategoryText { get => model.VoteCategoryText; }
+        public long? VoteCategoryId { get => model.VoteCategoryId; set => SetP(model.VoteCategoryId, value => model.VoteCategoryId = value, value); }
+        public string? VoteCategoryText { get => model.VoteCategoryText; }
         public string Description { get => model.Description; set => SetP(model.Description, value => model.Description = value, value); }
-        public MemberInfoModel MemberAtFault { get => model.MemberAtFault; set => SetP(model.MemberAtFault, value => model.MemberAtFault = value, value); }
+        public MemberInfoModel? MemberAtFault { get => model.MemberAtFault; set => SetP(model.MemberAtFault, value => model.MemberAtFault = value, value); }
     }
 }

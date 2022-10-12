@@ -41,7 +41,7 @@
             if (selectedTabIndex != value)
             {
                 selectedTabIndex = value;
-                SelectedTabChanged();
+                _ = SelectedTabChanged();
             }
         }
     }
@@ -51,9 +51,9 @@
         navigationManager.LocationChanged += OnLocationChanged;
     }
 
-    public void SelectedTabChanged()
+    public async Task SelectedTabChanged()
     {
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 
     protected override void RedirectUrl()

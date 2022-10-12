@@ -23,43 +23,36 @@
     <InputGroup Label="Duration">
         <input class="form-control" type="time" aria-label="Duration" @bind="Event.Duration"/>
     </InputGroup>
-    <div class="card m-1 mb-2">
-        <div class="card-body">
-            <div class="card-card-title">
-                <div class="input-group">
-                    <div class="input-group-text">
-                        <InputCheckbox class="form-check-input mt-0" @bind-Value="Event.HasPractice"/>
-                    </div>
-                    <label class="form-control">Practice</label>
-                </div>
+    <div class="m-1 mb-2">
+        <div class="input-group">
+            <div class="input-group-text">
+                <InputCheckbox class="form-check-input mt-0" @bind-Value="Event.HasPractice"/>
             </div>
-            <EditSession Session=Event.Practice />
+            <label class="form-control">Practice</label>
         </div>
+        <EditSession Session=Event.Practice />
     </div>
-    <div class="card m-1 mb-2">
-        <div class="card-body">
-            <div class="card-card-title">
-                <div class="input-group">
-                    <div class="input-group-text">
-                        <InputCheckbox class="form-check-input mt-0" @bind-Value="Event.HasQualifying"/>
-                    </div>
-                    <label class="form-control">Qualifying</label>
-                </div>
+    <div class="m-1 mb-2">
+        <div class="input-group">
+            <div class="input-group-text">
+                <InputCheckbox class="form-check-input mt-0" @bind-Value="Event.HasQualifying"/>
             </div>
-            <EditSession Session=Event.Qualifying />
+            <label class="form-control">Qualifying</label>
         </div>
+        <EditSession Session=Event.Qualifying />
     </div>
     <div class="card mx-1 mb-2">
         <div class="card-body">
+            <div class="card-title">
+                Race Sessions
+            </div>
             @foreach(var session in @Bind(Event, x => x.Races))
             {
-                        <div class="card-card-title">
-                            <div class="input-group">
-                                <InputText class="form-control" @bind-Value="session.Name"/>
-                                <button class="btn btn-outline-danger" type="button" @onclick="@(() => Event.Sessions.Remove(session))">X</button>
-                            </div>
-                        </div>
-                        <EditSession Session=session />
+                <div class="input-group">
+                    <InputText class="form-control" @bind-Value="session.Name"/>
+                    <button class="btn btn-outline-danger" type="button" @onclick="@(() => Event.Sessions.Remove(session))">X</button>
+                </div>
+                <EditSession Session=session />
                 @if (@Event.CanMoveSessionDown(session))
                 {
                     <div class="container d-flex justify-content-center my-1 py-0">

@@ -48,7 +48,7 @@
     {
         var parameters = new ModalParameters()
             .Add(nameof(EditReviewModal.Model), review.CopyModel())
-            .Add(nameof(EditReviewModal.InvolvedMembers), ReviewsVm.EventMembers)
+            .Add(nameof(EditReviewModal.EventMembers), ReviewsVm.EventMembers)
             .Add(nameof(EditReviewModal.OnSubmit),
                 new Func<ReviewViewModel, CancellationToken, Task<bool>>(async (review, cancellationToken) => await review.SaveChangesAsync(cancellationToken)));
         var options = new ModalOptions()
@@ -85,7 +85,7 @@
     {
         var parameters = new ModalParameters()
             .Add(nameof(EditReviewModal.Model), new ReviewModel())
-            .Add(nameof(EditReviewModal.InvolvedMembers), ReviewsVm.EventMembers)
+            .Add(nameof(EditReviewModal.EventMembers), ReviewsVm.EventMembers)
             .Add(nameof(EditReviewModal.OnSubmit),
                 new Func<ReviewViewModel, CancellationToken, 
                     Task<bool>>(async (review, cancellationToken) => await review.AddToSessionAsync(review.SessionId.GetValueOrDefault(), cancellationToken)));

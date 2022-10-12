@@ -46,7 +46,7 @@ namespace iRLeagueManager.Web.Shared
 
         protected virtual void SharedStateChanged(object? sender, EventArgs e)
         {
-            StateHasChanged();
+            InvokeAsync(StateHasChanged);
         }
 
         protected virtual void RedirectUrl()

@@ -93,7 +93,7 @@
 
     protected override void OnInitialized()
     {
-        sharedState.StateChanged += (sender, e) => StateHasChanged();
+        sharedState.StateChanged += (sender, e) => InvokeAsync(StateHasChanged);
 
     }
 
@@ -105,7 +105,7 @@
     private void OnSeasonSelectChanged(long value)
     {
         navigationManager.NavigateTo($"./{sharedState.LeagueName}/Seasons/{value}");
-        StateHasChanged();
+        InvokeAsync(StateHasChanged);
     }
 
     private string GetCurrentUrl()

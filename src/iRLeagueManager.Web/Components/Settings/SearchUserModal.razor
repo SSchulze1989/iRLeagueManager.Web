@@ -1,0 +1,76 @@
+﻿@using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Users
+@using iRLeagueManager.Web.ViewModels
+@inject LeagueApiService apiService
+
+<BlazoredTypeahead 
+    @bind-Value=User
+    SearchMethod=SearchUsers
+    MinimumLength=3
+    Debounce=500
+    placeholder="Type Name ...">
+    <SelectedTemplate Context=user>
+        @user?.UserName
+    </SelectedTemplate>
+    <ResultTemplate Context=user>
+        @user.UserName (@user.Firstname @user.Lastname)
+    </ResultTemplate>
+</BlazoredTypeahead>
+<CancelSubmitButtons 
+    SubmitText=Ok 
+    CancelText=Cancel 
+    CanSubmit=@(User is not null) 
+    OnSubmit=Submit
+    OnCancel=Cancel/>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; } = default!;
+    [Parameter] public LeagueUsersViewModel LeagueUsers { get; set; } = default!;
+
+    private UserModel? User { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _ = ModalInstance ?? throw new InvalidOperationException($"Usage of {GetType()} requires a CascadingParameter of type {typeof(BlazoredModalInstance)}");
+        _ = LeagueUsers ?? throw new InvalidOperationException($"Usage of {GetType()} requires a Parameter of type {typeof(LeagueUsersViewModel)}");
+    }
+
+    private async Task<IEnumerable<UserModel>> SearchUsers(string name)
+    {
+        if (apiService.CurrentLeague == null)
+        {
+            return Array.Empty<UserModel>();
+        }
+        var parts = name.Split(',', ';', ' ');
+        var model = new SearchModel() { SearchKeys = parts };
+        var request = apiService.Client
+            .Users()
+            .Search()
+            .Post(model);
+        var result = await request;
+        if (result.Success)
+        {
+            return result.Content;
+        }
+        return Array.Empty<UserModel>();
+    }
+
+    private async Task Submit()
+    {
+        if (User == null)
+        {
+            return;
+        }
+
+        var result = await LeagueUsers.AddUser(User);
+        if (result.IsSuccess)
+        {
+            await ModalInstance.CloseAsync();
+        }
+    }
+
+    private async Task Cancel()
+    {
+        await ModalInstance.CancelAsync();
+    }
+}

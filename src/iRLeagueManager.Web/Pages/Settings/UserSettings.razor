@@ -1,0 +1,117 @@
+﻿@using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.Components.Settings
+@using iRLeagueManager.Web.ViewModels
+@inherits MvvmComponentBase
+@inject LeagueUsersViewModel Users
+
+<section @attributes=AdditionalAttributes id="league_member_section">
+    <div class="card my-2 pb-0">
+        <div class="card-header">
+            Members and Roles
+        </div>
+        <div class="card-body">
+            <table class="table table-sm table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Admin</th>
+                        <th>Organizer</th>
+                        <th>Steward</th>
+                        <th>Member</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var user in @Bind(Users, x => x.LeagueUsers))
+                    {
+                        <tr>
+                            @if (string.IsNullOrWhiteSpace(user.FirstName) && string.IsNullOrWhiteSpace(user.LastName))
+                            {
+                                <th>@user.UserName</th>
+                            }
+                            else
+                            {
+                                <th>@user.FirstName @user.LastName</th>
+                            }
+                            <th><input class="form-check-input" type="checkbox" checked="@(IsInRole(user, "Admin"))" @onclick=@(() => ToggleRole(user, "Admin")) @onclick:preventDefault/></th>
+                            <th><input class="form-check-input" type="checkbox" checked="@(IsInRole(user, "Organizer"))" @onclick=@(() => ToggleRole(user, "Organizer")) @onclick:preventDefault/></th>
+                            <th><input class="form-check-input" type="checkbox" checked="@(IsInRole(user, "Steward"))" @onclick=@(() => ToggleRole(user, "Steward")) @onclick:preventDefault/></th>
+                            <th><input class="form-check-input" type="checkbox" checked="@(IsInRole(user, "Member"))" @onclick=@(() => ToggleRole(user, "Member")) @onclick:preventDefault/></th>
+                        </tr>
+                    }
+                </tbody>    
+            </table>
+        </div>
+    </div>
+    <button class="btn btn-outline-secondary" type="button" @onclick=OpenAddUser>Search User</button>
+</section>
+
+@code {
+    [CascadingParameter] IModalService ModalService { get; set; } = default!;
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        await Users.LoadAsync();
+    }
+
+    private bool IsInRole(LeagueUserViewModel user, string role)
+    {
+        bool inRole = user.LeagueRoles.Any(x => x.Equals(role, StringComparison.OrdinalIgnoreCase));
+        return inRole;
+    }
+
+    private async Task ToggleRole(LeagueUserViewModel user, string role)
+    {
+        if (IsInRole(user, role))
+        {
+            if (await ConfirmRemoveRole(user, role))
+            {
+                await user.RemoveRoleAsync(role);
+            }
+            return;
+        }
+        if (await ConfirmAddRole(user, role))
+        {
+            await user.AddRoleAsync(role);
+        }
+    }
+
+    private async Task<bool> ConfirmRemoveRole(LeagueUserViewModel user, string role)
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(ConfirmModal.Text), $"Confirm: Remove role \"{role}\" from user \"{user.UserName}\"")
+            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
+        var confirm = await ModalService.Show<ConfirmModal>("Remove Role", parameters).Result;
+        if (confirm.Cancelled)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    private async Task<bool> ConfirmAddRole(LeagueUserViewModel user, string role)
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(ConfirmModal.Text), $"Confirm: Add role \"{role}\" to user \"{user.UserName}\"")
+            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
+        var confirm = await ModalService.Show<ConfirmModal>("Add Role", parameters).Result;
+        if (confirm.Cancelled)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    private async Task OpenAddUser()
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(SearchUserModal.LeagueUsers), Users);
+        await ModalService.Show<SearchUserModal>("Search User", parameters).Result;
+    }
+}

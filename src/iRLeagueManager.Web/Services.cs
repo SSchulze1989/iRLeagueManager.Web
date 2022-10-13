@@ -21,6 +21,7 @@ namespace iRLeagueManager.Web
             services.AddScoped<ResultConfigSettingsViewModel>();
             services.AddScoped<ReviewsPageViewModel>();
             services.AddScoped<EventListViewModel>();
+            services.AddScoped<LeagueUsersViewModel>();
         }
     }
 }

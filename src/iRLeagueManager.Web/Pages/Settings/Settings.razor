@@ -8,20 +8,24 @@
 
 <h3>Settings</h3>
 <div style="height: 600px">
-    <div>
-        <NavLink class="nav-link tab-header" href="@GetTabLink(0)">Season</NavLink>
-        <NavLink class="nav-link tab-header" href="@GetTabLink(1)">Scorings</NavLink>
-    </div>
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <NavLink class="nav-link" href="@GetTabLink(0)">Season</NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="@GetTabLink(1)">Users</NavLink>
+        </li>
+    </ul>
 
     @if (HasRendered)
     {
         @switch (selectedTabIndex)
         {
             case 0:
-                <SeasonSettings/>
+                <SeasonSettings />
                 break;
             case 1:
-                <ResultConfigSettings/>
+                <UserSettings class="container-md px-0 mb-2 mx-0" />
                 break;
             default:
                 <p><em>Index out of bounds!</em></p>
@@ -85,5 +89,6 @@
     protected override void Dispose(bool disposing)
     {
         navigationManager.LocationChanged -= OnLocationChanged;
+        base.Dispose(disposing);
     }
 }

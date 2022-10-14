@@ -14,10 +14,15 @@
                 <thead>
                     <tr>
                         <th>Name</th>
+                        @foreach(var role in LeagueRoles.RolesAvailable)
+                        {
+                            <th>@role</th>
+                        }
+                        @*<th>Name</th>
                         <th>Admin</th>
                         <th>Organizer</th>
                         <th>Steward</th>
-                        <th>Member</th>
+                        <th>Member</th>*@
                         <th></th>
                     </tr>
                 </thead>
@@ -33,10 +38,22 @@
                             {
                                 <th>@user.FirstName @user.LastName</th>
                             }
-                            <th><input class="form-check-input" type="checkbox" checked="@(IsInRole(user, "Admin"))" @onclick=@(() => ToggleRole(user, "Admin")) @onclick:preventDefault/></th>
+                            @foreach(var role in LeagueRoles.RolesAvailable)
+                            {
+                                <th>
+                                    @{var disabled = user.IsImplicitRole(role);}
+                                    <input class="form-check-input @(disabled ? "disabled" : "")"
+                                           type="checkbox" 
+                                           checked="@(user.HasRole(role))" 
+                                           @onclick=@(() => ToggleRole(user, role)) 
+                                           @onclick:preventDefault
+                                           disabled="@disabled"/>
+                                </th>
+                            }
+                            @*<th><input class="form-check-input" type="checkbox" checked="@(IsInRole(user, "Admin"))" @onclick=@(() => ToggleRole(user, "Admin")) @onclick:preventDefault/></th>
                             <th><input class="form-check-input" type="checkbox" checked="@(IsInRole(user, "Organizer"))" @onclick=@(() => ToggleRole(user, "Organizer")) @onclick:preventDefault/></th>
                             <th><input class="form-check-input" type="checkbox" checked="@(IsInRole(user, "Steward"))" @onclick=@(() => ToggleRole(user, "Steward")) @onclick:preventDefault/></th>
-                            <th><input class="form-check-input" type="checkbox" checked="@(IsInRole(user, "Member"))" @onclick=@(() => ToggleRole(user, "Member")) @onclick:preventDefault/></th>
+                            <th><input class="form-check-input" type="checkbox" checked="@(IsInRole(user, "Member"))" @onclick=@(() => ToggleRole(user, "Member")) @onclick:preventDefault/></th>*@
                         </tr>
                     }
                 </tbody>    
@@ -60,15 +77,9 @@
         await Users.LoadAsync();
     }
 
-    private bool IsInRole(LeagueUserViewModel user, string role)
+    private async Task ToggleRole(LeagueUserViewModel user, LeagueRoleValue role)
     {
-        bool inRole = user.LeagueRoles.Any(x => x.Equals(role, StringComparison.OrdinalIgnoreCase));
-        return inRole;
-    }
-
-    private async Task ToggleRole(LeagueUserViewModel user, string role)
-    {
-        if (IsInRole(user, role))
+        if (user.HasRole(role))
         {
             if (await ConfirmRemoveRole(user, role))
             {
@@ -82,7 +93,7 @@
         }
     }
 
-    private async Task<bool> ConfirmRemoveRole(LeagueUserViewModel user, string role)
+    private async Task<bool> ConfirmRemoveRole(LeagueUserViewModel user, LeagueRoleValue role)
     {
         var parameters = new ModalParameters()
             .Add(nameof(ConfirmModal.Text), $"Confirm: Remove role \"{role}\" from user \"{user.UserName}\"")
@@ -95,7 +106,7 @@
         return true;
     }
 
-    private async Task<bool> ConfirmAddRole(LeagueUserViewModel user, string role)
+    private async Task<bool> ConfirmAddRole(LeagueUserViewModel user, LeagueRoleValue role)
     {
         var parameters = new ModalParameters()
             .Add(nameof(ConfirmModal.Text), $"Confirm: Add role \"{role}\" to user \"{user.UserName}\"")

@@ -1,4 +1,5 @@
-﻿using iRLeagueApiCore.Common.Models.Users;
+﻿using iRLeagueApiCore.Common;
+using iRLeagueApiCore.Common.Models.Users;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 using System.Collections.Generic;
@@ -17,16 +18,27 @@ namespace iRLeagueManager.Web.ViewModels
         public string FirstName { get => model.Firstname; set => SetP(model.Firstname, value => model.Firstname = value, value); }
         public string LastName { get => model.Lastname; set => SetP(model.Lastname, value => model.Lastname = value,value); }
 
-        public IEnumerable<string> LeagueRoles => model.LeagueRoles;
+        public IEnumerable<LeagueRoleValue> Roles => model.LeagueRoles.Select(x => LeagueRoles.GetRoleValue(x));
 
-        public async Task<StatusResult> AddRoleAsync(string role)
+        public bool HasRole(LeagueRoleValue role)
+        {
+            return LeagueRoles.CheckRole(role, Roles);
+        }
+
+        public bool IsImplicitRole(LeagueRoleValue role)
+        {
+            var implicitOfRoles = LeagueRoles.ImplicitRoleOf(role);
+            return implicitOfRoles.Any(x => LeagueRoles.CheckRole(x, Roles));
+        }
+
+        public async Task<StatusResult> AddRoleAsync(LeagueRoleValue role)
         {
             if (ApiService.CurrentLeague == null)
             {
                 return LeagueNullResult();
             }
 
-            var addRoleModel = new RoleModel() { RoleName = role };
+            var addRoleModel = new RoleModel() { RoleName = role.ToString() };
             var request = ApiService.CurrentLeague
                 .Users()
                 .WithId(model.UserId)
@@ -41,14 +53,14 @@ namespace iRLeagueManager.Web.ViewModels
             return result.ToStatusResult();
         }
 
-        public async Task<StatusResult> RemoveRoleAsync(string role)
+        public async Task<StatusResult> RemoveRoleAsync(LeagueRoleValue role)
         {
             if (ApiService.CurrentLeague == null)
             {
                 return LeagueNullResult();
             }
 
-            var addRoleModel = new RoleModel() { RoleName = role };
+            var addRoleModel = new RoleModel() { RoleName = role.ToString() };
             var request = ApiService.CurrentLeague
                 .Users()
                 .WithId(model.UserId)

@@ -13,12 +13,31 @@
     <h3>Schedules</h3>
 </LoadingHeader>
 
-<div>
-    @foreach(var schedule in @Bind(vm, x => x.Schedules))
-    {
-        <DisplaySchedule class="container-md px-0 mb-2 mx-0" Schedule=schedule/>
-    }
-</div>
+<AuthorizeView Roles=@(GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer))>
+    <Authorized>
+        <div>
+            @foreach(var schedule in @Bind(vm, x => x.Schedules))
+            {
+                <DisplaySchedule class="container-md px-0 mb-2 mx-0" Schedule=schedule/>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <AuthorizeView Roles=@(GetRoleString(LeagueRoles.Member)) Context=context2>
+            <Authorized>
+                <div>
+                    @foreach(var schedule in @Bind(vm, x => x.Schedules))
+                    {
+                        <DisplaySchedule class="container-md px-0 mb-2 mx-0" Schedule=schedule ReadOnly=true/>
+                    }
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                You are not allowed here!
+            </NotAuthorized>
+        </AuthorizeView>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     protected override async Task OnAfterRenderAsync(bool firstRender)

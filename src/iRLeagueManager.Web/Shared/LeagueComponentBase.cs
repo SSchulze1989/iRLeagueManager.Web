@@ -1,4 +1,6 @@
-﻿using iRLeagueManager.Web.Data;
+﻿using iRLeagueApiCore.Common;
+using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Extensions;
 using iRLeagueManager.Web.ViewModels;
 using Microsoft.AspNetCore.Components;
 using MvvmBlazor.Components;
@@ -146,6 +148,19 @@ namespace iRLeagueManager.Web.Shared
                     _ = OnEventChangedAsync(EventList.Selected);
                     break;
             }
+        }
+
+        protected string GetRoleString(params string[] roleNames)
+        {
+            IEnumerable<string> roles = new[] { "Admin" };
+            if (LeagueName != null)
+            {
+                var leagueRoleNames = roleNames
+                    .Select(x => LeagueRoles.GetLeagueRoleName(LeagueName, x))
+                    .NotNull();
+                roles = roles.Concat(leagueRoleNames);
+            }
+            return string.Join(',', roles);
         }
     }
 }

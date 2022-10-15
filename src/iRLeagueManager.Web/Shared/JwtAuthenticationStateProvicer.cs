@@ -8,12 +8,18 @@ namespace iRLeagueManager.Web.Shared
     public class JwtAuthenticationStateProvicer : AuthenticationStateProvider
     {
         private readonly JwtSecurityTokenHandler tokenHandler = new();
-        private readonly ITokenStore tokenStore;
+        private readonly IAsyncTokenProvider tokenStore;
         private string lastToken = string.Empty;
 
-        public JwtAuthenticationStateProvicer(ITokenStore tokenStore)
+        public JwtAuthenticationStateProvicer(IAsyncTokenProvider tokenStore)
         {
             this.tokenStore = tokenStore;
+            tokenStore.TokenChanged += TokenStore_TokenChanged;
+        }
+
+        private void TokenStore_TokenChanged(object? sender, EventArgs e)
+        {
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
 
         private async Task<ClaimsPrincipal> GetTokenUser()
@@ -24,7 +30,7 @@ namespace iRLeagueManager.Web.Shared
                 return GetAnonymous();
             }
             var jwtSecurityToken = tokenHandler.ReadJwtToken(token);
-            var identity = new ClaimsIdentity(jwtSecurityToken.Claims);
+            var identity = new ClaimsIdentity(jwtSecurityToken.Claims, "bearer");
             return new ClaimsPrincipal(identity);
         }
 

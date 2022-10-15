@@ -5,6 +5,7 @@ using iRLeagueApiCore.Common.Converters;
 using iRLeagueManager.Web;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Server.Data;
+using iRLeagueManager.Web.Shared;
 using iRLeagueManager.Web.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -47,8 +48,10 @@ builder.Services.AddScoped<JsonSerializerOptions>(configure =>
 });
 builder.Services.AddScoped<LeagueApiClientFactory>();
 builder.Services.AddScoped<ITokenStore, AsyncTokenStore>();
+builder.Services.AddScoped<IAsyncTokenProvider>(x => x.GetRequiredService<ITokenStore>());
 builder.Services.AddScoped(sp => sp.GetRequiredService<LeagueApiClientFactory>().CreateClient());
 builder.Services.AddScoped<SharedStateService>();
+builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvicer>();
 builder.Services.AddViewModels();
 
 builder.Services.AddBlazoredModal();

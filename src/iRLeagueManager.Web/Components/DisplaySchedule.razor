@@ -6,14 +6,21 @@
 <div @attributes=AdditionalAttributes>
     <div class="card my-2 pb-0">
         <LoadingHeader class="card-header">
-            <div class="input-group @(EditName ? "" : " d-none")">
-                <input type="text" class="form-control" @bind="Schedule.Name" @ref="ScheduleNameInput"/>
-                <button type="button" class="btn btn-success" @onclick=@SaveName>&#10004</button>
-                <button type="button" class="btn btn-danger" @onclick=@ResetName>&#128473;</button>
-            </div>
-            <div class="@(EditName ? " d-none" : "")"> 
-                <div class="pointer" @onclick=@EditNameClick>@Bind(Schedule, x => x.Name)</div>
-            </div>
+            @if(ReadOnly)
+            {
+                <div class="input-group @(EditName ? "" : " d-none")">
+                    <input type="text" class="form-control" @bind="Schedule.Name" @ref="ScheduleNameInput"/>
+                    <button type="button" class="btn btn-success" @onclick=@SaveName>&#10004</button>
+                    <button type="button" class="btn btn-danger" @onclick=@ResetName>&#128473;</button>
+                </div>
+                <div class="@(EditName ? " d-none" : "")"> 
+                    <div class="pointer" @onclick=@EditNameClick>@Bind(Schedule, x => x.Name)</div>
+                </div>
+            }
+            else
+            {
+                <div>@Bind(Schedule, x => x.Name)</div>
+            }
         </LoadingHeader>
         <div class="card-body overflow-scroll">
             @if(Schedule.Events != null)
@@ -41,7 +48,8 @@
                     {
                         var eventId = @event.EventId;
                         var races = @Bind(@event, x => x.Races);
-                        <tr @onclick="@(() => OnTableRowClick(@event))" class="pointer">
+
+                        <tr @onclick="@(() => OnTableRowClick(@event))" class="@(ReadOnly ? "" : "pointer")">
                             <td>@(index + 1).</td>
                             <td>@Bind(@event, x => x.Date).ToString(@"dd.MM.yyyy")</td>
                             <td>@Bind(@event, x => x.Name)</td>
@@ -79,6 +87,8 @@
     public ScheduleViewModel Schedule { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues = true)]
     public IDictionary<string, object>? AdditionalAttributes { get; set; }
+    [Parameter]
+    public bool ReadOnly { get; set; } = false;
 
     private ElementReference ScheduleNameInput { get; set; }
 
@@ -149,6 +159,10 @@
 
     private async Task OnTableRowClick(EventViewModel eventViewModel)
     {
+        if (ReadOnly)
+        {
+            return;
+        }
         //navigationManager.NavigateTo($"{LeagueName}/Results/Session/{sessionId}");
         var parameters = new ModalParameters()
             .Add(nameof(EditEventModal.EventModel), eventViewModel.CopyModel());

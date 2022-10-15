@@ -19,6 +19,8 @@ namespace iRLeagueManager.Web.Data
 
         private const string tokenKey = "LeagueApiToken";
 
+        public event EventHandler? TokenChanged;
+
         public bool IsLoggedIn { get; private set; }
         public DateTime Expiration { get; private set; }
 
@@ -34,6 +36,7 @@ namespace iRLeagueManager.Web.Data
             IsLoggedIn = false;
             await localStore.DeleteAsync(tokenKey);
             await Task.FromResult(true);
+            TokenChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public async Task<string> GetTokenAsync()
@@ -106,6 +109,7 @@ namespace iRLeagueManager.Web.Data
         {
             logger.LogDebug("Set token to local browser session: {Token}", token);
             await localStore.SetAsync(tokenKey, token);
+            TokenChanged?.Invoke(this, EventArgs.Empty);            
         }
     }
 }

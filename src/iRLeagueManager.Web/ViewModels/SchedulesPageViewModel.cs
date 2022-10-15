@@ -37,8 +37,13 @@ public class SchedulesPageViewModel : LeagueViewModelBase<SchedulesPageViewModel
 
         var getSchedules = result.Content;
         Schedules = new ObservableCollection<ScheduleViewModel>(getSchedules.Select(x =>
-            new ScheduleViewModel(LoggerFactory, ApiService, x))
+            Schedules.FirstOrDefault(y => y.ScheduleId == x.ScheduleId) ?? new ScheduleViewModel(LoggerFactory, ApiService, x))
         );
+
+        foreach (var schedule in Schedules)
+        {
+            await schedule.LoadEvents();
+        }
 
         Loading = false;
     }

@@ -50,10 +50,5 @@
     private async Task LoadSchedules()
     {
         await vm.Load();
-        // load sessions to display
-        foreach(var schedule in vm.Schedules)
-        {
-            await schedule.LoadEvents();
-        }
     }
 }

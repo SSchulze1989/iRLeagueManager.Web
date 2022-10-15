@@ -19,6 +19,8 @@ namespace iRLeagueManager.Web.Data
 
         private const string tokenKey = "LeagueApiToken";
 
+        private string inMemoryToken = string.Empty;
+
         public event EventHandler? TokenChanged;
 
         public bool IsLoggedIn { get; private set; }
@@ -32,15 +34,26 @@ namespace iRLeagueManager.Web.Data
 
         public async Task ClearTokenAsync()
         {
+            var tokenValue = inMemoryToken;
+
             logger.LogDebug("Clear token in local browser store");
             IsLoggedIn = false;
+            inMemoryToken = string.Empty;
             await localStore.DeleteAsync(tokenKey);
             await Task.FromResult(true);
-            TokenChanged?.Invoke(this, EventArgs.Empty);
+            if (inMemoryToken != tokenValue)
+            {
+                TokenChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         public async Task<string> GetTokenAsync()
         {
+            if (string.IsNullOrEmpty(inMemoryToken) == false)
+            {
+                return inMemoryToken;
+            }
+
             logger.LogDebug("Reading token from local browser store");
             try
             {
@@ -107,9 +120,15 @@ namespace iRLeagueManager.Web.Data
 
         public async Task SetTokenAsync(string token)
         {
+            var oldToken = inMemoryToken;
             logger.LogDebug("Set token to local browser session: {Token}", token);
             await localStore.SetAsync(tokenKey, token);
-            TokenChanged?.Invoke(this, EventArgs.Empty);            
+            inMemoryToken = token;
+
+            if (inMemoryToken != oldToken)
+            {
+                TokenChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 }

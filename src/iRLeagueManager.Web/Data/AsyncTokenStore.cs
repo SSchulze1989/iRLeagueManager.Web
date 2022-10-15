@@ -85,7 +85,7 @@ namespace iRLeagueManager.Web.Data
                         return string.Empty;
                     }
                     IsLoggedIn = true;
-                    return token.Value ?? string.Empty;
+                    return inMemoryToken = token.Value ?? string.Empty;
                 }
                 IsLoggedIn = false;
                 return string.Empty;
@@ -96,27 +96,6 @@ namespace iRLeagueManager.Web.Data
                 return string.Empty;
             }
         }
-
-        //private Task<AuthenticationState> AuthenticationTask(string token)
-        //{
-        //    var state = new AuthenticationState(CreatePrincipal(token));
-        //    return Task.FromResult());
-        //}
-
-        //private ClaimsPrincipal CreatePrincipal(string token)
-        //{
-        //    // decode token
-        //    var handler = new JwtSecurityTokenHandler();
-        //    var jsonToken = handler.ReadToken(token);
-        //    var tokenS = jsonToken as JwtSecurityToken;
-        //    if (tokenS != null)
-        //    {
-        //        var claims = tokenS.Claims.ToList();
-        //        claims.Add(new Claim("ApiToken", token));
-        //        return new ClaimsPrincipal(new ClaimsIdentity(claims));
-        //    }
-        //    return new ClaimsPrincipal();
-        //}
 
         public async Task SetTokenAsync(string token)
         {

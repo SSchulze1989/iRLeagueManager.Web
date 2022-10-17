@@ -2,6 +2,13 @@
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 1rem;
+}
+
+@media (max-width: 640.98px) {
+    html {
+        font-size: 0.8rem;
+    }
 }
 
 h1:focus {

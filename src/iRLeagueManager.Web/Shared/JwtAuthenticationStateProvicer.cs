@@ -5,7 +5,7 @@ using System.Security.Claims;
 
 namespace iRLeagueManager.Web.Shared
 {
-    public class JwtAuthenticationStateProvicer : AuthenticationStateProvider
+    public class JwtAuthenticationStateProvicer : AuthenticationStateProvider, IDisposable
     {
         private readonly JwtSecurityTokenHandler tokenHandler = new();
         private readonly IAsyncTokenProvider tokenStore;
@@ -48,6 +48,11 @@ namespace iRLeagueManager.Web.Shared
         {
             var user = await GetTokenUser();
             return new AuthenticationState(user);
+        }
+
+        void IDisposable.Dispose()
+        {
+            tokenStore.TokenChanged -= TokenStore_TokenChanged;
         }
     }
 }

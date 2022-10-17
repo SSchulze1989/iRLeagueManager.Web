@@ -6,15 +6,24 @@
 <div @attributes=AdditionalAttributes>
     <div class="card my-2 pb-0">
         <LoadingHeader class="card-header">
-            @if(ReadOnly)
+            @if(ReadOnly == false)
             {
                 <div class="input-group @(EditName ? "" : " d-none")">
-                    <input type="text" class="form-control" @bind="Schedule.Name" @ref="ScheduleNameInput"/>
-                    <button type="button" class="btn btn-success" @onclick=@SaveName>&#10004</button>
-                    <button type="button" class="btn btn-danger" @onclick=@ResetName>&#128473;</button>
+                    <input type="text" class="form-control" @bind="Schedule.Name" @ref="ScheduleNameInput" @onkeydown=@(async args => { if (args.Key == "Enter") { await SaveName(); } })/>
+                    <button type="button" class="btn btn-success @(Schedule.Loading ? "disabled" : "")" @onclick=@SaveName>
+                        &#10004 
+                        @if (Schedule.Loading)
+                        {
+                            <span class="spinner-border spinner-border-sm mr-1"></span>
+                        }
+                    </button>
+                    <button type="button" class="btn btn-danger @(Schedule.Loading ? "disabled" : "")" @onclick=@ResetName>&#128473;</button>
                 </div>
-                <div class="@(EditName ? " d-none" : "")"> 
-                    <div class="pointer" @onclick=@EditNameClick>@Bind(Schedule, x => x.Name)</div>
+                <div class="d-flex hover-button pointer @(EditName ? " d-none" : "")" @onclick=@EditNameClick> 
+                    <div>@Bind(Schedule, x => x.Name)</div>
+                    <div class="hover-button-text">
+                        <span class="oi oi-pencil" />
+                    </div>
                 </div>
             }
             else
@@ -151,6 +160,7 @@
     private async Task SaveName()
     {
         var success = await Schedule.SaveChangesAsync();
+        await Task.Delay(1000);
         if (success)
         {
             EditName = false;

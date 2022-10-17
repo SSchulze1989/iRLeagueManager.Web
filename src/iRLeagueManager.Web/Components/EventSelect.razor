@@ -11,7 +11,7 @@
     <select @bind=SelectedIndex class="form-select">
         @foreach((var @event, var index) in Events.Select((x, i) => (x, i)))
         {
-            <option value="@(index)">@((index + 1).ToString("00")). @(@event.Date) - @(@event.Name)</option>
+            <option value="@(index)">@((index + 1).ToString("00")). @(@event.Date.ToString("dd.MM.yy")) - @(@event.Name)</option>
         }
     </select>
     <button class="btn btn-outline-secondary" type="button" @onclick=EventMovePrevious disabled=@(SelectedIndex == 0)><span class="oi oi-chevron-left"></span></button>

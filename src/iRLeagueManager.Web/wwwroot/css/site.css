@@ -7,12 +7,14 @@ html, body {
 
 @media (max-width: 640.98px) {
     html {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
 }
 
-h1:focus {
-    outline: none;
+@media only screen and (hover: none) and (pointer: coarse) {
+    html {
+        font-size: 0.75rem;
+    }
 }
 
 h3 {

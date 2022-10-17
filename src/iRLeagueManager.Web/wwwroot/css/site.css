@@ -5,13 +5,7 @@ html, body {
     font-size: 1rem;
 }
 
-@media (max-width: 640.98px) {
-    html {
-        font-size: 0.75rem;
-    }
-}
-
-@media only screen and (hover: none) and (pointer: coarse) {
+@media (max-width: 840.98px) {
     html {
         font-size: 0.75rem;
     }

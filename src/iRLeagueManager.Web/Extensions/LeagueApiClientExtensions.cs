@@ -1,4 +1,5 @@
 ﻿using iRLeagueApiCore.Client.Results;
+using iRLeagueManager.Web.Data;
 using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Specialized;
@@ -20,6 +21,15 @@ namespace iRLeagueManager.Web.Extensions
                 return default(T);
             }
             throw new ActionResultException<T>(clientActionResult);
+        }
+
+        public static StatusResult ToStatusResult<T>(this ClientActionResult<T> clientActionResult)
+        {
+            if (clientActionResult.Success)
+            {
+                return StatusResult.SuccessResult(clientActionResult.Message);
+            }
+            return StatusResult.FailedResult(clientActionResult.Status, clientActionResult.Message, clientActionResult.Errors);
         }
     }
 

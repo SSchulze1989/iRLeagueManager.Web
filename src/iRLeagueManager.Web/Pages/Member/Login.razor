@@ -1,4 +1,5 @@
 ﻿@page "/member/login"
+@using System.ComponentModel.DataAnnotations
 @using iRLeagueApiCore.Client
 @using iRLeagueApiCore.Client.Http
 @using iRLeagueManager.Web.Extensions
@@ -6,18 +7,20 @@
 @inject ITokenStore tokenStore
 @inject ILeagueApiClient ApiClient
 @inject NavigationManager NavigationManager
+@attribute [AllowAnonymous]
 
 <div class="card">
     <h4 class="card-header">Login</h4>
     <div class="card-body">
-        <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+        <EditForm Model=@model OnValidSubmit="OnValidSubmit">
             <DataAnnotationsValidator />
-            <div class="form-group">
+            <StatusResultValidator @ref=ResultValidator />
+            <div class="form-group mb-3">
                 <label>Username</label>
                 <InputText @bind-Value="model.Username" class="form-control" />
                 <ValidationMessage For="@(() => model.Username)" />
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label>Password</label>
                 <InputText @bind-Value="model.Password" type="password" class="form-control" />
                 <ValidationMessage For="@(() => model.Password)" />
@@ -36,14 +39,22 @@
 @code {
     public record User
     {
+        [Required]
         public string Username { get; set; } = string.Empty;
+        [Required]
         public string Password { get; set; } = string.Empty;
     }
 
     private bool loading;
-    public bool Loading { get => loading; set { loading = value; StateHasChanged(); } }
+    public bool Loading { get => loading; set { loading = value; InvokeAsync(StateHasChanged); } }
+
+    private StatusResultValidator ResultValidator { get; set; } = default!;
 
     public User model = new User();
+
+    protected override void OnInitialized()
+    {
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -54,13 +65,13 @@
         }
 
 #if DEBUG
-        //if (firstRender && configuration["DefaultUser"] != null)
-        //{
-        //model.Username = configuration["DefaultUser"];
-        //model.Password = configuration["DefaultPassword"];
-        //await OnValidSubmit();
-        //return;
-        //}
+    //if (firstRender && configuration["DefaultUser"] != null)
+    //{
+    //model.Username = configuration["DefaultUser"];
+    //model.Password = configuration["DefaultPassword"];
+    //await OnValidSubmit();
+    //return;
+    //}
 #endif
     }
 
@@ -71,9 +82,10 @@
             try 
             {
                 Loading = true;
-                var success = await ApiClient.LogIn(model.Username, model.Password);
-                if (success == false)
+                var result = await ApiClient.LogIn(model.Username, model.Password);
+                if (result.Success == false)
                 {
+                    ResultValidator.ValidateResult(result.ToStatusResult());
                     return;
                 }
                 var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";

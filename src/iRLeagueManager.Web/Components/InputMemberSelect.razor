@@ -80,7 +80,7 @@
 
     private void OnMemberListCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        StateHasChanged();
+        InvokeAsync(StateHasChanged);
     }
 
     //protected override void Dispose(bool disposing)

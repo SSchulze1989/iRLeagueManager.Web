@@ -46,7 +46,6 @@ namespace iRLeagueManager.Web.ViewModels
                     );
                 }
                 Loading = false;
-                //StateHasChanged();
             }
         }
     }

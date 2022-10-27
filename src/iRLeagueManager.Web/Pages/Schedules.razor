@@ -1,10 +1,10 @@
-﻿@page "/{LeagueName}/Schedules/Season/{SeasonId:long}"
+﻿@page "/{LeagueName}/Schedules"
+@page "/{LeagueName}/Schedules/Season/{SeasonId:long}"
 @using System.Text.Json
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
 @using iRLeagueManager.Web.Components
-@attribute [Authorize]
 @inherits LeagueComponentBase
 @inject SchedulesPageViewModel vm
 @inject JsonSerializerOptions jsonOptions
@@ -13,12 +13,24 @@
     <h3>Schedules</h3>
 </LoadingHeader>
 
-<div>
-    @foreach(var schedule in @Bind(vm, x => x.Schedules))
-    {
-        <DisplaySchedule Schedule=schedule/>
-    }
-</div>
+<AuthorizeView Roles=@(GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer))>
+    <Authorized>
+        <div>
+            @foreach(var schedule in @Bind(vm, x => x.Schedules))
+            {
+                <DisplaySchedule class="container-md px-0 mb-2 mx-0" Schedule=schedule/>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div>
+            @foreach(var schedule in @Bind(vm, x => x.Schedules))
+            {
+                <DisplaySchedule class="container-md px-0 mb-2 mx-0" Schedule=schedule ReadOnly=true/>
+            }
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -31,10 +43,5 @@
     private async Task LoadSchedules()
     {
         await vm.Load();
-        // load sessions to display
-        foreach(var schedule in vm.Schedules)
-        {
-            await schedule.LoadEvents();
-        }
     }
 }

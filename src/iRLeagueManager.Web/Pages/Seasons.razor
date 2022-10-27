@@ -2,12 +2,12 @@
 @page "/{LeagueName}/Seasons/{SeasonId:long}"
 @using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.ViewModels
-@attribute [Authorize]
 @inherits MvvmComponentBase
 @inject NavigationManager navigationManager
 @inject LeagueApiService apiService
 @inject SeasonsViewModel vm
 @inject SharedStateService sharedState
+@*@inject AuthenticationStateProvider authStateProvider*@
 
 <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
     <h3>Seasons</h3>
@@ -46,8 +46,12 @@
         }
     }
 
-    protected override Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        return vm.OnAfterRenderAsync(firstRender);
+        await vm.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
     }
 }

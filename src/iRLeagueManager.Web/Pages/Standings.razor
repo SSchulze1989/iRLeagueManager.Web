@@ -1,0 +1,90 @@
+﻿@page "/{LeagueName}/Standings/Seasons/{SeasonId:long}"
+@page "/{LeagueName}/Standings"
+@using System.ComponentModel
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore.Query
+@using Microsoft.Extensions.Primitives
+@using System.Linq.Expressions
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.Components.Results
+@using iRLeagueManager.Web.Components.Standings
+@using iRLeagueManager.Web.ViewModels
+@inherits LeagueComponentBase
+@inject StandingsPageViewModel vm
+
+<LoadingHeader class="mb-2" Loading=@Bind(vm, x => x.Loading)>
+    <h3>Standings</h3>
+</LoadingHeader>
+
+@if (@Bind(vm, x => x.Standings)?.Count == 0)
+{
+    <div class="card-body">
+        <p class="results-scoring"><em>No Standings</em></p>
+    </div>
+}
+<ul class="nav nav-tabs">
+@foreach((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x,i)))
+{
+    <li class="nav-item">
+        <a class="nav-link @((i==Bind(vm, x => x.SelectedStandingIndex)) ? "active" : "")" href="@(GetTabLink(i))">@standing.Name</a>
+    </li>
+}
+</ul>
+@if (@Bind(vm, x => x.SelectedStanding) != null)
+{
+    <DisplayStanding class="px-0 mb-2 mx-0" Standing=@Bind(vm, x => x.SelectedStanding)/>
+}
+
+@code {
+    private const string standingTabParam = "resultTab";
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+        base.OnInitialized();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+
+        var standingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
+        await vm.LoadAsync();   
+        vm.SelectedStandingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
+        if (standingIndex >= vm.Standings.Count() || standingIndex < 0)
+        {
+            standingIndex = 0;
+        }
+
+        if (SeasonId != null)
+        {
+            var navUri = $"./{LeagueName}/Standings/Seasons/{SeasonId}?{standingTabParam}={standingIndex}";
+            NavigationManager.NavigateTo(navUri);
+        }
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        vm.SelectedStandingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
+    }
+
+    private string GetTabLink(int index)
+    {
+        var url = NavigationManager.GetUriWithQueryParameter(standingTabParam, index);
+        return url;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing == false)
+        {
+            NavigationManager.LocationChanged -= OnLocationChanged;
+        }
+        base.Dispose(disposing);
+    }
+}

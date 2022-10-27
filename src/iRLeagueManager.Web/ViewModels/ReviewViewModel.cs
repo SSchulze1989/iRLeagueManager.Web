@@ -38,14 +38,16 @@ namespace iRLeagueManager.Web.ViewModels
         public string IncidentNr { get => model.IncidentNr; set => SetP(model.IncidentNr, value => model.IncidentNr = value, value); }
         public string ResultText { get => model.ResultText; set => SetP(model.ResultText, value => model.ResultText = value, value); }
 
-        private ObservableCollection<MemberInfoModel> involvedMembers = new();
-        public ObservableCollection<MemberInfoModel> InvolvedMembers { get => involvedMembers; set => Set(ref involvedMembers, value); }
+        private IList<MemberInfoModel> involvedMembers = new List<MemberInfoModel>();
+        public IList<MemberInfoModel> InvolvedMembers { get => involvedMembers; set => Set(ref involvedMembers, value); }
 
         private ObservableCollection<ReviewCommentViewModel> comments = new();
         public ObservableCollection<ReviewCommentViewModel> Comments { get => comments; set => Set(ref comments, value); }
 
         private ObservableCollection<VoteViewModel> votes = new();
         public ObservableCollection<VoteViewModel> Votes { get => votes; set => Set(ref votes, value); }
+
+        public IEnumerable<CountedVote> CountedVotes => GetCountedVotes();
 
         public void AddVote(VoteViewModel vote)
         {
@@ -170,6 +172,24 @@ namespace iRLeagueManager.Web.ViewModels
             return ApiService.CurrentLeague?.Reviews().WithId(ReviewId);
         }
 
+        private void UpdateModelMemberList()
+        {
+            foreach(var member in InvolvedMembers)
+            {
+                if (model.InvolvedMembers.Any(x => x.MemberId == member.MemberId) == false)
+                {
+                    model.InvolvedMembers.Add(member);
+                }
+            }
+            foreach(var member in model.InvolvedMembers.ToArray())
+            {
+                if (InvolvedMembers.Any(x => x.MemberId == member.MemberId) == false)
+                {
+                    model.InvolvedMembers.Remove(member);
+                }
+            }
+        }
+
         private void RefreshMemberList()
         {
             // Add comments from to list that are not already in there
@@ -213,16 +233,18 @@ namespace iRLeagueManager.Web.ViewModels
             }
         }
 
-        public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             if (model == null)
             {
-                return true;
+                return StatusResult.SuccessResult();
             }
             if (ApiService.CurrentLeague == null || ReviewId == 0)
             {
-                return false;
+                return LeagueNullResult();
             }
+
+            UpdateModelMemberList();
 
             try
             {
@@ -237,8 +259,7 @@ namespace iRLeagueManager.Web.ViewModels
                     var moveResult = await moveRequest.Post(cancellationToken);
                     if (moveResult.Success == false)
                     {
-                        moveResult.EnsureSuccess();
-                        return false;
+                        return moveResult.ToStatusResult();
                     }
                 }
 
@@ -249,11 +270,10 @@ namespace iRLeagueManager.Web.ViewModels
                 var result = await request;
                 if (result.Success == false)
                 {
-                    result.EnsureSuccess();
-                    return false;
+                    return result.ToStatusResult();
                 }
                 SetModel(result.Content);
-                return true;
+                return StatusResult.SuccessResult();
             }
             finally
             {
@@ -266,16 +286,40 @@ namespace iRLeagueManager.Web.ViewModels
             Votes = new ObservableCollection<VoteViewModel>(model.VoteResults.Select(x => new VoteViewModel(LoggerFactory, ApiService, x)));
         }
 
-        public async Task<bool> AddToSessionAsync(long sessionId, CancellationToken cancellationToken = default)
+        private IEnumerable<CountedVote> GetCountedVotes()
+        {
+            List<CountedVote> countedVotes = new();
+            foreach(var vote in Comments.SelectMany(x => x.Votes))
+            {
+                CountedVote? countedVote = countedVotes
+                    .FirstOrDefault(x => CompareVotes(vote, x.Vote));
+                if (countedVote == null)
+                {
+                    countedVote = new(vote);
+                    countedVotes.Add(countedVote);
+                }
+                countedVote.Count++;
+            }
+            return countedVotes;
+        }
+
+        private bool CompareVotes(VoteViewModel vote1, VoteViewModel vote2)
+        {
+            return vote1.MemberAtFault?.MemberId == vote2.MemberAtFault?.MemberId && vote1.VoteCategoryId == vote2.VoteCategoryId;
+        }
+
+        public async Task<StatusResult> AddToSessionAsync(long sessionId, CancellationToken cancellationToken = default)
         {
             if (model == null)
             {
-                return true;
+                return StatusResult.SuccessResult();
             }
             if (ApiService.CurrentLeague == null)
             {
-                return false;
+                return LeagueNullResult();
             }
+
+            UpdateModelMemberList();
 
             try
             {
@@ -286,11 +330,10 @@ namespace iRLeagueManager.Web.ViewModels
                 var result = await endpoint.Post(model, cancellationToken);
                 if (result.Success == false)
                 {
-                    result.EnsureSuccess();
-                    return false;
+                    return result.ToStatusResult();
                 }
                 SetModel(model);
-                return true;
+                return StatusResult.SuccessResult();
             }
             finally
             {

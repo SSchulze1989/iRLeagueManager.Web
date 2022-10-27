@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-	<Version>0.1.1</Version>
+	<Version>0.3.6</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-iRLeagueManager.Web-2B05F9DC-55A3-49D1-BD64-31507000EDF3</UserSecretsId>
@@ -20,13 +20,18 @@
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.2.0" />
     <PackageReference Include="Blazored.Modal" Version="7.0.0" />
-    <PackageReference Include="iRLeagueApiCore.Client" Version="0.3.3" />
+    <PackageReference Include="iRLeagueApiCore.Client" Version="0.3.6" />
+    <PackageReference Include="iRLeagueApiCore.Common" Version="0.3.6" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.3" />
     <PackageReference Include="MvvmBlazor" Version="6.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Typeahead\src\Blazored.Typeahead\Blazored.Typeahead.csproj" />
   </ItemGroup>
 
 </Project>

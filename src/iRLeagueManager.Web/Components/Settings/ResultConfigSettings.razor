@@ -25,7 +25,7 @@
         {
             selectedResultConfigIndex = value;
             vm.Selected = vm.ResultsConfigs.ElementAt(selectedResultConfigIndex);
-            StateHasChanged();
+            InvokeAsync(StateHasChanged);
         }
     }
 
@@ -60,6 +60,6 @@
             await vm.LoadFromLeagueAsync();
         }
         SelectedResultConfigIndex = 0;
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 }

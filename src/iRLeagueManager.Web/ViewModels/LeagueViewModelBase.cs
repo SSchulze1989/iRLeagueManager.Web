@@ -84,6 +84,12 @@ namespace iRLeagueManager.Web.ViewModels
             }
             return false;
         }
+
+        protected static StatusResult LeagueNullResult() => 
+            StatusResult.FailedResult("League Null", $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentLeague)} was null", Array.Empty<object>());
+
+        protected static StatusResult SeasonNullResult() => 
+            StatusResult.FailedResult("Season Null", $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentSeason)} was null", Array.Empty<object>());
     }
 
     public class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelBase<TViewModel>

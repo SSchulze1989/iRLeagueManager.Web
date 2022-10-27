@@ -19,6 +19,10 @@ namespace iRLeagueManager.Web.Data
 
         private const string tokenKey = "LeagueApiToken";
 
+        private string inMemoryToken = string.Empty;
+
+        public event EventHandler? TokenChanged;
+
         public bool IsLoggedIn { get; private set; }
         public DateTime Expiration { get; private set; }
 
@@ -30,14 +34,26 @@ namespace iRLeagueManager.Web.Data
 
         public async Task ClearTokenAsync()
         {
+            var tokenValue = inMemoryToken;
+
             logger.LogDebug("Clear token in local browser store");
             IsLoggedIn = false;
+            inMemoryToken = string.Empty;
             await localStore.DeleteAsync(tokenKey);
             await Task.FromResult(true);
+            if (inMemoryToken != tokenValue)
+            {
+                TokenChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         public async Task<string> GetTokenAsync()
         {
+            if (string.IsNullOrEmpty(inMemoryToken) == false)
+            {
+                return inMemoryToken;
+            }
+
             logger.LogDebug("Reading token from local browser store");
             try
             {
@@ -69,7 +85,7 @@ namespace iRLeagueManager.Web.Data
                         return string.Empty;
                     }
                     IsLoggedIn = true;
-                    return token.Value ?? string.Empty;
+                    return inMemoryToken = token.Value ?? string.Empty;
                 }
                 IsLoggedIn = false;
                 return string.Empty;
@@ -81,31 +97,17 @@ namespace iRLeagueManager.Web.Data
             }
         }
 
-        //private Task<AuthenticationState> AuthenticationTask(string token)
-        //{
-        //    var state = new AuthenticationState(CreatePrincipal(token));
-        //    return Task.FromResult());
-        //}
-
-        //private ClaimsPrincipal CreatePrincipal(string token)
-        //{
-        //    // decode token
-        //    var handler = new JwtSecurityTokenHandler();
-        //    var jsonToken = handler.ReadToken(token);
-        //    var tokenS = jsonToken as JwtSecurityToken;
-        //    if (tokenS != null)
-        //    {
-        //        var claims = tokenS.Claims.ToList();
-        //        claims.Add(new Claim("ApiToken", token));
-        //        return new ClaimsPrincipal(new ClaimsIdentity(claims));
-        //    }
-        //    return new ClaimsPrincipal();
-        //}
-
         public async Task SetTokenAsync(string token)
         {
+            var oldToken = inMemoryToken;
             logger.LogDebug("Set token to local browser session: {Token}", token);
             await localStore.SetAsync(tokenKey, token);
+            inMemoryToken = token;
+
+            if (inMemoryToken != oldToken)
+            {
+                TokenChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 }

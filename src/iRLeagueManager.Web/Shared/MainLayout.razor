@@ -9,17 +9,13 @@
 <div class="page">
 
     <CascadingValue Value="LeagueName" Name="LeagueName">
-    @*<CascadingValue Value="SeasonId" Name="SeasonId">
-    <CascadingValue Value="EventId" Name="EventId">*@
         <div class="sidebar">
             <NavMenu />
         </div>
-    @*</CascadingValue>
-    </CascadingValue>*@
     </CascadingValue>
 
     <main>
-        <article class="content px-4">
+        <article class="content px-2 pb-4">
             @Body
         </article>
     </main>
@@ -28,8 +24,6 @@
 @code {
     [CascadingParameter]
     public RouteData? RouteData { get; set; }
-    [CascadingParameter]
-    public LeagueApiService ApiService { get; set; } = default!;
 
     public string? LeagueName { get; set; }
     //public long? SeasonId { get; set; }

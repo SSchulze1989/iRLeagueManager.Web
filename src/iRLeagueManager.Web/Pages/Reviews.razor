@@ -11,20 +11,25 @@
 @inherits LeagueComponentBase
 @inject ReviewsPageViewModel ReviewsVm
 
-<LoadingHeader Loading=@(Bind(ReviewsVm, x => x.Loading))>
+<LoadingHeader class="mb-2" Loading=@(Bind(ReviewsVm, x => x.Loading))>
     <h3>Reviews</h3>
 </LoadingHeader>
 
-<div>
-    <EventSelect class="my-2 mx-n2"/>
-    <CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
-        @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
-        {
-            <ReviewCard class="container-md px-0 mb-2 mx-0" Review=review EditClick=@(async () => await OnEditClick(review)) DeleteClick=@(async () => await OnDeleteClick(review))/>
-        }
-    </CascadingValue>
-    <button class="btn btn-outline-secondary" type="button" @onclick=OnAddClick>Add Review</button>
-</div>
+<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
+    <Authorized>
+        <EventSelect />
+        <CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
+            @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
+            {
+                <ReviewCard class="container-md px-0 mb-2 mx-0" Review=review EditClick=@(async () => await OnEditClick(review)) DeleteClick=@(async () => await OnDeleteClick(review))/>
+            }
+        </CascadingValue>
+        <button class="btn btn-outline-secondary" type="button" @onclick=OnAddClick>Add Review</button>
+    </Authorized>
+    <NotAuthorized>
+        You are not allowed here!
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     [CascadingParameter]
@@ -48,9 +53,10 @@
     {
         var parameters = new ModalParameters()
             .Add(nameof(EditReviewModal.Model), review.CopyModel())
-            .Add(nameof(EditReviewModal.InvolvedMembers), ReviewsVm.EventMembers)
+            .Add(nameof(EditReviewModal.EventMembers), ReviewsVm.EventMembers)
             .Add(nameof(EditReviewModal.OnSubmit),
-                new Func<ReviewViewModel, CancellationToken, Task<bool>>(async (review, cancellationToken) => await review.SaveChangesAsync(cancellationToken)));
+                new Func<ReviewViewModel, CancellationToken, 
+                    Task<StatusResult>>(async (review, cancellationToken) => await review.SaveChangesAsync(cancellationToken)));
         var options = new ModalOptions()
         {
             Size = ModalSize.Medium,
@@ -85,10 +91,10 @@
     {
         var parameters = new ModalParameters()
             .Add(nameof(EditReviewModal.Model), new ReviewModel())
-            .Add(nameof(EditReviewModal.InvolvedMembers), ReviewsVm.EventMembers)
+            .Add(nameof(EditReviewModal.EventMembers), ReviewsVm.EventMembers)
             .Add(nameof(EditReviewModal.OnSubmit),
                 new Func<ReviewViewModel, CancellationToken, 
-                    Task<bool>>(async (review, cancellationToken) => await review.AddToSessionAsync(review.SessionId.GetValueOrDefault(), cancellationToken)));
+                    Task<StatusResult>>(async (review, cancellationToken) => await review.AddToSessionAsync(review.SessionId.GetValueOrDefault(), cancellationToken)));
         var options = new ModalOptions()
         {
             Size = ModalSize.Medium,

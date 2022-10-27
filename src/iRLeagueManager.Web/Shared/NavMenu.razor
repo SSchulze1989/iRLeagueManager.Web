@@ -49,6 +49,11 @@
                     </NavLink>
                 </div>
                 <div class="nav-item @(navItemsDisabled)">
+                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Standings")">
+                        <span class="oi oi-clipboard" aria-hidden="true"></span> Standings
+                    </NavLink>
+                </div>
+                <div class="nav-item @(navItemsDisabled)">
                     <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Reviews")">
                         <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Reviews
                     </NavLink>
@@ -61,6 +66,39 @@
                 </div>
             </Authorized>
             <NotAuthorized>
+                <div class="nav-item @(seasonSelectDisabled)">
+                    <select @bind="SeasonSelect" class="form-select no-radius px-0">
+                        @foreach (var season in sharedState.SeasonList)
+                        {
+                            <option value="@season.SeasonId" class="nav-option">@season.SeasonName</option>
+                        }
+                    </select>
+                </div>
+                <div class="nav-item disabled">
+                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Settings")">
+                        <span class="oi oi-cog" aria-hidden="true"></span> Settings
+                    </NavLink>
+                </div>
+                <div class="nav-item @(navItemsDisabled)">
+                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Schedules/Season/{sharedState.SeasonId}")">
+                        <span class="oi oi-calendar" aria-hidden="true"></span> Schedules
+                    </NavLink>
+                </div>
+                <div class="nav-item @(navItemsDisabled)">
+                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Results")">
+                        <span class="oi oi-clipboard" aria-hidden="true"></span> Results
+                    </NavLink>
+                </div>
+                <div class="nav-item @(navItemsDisabled)">
+                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Standings")">
+                        <span class="oi oi-clipboard" aria-hidden="true"></span> Standings
+                    </NavLink>
+                </div>
+                <div class="nav-item disabled">
+                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Reviews")">
+                        <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Reviews
+                    </NavLink>
+                </div>
                 <div class="nav-item">
                     <NavLink class="nav-link" href="@($"./member/login?returnUrl={GetReturnUrl()}")">
                         <span class="oi oi-account-login" aria-hidden="true"></span> Login
@@ -125,6 +163,11 @@
 
     private string GetReturnUrl()
     {
-        return WebUtility.UrlEncode(navigationManager.QueryParameter<string>("returnUrl") ?? string.Empty);
+        var returnUrl = navigationManager.QueryParameter<string>("returnUrl");
+        if (string.IsNullOrEmpty(returnUrl))
+        {
+            return GetCurrentUrl();
+        }
+        return WebUtility.UrlEncode(returnUrl);
     }
 }

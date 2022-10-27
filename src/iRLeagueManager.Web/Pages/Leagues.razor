@@ -4,7 +4,6 @@
 @using iRLeagueApiCore.Client.Http
 @using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.ViewModels;
-@attribute [Authorize]
 @inherits MvvmBlazor.Components.MvvmComponentBase
 @inject LeaguesViewModel vm
 @inject ILeagueApiClient apiClient
@@ -25,14 +24,10 @@
         <tbody>
             @foreach (var league in @Bind(vm, x => x.Leagues))
             {
-                <AuthorizeView Roles=@($"Admin,{LeagueRoles.GetLeagueRoleName(league.LeagueName, LeagueRoles.Member)}")>
-                    <Authorized>
-                        <tr>
-                            <td>@Bind(league, x => x.LeagueId)</td>
-                            <td><NavLink class="nav-link" href="@($"./{@Bind(league, x => x.LeagueName)}/Seasons")">@Bind(league, x => x.LeagueName)</NavLink></td>
-                        </tr>
-                    </Authorized>
-                </AuthorizeView>
+                <tr>
+                    <td>@Bind(league, x => x.LeagueId)</td>
+                    <td><NavLink class="nav-link" href="@($"./{@Bind(league, x => x.LeagueName)}/Seasons")">@Bind(league, x => x.LeagueName)</NavLink></td>
+                </tr>
             }
         </tbody>
     </table>

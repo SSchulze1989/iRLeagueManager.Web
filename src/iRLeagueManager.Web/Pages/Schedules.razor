@@ -5,7 +5,6 @@
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
 @using iRLeagueManager.Web.Components
-@attribute [Authorize]
 @inherits LeagueComponentBase
 @inject SchedulesPageViewModel vm
 @inject JsonSerializerOptions jsonOptions
@@ -24,19 +23,12 @@
         </div>
     </Authorized>
     <NotAuthorized>
-        <AuthorizeView Roles=@(GetRoleString(LeagueRoles.Member)) Context=context2>
-            <Authorized>
-                <div>
-                    @foreach(var schedule in @Bind(vm, x => x.Schedules))
-                    {
-                        <DisplaySchedule class="container-md px-0 mb-2 mx-0" Schedule=schedule ReadOnly=true/>
-                    }
-                </div>
-            </Authorized>
-            <NotAuthorized>
-                You are not allowed here!
-            </NotAuthorized>
-        </AuthorizeView>
+        <div>
+            @foreach(var schedule in @Bind(vm, x => x.Schedules))
+            {
+                <DisplaySchedule class="container-md px-0 mb-2 mx-0" Schedule=schedule ReadOnly=true/>
+            }
+        </div>
     </NotAuthorized>
 </AuthorizeView>
 

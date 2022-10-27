@@ -1,0 +1,80 @@
+﻿@using iRLeagueApiCore.Common.Models.Standings
+<div @attributes=AdditionalAttributes>
+     <div class="card my-2" id="standings">
+        <div class="card-header">
+            @Standing.Name
+        </div>
+        <div class="card-body overflow-scroll">
+            <table class="table table-sm table-striped table-hover">
+                @{
+                    var showDriver = HasDriver(Standing.StandingRows) && Standing.IsTeamStanding == false;
+                    var hasTeam = HasTeam(Standing.StandingRows);
+                }
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        @if (showDriver)
+                        {
+                            <th>Driver</th>
+                        }
+                        @if (hasTeam)
+                        {
+                            <th>Team</th>
+                        }
+                        <th>RacePoints</th>
+                        <th>Penalties</th>
+                        <th>Total Points</th>
+                        <th>Races</th>
+                        <th>Poles</th>
+                        <th>Wins</th>
+                        <th>Podiums</th>
+                        <th>Incidents</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var row in Standing.StandingRows)
+                    {
+                        <tr>
+                            <td>@row.Position (@row.PositionChange)</td>
+                            @if(showDriver)
+                            {
+                                <td>@row.Firstname @row.Lastname</td>
+                            }
+                            @if(hasTeam)
+                            {
+                                <td style="color:@row.TeamColor">@row.TeamName</td>
+                            }
+                            <td>@row.RacePoints</td>
+                            <td style="@(@row.PenaltyPoints != 0 ? "color:red" : "")">
+                                @(row.PenaltyPoints != 0 ? "-" : "")@row.PenaltyPoints
+                            </td>
+                            <td>@row.TotalPoints</td>
+                            <td>@row.Races</td>
+                            <td>@row.PolePositions</td>
+                            <td>@row.Wins</td>
+                            <td>@row.Top3</td>
+                            <td>@row.Incidents</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IDictionary<string, object>? AdditionalAttributes { get; set; }
+    [Parameter, EditorRequired]
+    public StandingsModel Standing { get; set; } = default!;
+
+    private bool HasDriver(IEnumerable<StandingRowModel> rows)
+    {
+        return rows.Any(x => x.MemberId != null);
+    }
+
+    private bool HasTeam(IEnumerable<StandingRowModel> rows)
+    {
+        return rows.Any(x => x.TeamId != null);
+    }
+}

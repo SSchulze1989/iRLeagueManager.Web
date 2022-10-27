@@ -2,7 +2,6 @@
 @page "/{LeagueName}/Seasons/{SeasonId:long}"
 @using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.ViewModels
-@attribute [Authorize]
 @inherits MvvmComponentBase
 @inject NavigationManager navigationManager
 @inject LeagueApiService apiService
@@ -19,8 +18,6 @@
 </div>
 
 @code {
-    [CascadingParameter]
-    public Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
     [Parameter]
     public string LeagueName { get; set; } = string.Empty;
 
@@ -56,6 +53,5 @@
         {
             return;
         }
-        var state = await AuthenticationStateTask;
     }
 }

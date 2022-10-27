@@ -7,6 +7,7 @@
 @inject ReviewViewModel Review
 
 <EditForm Model=Review OnValidSubmit=Submit>
+    <StatusResultValidator @ref=ResultValidator/>
     <InputGroup Label="Session">
         <InputSelect class="form-select" placeholder="Select Session" ariaaria-label="Select Session" id="incident_session" @bind-Value="Review.SessionId"> 
             @if (EventList.Selected != null)
@@ -18,6 +19,7 @@
             }
         </InputSelect>
     </InputGroup>
+    <FormValidationMessage For=@(() => Review.SessionId) />
     <InputGroup Label="Nr.">
         <InputText class="form-control" placeholder="Incident Nr." aria-label="IncidentNr" id="incident_nr" @bind-Value="Review.IncidentNr"/>
     </InputGroup>
@@ -30,6 +32,7 @@
     <InputGroup Label="Incident">
         <InputText class="form-control" placeholder="Incident Kind" aria-label="Incident Kind" id="incident_kind" @bind-Value="Review.IncidentKind" />
     </InputGroup>
+    <FormValidationMessage For=@(() => Review.IncidentKind) />
     <div class="p-1 mt-2">
         <div class="row g-0">
             <div class="input-group-text" style="border-bottom-left-radius:0; border-bottom-right-radius:0; border-bottom: none">
@@ -60,6 +63,8 @@
             </BlazoredTypeahead>
         </div>
     </div>
+    <FormValidationMessage For=@(() => Review.InvolvedMembers) />
+    <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
     <CancelSubmitButtons ModelState=Review SubmitText="Save" OnCancel=Cancel/>
 </EditForm>
 
@@ -80,7 +85,9 @@
     public IEnumerable<MemberInfoModel> EventMembers { get; set; } = Array.Empty<MemberInfoModel>();
 
     [Parameter]
-    public Func<ReviewViewModel, CancellationToken, Task<bool>>? OnSubmit { get; set; }
+    public Func<ReviewViewModel, CancellationToken, Task<StatusResult>>? OnSubmit { get; set; }
+
+    private StatusResultValidator ResultValidator { get; set; } = default!;
 
     protected override void OnParametersSet()
     {
@@ -102,7 +109,9 @@
         bool success = true;
         if (OnSubmit != null)
         {
-            success |= await OnSubmit.Invoke(Review, cts.Token);
+            var result = await OnSubmit.Invoke(Review, cts.Token);
+            ResultValidator.ValidateResult(result);
+            success &= result.IsSuccess;
         }
         if (success && ModalInstance != null)
         {

@@ -26,10 +26,18 @@ namespace iRLeagueManager.Web.ViewModels
             get => model.Date.GetValueOrDefault(); 
             set => SetP(model.Date, value => model.Date = value.GetValueOrDefault().Add(model.Date.GetValueOrDefault().TimeOfDay), value); 
         }
+
         public long? TrackId 
         { 
-            get => model.TrackId; 
-            set => SetP(model.TrackId, value => model.TrackId = value, value); 
+            get => model.TrackId;
+            set
+            {
+                if (SetP(model.TrackId, value => model.TrackId = value, value))
+                {
+                    OnPropertyChanged(nameof(TrackName));
+                    OnPropertyChanged(nameof(ConfigName));
+                }
+            }
         }
 
         public string TrackIdString
@@ -37,6 +45,10 @@ namespace iRLeagueManager.Web.ViewModels
             get => TrackId?.ToString() ?? string.Empty;
             set => TrackId = long.TryParse(value, out long trackId) ? trackId : null;
         }
+
+        public string TrackName => model.TrackName;
+
+        public string ConfigName => model.ConfigName;
 
         public DateTime StartTime 
         { 
@@ -163,6 +175,11 @@ namespace iRLeagueManager.Web.ViewModels
                     .Events()
                     .WithId(model.Id)
                     .Put(model, cancellationToken);
+                if (result.Success == false)
+                {
+                    return false;
+                }
+                SetModel(result.Content);
                 return result.Success;
             }
             finally

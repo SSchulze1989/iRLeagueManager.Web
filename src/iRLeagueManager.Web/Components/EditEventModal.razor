@@ -1,11 +1,12 @@
 ﻿@using System.Text.Json
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Tracks
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
 @inject EventViewModel Event
 @inject JsonSerializerOptions jsonOptions
-
+@inject TrackListService trackListService
 
 <EditForm Model=Event OnValidSubmit=Submit>
     <InputGroup Label="Name"> 
@@ -17,8 +18,34 @@
     <InputGroup Label="Start-Time">
         <input class="form-control" type="time" arial-label="StartTime" @bind="Event.StartTime"/>
     </InputGroup>
-    <InputGroup Label="TrackId">
-        <input class="form-control" type="number" placholder="123" aria-label="TrackId" @bind="Event.TrackIdString"/>
+    <InputGroup Label="Track">
+        <BlazoredTypeahead @bind-Value=SelectedTrack  
+                           SearchMethod=SearchTracks 
+                           MinimumLength=1
+                           MaximumSuggestions=100
+                           EnableDropDown=true
+                           class="form-control py-0 px-0 ps-1"
+                           placeholder="Search by Track name...">
+            <SelectedTemplate Context=track>
+                @track?.TrackName
+            </SelectedTemplate>
+            <ResultTemplate Context=track>
+                @track.TrackName
+            </ResultTemplate>
+        </BlazoredTypeahead>
+    </InputGroup>
+    <InputGroup Label="Config">
+        <select class="form-select" aria-label="SelectTrackConfig" @bind="Event.TrackId"
+            placeholder="..."
+            disabled="@(SelectedTrack == null)">
+            @if (SelectedTrack != null)
+            {
+                @foreach(var config in SelectedTrack.Configs)
+                {
+                    <option value="@config.TrackId">@config.ConfigName</option>
+                }
+            }
+        </select>
     </InputGroup>
     <InputGroup Label="Duration">
         <input class="form-control" type="time" aria-label="Duration" @bind="Event.Duration"/>
@@ -78,18 +105,56 @@
     [Parameter]
     public EventModel EventModel { get; set; } = default!;
 
-    protected override void OnParametersSet()
+    private IList<TrackGroupModel> TrackList { get; set; } = Array.Empty<TrackGroupModel>();
+
+    private TrackGroupModel? selectedTrack;
+    private TrackGroupModel? SelectedTrack
+    {
+        get => selectedTrack;
+        set
+        {
+            if (selectedTrack != value)
+            {
+                SetSelectedTrack(value);
+            }
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
     {
         _ = EventModel ?? throw new InvalidOperationException($"Error while setting parameters on {nameof(EditEventModal)}. ${nameof(EventModel)} is not allowed to be null but was null");
     }
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender == false)
         {
             return;
         }
         Event.SetModel(EventModel);
+        TrackList = await trackListService.GetTracks();
+        SelectedTrack = TrackList.FirstOrDefault(x => x.Configs.Any(y => y.TrackId == EventModel.TrackId));
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void SetSelectedTrack(TrackGroupModel? track)
+    {
+        if (track == null)
+        {
+            selectedTrack = null;
+            Event.TrackId = null;
+            return;
+        }
+
+        selectedTrack = track;
+        var trackGroup = track.Configs.FirstOrDefault(x => x.TrackId == Event.TrackId)
+            ?? track.Configs.FirstOrDefault();
+        Event.TrackId = trackGroup?.TrackId;
+    }
+
+    private async Task<IEnumerable<TrackGroupModel>> SearchTracks(string search)
+    {
+        return await Task.FromResult(TrackList.Where(x => x.TrackName.Contains(search, StringComparison.OrdinalIgnoreCase)));
     }
 
     private async Task Submit()

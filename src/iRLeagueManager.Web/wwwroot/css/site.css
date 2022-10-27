@@ -2,6 +2,13 @@
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 1rem;
+}
+
+@media (max-width: 840.98px) {
+    html {
+        font-size: 0.75rem;
+    }
 }
 
 h1:focus {
@@ -15,6 +22,20 @@ h3 {
 
 .pointer {
     cursor:pointer;
+}
+
+.hover-button-text {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    opacity: 0.5;
+}
+
+.hover-button .hover-button-text {
+    visibility: hidden !important;
+}
+
+.hover-button:hover .hover-button-text {
+    visibility: visible !important;
 }
 
 .page-header {

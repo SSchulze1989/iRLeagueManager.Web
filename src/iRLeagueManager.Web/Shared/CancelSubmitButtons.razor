@@ -3,7 +3,11 @@
 <div class="pt-2 pb-2">
     <div class="row">
         <div class="col d-flex justify-content-center">
-            <button class="btn btn-primary" disabled="@ModelState?.Loading" type="submit">
+            <button class="btn btn-primary 
+                    @(CanSubmit == false ? "disabled" : "")" 
+                    disabled="@ModelState?.Loading" 
+                    type="submit"
+                    @onclick="OnSubmit">
                 @if (@ModelState?.Loading == true)
                 {
                     <span class="spinner-border spinner-border-sm mr-1"></span>
@@ -23,7 +27,11 @@
     [Parameter]
     public string CancelText { get; set; } = "Cancel";
     [Parameter]
+    public EventCallback OnSubmit { get; set; }
+    [Parameter]
     public EventCallback OnCancel { get; set; }
+    [Parameter]
+    public bool CanSubmit { get; set; } = true;
 
     private IModelState? modelState;
     [Parameter]

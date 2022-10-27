@@ -233,15 +233,15 @@ namespace iRLeagueManager.Web.ViewModels
             }
         }
 
-        public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             if (model == null)
             {
-                return true;
+                return StatusResult.SuccessResult();
             }
             if (ApiService.CurrentLeague == null || ReviewId == 0)
             {
-                return false;
+                return LeagueNullResult();
             }
 
             UpdateModelMemberList();
@@ -259,8 +259,7 @@ namespace iRLeagueManager.Web.ViewModels
                     var moveResult = await moveRequest.Post(cancellationToken);
                     if (moveResult.Success == false)
                     {
-                        moveResult.EnsureSuccess();
-                        return false;
+                        return moveResult.ToStatusResult();
                     }
                 }
 
@@ -271,11 +270,10 @@ namespace iRLeagueManager.Web.ViewModels
                 var result = await request;
                 if (result.Success == false)
                 {
-                    result.EnsureSuccess();
-                    return false;
+                    return result.ToStatusResult();
                 }
                 SetModel(result.Content);
-                return true;
+                return StatusResult.SuccessResult();
             }
             finally
             {
@@ -310,16 +308,18 @@ namespace iRLeagueManager.Web.ViewModels
             return vote1.MemberAtFault?.MemberId == vote2.MemberAtFault?.MemberId && vote1.VoteCategoryId == vote2.VoteCategoryId;
         }
 
-        public async Task<bool> AddToSessionAsync(long sessionId, CancellationToken cancellationToken = default)
+        public async Task<StatusResult> AddToSessionAsync(long sessionId, CancellationToken cancellationToken = default)
         {
             if (model == null)
             {
-                return true;
+                return StatusResult.SuccessResult();
             }
             if (ApiService.CurrentLeague == null)
             {
-                return false;
+                return LeagueNullResult();
             }
+
+            UpdateModelMemberList();
 
             try
             {
@@ -330,11 +330,10 @@ namespace iRLeagueManager.Web.ViewModels
                 var result = await endpoint.Post(model, cancellationToken);
                 if (result.Success == false)
                 {
-                    result.EnsureSuccess();
-                    return false;
+                    return result.ToStatusResult();
                 }
                 SetModel(model);
-                return true;
+                return StatusResult.SuccessResult();
             }
             finally
             {

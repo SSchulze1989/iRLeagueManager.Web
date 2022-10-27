@@ -6,11 +6,15 @@
 
 <CascadingValue Value="EventList">
 <CascadingBlazoredModal>
-<CascadingValue Value="ApiService">
+<CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
             <CascadingValue Value="routeData">
-                <AppRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                    <NotAuthorized>
+                        <LoginRedirect/>
+                    </NotAuthorized>
+                </AuthorizeRouteView>
                 <FocusOnNavigate RouteData="@routeData" Selector="h1" />
             </CascadingValue>
         </Found>
@@ -21,6 +25,6 @@
             </LayoutView>
         </NotFound>
     </Router>
-</CascadingValue>
+</CascadingAuthenticationState>
 </CascadingBlazoredModal>
 </CascadingValue>

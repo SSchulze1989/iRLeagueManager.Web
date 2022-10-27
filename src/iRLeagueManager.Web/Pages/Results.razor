@@ -14,13 +14,13 @@
 @inherits LeagueComponentBase
 @inject ResultsPageViewModel vm
 
-<LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+<LoadingHeader class="mb-2" Loading=@Bind(vm, x => x.Loading)>
     <h3>Results</h3>
 </LoadingHeader>
 
-<div>
-    <div>
-        <EventSelect class="my-2 mx-n2"/>
+<AuthorizeView Roles=@GetRoleString(LeagueRoles.Member)>
+    <Authorized>
+        <EventSelect />
         @if (@Bind(vm, x => x.Results)?.Count == 0)
         {
             <div class="card-body">
@@ -35,8 +35,6 @@
             </li>
         }
         </ul>
-    </div>
-    <div>
         @if (@Bind(vm, x => x.SelectedEvent) != null && @Bind(vm, x => x.SelectedEventResult) != null)
         {
             @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults))
@@ -44,8 +42,11 @@
                 <DisplayResult class="px-0 mb-2 mx-0" Result=result/>
             }
         }
-    </div>
-</div>
+    </Authorized>
+    <NotAuthorized>
+        You are not allowed here!
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     private const string resultTabParam = "resultTab";

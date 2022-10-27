@@ -8,6 +8,7 @@
 @inject LeagueApiService apiService
 @inject SeasonsViewModel vm
 @inject SharedStateService sharedState
+@*@inject AuthenticationStateProvider authStateProvider*@
 
 <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
     <h3>Seasons</h3>
@@ -18,6 +19,8 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
     [Parameter]
     public string LeagueName { get; set; } = string.Empty;
 
@@ -46,8 +49,13 @@
         }
     }
 
-    protected override Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        return vm.OnAfterRenderAsync(firstRender);
+        await vm.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        var state = await AuthenticationStateTask;
     }
 }

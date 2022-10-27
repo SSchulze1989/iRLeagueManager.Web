@@ -56,7 +56,7 @@
             var resultIndex = NavigationManager.QueryParameter<int>(resultTabParam);
             await vm.LoadFromEventAsync(@event.EventId);
 
-            if (resultIndex >= vm.Results.Count())
+            if (resultIndex >= vm.Results.Count() || resultIndex < 0)
             {
                 resultIndex = 0;
             }
@@ -87,5 +87,14 @@
     {
         var url = NavigationManager.GetUriWithQueryParameter(resultTabParam, index);
         return url;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing == false)
+        {
+            NavigationManager.LocationChanged -= OnLocationChanged;
+        }
+        base.Dispose(disposing);
     }
 }

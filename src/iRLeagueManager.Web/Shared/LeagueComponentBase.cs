@@ -102,6 +102,7 @@ namespace iRLeagueManager.Web.Shared
             {
                 return;
             }
+            SeasonId = ApiService.CurrentSeason.Id;
             
             HasRendered = true;
             await LoadEventList(ApiService.CurrentSeason.Id);

@@ -60,14 +60,14 @@
 
                         <tr @onclick="@(() => OnTableRowClick(@event))" class="@(ReadOnly ? "" : "pointer")">
                             <td>@(index + 1).</td>
-                            <td>@Bind(@event, x => x.Date).ToString(@"dd.MM.yyyy")</td>
-                            <td>@Bind(@event, x => x.Name)</td>
-                            <td>@Bind(@event, x => x.TrackId)</td>
-                            <td>@Bind(@event, x => x.Laps)</td>
-                            <td>@Bind(@event, x => x.StartTime).ToString(@"HH:mm")</td>
-                            <td>@Bind(@event, x => x.Duration).ToString(@"HH:mm")</td>
-                            <td>@(DurationString(Bind(@event, x=> x.Practice)))</td>
-                            <td>@(DurationString(Bind(@event, x=> x.Qualifying)))</td>
+                            <td>@(@event.Date.ToString(@"dd.MM.yyyy"))</td>
+                            <td>@(@event.Name)</td>
+                            <td>@(@event.TrackName)@(@event.ConfigName == "-" ? "" : $" - {@event.ConfigName}")</td>
+                            <td>@(@event.Laps)</td>
+                            <td>@(@event.StartTime.ToString(@"HH:mm"))</td>
+                            <td>@(@event.Duration.ToString(@"HH:mm"))</td>
+                            <td>@(DurationString(@event.Practice))</td>
+                            <td>@(DurationString(@event.Qualifying))</td>
                             @for(int i=0; i<maxRaceCount; i++)
                             {
                                 var race = races.ElementAtOrDefault(i);

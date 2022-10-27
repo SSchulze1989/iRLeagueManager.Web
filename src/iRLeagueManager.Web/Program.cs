@@ -45,6 +45,7 @@ builder.Services.AddScoped<IAsyncTokenProvider>(x => x.GetRequiredService<IToken
 builder.Services.AddScoped(sp => sp.GetRequiredService<LeagueApiClientFactory>().CreateClient());
 builder.Services.AddScoped<SharedStateService>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvicer>();
+builder.Services.AddTrackList();
 builder.Services.AddViewModels();
 
 builder.Services.AddBlazoredModal();

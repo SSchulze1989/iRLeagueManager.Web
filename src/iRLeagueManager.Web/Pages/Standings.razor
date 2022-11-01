@@ -39,7 +39,7 @@
 }
 
 @code {
-    private const string standingTabParam = "resultTab";
+    private const string standingTabParam = "standingTab";
 
     protected override void OnInitialized()
     {
@@ -51,33 +51,26 @@
     {
         if (@event?.EventId != null)
         {
+            var standingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
             NavigationManager.NavigateTo($"./{LeagueName}/Standings/Events/{@event.EventId}");
             await vm.LoadFromEventAsync(@event.EventId);
+            
+            if (standingIndex >= vm.Standings.Count() || standingIndex < 0)
+            {
+                standingIndex = 0;
+            }
+            var navUri = $"./{LeagueName}/Standings/Events/{@event.EventId}?{standingTabParam}={standingIndex}";
+            NavigationManager.NavigateTo(navUri);
         }
     }
 
-    //protected override async Task OnAfterRenderAsync(bool firstRender)
-    //{
-    //    await base.OnAfterRenderAsync(firstRender);
-    //    if (firstRender == false)
-    //    {
-    //        return;
-    //    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false) return;
 
-    //    var standingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
-    //    await vm.LoadAsync();   
-    //    vm.SelectedStandingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
-    //    if (standingIndex >= vm.Standings.Count() || standingIndex < 0)
-    //    {
-    //        standingIndex = 0;
-    //    }
-
-    //    if (SeasonId != null)
-    //    {
-    //        var navUri = $"./{LeagueName}/Standings/Seasons/{SeasonId}?{standingTabParam}={standingIndex}";
-    //        NavigationManager.NavigateTo(navUri);
-    //    }
-    //}
+        vm.SelectedStandingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
+    }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {

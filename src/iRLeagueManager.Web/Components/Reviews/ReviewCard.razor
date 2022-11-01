@@ -7,7 +7,7 @@
 <CascadingValue Value=Review.InvolvedMembers>
 <div @attributes=AdditionalAttributes>
     <div class="card">
-        <div class="btn card-header accordion-header review-header">
+        <div class="card-header accordion-header review-header">
             <div class="row">
                 <div class="col d-md-flex justify-content-start">
                     <span>@Review.SessionName:</span>
@@ -106,17 +106,20 @@
                     </div>
                 </div>
                 <hr/>
-                <div>
-                    <h5>Comments</h5>
-                    <ul class="list-group">
-                        @foreach(var comment in @Bind(Review, x => x.Comments))
-                        {
-                            <li class="list-group-item">
-                                <ReviewComment Comment=comment />
-                            </li>
-                        }
-                    </ul>
-                </div>
+                @if (ShowComments)
+                {
+                    <div>
+                        <h5>Comments</h5>
+                        <ul class="list-group">
+                            @foreach (var comment in @Bind(Review, x => x.Comments))
+                            {
+                                <li class="list-group-item">
+                                    <ReviewComment Comment=comment />
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -134,6 +137,8 @@
     public EventCallback<MouseEventArgs> EditClick { get; set; } 
     [Parameter]
     public EventCallback<MouseEventArgs> DeleteClick { get; set; }
+    [Parameter]
+    public bool ShowComments { get; set; } = false;
 
     private ElementReference ReviewText { get; set; }
 

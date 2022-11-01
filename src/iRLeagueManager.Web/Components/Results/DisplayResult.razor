@@ -15,7 +15,6 @@
                         <th @onclick="() => SetOrderProperty(Result, row => row.FinalPosition)">Pos.</th>
                         @if (isTeamResult == false)
                         {
-                            <th @onclick="() => SetOrderProperty(Result, row => row.FinalPositionChange)">Chg.</th>
                             <th @onclick="() => SetOrderProperty(Result, row => row.StartPosition)">Start</th>
                             <th @onclick="() => SetOrderProperty(Result, row => row.Firstname)">Name</th>
                         }
@@ -40,10 +39,9 @@
                     @foreach(var row in Result.ResultRows)
                     {
                         <tr>
-                            <td>@row.FinalPosition</td>
+                            <td><ValueChange Value=row.FinalPosition Change=row.FinalPositionChange /></td>
                             @if (isTeamResult == false)
                             {
-                                <td>@row.FinalPositionChange</td>
                                 <td>@row.StartPosition</td>
                                 <td>@row.Firstname @row.Lastname</td>
                             }

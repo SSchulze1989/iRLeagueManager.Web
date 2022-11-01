@@ -21,6 +21,28 @@ namespace iRLeagueManager.Web.ViewModels
 
         public StandingsModel? SelectedStanding => Standings.ElementAtOrDefault(SelectedStandingIndex);
 
+        public async Task<StatusResult> LoadFromEventAsync(long eventId)
+        {
+            if (ApiService.CurrentLeague == null)
+            {
+                return LeagueNullResult();
+            }
+
+            var request = ApiService.CurrentLeague
+                .Events()
+                .WithId(eventId)
+                .Standings()
+                .Get();
+            var result = await request;
+            if (result.Success)
+            {
+                var standingsData = result.Content;
+                Standings = new ObservableCollection<StandingsModel>(standingsData);
+            }
+
+            return result.ToStatusResult();
+        }
+
         public async Task<StatusResult> LoadAsync(long? seasonId = null)
         {
             if (ApiService.CurrentLeague == null)

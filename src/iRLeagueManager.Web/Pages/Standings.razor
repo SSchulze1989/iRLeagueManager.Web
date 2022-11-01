@@ -1,4 +1,5 @@
-﻿@page "/{LeagueName}/Standings/Seasons/{SeasonId:long}"
+﻿@page "/{LeagueName}/Standings/Events/{EventId:long}"
+@page "/{LeagueName}/Standings/Seasons/{SeasonId:long}"
 @page "/{LeagueName}/Standings"
 @using System.ComponentModel
 @using Microsoft.AspNetCore.WebUtilities
@@ -17,6 +18,7 @@
     <h3>Standings</h3>
 </LoadingHeader>
 
+<EventSelect />
 @if (@Bind(vm, x => x.Standings)?.Count == 0)
 {
     <div class="card-body">
@@ -45,28 +47,37 @@
         base.OnInitialized();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnEventChangedAsync(EventViewModel? @event)
     {
-        await base.OnAfterRenderAsync(firstRender);
-        if (firstRender == false)
+        if (@event?.EventId != null)
         {
-            return;
-        }
-
-        var standingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
-        await vm.LoadAsync();   
-        vm.SelectedStandingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
-        if (standingIndex >= vm.Standings.Count() || standingIndex < 0)
-        {
-            standingIndex = 0;
-        }
-
-        if (SeasonId != null)
-        {
-            var navUri = $"./{LeagueName}/Standings/Seasons/{SeasonId}?{standingTabParam}={standingIndex}";
-            NavigationManager.NavigateTo(navUri);
+            NavigationManager.NavigateTo($"./{LeagueName}/Standings/Events/{@event.EventId}");
+            await vm.LoadFromEventAsync(@event.EventId);
         }
     }
+
+    //protected override async Task OnAfterRenderAsync(bool firstRender)
+    //{
+    //    await base.OnAfterRenderAsync(firstRender);
+    //    if (firstRender == false)
+    //    {
+    //        return;
+    //    }
+
+    //    var standingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
+    //    await vm.LoadAsync();   
+    //    vm.SelectedStandingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
+    //    if (standingIndex >= vm.Standings.Count() || standingIndex < 0)
+    //    {
+    //        standingIndex = 0;
+    //    }
+
+    //    if (SeasonId != null)
+    //    {
+    //        var navUri = $"./{LeagueName}/Standings/Seasons/{SeasonId}?{standingTabParam}={standingIndex}";
+    //        NavigationManager.NavigateTo(navUri);
+    //    }
+    //}
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {

@@ -36,7 +36,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach(var row in Result.ResultRows)
+                    @{var resultRows = Result.ResultRows;}
+                    @foreach(var row in resultRows)
                     {
                         <tr>
                             <td><ValueChange Value=row.FinalPosition Change=row.FinalPositionChange /></td>
@@ -46,9 +47,9 @@
                                 <td>@row.Firstname @row.Lastname</td>
                             }
                             <td style="color:@row.TeamColor">@row.TeamName</td>
-                            <td>@row.QualifyingTime.LapTimeString()</td>
-                            <td>@row.FastestLapTime.LapTimeString() (@row.FastLapNr)</td>
-                            <td>@row.AvgLapTime.LapTimeString()</td>
+                            <td class="@(IsFastestLap(resultRows, row, x => x.QualifyingTime) ? "fw-bold" : "")">@row.QualifyingTime.LapTimeString()</td>
+                            <td class="@(IsFastestLap(resultRows, row, x => x.FastestLapTime) ? "fw-bold" : "")">@row.FastestLapTime.LapTimeString() (@row.FastLapNr)</td>
+                            <td class="@(IsFastestLap(resultRows, row, x => x.AvgLapTime) ? "fw-bold" : "")">@row.AvgLapTime.LapTimeString()</td>
                             @if (isTeamResult == false)
                             {
                                 <td>+@row.Interval.LapTimeString()</td>
@@ -87,5 +88,15 @@
     private void SetOrderProperty(SessionResultViewModel result, Expression<Func<ResultRowModel, IComparable>> selector, bool descending = false)
     {
         result.OrderByPropertySelector = selector;
+    }
+
+    private bool IsFastestLap(IEnumerable<ResultRowModel> resultRows, ResultRowModel row, Func<ResultRowModel, TimeSpan> selector)
+    {
+        var rowValue = selector(row);
+        var minValue = resultRows
+            .Select(x => selector(x))
+            .Where(x => x > TimeSpan.FromSeconds(1))
+            .Min();
+        return rowValue == minValue;
     }
 }

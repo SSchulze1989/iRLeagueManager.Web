@@ -96,7 +96,7 @@
         var minValue = resultRows
             .Select(x => selector(x))
             .Where(x => x > TimeSpan.FromSeconds(1))
-            .Min();
+            .MinOrDefault();
         return rowValue == minValue;
     }
 }

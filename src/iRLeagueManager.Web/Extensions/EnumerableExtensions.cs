@@ -6,5 +6,14 @@
         {
             return enumerable.Where(x => x is not null).OfType<T>();
         }
+
+        public static T? MinOrDefault<T>(this IEnumerable<T> enumerable)
+        {
+            if (enumerable.Any() == false)
+            {
+                return default;
+            }
+            return enumerable.Min();
+        }
     }
 }

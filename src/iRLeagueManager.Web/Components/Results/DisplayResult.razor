@@ -8,6 +8,10 @@
         <div class="card-header">
             @Bind(Result, x => x.SessionName)
         </div>
+        @{
+            var resultRows = Result.ResultRows;
+            var displayBonusPoints = resultRows.Any(x => x.BonusPoints != 0);
+        }
         <div class="card-body overflow-scroll">
             <table class="table table-sm table-striped table-hover">
                 <thead>
@@ -29,14 +33,16 @@
                             <th @onclick="() => SetOrderProperty(Result, row => row.CompletedLaps)">Laps Compl.</th>
                         }
                         <th @onclick="() => SetOrderProperty(Result, row => row.RacePoints)">Race Pts.</th>
-                        <th @onclick="() => SetOrderProperty(Result, row => row.BonusPoints)">Bonus Pts.</th>
+                        @if (displayBonusPoints)
+                        {
+                            <th @onclick="() => SetOrderProperty(Result, row => row.BonusPoints)">Bonus Pts.</th>
+                        }
                         <th @onclick="() => SetOrderProperty(Result, row => row.PenaltyPoints)">Penalty</th>
-                        <th @onclick="() => SetOrderProperty(Result, row => row.Incidents)">Incs.</th>
                         <th @onclick="() => SetOrderProperty(Result, row => row.TotalPoints)">Total Pts.</th>
+                        <th @onclick="() => SetOrderProperty(Result, row => row.Incidents)">Incs.</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @{var resultRows = Result.ResultRows;}
                     @foreach(var row in resultRows)
                     {
                         <tr>
@@ -57,12 +63,15 @@
                                 <td>@row.CompletedLaps</td>
                             }
                             <td>@row.RacePoints</td>
-                            <td>@row.BonusPoints</td>
+                            @if (displayBonusPoints)
+                            {
+                                <td>@row.BonusPoints</td>
+                            }
                             <td style="@(@row.PenaltyPoints != 0 ? "color:red" : "")">
-                                @(row.PenaltyPoints != 0 ? "-" : "")@row.PenaltyPoints
+                                @(row.PenaltyPoints != 0 ? $"-{row.PenaltyPoints}" : "")
                             </td>
-                            <td>@row.Incidents</td>
                             <td>@row.TotalPoints</td>
+                            <td>@row.Incidents</td>
                         </tr>
                     }
                 </tbody>

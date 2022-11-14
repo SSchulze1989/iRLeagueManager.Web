@@ -37,7 +37,7 @@ namespace iRLeagueManager.Web.ViewModels
                 .Standings()
                 .Get();
                 var result = await request;
-                if (result.Success)
+                if (result.Success && result.Content is not null)
                 {
                     var standingsData = result.Content;
                     Standings = new ObservableCollection<StandingsModel>(standingsData);
@@ -72,7 +72,7 @@ namespace iRLeagueManager.Web.ViewModels
 
                 var request = ApiService.CurrentSeason.Standings().Get();
                 var result = await request;
-                if (result.Success)
+                if (result.Success && result.Content is not null)
                 {
                     var standingsData = result.Content;
                     Standings = new ObservableCollection<StandingsModel>(standingsData);

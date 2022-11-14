@@ -40,7 +40,7 @@ public class LeagueApiService
         Shared.SeasonId = 0;
         Shared.SeasonName = string.Empty;
         var result = await CurrentLeague.Seasons().Get();
-        if (result.Success)
+        if (result.Success && result.Content is not null)
         {
             var seasons = result.Content;
             Shared.SeasonList = new ObservableCollection<SeasonModel>(seasons);
@@ -64,7 +64,7 @@ public class LeagueApiService
 
         // get name and update state
         var result = await CurrentSeason.Get();
-        if (result.Success)
+        if (result.Success && result.Content is not null)
         {
             var season = result.Content;
             Shared.SeasonId = seasonId;
@@ -84,7 +84,7 @@ public class LeagueApiService
             .Events()
             .WithId(eventId)
             .Get();
-        if (eventRequestResult.Success == false)
+        if (eventRequestResult.Success == false || eventRequestResult.Content is null)
         {
             return;
         }

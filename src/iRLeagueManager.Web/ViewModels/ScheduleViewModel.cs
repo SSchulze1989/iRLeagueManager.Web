@@ -71,7 +71,7 @@ namespace iRLeagueManager.Web.ViewModels
             }
 
             var result = await ApiService.CurrentLeague.Schedules().WithId(ScheduleId).Get(cancellationToken);
-            if (result.Success == false)
+            if (result.Success == false || result.Content is null)
             {
                 return;
             }
@@ -86,7 +86,7 @@ namespace iRLeagueManager.Web.ViewModels
             //await Task.Delay(500);
 
             var result = await ApiService.CurrentLeague.Schedules().WithId(ScheduleId).Events().Get(cancellationToken);
-            if (result.Success == false)
+            if (result.Success == false || result.Content is null)
             {
                 return;
             }

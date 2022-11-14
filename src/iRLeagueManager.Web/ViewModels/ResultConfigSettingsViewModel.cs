@@ -27,7 +27,7 @@ namespace iRLeagueManager.Web.ViewModels
 
             var resultConfigsEndpoint = ApiService.CurrentLeague.ResultConfigs();
             var resultConfigsResult = await resultConfigsEndpoint.Get();
-            if (resultConfigsResult.Success == false)
+            if (resultConfigsResult.Success == false || resultConfigsResult.Content is null)
             {
                 return;
             }

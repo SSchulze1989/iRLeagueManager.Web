@@ -21,7 +21,7 @@ namespace iRLeagueManager.Web.Data
             {
                 var request = apiService.Client.Tracks().Get();
                 var result = await request;
-                if (result.Success)
+                if (result.Success && result.Content is not null)
                 {
                     lastUpdate = DateTime.UtcNow;
                     cachedTrackList = result.Content.ToList();

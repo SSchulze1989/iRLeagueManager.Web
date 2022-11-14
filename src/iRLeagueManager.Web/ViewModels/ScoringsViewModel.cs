@@ -29,7 +29,7 @@ namespace iRLeagueManager.Web.ViewModels
                 return;
             }
             var result = await ApiService.CurrentSeason.Scorings().Get();
-            if (result.Success)
+            if (result.Success && result.Content is not null)
             {
                 var scorings = result.Content.Select(x => new ScoringViewModel(LoggerFactory, ApiService, x));
                 Scorings = new ObservableCollection<ScoringViewModel>(scorings);

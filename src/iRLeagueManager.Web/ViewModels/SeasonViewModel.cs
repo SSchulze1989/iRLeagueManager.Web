@@ -62,7 +62,7 @@ public class SeasonViewModel : LeagueViewModelBase<SeasonViewModel>
                 return;
             }
             var result = await ApiService.CurrentSeason.Get();
-            if (result.Success)
+            if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);
             }
@@ -87,7 +87,7 @@ public class SeasonViewModel : LeagueViewModelBase<SeasonViewModel>
                 .Seasons()
                 .WithId(model.SeasonId)
                 .Put(model);
-            if (result.Success)
+            if (result.Success && result.Content is not null)
             {
                 model = result.Content;
                 return true;

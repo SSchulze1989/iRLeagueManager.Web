@@ -39,9 +39,20 @@
         <DisplayResult class="px-0 mb-2 mx-0" Result=result/>
     }
 }
+<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+    <Authorized>
+        <div>
+            <button class="btn btn-outline-secondary" @onclick=OnUploadButtonClick>Upload Result</button>
+        </div>
+    </Authorized>
+</AuthorizeView>
 
 @code {
     private const string resultTabParam = "resultTab";
+
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -87,6 +98,11 @@
     {
         var url = NavigationManager.GetUriWithQueryParameter(resultTabParam, index);
         return url;
+    }
+
+    private async Task OnUploadButtonClick()
+    {
+        await ModalService.Show<UploadResultPrompt>().Result;
     }
 
     protected override void Dispose(bool disposing)

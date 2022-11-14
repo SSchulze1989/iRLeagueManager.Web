@@ -68,7 +68,7 @@ namespace iRLeagueManager.Web.ViewModels
                     .WithId(CommentId)
                     .Put(model);
                 var result = await request;
-                if (result.Success == false)
+                if (result.Success == false || result.Content is null)
                 {
                     result.EnsureSuccess();
                     return false;

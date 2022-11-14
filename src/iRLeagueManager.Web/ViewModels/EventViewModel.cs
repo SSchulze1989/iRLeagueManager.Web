@@ -145,7 +145,7 @@ namespace iRLeagueManager.Web.ViewModels
             }
 
             var result = await ApiService.CurrentLeague.Events().WithId(eventId).Get(cancellationToken);
-            if (result.Success == false)
+            if (result.Success == false || result.Content is null)
             {
                 return;
             }
@@ -175,7 +175,7 @@ namespace iRLeagueManager.Web.ViewModels
                     .Events()
                     .WithId(model.Id)
                     .Put(model, cancellationToken);
-                if (result.Success == false)
+                if (result.Success == false || result.Content is null)
                 {
                     return false;
                 }

@@ -34,7 +34,7 @@
 </ul>
 @if (@Bind(vm, x => x.SelectedEvent) != null && @Bind(vm, x => x.SelectedEventResult) != null)
 {
-    @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults))
+    @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
     {
         <DisplayResult class="px-0 mb-2 mx-0" Result=result/>
     }
@@ -102,7 +102,14 @@
 
     private async Task OnUploadButtonClick()
     {
-        await ModalService.Show<UploadResultPrompt>().Result;
+        var @event = vm.SelectedEvent?.GetModel();
+        if (@event is null)
+        {
+            return;
+        }
+        var parameters = new ModalParameters()
+            .Add(nameof(UploadResultPrompt.Event), @event);
+        await ModalService.Show<UploadResultPrompt>("Upload json result", parameters).Result;
     }
 
     protected override void Dispose(bool disposing)

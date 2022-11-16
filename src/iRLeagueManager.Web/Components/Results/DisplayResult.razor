@@ -11,6 +11,8 @@
         @{
             var resultRows = Result.ResultRows;
             var displayBonusPoints = resultRows.Any(x => x.BonusPoints != 0);
+            var displayStartPos = resultRows.Any(x => x.StartPosition != 0);
+            var displayQualyLap = resultRows.Any(x => x.QualifyingTime > TimeSpan.FromSeconds(1));
         }
         <div class="card-body overflow-scroll">
             <table class="table table-sm table-striped table-hover">
@@ -19,11 +21,17 @@
                         <th @onclick="() => SetOrderProperty(Result, row => row.FinalPosition)">Pos.</th>
                         @if (isTeamResult == false)
                         {
-                            <th @onclick="() => SetOrderProperty(Result, row => row.StartPosition)">Start</th>
+                            @if (displayStartPos)
+                            {
+                                <th @onclick="() => SetOrderProperty(Result, row => row.StartPosition)">Start</th>
+                            }
                             <th @onclick="() => SetOrderProperty(Result, row => row.Firstname)">Name</th>
                         }
                         <th @onclick="() => SetOrderProperty(Result, row => row.TeamName)">Team</th>
-                        <th @onclick="() => SetOrderProperty(Result, row => row.QualifyingTime)">Qualy Lap</th>
+                        @if (displayQualyLap)
+                        {
+                            <th @onclick="() => SetOrderProperty(Result, row => row.QualifyingTime)">Qualy Lap</th>
+                        }
                         <th @onclick="() => SetOrderProperty(Result, row => row.FastestLapTime)">Fastest Lap</th>
                         <th @onclick="() => SetOrderProperty(Result, row => row.AvgLapTime)">Avg. Lap</th>
                         @if (isTeamResult == false)
@@ -49,11 +57,17 @@
                             <td><ValueChange Value=row.FinalPosition Change=row.FinalPositionChange /></td>
                             @if (isTeamResult == false)
                             {
-                                <td>@row.StartPosition</td>
+                                @if (displayStartPos)
+                                {
+                                    <td>@row.StartPosition</td>
+                                }
                                 <td>@row.Firstname @row.Lastname</td>
                             }
                             <td style="color:@row.TeamColor">@row.TeamName</td>
-                            <td class="@(IsFastestLap(resultRows, row, x => x.QualifyingTime) ? "fw-bold" : "")">@row.QualifyingTime.LapTimeString()</td>
+                            @if (displayQualyLap)
+                            {
+                                <td class="@(IsFastestLap(resultRows, row, x => x.QualifyingTime) ? "fw-bold" : "")">@row.QualifyingTime.LapTimeString()</td>
+                            }
                             <td class="@(IsFastestLap(resultRows, row, x => x.FastestLapTime) ? "fw-bold" : "")">@row.FastestLapTime.LapTimeString() (@row.FastLapNr)</td>
                             <td class="@(IsFastestLap(resultRows, row, x => x.AvgLapTime) ? "fw-bold" : "")">@row.AvgLapTime.LapTimeString()</td>
                             @if (isTeamResult == false)

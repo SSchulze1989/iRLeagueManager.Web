@@ -35,7 +35,7 @@
                     @foreach(var row in Standing.StandingRows)
                     {
                         <tr>
-                            <td>@row.Position (@row.PositionChange)</td>
+                            <td><ValueChange Value=row.Position Change=row.PositionChange /></td>
                             @if(showDriver)
                             {
                                 <td>@row.Firstname @row.Lastname</td>
@@ -44,14 +44,14 @@
                             {
                                 <td style="color:@row.TeamColor">@row.TeamName</td>
                             }
-                            <td>@row.RacePoints</td>
+                            <td><ValueChange Value=row.RacePoints Change=row.RacePointsChange /></td>
                             <td style="@(@row.PenaltyPoints != 0 ? "color:red" : "")">
                                 @(row.PenaltyPoints != 0 ? "-" : "")@row.PenaltyPoints
                             </td>
-                            <td>@row.TotalPoints</td>
+                            <td><ValueChange Value=row.TotalPoints Change=row.TotalPointsChange /></td>
                             <td>@row.Races</td>
-                            <td>@row.PolePositions</td>
-                            <td>@row.Wins</td>
+                            <td><ValueChange Value=row.PolePositions Change=row.PolePositionsChange /></td>
+                            <td><ValueChange Value=row.Wins Change=row.WinsChange /></td>
                             <td>@row.Top3</td>
                             <td>@row.Incidents</td>
                         </tr>

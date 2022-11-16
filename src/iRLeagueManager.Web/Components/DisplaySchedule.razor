@@ -43,7 +43,6 @@
                             <th>Track</th>
                             <th>Laps</th>
                             <th>Start</th>
-                            <th>Duration</th>
                             <th>Practice</th>
                             <th>Qualy</th>
                             @for(int i=0; i<maxRaceCount; i++)
@@ -65,7 +64,6 @@
                             <td>@(@event.TrackName)@(@event.ConfigName == "-" ? "" : $" - {@event.ConfigName}")</td>
                             <td>@(@event.Laps)</td>
                             <td>@(@event.StartTime.ToString(@"HH:mm"))</td>
-                            <td>@(@event.Duration.ToString(@"HH:mm"))</td>
                             <td>@(DurationString(@event.Practice))</td>
                             <td>@(DurationString(@event.Qualifying))</td>
                             @for(int i=0; i<maxRaceCount; i++)

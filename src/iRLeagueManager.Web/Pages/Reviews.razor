@@ -1,4 +1,5 @@
-﻿@page "/{LeagueName}/Reviews/Events/{EventId:long}"
+﻿
+@page "/{LeagueName}/Reviews/Events/{EventId:long}"
 @page "/{LeagueName}/Reviews/Seasons/{SeasonId:long}"
 @page "/{LeagueName}/Reviews"
 @using iRLeagueManager.Web.Extensions
@@ -7,7 +8,6 @@
 @using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.Components.Reviews
 @using iRLeagueManager.Web.ViewModels
-@attribute [Authorize]
 @inherits LeagueComponentBase
 @inject ReviewsPageViewModel ReviewsVm
 
@@ -15,21 +15,28 @@
     <h3>Reviews</h3>
 </LoadingHeader>
 
+<EventSelect />
+<CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
     <Authorized>
-        <EventSelect />
-        <CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
-            @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
-            {
-                <ReviewCard class="container-md px-0 mb-2 mx-0" Review=review EditClick=@(async () => await OnEditClick(review)) DeleteClick=@(async () => await OnDeleteClick(review))/>
-            }
-        </CascadingValue>
+        @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
+        {
+            <ReviewCard class="container-md px-0 mb-2 mx-0" 
+                        Review=review 
+                        EditClick=@(async () => await OnEditClick(review)) 
+                        DeleteClick=@(async () => await OnDeleteClick(review))
+                        ShowComments=true/>
+        }
         <button class="btn btn-outline-secondary" type="button" @onclick=OnAddClick>Add Review</button>
     </Authorized>
     <NotAuthorized>
-        You are not allowed here!
+        @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
+        {
+            <ReviewCard class="container-md px-0 mb-2 mx-0" Review=review />
+        }
     </NotAuthorized>
 </AuthorizeView>
+</CascadingValue>
 
 @code {
     [CascadingParameter]

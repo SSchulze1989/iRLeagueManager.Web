@@ -8,6 +8,10 @@
         <div class="card-header">
             @Bind(Result, x => x.SessionName)
         </div>
+        @{
+            var resultRows = Result.ResultRows;
+            var displayBonusPoints = resultRows.Any(x => x.BonusPoints != 0);
+        }
         <div class="card-body overflow-scroll">
             <table class="table table-sm table-striped table-hover">
                 <thead>
@@ -15,7 +19,6 @@
                         <th @onclick="() => SetOrderProperty(Result, row => row.FinalPosition)">Pos.</th>
                         @if (isTeamResult == false)
                         {
-                            <th @onclick="() => SetOrderProperty(Result, row => row.FinalPositionChange)">Chg.</th>
                             <th @onclick="() => SetOrderProperty(Result, row => row.StartPosition)">Start</th>
                             <th @onclick="() => SetOrderProperty(Result, row => row.Firstname)">Name</th>
                         }
@@ -30,27 +33,29 @@
                             <th @onclick="() => SetOrderProperty(Result, row => row.CompletedLaps)">Laps Compl.</th>
                         }
                         <th @onclick="() => SetOrderProperty(Result, row => row.RacePoints)">Race Pts.</th>
-                        <th @onclick="() => SetOrderProperty(Result, row => row.BonusPoints)">Bonus Pts.</th>
+                        @if (displayBonusPoints)
+                        {
+                            <th @onclick="() => SetOrderProperty(Result, row => row.BonusPoints)">Bonus Pts.</th>
+                        }
                         <th @onclick="() => SetOrderProperty(Result, row => row.PenaltyPoints)">Penalty</th>
-                        <th @onclick="() => SetOrderProperty(Result, row => row.Incidents)">Incs.</th>
                         <th @onclick="() => SetOrderProperty(Result, row => row.TotalPoints)">Total Pts.</th>
+                        <th @onclick="() => SetOrderProperty(Result, row => row.Incidents)">Incs.</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach(var row in Result.ResultRows)
+                    @foreach(var row in resultRows)
                     {
                         <tr>
-                            <td>@row.FinalPosition</td>
+                            <td><ValueChange Value=row.FinalPosition Change=row.FinalPositionChange /></td>
                             @if (isTeamResult == false)
                             {
-                                <td>@row.FinalPositionChange</td>
                                 <td>@row.StartPosition</td>
                                 <td>@row.Firstname @row.Lastname</td>
                             }
                             <td style="color:@row.TeamColor">@row.TeamName</td>
-                            <td>@row.QualifyingTime.LapTimeString()</td>
-                            <td>@row.FastestLapTime.LapTimeString() (@row.FastLapNr)</td>
-                            <td>@row.AvgLapTime.LapTimeString()</td>
+                            <td class="@(IsFastestLap(resultRows, row, x => x.QualifyingTime) ? "fw-bold" : "")">@row.QualifyingTime.LapTimeString()</td>
+                            <td class="@(IsFastestLap(resultRows, row, x => x.FastestLapTime) ? "fw-bold" : "")">@row.FastestLapTime.LapTimeString() (@row.FastLapNr)</td>
+                            <td class="@(IsFastestLap(resultRows, row, x => x.AvgLapTime) ? "fw-bold" : "")">@row.AvgLapTime.LapTimeString()</td>
                             @if (isTeamResult == false)
                             {
                                 <td>+@row.Interval.LapTimeString()</td>
@@ -58,12 +63,15 @@
                                 <td>@row.CompletedLaps</td>
                             }
                             <td>@row.RacePoints</td>
-                            <td>@row.BonusPoints</td>
+                            @if (displayBonusPoints)
+                            {
+                                <td>@row.BonusPoints</td>
+                            }
                             <td style="@(@row.PenaltyPoints != 0 ? "color:red" : "")">
-                                @(row.PenaltyPoints != 0 ? "-" : "")@row.PenaltyPoints
+                                @(row.PenaltyPoints != 0 ? $"-{row.PenaltyPoints}" : "")
                             </td>
-                            <td>@row.Incidents</td>
                             <td>@row.TotalPoints</td>
+                            <td>@row.Incidents</td>
                         </tr>
                     }
                 </tbody>
@@ -89,5 +97,15 @@
     private void SetOrderProperty(SessionResultViewModel result, Expression<Func<ResultRowModel, IComparable>> selector, bool descending = false)
     {
         result.OrderByPropertySelector = selector;
+    }
+
+    private bool IsFastestLap(IEnumerable<ResultRowModel> resultRows, ResultRowModel row, Func<ResultRowModel, TimeSpan> selector)
+    {
+        var rowValue = selector(row);
+        var minValue = resultRows
+            .Select(x => selector(x))
+            .Where(x => x > TimeSpan.FromSeconds(1))
+            .MinOrDefault();
+        return rowValue == minValue;
     }
 }

@@ -1,0 +1,19 @@
+﻿.pos-change {
+    font-style: italic;
+    opacity: 0.5;
+}
+
+    .negative {
+        color: red;
+    }
+
+    .positive {
+        color: green;
+    }
+    .positive:before {
+        content: "+";
+    }
+
+    .equal {
+        display: none !important;
+    }

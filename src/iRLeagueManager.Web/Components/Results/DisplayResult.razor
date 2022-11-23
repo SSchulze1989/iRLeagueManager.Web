@@ -72,7 +72,7 @@
                             <td class="@(IsFastestLap(resultRows, row, x => x.AvgLapTime) ? "fw-bold" : "")">@row.AvgLapTime.LapTimeString()</td>
                             @if (isTeamResult == false)
                             {
-                                <td>+@row.Interval.LapTimeString()</td>
+                                <td>+@(row.Interval.Laps == 0 ? row.Interval.Time.LapTimeString() : $"{row.Interval.Laps} Laps")</td>
                                 <td>@row.LeadLaps</td>
                                 <td>@row.CompletedLaps</td>
                             }

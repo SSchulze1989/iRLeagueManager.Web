@@ -83,6 +83,17 @@ a, .btn-link {
     color: red;
 }
 
+.input-plain::-webkit-outer-spin-button,
+.input-plain::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+.input-plain {
+    -moz-appearance: textfield;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -138,6 +149,17 @@ a, .btn-link {
 .results-row:hover {
     outline: solid gray 1px;
     filter: brightness(110%);
+}
+
+.input-group-list > .input-group:not(:first-child) > * {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top: none;
+}
+
+.input-group-list > .input-group:not(:last-child) > * {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 /* Tabs style */

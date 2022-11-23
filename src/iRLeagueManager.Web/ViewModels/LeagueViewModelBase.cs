@@ -102,7 +102,7 @@ namespace iRLeagueManager.Web.ViewModels
             SetModel(model);
         }
 
-        public TModel GetModel()
+        public virtual TModel GetModel()
         {
             return model;
         }

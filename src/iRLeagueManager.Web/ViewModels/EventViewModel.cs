@@ -1,6 +1,7 @@
 ﻿using iRLeagueApiCore.Common.Enums;
 using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Extensions;
 using MvvmBlazor.ViewModel;
 using System.Collections.ObjectModel;
 
@@ -9,13 +10,16 @@ namespace iRLeagueManager.Web.ViewModels
     public class EventViewModel : LeagueViewModelBase<EventViewModel, EventModel>
     {
         public EventViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
-            base(loggerFactory, apiService, new EventModel())
+            this(loggerFactory, apiService, new EventModel())
         {
         }
 
         public EventViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, EventModel model) :
-            this(loggerFactory, apiService)
+            base(loggerFactory, apiService, new EventModel())
         {
+            Sessions = new();
+            resultConfigs = new List<ResultConfigInfoModel>();
+            availableResultConfigs = Array.Empty<ResultConfigInfoModel>();
             SetModel(model);
         }
 
@@ -66,7 +70,13 @@ namespace iRLeagueManager.Web.ViewModels
 
         public int RaceCount => Races.Count();
 
-        public ObservableCollection<SessionViewModel> Sessions { get; private set; } = new ObservableCollection<SessionViewModel>();
+        public ObservableCollection<SessionViewModel> Sessions { get; private set; }
+
+        private IList<ResultConfigInfoModel> resultConfigs;
+        public IList<ResultConfigInfoModel> ResultConfigs { get => resultConfigs; set => Set(ref resultConfigs, value); }
+
+        private IEnumerable<ResultConfigInfoModel> availableResultConfigs;
+        public IEnumerable<ResultConfigInfoModel> AvailableResultConfigs { get => availableResultConfigs; private set => Set(ref availableResultConfigs, value); }
 
         public bool HasPractice
         {
@@ -137,32 +147,53 @@ namespace iRLeagueManager.Web.ViewModels
 
         public int Laps => Race?.Laps ?? Qualifying?.Laps ?? Practice?.Laps ?? 0;
 
-        public async Task Load(long eventId, CancellationToken cancellationToken = default)
+        public async Task<StatusResult> Load(long eventId, CancellationToken cancellationToken = default)
         {
-            if (ApiService.CurrentLeague == null)
+            if (ApiService.CurrentLeague is null)
             {
-                return;
+                return LeagueNullResult();
             }
 
             var result = await ApiService.CurrentLeague.Events().WithId(eventId).Get(cancellationToken);
-            if (result.Success == false || result.Content is null)
+            if (result.Success && result.Content is not null)
             {
-                return;
+                SetModel(result.Content);
             }
 
-            SetModel(result.Content);
+            return result.ToStatusResult();
         }
 
-        public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public async Task<StatusResult> LoadAvailableResultConfigs(CancellationToken cancellationToken = default)
         {
-            if (model == null)
-                return true;
+            if (ApiService.CurrentLeague is null)
+            {
+                return LeagueNullResult();
+            }
+
+            var request = ApiService.CurrentLeague.ResultConfigs()
+                .Get(cancellationToken);
+            var result = await request;
+            if (result.Success && result.Content is not null)
+            {
+                AvailableResultConfigs = result.Content.Select(MapToResultConfigInfo);
+            }
+            
+            return result.ToStatusResult();
+        }
+
+        public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
             if (ApiService.CurrentLeague == null)
-                return false;
+            {
+                return LeagueNullResult();
+            }
+
             try
             {
+                Loading = true;
+
                 // Delete sessions that were removed from the SessionViewModel collection
-                foreach(var sessionModel in model.Sessions.ToList())
+                foreach (var sessionModel in model.Sessions.ToList())
                 {
                     if (Sessions.Any(x => x.GetModel() == sessionModel) == false)
                     {
@@ -170,17 +201,18 @@ namespace iRLeagueManager.Web.ViewModels
                     }
                 }
                 ReorderSesssionNrs();
-                Loading = true;
+                // Sync result config selection
+                UpdateResultConfigList();
+
                 var result = await ApiService.CurrentLeague
                     .Events()
                     .WithId(model.Id)
                     .Put(model, cancellationToken);
-                if (result.Success == false || result.Content is null)
+                if (result.Success && result.Content is not null)
                 {
-                    return false;
+                    SetModel(result.Content);
                 }
-                SetModel(result.Content);
-                return result.Success;
+                return result.ToStatusResult();
             }
             finally
             {
@@ -313,13 +345,63 @@ namespace iRLeagueManager.Web.ViewModels
             SortSessions();
         }
 
+        private void UpdateResultConfigList()
+        {
+            foreach (var member in ResultConfigs)
+            {
+                if (model.ResultConfigs.Any(x => x.ResultConfigId == member.ResultConfigId) == false)
+                {
+                    model.ResultConfigs.Add(member);
+                }
+            }
+            foreach (var member in model.ResultConfigs.ToArray())
+            {
+                if (ResultConfigs.Any(x => x.ResultConfigId == member.ResultConfigId) == false)
+                {
+                    model.ResultConfigs.Remove(member);
+                }
+            }
+        }
+
+        private void RefreshResultConfigList()
+        {
+            // Add comments from to list that are not already in there
+            foreach (var member in model.ResultConfigs)
+            {
+                if (ResultConfigs.Any(x => x.ResultConfigId == member.ResultConfigId) == false)
+                {
+                    ResultConfigs.Add(member);
+                }
+            }
+            // Remove comments that are no longer in the model
+            foreach (var member in ResultConfigs.ToArray())
+            {
+                if (model.ResultConfigs.Any(x => x.ResultConfigId == member.ResultConfigId) == false)
+                {
+                    ResultConfigs.Remove(member);
+                }
+            }
+        }
+
         public override void SetModel(EventModel model)
         {
             _ = model ?? throw new ArgumentNullException(nameof(model));
             this.model = model;
-            Sessions = new ObservableCollection<SessionViewModel>(model.Sessions.Select(x => new SessionViewModel(LoggerFactory, ApiService, x)));
+            Sessions = new(model.Sessions.Select(x => new SessionViewModel(LoggerFactory, ApiService, x)));
             SortSessions();
+            if (ResultConfigs is not null)
+            {
+                RefreshResultConfigList();
+            }
             OnPropertyChanged();
         }
+
+        private ResultConfigInfoModel MapToResultConfigInfo(ResultConfigModel config) => new()
+        {
+            LeagueId = config.LeagueId,
+            ResultConfigId = config.ResultConfigId,
+            Name = config.Name,
+            DisplayName = config.DisplayName,
+        };
     }
 }

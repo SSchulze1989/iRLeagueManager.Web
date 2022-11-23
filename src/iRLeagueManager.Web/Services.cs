@@ -22,14 +22,16 @@ namespace iRLeagueManager.Web
             services.TryAddTransient<EventViewModel>();
             services.TryAddTransient<ReviewViewModel>();
             services.TryAddTransient<ReviewCommentViewModel>();
+            services.TryAddTransient<ResultConfigViewModel>();
+            services.TryAddTransient<PointRuleViewModel>();
+            services.TryAddTransient<SortOptionsViewModel>();
             services.TryAddScoped<ResultsPageViewModel>();
-            services.TryAddScoped<ScoringsViewModel>();
-            services.TryAddScoped<ScoringViewModel>();
             services.TryAddScoped<ResultConfigSettingsViewModel>();
             services.TryAddScoped<ReviewsPageViewModel>();
             services.TryAddScoped<EventListViewModel>();
             services.TryAddScoped<LeagueUsersViewModel>();
             services.TryAddScoped<StandingsPageViewModel>();
+            services.TryAddScoped<ResultConfigSettingsViewModel>();
             return services;
         }
     }

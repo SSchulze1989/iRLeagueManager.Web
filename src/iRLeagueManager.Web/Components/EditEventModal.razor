@@ -9,45 +9,48 @@
 @inject TrackListService trackListService
 
 <EditForm Model=Event OnValidSubmit=Submit>
-    <InputGroup Label="Name"> 
-        <InputText class="form-control" placeholder="Event Name" aria-label="EventName" id="name" @bind-Value="Event.Name"/>
-    </InputGroup>
-    <InputGroup Label="Date">
-        <InputDate class="form-control" aria-label="Date" id="date" @bind-Value="Event.Date" />
-    </InputGroup>
-    <InputGroup Label="Start-Time">
-        <input class="form-control" type="time" arial-label="StartTime" @bind="Event.StartTime"/>
-    </InputGroup>
-    <InputGroup Label="Track">
-        <BlazoredTypeahead @bind-Value=SelectedTrack  
-                           SearchMethod=SearchTracks 
-                           MinimumLength=1
-                           MaximumSuggestions=100
-                           EnableDropDown=true
-                           class="form-control py-0 px-0 ps-1"
-                           placeholder="Search by Track name...">
-            <SelectedTemplate Context=track>
-                @track?.TrackName
-            </SelectedTemplate>
-            <ResultTemplate Context=track>
-                @track.TrackName
-            </ResultTemplate>
-        </BlazoredTypeahead>
-    </InputGroup>
-    <InputGroup Label="Config">
-        <select class="form-select" aria-label="SelectTrackConfig" @bind="Event.TrackId"
-            placeholder="..."
-            disabled="@(SelectedTrack == null)">
-            @if (SelectedTrack != null)
-            {
-                @foreach(var config in SelectedTrack.Configs)
+    <div class="input-group-list mb-2">
+        <InputGroup Label="Name"> 
+            <InputText class="form-control" placeholder="Event Name" aria-label="EventName" id="name" @bind-Value="Event.Name"/>
+        </InputGroup>
+        <InputGroup Label="Date">
+            <InputDate class="form-control" aria-label="Date" id="date" @bind-Value="Event.Date" />
+        </InputGroup>
+        <InputGroup Label="Start-Time">
+            <input class="form-control" type="time" arial-label="StartTime" @bind="Event.StartTime"/>
+        </InputGroup>
+        <InputGroup Label="Track">
+            <BlazoredTypeahead @bind-Value=SelectedTrack  
+                               SearchMethod=SearchTracks 
+                               MinimumLength=1
+                               MaximumSuggestions=100
+                               EnableDropDown=true
+                               class="form-control py-0 px-0 ps-1 border border-top-0"
+                               style="border-color: #ced4da !important"
+                               placeholder="Search by Track name...">
+                <SelectedTemplate Context=track >
+                    @track?.TrackName
+                </SelectedTemplate>
+                <ResultTemplate Context=track>
+                    @track.TrackName
+                </ResultTemplate>
+            </BlazoredTypeahead>
+        </InputGroup>
+        <InputGroup Label="Config"  Class="">
+            <select class="form-select" aria-label="SelectTrackConfig" @bind="Event.TrackId"
+                placeholder="..."
+                disabled="@(SelectedTrack == null)">
+                @if (SelectedTrack != null)
                 {
-                    <option value="@config.TrackId">@config.ConfigName</option>
+                    @foreach(var config in SelectedTrack.Configs)
+                    {
+                        <option value="@config.TrackId">@config.ConfigName</option>
+                    }
                 }
-            }
-        </select>
-    </InputGroup>
-    <div class="m-1 mb-2">
+            </select>
+        </InputGroup>
+    </div>
+    <div class="input-group-list mb-2">
         <div class="input-group">
             <div class="input-group-text">
                 <InputCheckbox class="form-check-input mt-0" @bind-Value="Event.HasPractice"/>
@@ -56,7 +59,7 @@
         </div>
         <EditSession Session=Event.Practice />
     </div>
-    <div class="m-1 mb-2">
+    <div class="input-group-list mb-2">
         <div class="input-group">
             <div class="input-group-text">
                 <InputCheckbox class="form-check-input mt-0" @bind-Value="Event.HasQualifying"/>
@@ -65,18 +68,20 @@
         </div>
         <EditSession Session=Event.Qualifying />
     </div>
-    <div class="card mx-1 mb-2">
+    <div class="card mb-2">
         <div class="card-body">
             <div class="card-title">
                 Race Sessions
             </div>
             @foreach(var session in @Bind(Event, x => x.Races))
             {
-                <div class="input-group">
-                    <InputText class="form-control" @bind-Value="session.Name"/>
-                    <button class="btn btn-outline-danger" type="button" @onclick="@(() => Event.Sessions.Remove(session))">X</button>
+                <div class="input-group-list">
+                    <div class="input-group">
+                        <InputText class="form-control" @bind-Value="session.Name"/>
+                        <button class="btn btn-outline-danger" type="button" style="border-bottom: 1px; border-bottom-style: solid; margin-bottom: -1px" @onclick="@(() => Event.Sessions.Remove(session))"><span class="oi oi-trash"/></button>
+                    </div>
+                    <EditSession Session=session />
                 </div>
-                <EditSession Session=session />
                 @if (@Event.CanMoveSessionDown(session))
                 {
                     <div class="container d-flex justify-content-center my-1 py-0">
@@ -89,6 +94,29 @@
             </div>
         </div>
     </div>
+    <div class="input-group-list mb-2">
+        <InputGroup Label="Result Configs">
+            <BlazoredTypeahead @bind-Values=Event.ResultConfigs  
+                               SearchMethod=SearchResultConfigs 
+                               MinimumLength=0
+                               MaximumSuggestions=10
+                               EnableDropDown=true
+                               DeleteItemsOnBackspace=false
+                               class="form-control py-0 px-0 ps-1 border"
+                               style="border-color: #ced4da !important"
+                               placeholder="Enter config name...">
+                <SelectedTemplate Context=config >
+                    @config?.Name
+                </SelectedTemplate>
+                <ResultTemplate Context=config>
+                    @config.Name
+                </ResultTemplate>
+                <NotFoundTemplate Context=name>
+                    @name not found!
+                </NotFoundTemplate>
+            </BlazoredTypeahead>
+        </InputGroup>
+    </div>
     <CancelSubmitButtons ModelState=Event SubmitText="Save" OnCancel=Cancel/>
 </EditForm>
 
@@ -96,9 +124,8 @@
     private CancellationTokenSource cts = new();
 
     [CascadingParameter]
-    public BlazoredModalInstance? ModalInstance { get; set; }
-    //[Parameter]
-    //public EventViewModel Event { get; set; } = default!;
+    public BlazoredModalInstance ModalInstance { get; set; } = default!;
+
     [Parameter]
     public EventModel EventModel { get; set; } = default!;
 
@@ -117,9 +144,12 @@
         }
     }
 
-    protected override async Task OnParametersSetAsync()
+    private IEnumerable<ResultConfigInfoModel> ResultConfigs { get; set; } = Array.Empty<ResultConfigInfoModel>();
+
+    protected override void OnParametersSet()
     {
-        _ = EventModel ?? throw new InvalidOperationException($"Error while setting parameters on {nameof(EditEventModal)}. ${nameof(EventModel)} is not allowed to be null but was null");
+        _ = ModalInstance ?? throw BlazorParameterNullException.New(this, ModalInstance);
+        _ = EventModel ?? throw BlazorParameterNullException.New(this, EventModel);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -131,6 +161,8 @@
         Event.SetModel(EventModel);
         TrackList = await trackListService.GetTracks();
         SelectedTrack = TrackList.FirstOrDefault(x => x.Configs.Any(y => y.TrackId == EventModel.TrackId));
+        await Event.LoadAvailableResultConfigs();
+        ResultConfigs = Event.AvailableResultConfigs;
         await InvokeAsync(StateHasChanged);
     }
 
@@ -154,22 +186,22 @@
         return await Task.FromResult(TrackList.Where(x => x.TrackName.Contains(search, StringComparison.OrdinalIgnoreCase)));
     }
 
+    private async Task<IEnumerable<ResultConfigInfoModel>> SearchResultConfigs(string name)
+    {
+        return await Task.FromResult(ResultConfigs
+            .Where(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase) || x.DisplayName.Contains(name, StringComparison.OrdinalIgnoreCase)));
+    }
+
     private async Task Submit()
     {
-        var success = await Event.SaveChangesAsync(cts.Token);
-        if (success && ModalInstance != null)
-        {
-            var result = ModalResult.Ok(Event.GetModel());
-            await ModalInstance.CloseAsync(result);
-        }
+        var status = await Event.SaveChangesAsync(cts.Token);
+        var result = ModalResult.Ok(Event.GetModel());
+        await ModalInstance.CloseAsync(result);
     }
 
     private async Task Cancel()
     {
-        if (ModalInstance != null)
-        {
-            await ModalInstance.CancelAsync();   
-        }
+        await ModalInstance.CancelAsync();
     }
 
     protected override void Dispose(bool disposing)

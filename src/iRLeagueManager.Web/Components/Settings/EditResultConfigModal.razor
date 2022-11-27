@@ -19,6 +19,21 @@
                 <option value=@ResultKind.Team>Team</option>
             </InputSelect>
         </InputGroup>
+        <InputGroup Label="Source">
+            <InputSelect class="form-select" id="input-source" placeholder="Source..." aria-label="input-source" @bind-Value=vm.SourceResultConfigId>
+                <option value="0">Raw</option>
+                @foreach(var config in @Bind(vm, x => x.AvailableResultConfigs).Where(CanSelectAsSourceConfig))
+                {
+                    <option value=@config.ResultConfigId>@config.Name</option>
+                }
+            </InputSelect>
+        </InputGroup>
+        @if (vm.ResultKind == ResultKind.Team)
+        {
+            <InputGroup Label="Take">
+                <InputNumber class="form-control" id="input-results-per-team" aria-label="input-results-per-team" @bind-Value=vm.ResultsPerTeam/>
+            </InputGroup>
+        }
     </div>
 
     <div class="input-group-list p-1 mb-2">
@@ -101,14 +116,23 @@
         _ = Model ?? throw BlazorParameterNullException.New(this, Model);
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+        await vm.LoadAvailableResultConfigs(cts.Token);
+    }
+
     private async Task PointsFilterClick()
     {
-
+        await Task.CompletedTask;
     }
 
     private async Task ResultFilterClick()
     {
-        
+        await Task.CompletedTask;
     }
 
     private async Task Submit()
@@ -121,6 +145,13 @@
             await ModalInstance.CloseAsync(result);
             return;
         }
+    }
+
+    private bool CanSelectAsSourceConfig(ResultConfigModel model)
+    {
+        bool isSelf = model.ResultConfigId == vm.ResultConfigId;
+        bool isDepending = model.SourceResultConfig != null && model.SourceResultConfig.ResultConfigId == vm.ResultConfigId;
+        return isSelf == false && isDepending == false;
     }
 
     private async Task Cancel()

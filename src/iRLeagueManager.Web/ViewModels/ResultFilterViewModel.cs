@@ -12,10 +12,10 @@ namespace iRLeagueManager.Web.ViewModels
         }
 
         public long LeagueId => model.LeagueId;
-        public long ResultsFilterId => model.ResultsFilterId;
+        public long ResultsFilterId => model.FilterOptionId;
         public string ColumnPropertyName { get => model.ColumnPropertyName; set => SetP(model.ColumnPropertyName, value => model.ColumnPropertyName = value, value); } 
         public ComparatorType Comparator { get => model.Comparator; set => SetP(model.Comparator, value => model.Comparator = value, value); }
-        public bool Include { get => model.Include; set => SetP(model.Include, value => model.Include = value, value); }
+        public FilterType FilterType { get => model.FilterType; set => SetP(model.FilterType, value => model.FilterType = value, value); }
         public ICollection<string> FilterValues { get => model.FilterValues; set => SetP(model.FilterValues, value => model.FilterValues = value, value); }
     }
 }

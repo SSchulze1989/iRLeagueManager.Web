@@ -68,6 +68,8 @@ namespace iRLeagueManager.Web.ViewModels
                 SortOptions.FastLapDesc => (SortValue.FastLap, SortDirection.Descending),
                 SortOptions.QualLapAsc => (SortValue.QualLap, SortDirection.Ascending),
                 SortOptions.QualLapDesc => (SortValue.QualLap, SortDirection.Descending),
+                SortOptions.FinPosAsc => (SortValue.FinalPos, SortDirection.Ascending),
+                SortOptions.FinPosDesc => (SortValue.FinalPos, SortDirection.Descending),
                 _ => (SortValue.TotalPts, SortDirection.Descending),
             };
         }
@@ -102,6 +104,8 @@ namespace iRLeagueManager.Web.ViewModels
                 (SortValue.FastLap, SortDirection.Descending) => SortOptions.FastLapDesc,
                 (SortValue.QualLap, SortDirection.Ascending) => SortOptions.QualLapAsc,
                 (SortValue.QualLap, SortDirection.Descending) => SortOptions.QualLapDesc,
+                (SortValue.FinalPos, SortDirection.Ascending) => SortOptions.FinPosAsc,
+                (SortValue.FinalPos, SortDirection.Descending) => SortOptions.FinPosDesc,
                 _ => SortOptions.TotalPtsDesc,
             };
         }

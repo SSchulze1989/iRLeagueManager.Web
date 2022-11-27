@@ -59,7 +59,7 @@ namespace iRLeagueManager.Web.ViewModels
         Incs,
         FastLap,
         QualLap,
-
+        FinalPos,
     }
 
     public enum SortDirection

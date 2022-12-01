@@ -1,0 +1,91 @@
+﻿@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@inherits MvvmComponentBase
+@inject ResultFiltersViewModel vm;
+
+@foreach(var filter in vm.Filters)
+{
+    <EditForm Model=filter>
+        <div class="input-group-list mb-3">
+            <InputGroup Label="Column">
+                <InputSelect class="form-select" id="input-column-select" aria-label="input-column-select" @bind-Value=filter.ColumnPropertyName>
+                    @foreach(var name in ColumnNames)
+                    {
+                        <option value=@name>@name</option>
+                    }
+                </InputSelect>
+                <button class="btn btn-outline-danger" @onclick=@(() => vm.Remove(filter))>
+                    <span class="oi oi-trash"/>
+                </button>
+            </InputGroup>
+            <InputGroup Label="Type">
+                <InputSelect class="form-select" id="input-type-select" aria-label="input-type-select" @bind-Value=filter.Comparator>
+                    @foreach(var compType in Enum.GetValues<ComparatorType>())
+                    {
+                        <option value=@compType>@compType.ToString()</option>
+                    }
+                </InputSelect>
+            </InputGroup>
+            <InputGroup Label="@(@Bind(filter, x => x.Comparator) == ComparatorType.InList ? "Values" : "Value")">
+                @{
+                    var propertyType = GetColumnPropertyType(filter.ColumnPropertyName);
+                }
+                @if (propertyType is null)
+                {
+                    <label class="form-control disabled" type="text" />
+                }
+                else if (propertyType == typeof(string))
+                {
+                    <InputText class="form-control" @bind-Value=filter.Value />
+                }
+                else if (propertyType == typeof(double) || propertyType == typeof(double?))
+                {
+                    <input type="number" class="form-control" value=@filter.Value @onchange=@((ChangeEventArgs args) => filter.Value = args.Value?.ToString() ?? string.Empty) />
+                }
+                else
+                {
+                    <label class="form-control">Not supported</label>
+                }
+            </InputGroup>
+        </div>
+    </EditForm>
+}
+<button class="btn btn-outline-secondary" @onclick=vm.Add>
+    Add Filter
+</button>
+
+@code {
+    [CascadingParameter]
+    public BlazoredModalInstance ModalInstance { get; set; } = default!;
+
+    [Parameter]
+    public IEnumerable<ResultFilterModel> Model { get; set; } = default!;
+
+    private static IEnumerable<string> ColumnNames { get; } = new[]
+    {
+        nameof(ResultRowModel.Car),
+        nameof(ResultRowModel.CompletedLaps),
+        nameof(ResultRowModel.CompletedPct),
+    };
+
+    protected override void OnParametersSet()
+    {
+        _ = ModalInstance ?? throw BlazorParameterNullException.New(this, ModalInstance);
+        _ = Model ?? throw BlazorParameterNullException.New(this, Model);
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+        vm.SetModel(Model);
+    }
+
+    private Type? GetColumnPropertyType(string name)
+    {
+        var property = typeof(ResultRowModel).GetProperty(name);
+        return property?.PropertyType;
+    }
+}

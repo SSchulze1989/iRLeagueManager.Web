@@ -11,32 +11,34 @@
 @inherits LeagueComponentBase
 @inject ReviewsPageViewModel ReviewsVm
 
-<LoadingHeader class="mb-2" Loading=@(Bind(ReviewsVm, x => x.Loading))>
-    <h3>Reviews</h3>
-</LoadingHeader>
+<div class="container-md">
+    <LoadingHeader class="mb-2" Loading=@(Bind(ReviewsVm, x => x.Loading))>
+        <h3>Reviews</h3>
+    </LoadingHeader>
 
-<EventSelect />
-<CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
-<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
-    <Authorized>
-        @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
-        {
-            <ReviewCard class="container-md px-0 mb-2 mx-0" 
-                        Review=review 
-                        EditClick=@(async () => await OnEditClick(review)) 
-                        DeleteClick=@(async () => await OnDeleteClick(review))
-                        ShowComments=true/>
-        }
-        <button class="btn btn-outline-secondary" type="button" @onclick=OnAddClick>Add Review</button>
-    </Authorized>
-    <NotAuthorized>
-        @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
-        {
-            <ReviewCard class="container-md px-0 mb-2 mx-0" Review=review />
-        }
-    </NotAuthorized>
-</AuthorizeView>
-</CascadingValue>
+    <EventSelect />
+    <CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
+    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
+        <Authorized>
+            @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
+            {
+                <ReviewCard class="container-md px-0 mb-2 mx-0" 
+                            Review=review 
+                            EditClick=@(async () => await OnEditClick(review)) 
+                            DeleteClick=@(async () => await OnDeleteClick(review))
+                            ShowComments=true/>
+            }
+            <button class="btn btn-outline-secondary" type="button" @onclick=OnAddClick>Add Review</button>
+        </Authorized>
+        <NotAuthorized>
+            @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
+            {
+                <ReviewCard class="container-md px-0 mb-2 mx-0" Review=review />
+            }
+        </NotAuthorized>
+    </AuthorizeView>
+    </CascadingValue>
+</div>
 
 @code {
     [CascadingParameter]

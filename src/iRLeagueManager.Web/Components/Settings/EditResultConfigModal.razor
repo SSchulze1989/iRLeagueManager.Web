@@ -6,7 +6,7 @@
 
 <EditForm Model=vm OnValidSubmit=Submit>
     <StatusResultValidator @ref=ResultValidator />
-    <div class="p-1 input-group-list mb-2">
+    <div class="input-group-list mb-2">
         <InputGroup Label="Name">
             <InputText class="form-control" id="input-name" placeholder="Name..." aria-label="input-name" @bind-Value=vm.Name/>
         </InputGroup>
@@ -36,7 +36,7 @@
         }
     </div>
 
-    <div class="input-group-list p-1 mb-2">
+    <div class="input-group-list mb-2">
         <InputGroup Label="Points Filter">
             <button class="form-control" type="button" @onclick=PointsFilterClick>
                 @if (vm.FiltersForPoints.Count == 0)
@@ -63,12 +63,12 @@
         </InputGroup>
     </div>
 
-    <div class="card mx-1 mb-2">
+    <div class="card mb-2">
         <div class="card-body">
             <div class="card-title">
                 Session Scorings
             </div>
-            @foreach(var scoring in @Bind(vm, x => x.Scorings))
+            @foreach(var scoring in @Bind(vm, x => x.Scorings).Where(x => x.IsCombinedResult == false))
             {
                 <div class="input-group-list mb-3">
                     <div class="input-group">
@@ -79,9 +79,22 @@
                 </div>
             }
             <div class="mt-3">
-                <button class="btn btn-outline-secondary" type="button" @onclick="@(vm.AddScoring)">Add Scoring</button>
+                <button class="btn btn-outline-secondary" type="button" @onclick="@(() => vm.AddScoring())">Add Scoring</button>
             </div>
         </div>
+    </div>
+
+    <div class="input-group-list mb-3">
+        <div class="input-group" disabled>
+            <div class="input-group-text">
+                <InputCheckbox class="form-form-check-input mt-0" @bind-Value=vm.CalculateCombinedResult/>
+            </div>
+            <label class="form-control">Get Combined Result</label>
+        </div>
+        @if (vm.CalculateCombinedResult)
+        {
+            <EditScoring Scoring=@(vm.Scorings.First(x => x.IsCombinedResult)) />
+        }
     </div>
     <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
     <CancelSubmitButtons ModelState=vm SubmitText="Save" OnCancel=Cancel/>
@@ -90,6 +103,8 @@
 @code {
     [CascadingParameter]
     public BlazoredModalInstance ModalInstance { get; set; } = default!;
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
 
     private ResultConfigModel model = default!;
     [Parameter]
@@ -112,6 +127,7 @@
 
     protected override void OnParametersSet()
     {
+        _ = ModalService ?? throw BlazorParameterNullException.New(this, ModalService);
         _ = ModalInstance ?? throw BlazorParameterNullException.New(this, ModalInstance);
         _ = Model ?? throw BlazorParameterNullException.New(this, Model);
     }
@@ -127,7 +143,13 @@
 
     private async Task PointsFilterClick()
     {
-        await Task.CompletedTask;
+        var parameters = new ModalParameters()
+            .Add(nameof(EditResultFilterModal.Model), Array.Empty<ResultFilterModel>());
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true,
+        };
+        var result = await ModalService.Show<EditResultFilterModal>("Edit Filter", parameters, options).Result;
     }
 
     private async Task ResultFilterClick()

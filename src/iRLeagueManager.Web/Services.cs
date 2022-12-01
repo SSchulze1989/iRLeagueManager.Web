@@ -25,6 +25,7 @@ namespace iRLeagueManager.Web
             services.TryAddTransient<ResultConfigViewModel>();
             services.TryAddTransient<PointRuleViewModel>();
             services.TryAddTransient<SortOptionsViewModel>();
+            services.TryAddTransient<ResultFiltersViewModel>();
             services.TryAddScoped<ResultsPageViewModel>();
             services.TryAddScoped<ResultConfigSettingsViewModel>();
             services.TryAddScoped<ReviewsPageViewModel>();

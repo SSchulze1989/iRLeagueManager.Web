@@ -33,6 +33,29 @@ namespace iRLeagueManager.Web.ViewModels
             get => SourceResultConfig?.ResultConfigId ?? 0;
             set => SetP(SourceResultConfig, value => SourceResultConfig = value, GetConfigInfoModel(AvailableResultConfigs.FirstOrDefault(x => x.ResultConfigId == value)));
         }
+        public bool CalculateCombinedResult 
+        { 
+            get => Scorings.Any(x => x.IsCombinedResult); 
+            set
+            {
+                if (value && CalculateCombinedResult == false)
+                {
+                    var combined = AddScoring();
+                    combined.Name = "Combined";
+                    combined.ShowResults = true;
+                    combined.IsCombinedResult = true;
+                    return;
+                }
+                if (value == false && CalculateCombinedResult)
+                {
+                    var removeScoring = Scorings.FirstOrDefault(x => x.IsCombinedResult);
+                    if (removeScoring != null)
+                    {
+                        RemoveScoring(removeScoring);
+                    }
+                }
+            }
+        }
 
         private ObservableCollection<ScoringViewModel> scorings;
         public ObservableCollection<ScoringViewModel> Scorings { get => scorings; set => SetP(scorings, value => scorings = value, value); }
@@ -100,17 +123,34 @@ namespace iRLeagueManager.Web.ViewModels
             }
         }
 
-        public void AddScoring()
+        public ScoringViewModel AddScoring()
         {
             var scoring = new ScoringModel() { Name = "New Scoring" };
             model.Scorings.Add(scoring);
-            Scorings.Add(new ScoringViewModel(LoggerFactory, ApiService, scoring));
+            var newScoring = new ScoringViewModel(LoggerFactory, ApiService, scoring);
+            Scorings.Add(newScoring);
+            UpdateScoringIndex();
+            return newScoring;
         }
 
         public void RemoveScoring(ScoringViewModel scoring)
         {
             Scorings.Remove(scoring);
             model.Scorings.Remove(scoring.GetModel());
+            UpdateScoringIndex();
+        }
+
+        private void UpdateScoringIndex()
+        {
+            foreach(var (scoring, index) in model.Scorings.Where(x => x.IsCombinedResult == false).Select((x, i) => (x, i)))
+            {
+                scoring.Index = index;
+            }
+            var combinedScoring = model.Scorings.FirstOrDefault(x => x.IsCombinedResult);
+            if (combinedScoring != null)
+            {
+                combinedScoring.Index = 999;
+            }
         }
 
         public ResultConfigInfoModel? GetConfigInfoModel(ResultConfigModel? model)

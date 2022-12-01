@@ -7,46 +7,48 @@
 @inherits LeagueComponentBase
 @inject NavigationManager navigationManager
 
-<LoadingHeader><h3>Settings</h3></LoadingHeader>
-<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin)>
-    <Authorized>
-        <div style="height: 600px">
-            <ul class="nav nav-tabs">
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="@GetTabLink(0)">Season</NavLink>
-                </li>
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="@GetTabLink(1)">Users</NavLink>
-                </li>
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="@GetTabLink(2)">Results</NavLink>
-                </li>
-            </ul>
+<div class="container-md">
+    <LoadingHeader><h3>Settings</h3></LoadingHeader>
+    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin)>
+        <Authorized>
+            <div style="height: 600px">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="@GetTabLink(0)">Season</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="@GetTabLink(1)">Users</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="@GetTabLink(2)">Results</NavLink>
+                    </li>
+                </ul>
 
-            @if (HasRendered)
-            {
-                @switch (selectedTabIndex)
+                @if (HasRendered)
                 {
-                    case 0:
-                        <SeasonSettings />
-                        break;
-                    case 1:
-                        <UserSettings class="container-md px-0 mb-2 mx-0" />
-                        break;
-                    case 2:
-                        <ResultSettings class="container-md px-0 mb-2 mx-0" />
-                        break;
-                    default:
-                        <p><em>Index out of bounds!</em></p>
-                        break;
+                    @switch (selectedTabIndex)
+                    {
+                        case 0:
+                            <SeasonSettings />
+                            break;
+                        case 1:
+                            <UserSettings class="container-md px-0 mb-2 mx-0" />
+                            break;
+                        case 2:
+                            <ResultSettings class="container-md px-0 mb-2 mx-0" />
+                            break;
+                        default:
+                            <p><em>Index out of bounds!</em></p>
+                            break;
+                    }
                 }
-            }
-        </div>
-    </Authorized>
-    <NotAuthorized>
-        You are not allowed Here!
-    </NotAuthorized>
-</AuthorizeView>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            You are not allowed Here!
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
 
 @code {
     // Query parameters

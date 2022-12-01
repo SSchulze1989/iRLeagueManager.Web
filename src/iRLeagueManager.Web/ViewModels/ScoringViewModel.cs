@@ -18,11 +18,12 @@ namespace iRLeagueManager.Web.ViewModels
         public long Id => model.Id;
         public long LeagueId => model.LeagueId;
         [Required]
-        public string Name { get => model.Name; set => Set(model, x => x.Name, value); }
-        public bool ShowResults { get => model.ShowResults; set => Set(model, x => x.ShowResults, value); }
-        public bool UseResultSetTeam { get => model.UseResultSetTeam; set => Set(model, x => x.UseResultSetTeam, value); }
-        public bool UpdateTeamOnRecalculation { get => model.UpdateTeamOnRecalculation; set => Set(model, x => x.UpdateTeamOnRecalculation, value); }
-        public int MaxResultsPerGroup { get => model.MaxResultsPerGroup; set => Set(model, x => x.MaxResultsPerGroup, value); }
+        public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
+        public bool ShowResults { get => model.ShowResults; set => SetP(model.ShowResults, value => model.ShowResults = value, value); }
+        public bool IsCombinedResult { get => model.IsCombinedResult; set => SetP(model.IsCombinedResult, value => model.IsCombinedResult = value, value); }
+        public bool UseResultSetTeam { get => model.UseResultSetTeam; set => SetP(model.UseResultSetTeam, value => model.UseResultSetTeam = value, value); }
+        public bool UpdateTeamOnRecalculation { get => model.UpdateTeamOnRecalculation; set => SetP(model.UpdateTeamOnRecalculation, value => model.UpdateTeamOnRecalculation = value, value); }
+        public int MaxResultsPerGroup { get => model.MaxResultsPerGroup; set => SetP(model.MaxResultsPerGroup, value => model.MaxResultsPerGroup = value, value); }
 
         private PointRuleViewModel pointRule;
         public PointRuleViewModel PointRule { get => pointRule; set => Set(ref pointRule, value); }

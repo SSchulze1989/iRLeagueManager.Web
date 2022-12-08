@@ -38,7 +38,7 @@
                 {
                     <InputText class="form-control" @bind-Value=filter.Value />
                 }
-                else if (propertyType == typeof(double) || propertyType == typeof(double?))
+                else if (propertyType == typeof(double) || propertyType == typeof(double?) || propertyType == typeof(int) || propertyType == typeof(int?))
                 {
                     <input type="number" class="form-control" value=@filter.Value @onchange=@((ChangeEventArgs args) => filter.Value = args.Value?.ToString() ?? string.Empty) />
                 }
@@ -53,6 +53,7 @@
 <button class="btn btn-outline-secondary" @onclick=vm.Add>
     Add Filter
 </button>
+<CancelSubmitButtons SubmitText="Ok" CancelText="Cancel" OnSubmit=Submit OnCancel=Cancel />
 
 @code {
     [CascadingParameter]
@@ -66,6 +67,12 @@
         nameof(ResultRowModel.Car),
         nameof(ResultRowModel.CompletedLaps),
         nameof(ResultRowModel.CompletedPct),
+        nameof(ResultRowModel.SeasonStartIrating),
+        nameof(ResultRowModel.Division),
+        nameof(ResultRowModel.OldIrating),
+        nameof(ResultRowModel.NewIrating),
+        nameof(ResultRowModel.OldSafetyRating),
+        nameof(ResultRowModel.NewSafetyRating),
     };
 
     protected override void OnParametersSet()
@@ -81,6 +88,17 @@
             return;
         }
         vm.SetModel(Model);
+    }
+
+    private async Task Submit()
+    {
+        var result = ModalResult.Ok(vm.GetModel());
+        await ModalInstance.CloseAsync(result);
+    }
+
+    private async Task Cancel()
+    {
+        await ModalInstance.CancelAsync();
     }
 
     private Type? GetColumnPropertyType(string name)

@@ -4,14 +4,14 @@
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
 @inject LeagueApiService ApiService
-@inject ReviewCommentViewModel Comment
+@inject ReviewViewModel Review
 
-<EditForm Model=Comment OnValidSubmit=Submit>
+<EditForm Model=Review OnValidSubmit=Submit>
     <div class="input-group-list">
         <InputGroup Label="Text">
-            <InputTextArea class="form-control" @bind-Value=Comment.Text style="height: 140px;"/>
+            <InputTextArea class="form-control" @bind-Value=Review.ResultText style="height: 140px;"/>
         </InputGroup>
-        @foreach(var vote in Comment.Votes)
+        @foreach(var vote in Review.Votes)
         {
             <InputGroup Label="Vote">
                 <InputSelect class="form-select" @bind-Value=vote.VoteCategoryId>
@@ -27,7 +27,7 @@
                         <option value=@member.MemberId>@member.FirstName @member.LastName</option>
                     }
                 </InputSelect>
-                <button class="btn btn-outline-danger" type="button" @onclick=@(() => Comment.RemoveVote(vote))>
+                <button class="btn btn-outline-danger" type="button" @onclick=@(() => Review.RemoveVote(vote))>
                     <span class="oi oi-x"/>
                 </button>
             </InputGroup>
@@ -45,7 +45,7 @@
             </div>
         </InputGroup>
     </div>
-    <CancelSubmitButtons ModelState=Comment SubmitText="Save" OnCancel=Cancel/>
+    <CancelSubmitButtons ModelState=Review SubmitText="Save" OnCancel=Cancel/>
 </EditForm>
 
 @code {
@@ -59,10 +59,10 @@
     //public ReviewViewModel Review { get; set; } = default!;
 
     [Parameter]
-    public ReviewCommentModel Model { get; set; } = default!;
+    public ReviewModel Model { get; set; } = default!;
 
     [Parameter]
-    public Func<ReviewCommentViewModel, CancellationToken, Task<bool>>? OnSubmit { get; set; }
+    public Func<ReviewViewModel, CancellationToken, Task<StatusResult>>? OnSubmit { get; set; }
 
     private long? NewValue
     {
@@ -82,7 +82,7 @@
 
     protected override void OnParametersSet()
     {
-        _ = Model ?? throw new InvalidOperationException($"Parameter {nameof(Model)} must have a value");
+        _ = Model ?? throw BlazorParameterNullException.New(this, Model);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -92,7 +92,7 @@
             return;
         }
         AvailableVoteCategories = await GetAvailableVoteCategories();
-        Comment.SetModel(Model);
+        Review.SetModel(Model);
         await InvokeAsync(StateHasChanged);
     }
 
@@ -106,7 +106,7 @@
                 VoteCategoryId = voteCat.Id,
                 VoteCategoryText = voteCat.Text,
             };
-            Comment.AddVote(vote);
+            Review.AddVote(vote);
         }
         if (NewValueInput.Element  is not null)
         {
@@ -137,11 +137,12 @@
         bool success = true;
         if (OnSubmit != null)
         {
-            success |= await OnSubmit.Invoke(Comment, cts.Token);
+            var status = await OnSubmit.Invoke(Review, cts.Token);
+            success |= status.IsSuccess;
         }
         if (success && ModalInstance != null)
         {
-            var result = ModalResult.Ok(Comment.GetModel());
+            var result = ModalResult.Ok(Review.GetModel());
             await ModalInstance.CloseAsync(result);
         }
     }
@@ -167,7 +168,7 @@
         var result = await request;
         if (result.Success && result.Content is IEnumerable<VoteCategoryModel> models)
         {
-            return models;
+            return models.OrderBy(x => x.Index);
         }
         return Array.Empty<VoteCategoryModel>();
     }

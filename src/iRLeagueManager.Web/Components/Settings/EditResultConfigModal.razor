@@ -50,14 +50,14 @@
             </button>
         </InputGroup>
         <InputGroup Label="Result Filter">
-            <button class="form-control" type="button" @onclick=PointsFilterClick>
-                @if (vm.FiltersForPoints.Count == 0)
+            <button class="form-control" type="button" @onclick=ResultFilterClick>
+                @if (vm.FiltersForResult.Count == 0)
                 {
                     <span class="text-secondary"><em>Configure</em></span>
                 }
                 else
                 {
-                    <span class="text-secondary">@vm.FiltersForPoints.Count filters applied</span>
+                    <span class="text-secondary">@vm.FiltersForResult.Count filters applied</span>
                 }
             </button>
         </InputGroup>
@@ -144,17 +144,33 @@
     private async Task PointsFilterClick()
     {
         var parameters = new ModalParameters()
-            .Add(nameof(EditResultFilterModal.Model), Array.Empty<ResultFilterModel>());
+            .Add(nameof(EditResultFilterModal.Model), vm.GetModel().FiltersForPoints);
         var options = new ModalOptions()
         {
             DisableBackgroundCancel = true,
         };
-        var result = await ModalService.Show<EditResultFilterModal>("Edit Filter", parameters, options).Result;
+        var result = await ModalService.Show<EditResultFilterModal>("Edit Points Filter", parameters, options).Result;
+        if (result.Confirmed && result.Data is IEnumerable<ResultFilterModel> model)
+        {
+            vm.GetModel().FiltersForPoints = model.ToList();
+            vm.SetModel(vm.GetModel());
+        }
     }
 
     private async Task ResultFilterClick()
     {
-        await Task.CompletedTask;
+        var parameters = new ModalParameters()
+            .Add(nameof(EditResultFilterModal.Model), vm.GetModel().FiltersForResult);
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true,
+        };
+        var result = await ModalService.Show<EditResultFilterModal>("Edit Result Filter", parameters, options).Result;
+        if (result.Confirmed && result.Data is IEnumerable<ResultFilterModel> model)
+        {
+            vm.GetModel().FiltersForResult = model.ToList();
+            vm.SetModel(vm.GetModel());
+        }
     }
 
     private async Task Submit()

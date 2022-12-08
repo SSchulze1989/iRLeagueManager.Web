@@ -55,6 +55,12 @@ namespace iRLeagueManager.Web.ViewModels
             model.VoteResults.Add(vote.GetModel());
         }
 
+        public void AddVote(VoteModel vote)
+        {
+            model.VoteResults.Add(vote);
+            votes.Add(new(LoggerFactory, ApiService, vote));
+        }
+
         public void RemoveVote(VoteViewModel vote)
         {
             votes.Remove(vote);

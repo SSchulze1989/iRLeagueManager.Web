@@ -49,7 +49,9 @@
                                 @(row.PenaltyPoints != 0 ? "-" : "")@row.PenaltyPoints
                             </td>
                             <td><ValueChange Value=row.TotalPoints Change=row.TotalPointsChange /></td>
-                            <td>@row.Races</td>
+                            <td>
+                                @row.RacesCounted@(row.RacesCounted != row.Races ? $" ({row.Races})" : "")
+                            </td>
                             <td><ValueChange Value=row.PolePositions Change=row.PolePositionsChange /></td>
                             <td><ValueChange Value=row.Wins Change=row.WinsChange /></td>
                             <td>@row.Top3</td>

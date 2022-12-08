@@ -1,5 +1,6 @@
 ﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Extensions;
 using MvvmBlazor.ViewModel;
 using System.Collections.ObjectModel;
 
@@ -76,6 +77,45 @@ namespace iRLeagueManager.Web.ViewModels
                 return;
             }
             await SetModel(result.Content);
+        }
+
+        public async Task<StatusResult> AddEvent(EventViewModel @event, CancellationToken cancellationToken = default)
+        {
+            if (ApiService.CurrentLeague == null)
+            {
+                return LeagueNullResult();
+            }
+
+            var request = ApiService.CurrentLeague.Schedules()
+                .WithId(ScheduleId)
+                .Events()
+                .Post(@event.GetModel(), cancellationToken);
+            var result = await request;
+            if (result.Success)
+            {
+                await LoadEvents(cancellationToken);
+            }
+
+            return result.ToStatusResult();
+        }
+
+        public async Task<StatusResult> RemoveEvent(EventViewModel @event, CancellationToken cancellationToken = default)
+        {
+            if (ApiService.CurrentLeague == null)
+            {
+                return LeagueNullResult();
+            }
+
+            var request = ApiService.CurrentLeague.Events()
+                .WithId(@event.EventId)
+                .Delete(cancellationToken);
+            var result = await request;
+            if (result.Success)
+            {
+                await LoadEvents(cancellationToken);
+            }
+
+            return result.ToStatusResult();
         }
 
         public async Task LoadEvents(CancellationToken cancellationToken = default)

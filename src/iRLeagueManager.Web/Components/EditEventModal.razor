@@ -9,6 +9,7 @@
 @inject TrackListService trackListService
 
 <EditForm Model=Event OnValidSubmit=Submit>
+    <StatusResultValidator @ref=ResultValidator/>
     <div class="input-group-list mb-2">
         <InputGroup Label="Name"> 
             <InputText class="form-control" placeholder="Event Name" aria-label="EventName" id="name" @bind-Value="Event.Name"/>
@@ -117,6 +118,7 @@
             </BlazoredTypeahead>
         </InputGroup>
     </div>
+    <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
     <CancelSubmitButtons ModelState=Event SubmitText="Save" OnCancel=Cancel/>
 </EditForm>
 
@@ -129,7 +131,12 @@
     [Parameter]
     public EventModel EventModel { get; set; } = default!;
 
+    [Parameter]
+    public Func<EventViewModel, CancellationToken, Task<StatusResult>>? OnSubmit { get; set; }
+
     private IList<TrackGroupModel> TrackList { get; set; } = Array.Empty<TrackGroupModel>();
+
+    private StatusResultValidator ResultValidator { get; set; } = default!;
 
     private TrackGroupModel? selectedTrack;
     private TrackGroupModel? SelectedTrack
@@ -194,9 +201,20 @@
 
     private async Task Submit()
     {
-        var status = await Event.SaveChangesAsync(cts.Token);
-        var result = ModalResult.Ok(Event.GetModel());
-        await ModalInstance.CloseAsync(result);
+        //var status = await Event.SaveChangesAsync(cts.Token);
+        //var result = ModalResult.Ok(Event.GetModel());
+        bool success = true;
+        if (OnSubmit != null)
+        {
+            var result = await OnSubmit.Invoke(Event, cts.Token);
+            ResultValidator.ValidateResult(result);
+            success &= result.IsSuccess;
+        }
+        if (success)
+        {
+            var result = ModalResult.Ok(Event.GetModel());
+            await ModalInstance.CloseAsync(result);
+        }
     }
 
     private async Task Cancel()

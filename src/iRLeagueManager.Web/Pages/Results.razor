@@ -34,9 +34,13 @@
                 </li>
             }
         </ul>
-        <button class="btn btn-outline-secondary" @onclick=TriggerCalculation>
-            Calculate
-        </button>
+        <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+            <Authorized>
+                <button class="btn btn-outline-secondary" @onclick=TriggerCalculation>
+                    Calculate
+                </button>
+            </Authorized>
+        </AuthorizeView>
     </div>
     @if (@Bind(vm, x => x.SelectedEvent) != null && @Bind(vm, x => x.SelectedEventResult) != null)
     {

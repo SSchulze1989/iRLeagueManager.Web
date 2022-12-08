@@ -34,10 +34,10 @@ public class SeasonViewModel : LeagueViewModelBase<SeasonViewModel>
     public long LeagueId => model.LeagueId;
     public DateTime? SeasonStart => model.SeasonStart;
     public DateTime? SeasonEnd => SeasonEnd;
-    public string? SeasonName { get => model.SeasonName; set => Set(model, x => x.SeasonName, value); }
-    public long? MainScoringId { get => model.MainScoringId; set => Set(model, x => x.MainScoringId, value); }
-    public bool HideComments { get => model.HideComments; set => Set(model, x => x.HideComments, value); }
-    public bool Finished { get => model.Finished; set => Set(model, x => x.Finished, value); }
+    public string SeasonName { get => model.SeasonName; set => SetP(model.SeasonName, value => model.SeasonName = value, value); }
+    public long? MainScoringId { get => model.MainScoringId; set => SetP(model.MainScoringId, value => model.MainScoringId = value, value); }
+    public bool HideComments { get => model.HideComments; set => SetP(model.HideComments, value => model.HideComments = value, value); }
+    public bool Finished { get => model.Finished; set => SetP(model.Finished, value => model.Finished = value, value); }
     public IEnumerable<long> ScheduleIds => model.ScheduleIds;
 
     public void SetModel(SeasonModel model)
@@ -62,7 +62,7 @@ public class SeasonViewModel : LeagueViewModelBase<SeasonViewModel>
                 return;
             }
             var result = await ApiService.CurrentSeason.Get();
-            if (result.Success)
+            if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);
             }
@@ -87,7 +87,7 @@ public class SeasonViewModel : LeagueViewModelBase<SeasonViewModel>
                 .Seasons()
                 .WithId(model.SeasonId)
                 .Put(model);
-            if (result.Success)
+            if (result.Success && result.Content is not null)
             {
                 model = result.Content;
                 return true;

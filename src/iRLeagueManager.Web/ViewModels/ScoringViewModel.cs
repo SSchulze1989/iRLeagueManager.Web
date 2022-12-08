@@ -7,62 +7,33 @@ using System.Runtime.CompilerServices;
 
 namespace iRLeagueManager.Web.ViewModels
 {
-    public class ScoringViewModel : LeagueViewModelBase<ScoringViewModel>
+    public class ScoringViewModel : LeagueViewModelBase<ScoringViewModel, ScoringModel>
     {
-        private ScoringModel model;
-
-        public ScoringViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : this(loggerFactory, apiService, new ScoringModel())
+        public ScoringViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, ScoringModel model) : 
+            base(loggerFactory, apiService, model)
         {
-        }
-
-        public ScoringViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, ScoringModel model) : base (loggerFactory, apiService)
-        {
-            this.model = model;
+            pointRule ??= new(loggerFactory, apiService);
         }
 
         public long Id => model.Id;
         public long LeagueId => model.LeagueId;
         [Required]
-        public string Name { get => model.Name; set => Set(model, x => x.Name, value); }
-        public ScoringKind ScoringKind { get => model.ScoringKind; set => Set(model, x => x.ScoringKind, value); }
-        public bool ShowResults { get => model.ShowResults; set => Set(model, x => x.ShowResults, value); }
-        public bool UseResultSetTeam { get => model.UseResultSetTeam; set => Set(model, x => x.UseResultSetTeam, value); }
-        public bool UpdateTeamOnRecalculation { get => model.UpdateTeamOnRecalculation; set => Set(model, x => x.UpdateTeamOnRecalculation, value); }
-        public int MaxResultsPerGroup { get => model.MaxResultsPerGroup; set => Set(model, x => x.MaxResultsPerGroup, value); }
+        public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
+        public bool ShowResults { get => model.ShowResults; set => SetP(model.ShowResults, value => model.ShowResults = value, value); }
+        public bool IsCombinedResult { get => model.IsCombinedResult; set => SetP(model.IsCombinedResult, value => model.IsCombinedResult = value, value); }
+        public bool UseResultSetTeam { get => model.UseResultSetTeam; set => SetP(model.UseResultSetTeam, value => model.UseResultSetTeam = value, value); }
+        public bool UpdateTeamOnRecalculation { get => model.UpdateTeamOnRecalculation; set => SetP(model.UpdateTeamOnRecalculation, value => model.UpdateTeamOnRecalculation = value, value); }
+        public int MaxResultsPerGroup { get => model.MaxResultsPerGroup; set => SetP(model.MaxResultsPerGroup, value => model.MaxResultsPerGroup = value, value); }
 
-        public void SetModel(ScoringModel model)
+        private PointRuleViewModel pointRule;
+        public PointRuleViewModel PointRule { get => pointRule; set => Set(ref pointRule, value); }
+
+        public override void SetModel(ScoringModel model)
         {
             this.model = model;
-            OnPropertyChanged(null);
-        }
-
-        public async Task<bool> SaveCurrentModelAsync()
-        {
-            //try
-            //{
-            //    Loading = Saving = true;
-            //    if (ApiService.CurrentLeague == null || model.Id == 0)
-            //    {
-            //        return false;
-            //    }
-            //    await Task.Delay(500);
-            //    Logger.LogInformation("Begin saving Scoring {ScoringId} ...", model.Id);
-            //    var result = await ApiService.CurrentLeague
-            //        .Scorings()
-            //        .WithId(model.Id)
-            //        .Put(model);
-            //    Logger.LogInformation("Result: {Status}|{StatusCode} - {ResultMessage}", result.Status, result.HttpStatusCode, result.Message);
-            //    if (result.Success)
-            //    {
-            //        HasChanged = false;
-            //    }
-            //    return result.Success;
-            //}
-            //finally
-            //{
-            //    Loading = Saving = false;
-            //}
-            return await Task.FromResult(true);
+            model.PointRule ??= new();
+            PointRule = new(LoggerFactory, ApiService, model.PointRule);
+            OnPropertyChanged();
         }
     }
 }

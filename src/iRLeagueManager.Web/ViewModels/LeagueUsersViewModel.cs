@@ -30,7 +30,7 @@ namespace iRLeagueManager.Web.ViewModels
                 var getUsersEndpoint = ApiService.CurrentLeague.Users().Get();
                 var result = await getUsersEndpoint;
 
-                if (result.Success == false)
+                if (result.Success == false || result.Content is null)
                 {
                     return result.ToStatusResult();
                 }

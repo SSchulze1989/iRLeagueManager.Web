@@ -14,29 +14,31 @@
 @inherits LeagueComponentBase
 @inject StandingsPageViewModel vm
 
-<LoadingHeader class="mb-2" Loading=@Bind(vm, x => x.Loading)>
-    <h3>Standings</h3>
-</LoadingHeader>
+<div class="container-md">
+    <LoadingHeader class="mb-2" Loading=@Bind(vm, x => x.Loading)>
+        <h3>Standings</h3>
+    </LoadingHeader>
 
-<EventSelect />
-@if (@Bind(vm, x => x.Standings)?.Count == 0)
-{
-    <div class="card-body">
-        <p class="results-scoring"><em>No Standings</em></p>
-    </div>
-}
-<ul class="nav nav-tabs">
-@foreach((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x,i)))
-{
-    <li class="nav-item">
-        <a class="nav-link @((i==Bind(vm, x => x.SelectedStandingIndex)) ? "active" : "")" href="@(GetTabLink(i))">@standing.Name</a>
-    </li>
-}
-</ul>
-@if (@Bind(vm, x => x.SelectedStanding) != null)
-{
-    <DisplayStanding class="px-0 mb-2 mx-0" Standing=@Bind(vm, x => x.SelectedStanding)/>
-}
+    <EventSelect />
+    @if (@Bind(vm, x => x.Standings)?.Count == 0)
+    {
+        <div class="card-body">
+            <p class="results-scoring"><em>No Standings</em></p>
+        </div>
+    }
+    <ul class="nav nav-tabs">
+    @foreach((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x,i)))
+    {
+        <li class="nav-item">
+            <a class="nav-link @((i==Bind(vm, x => x.SelectedStandingIndex)) ? "active" : "")" href="@(GetTabLink(i))">@standing.Name</a>
+        </li>
+    }
+    </ul>
+    @if (@Bind(vm, x => x.SelectedStanding) != null)
+    {
+        <DisplayStanding class="container-md px-0 mb-2 mx-0" Standing=@Bind(vm, x => x.SelectedStanding)/>
+    }
+</div>
 
 @code {
     private const string standingTabParam = "standingTab";

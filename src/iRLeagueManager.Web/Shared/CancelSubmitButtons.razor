@@ -8,7 +8,7 @@
                     disabled="@ModelState?.Loading" 
                     type="submit"
                     @onclick="OnSubmit">
-                @if (@ModelState?.Loading == true)
+                @if (@ModelState?.Loading == true || IsLoading)
                 {
                     <span class="spinner-border spinner-border-sm mr-1"></span>
                 }
@@ -32,6 +32,8 @@
     public EventCallback OnCancel { get; set; }
     [Parameter]
     public bool CanSubmit { get; set; } = true;
+    [Parameter]
+    public bool IsLoading { get; set; } = false;
 
     private IModelState? modelState;
     [Parameter]

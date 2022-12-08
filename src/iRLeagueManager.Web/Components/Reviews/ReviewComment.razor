@@ -15,9 +15,12 @@
             <span class="badge bg-warning">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
         }
     </div>
-    @*<div class="mt-2">
-        <button class="btn btn-outline-secondary py-0" @onclick=EditClick>Edit</button>
-    </div>*@
+    @if (UserCanEdit)
+    {
+        <div class="mt-2">
+            <button class="btn btn-outline-secondary py-0" @onclick=EditClick>Edit</button>
+        </div>
+    }
 </div>
 
 @code {
@@ -27,6 +30,12 @@
     public IEnumerable<MemberInfoModel> InvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
     [Parameter, EditorRequired]
     public ReviewCommentViewModel Comment { get; set; } = default!;
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+    [Parameter]
+    public EventCallback OnStateHasChanged { get; set; } = default!;
+
+    private bool UserCanEdit;
 
     //[Parameter]
     //public EventCallback<MouseEventArgs> EditClick { get; set; }
@@ -34,7 +43,37 @@
     protected override void OnParametersSet()
     {
         _ = Comment ?? throw new InvalidOperationException($"Parameter {nameof(Comment)} must have a value");
+        _ = AuthenticationStateTask ?? throw BlazorParameterNullException.New(this, AuthenticationStateTask);
         base.OnParametersSet();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+        UserCanEdit = await GetUserCanEdit();
+    }
+
+    private async Task<bool> GetUserCanEdit()
+    {
+        var user = (await AuthenticationStateTask).User;
+
+        if (user.Identity?.IsAuthenticated == false)
+        {
+            return false;
+        }
+        if (user.IsInRole("Admin"))
+        {
+            return true;
+        }
+        if (user.GetUserId() == Comment.AuthorUserId)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private async Task EditClick()
@@ -48,6 +87,15 @@
         if (result.Confirmed && result.Data is ReviewCommentModel comment)
         {
             Comment.SetModel(comment);
+        }
+        await NotifyStateHasChanged();
+    }
+
+    private async Task NotifyStateHasChanged()
+    {
+        if (OnStateHasChanged.HasDelegate)
+        {
+            await OnStateHasChanged.InvokeAsync();
         }
     }
 }

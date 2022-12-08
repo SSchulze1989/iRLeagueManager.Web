@@ -13,35 +13,53 @@
 @inherits LeagueComponentBase
 @inject ResultsPageViewModel vm
 
-<LoadingHeader class="mb-2" Loading=@Bind(vm, x => x.Loading)>
-    <h3>Results</h3>
-</LoadingHeader>
+<div class="container-md">
+    <LoadingHeader class="mb-2" Loading=@Bind(vm, x => x.Loading)>
+        <h3>Results</h3>
+    </LoadingHeader>
 
-<EventSelect />
-@if (@Bind(vm, x => x.Results)?.Count == 0)
-{
-    <div class="card-body">
-        <p class="results-scoring"><em>No Results</em></p>
-    </div>
-}
-<ul class="nav nav-tabs">
-@foreach((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x,i)))
-{
-    <li class="nav-item">
-        <a class="nav-link @((i==Bind(vm, x => x.SelectedResultIndex)) ? "active" : "")" href="@(GetTabLink(i))">@Bind(eventResult, x => x.Name)</a>
-    </li>
-}
-</ul>
-@if (@Bind(vm, x => x.SelectedEvent) != null && @Bind(vm, x => x.SelectedEventResult) != null)
-{
-    @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults))
+    <EventSelect />
+    @if (@Bind(vm, x => x.Results)?.Count == 0)
     {
-        <DisplayResult class="px-0 mb-2 mx-0" Result=result/>
+        <div class="card-body">
+            <p class="results-scoring"><em>No Results</em></p>
+        </div>
     }
-}
+    <div class="d-flex justify-content-between">
+        <ul class="nav nav-tabs">
+            @foreach((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x,i)))
+            {
+                <li class="nav-item">
+                    <a class="nav-link @((i==Bind(vm, x => x.SelectedResultIndex)) ? "active" : "")" href="@(GetTabLink(i))">@Bind(eventResult, x => x.Name)</a>
+                </li>
+            }
+        </ul>
+        <button class="btn btn-outline-secondary" @onclick=TriggerCalculation>
+            Calculate
+        </button>
+    </div>
+    @if (@Bind(vm, x => x.SelectedEvent) != null && @Bind(vm, x => x.SelectedEventResult) != null)
+    {
+        @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
+        {
+            <DisplayResult class="container-md px-0 mb-2 mx-0" Result=result/>
+        }
+    }
+    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+        <Authorized>
+            <div>
+                <button class="btn btn-outline-secondary" @onclick=OnUploadButtonClick>Upload Result</button>
+            </div>
+        </Authorized>
+    </AuthorizeView>
+</div>
 
 @code {
     private const string resultTabParam = "resultTab";
+
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -87,6 +105,27 @@
     {
         var url = NavigationManager.GetUriWithQueryParameter(resultTabParam, index);
         return url;
+    }
+
+    private async Task OnUploadButtonClick()
+    {
+        var @event = vm.SelectedEvent?.GetModel();
+        if (@event is null)
+        {
+            return;
+        }
+        var parameters = new ModalParameters()
+            .Add(nameof(UploadResultPrompt.Event), @event);
+        await ModalService.Show<UploadResultPrompt>("Upload json result", parameters).Result;
+    }
+
+    private async Task TriggerCalculation()
+    {
+        if (vm.Loading)
+        {
+            return;
+        }
+        await vm.TriggerCalculation();
     }
 
     protected override void Dispose(bool disposing)

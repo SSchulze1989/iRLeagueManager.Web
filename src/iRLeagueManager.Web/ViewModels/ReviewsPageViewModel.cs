@@ -44,7 +44,7 @@ namespace iRLeagueManager.Web.ViewModels
                 var reviewsEndpoint = eventEndpoint
                     .Reviews();
                 var result = await reviewsEndpoint.Get(cancellationToken);
-                if (result.Success == false)
+                if (result.Success == false || result.Content is null)
                 {
                     return;
                 }
@@ -55,7 +55,7 @@ namespace iRLeagueManager.Web.ViewModels
                 var membersEndpoint = eventEndpoint
                     .Members();
                 var membersResult = await membersEndpoint.Get(cancellationToken);
-                if (membersResult.Success == false)
+                if (membersResult.Success == false || membersResult.Content is null)
                 {
                     return;
                 }

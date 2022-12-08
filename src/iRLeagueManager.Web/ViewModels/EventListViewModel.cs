@@ -39,7 +39,7 @@ namespace iRLeagueManager.Web.ViewModels
 
                 var sessionsEndpoint = ApiService.CurrentSeason.Events();
                 var result = await sessionsEndpoint.Get();
-                if (result.Success == false)
+                if (result.Success == false || result.Content is null)
                 {
                     EventList.Clear();
                     return;
@@ -72,7 +72,7 @@ namespace iRLeagueManager.Web.ViewModels
                     .Events()
                     .WithId(eventId)
                     .Get(cancellationToken);
-                if (result.Success == false)
+                if (result.Success == false || result.Content is null)
                 {
                     return;
                 }

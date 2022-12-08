@@ -1,0 +1,212 @@
+﻿@inherits MvvmComponentBase
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.ViewModels
+@inject ResultConfigViewModel vm
+
+<EditForm Model=vm OnValidSubmit=Submit>
+    <StatusResultValidator @ref=ResultValidator />
+    <div class="input-group-list mb-2">
+        <InputGroup Label="Name">
+            <InputText class="form-control" id="input-name" placeholder="Name..." aria-label="input-name" @bind-Value=vm.Name/>
+        </InputGroup>
+        <InputGroup Label="Show as">
+            <InputText class="form-control" id="input-display-name" placeholder="Show as ..." aria-label="input-display-name" @bind-Value=vm.DisplayName/>
+        </InputGroup>
+        <InputGroup Label="Type">
+            <InputSelect class="form-select" id="input-type" placeholder="Type..." aria-label="input-type" @bind-Value=vm.ResultKind>
+                <option value=@ResultKind.Member>Member</option>
+                <option value=@ResultKind.Team>Team</option>
+            </InputSelect>
+        </InputGroup>
+        <InputGroup Label="Source">
+            <InputSelect class="form-select" id="input-source" placeholder="Source..." aria-label="input-source" @bind-Value=vm.SourceResultConfigId>
+                <option value="0">Raw</option>
+                @foreach(var config in @Bind(vm, x => x.AvailableResultConfigs).Where(CanSelectAsSourceConfig))
+                {
+                    <option value=@config.ResultConfigId>@config.Name</option>
+                }
+            </InputSelect>
+        </InputGroup>
+        @if (vm.ResultKind == ResultKind.Team)
+        {
+            <InputGroup Label="Take">
+                <InputNumber class="form-control" id="input-results-per-team" aria-label="input-results-per-team" @bind-Value=vm.ResultsPerTeam/>
+            </InputGroup>
+        }
+    </div>
+
+    <div class="input-group-list mb-2">
+        <InputGroup Label="Points Filter">
+            <button class="form-control" type="button" @onclick=PointsFilterClick>
+                @if (vm.FiltersForPoints.Count == 0)
+                {
+                    <span class="text-secondary"><em>Configure</em></span>
+                }
+                else
+                {
+                    <span class="text-secondary">@vm.FiltersForPoints.Count filters applied</span>
+                }
+            </button>
+        </InputGroup>
+        <InputGroup Label="Result Filter">
+            <button class="form-control" type="button" @onclick=ResultFilterClick>
+                @if (vm.FiltersForResult.Count == 0)
+                {
+                    <span class="text-secondary"><em>Configure</em></span>
+                }
+                else
+                {
+                    <span class="text-secondary">@vm.FiltersForResult.Count filters applied</span>
+                }
+            </button>
+        </InputGroup>
+    </div>
+
+    <div class="card mb-2">
+        <div class="card-body">
+            <div class="card-title">
+                Session Scorings
+            </div>
+            @foreach(var scoring in @Bind(vm, x => x.Scorings).Where(x => x.IsCombinedResult == false))
+            {
+                <div class="input-group-list mb-3">
+                    <div class="input-group">
+                        <InputText class="form-control" id="scoring-name" aria-label="scoring-name" placeholder="Name..." @bind-Value=scoring.Name/>
+                        <button class="btn btn-outline-danger" type="button" @onclick="@(() => vm.RemoveScoring(scoring))"><span class="oi oi-trash"/></button>
+                    </div>
+                    <EditScoring Scoring=scoring />
+                </div>
+            }
+            <div class="mt-3">
+                <button class="btn btn-outline-secondary" type="button" @onclick="@(() => vm.AddScoring())">Add Scoring</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-group-list mb-3">
+        <div class="input-group" disabled>
+            <div class="input-group-text">
+                <InputCheckbox class="form-form-check-input mt-0" @bind-Value=vm.CalculateCombinedResult/>
+            </div>
+            <label class="form-control">Get Combined Result</label>
+        </div>
+        @if (vm.CalculateCombinedResult)
+        {
+            <EditScoring Scoring=@(vm.Scorings.First(x => x.IsCombinedResult)) />
+        }
+    </div>
+    <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+    <CancelSubmitButtons ModelState=vm SubmitText="Save" OnCancel=Cancel/>
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    public BlazoredModalInstance ModalInstance { get; set; } = default!;
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
+
+    private ResultConfigModel model = default!;
+    [Parameter]
+    public ResultConfigModel Model
+    {
+        get => model;
+        set
+        {
+            if (EqualityComparer<ResultConfigModel>.Default.Equals(model, value) == false)
+            {
+                model = value;
+                vm.SetModel(model);
+            }
+        }
+    }
+
+    private CancellationTokenSource cts = new();
+
+    private StatusResultValidator? ResultValidator { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _ = ModalService ?? throw BlazorParameterNullException.New(this, ModalService);
+        _ = ModalInstance ?? throw BlazorParameterNullException.New(this, ModalInstance);
+        _ = Model ?? throw BlazorParameterNullException.New(this, Model);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+        await vm.LoadAvailableResultConfigs(cts.Token);
+    }
+
+    private async Task PointsFilterClick()
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(EditResultFilterModal.Model), vm.GetModel().FiltersForPoints);
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true,
+        };
+        var result = await ModalService.Show<EditResultFilterModal>("Edit Points Filter", parameters, options).Result;
+        if (result.Confirmed && result.Data is IEnumerable<ResultFilterModel> model)
+        {
+            vm.GetModel().FiltersForPoints = model.ToList();
+            vm.SetModel(vm.GetModel());
+        }
+    }
+
+    private async Task ResultFilterClick()
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(EditResultFilterModal.Model), vm.GetModel().FiltersForResult);
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true,
+        };
+        var result = await ModalService.Show<EditResultFilterModal>("Edit Result Filter", parameters, options).Result;
+        if (result.Confirmed && result.Data is IEnumerable<ResultFilterModel> model)
+        {
+            vm.GetModel().FiltersForResult = model.ToList();
+            vm.SetModel(vm.GetModel());
+        }
+    }
+
+    private async Task Submit()
+    {
+        var status = await vm.SaveChangesAsync(cts.Token);
+        ResultValidator?.ValidateResult(status);
+        if (status.IsSuccess)
+        {
+            var result = ModalResult.Ok(vm.GetModel());
+            await ModalInstance.CloseAsync(result);
+            return;
+        }
+    }
+
+    private bool CanSelectAsSourceConfig(ResultConfigModel model)
+    {
+        bool isSelf = model.ResultConfigId == vm.ResultConfigId;
+        bool isDepending = model.SourceResultConfig != null && model.SourceResultConfig.ResultConfigId == vm.ResultConfigId;
+        return isSelf == false && isDepending == false;
+    }
+
+    private async Task Cancel()
+    {
+        if (ModalInstance != null)
+        {
+            await ModalInstance.CancelAsync();   
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing == false)
+        {
+            cts.Cancel();
+            cts.Dispose();
+        }
+        base.Dispose(disposing);
+    }
+}

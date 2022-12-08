@@ -1,0 +1,127 @@
+﻿@inherits MvvmComponentBase
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+
+<InputGroup Label="Sort First">
+    <button class="form-control" type="button" @onclick=@(() => EditPointsSortOptionsClick(Scoring.PointRule))>
+        <div class="d-flex justify-content-start overflow-scroll">
+            @foreach((var option, var priority) in Scoring.PointRule.PointsSortOptions.Select((x, i) => (x, i + 1)))
+            {
+                <div class="d-inline-block me-3 mb-2">
+                    <span>@(priority).@option.ToString()</span>
+                </div>
+            }
+        </div>
+    </button>
+</InputGroup>
+<InputGroup Label=Points>
+    <button class="form-control" type="button" @onclick=EditPointsClick>
+        @{var pointRule = @Bind(Scoring, x => x.PointRule);}
+        @if (@Bind(pointRule, x => x.RuleType) == PointRuleViewModel.PointRuleType.MaxPoints)
+        {
+            <small>MaxPoints: @pointRule.MaxPoints</small>
+            <small>DropOff p.Pl: @pointRule.PointDropOff</small>
+        }
+        @if (@Bind(pointRule, x => x.PointsPerPlace).Count() > 0)
+        {
+            <div class="overflow-scroll">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th><small>Pos.</small></th>
+                            @foreach ((var point, var position) in @Bind(pointRule, x => x.PointsPerPlace).Select((x, i) => (x, i + 1)))
+                            {
+                                <th><small>@position.</small></th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th><small>Pts.</small></th>
+                            @foreach (var point in @Bind(pointRule, x => x.PointsPerPlace))
+                            {
+                                <td><small>@point</small></td>
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <span>Points from source</span>
+        }
+    </button>
+</InputGroup>
+<InputGroup Label="Sort Final">
+    <button class="form-control" type="button" @onclick=@(() => EditFinalSortOptionsClick(Scoring.PointRule))>
+        <div class="d-flex justify-content-start overflow-scroll">
+            @foreach((var option, var priority) in Scoring.PointRule.FinalSortOptions.Select((x, i) => (x, i + 1)))
+            {
+                <div class="d-inline-block me-3 mb-2">
+                    <span>@(priority).@option.ToString()</span>
+                </div>
+            }
+        </div>
+    </button>
+</InputGroup>
+
+@code {
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
+
+    [Parameter]
+    public ScoringViewModel Scoring { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        _ = ModalService ?? throw BlazorParameterNullException.New(this, ModalService);
+        _ = Scoring ?? throw BlazorParameterNullException.New(this, Scoring);
+    }
+
+    private async Task EditPointsClick()
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(EditPointRuleModal.Model), Scoring.PointRule.CopyModel());
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true,
+        };
+        var result = await ModalService.Show<EditPointRuleModal>("Edit Points", parameters, options).Result;
+        if (result.Confirmed && result.Data is PointRuleModel model)
+        {
+            Scoring.GetModel().PointRule = model;
+            Scoring.PointRule.SetModel(model);
+        }
+    }
+
+    private async Task EditPointsSortOptionsClick(PointRuleViewModel pointRule)
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(EditSortOptionsModal.Model), pointRule.PointsSortOptions.ToList());
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true,
+        };
+        var result = await ModalService.Show<EditSortOptionsModal>("Sort for points", parameters, options).Result;
+        if (result.Confirmed && result.Data is IList<SortOptions> sortOptions)
+        {
+            pointRule.PointsSortOptions = sortOptions;
+        }
+    }
+
+    private async Task EditFinalSortOptionsClick(PointRuleViewModel pointRule)
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(EditSortOptionsModal.Model), pointRule.FinalSortOptions.ToList());
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true,
+        };
+        var result = await ModalService.Show<EditSortOptionsModal>("Final order", parameters, options).Result;
+        if (result.Confirmed && result.Data is IList<SortOptions> sortOptions)
+        {
+            pointRule.FinalSortOptions = sortOptions;
+        }
+    }
+}

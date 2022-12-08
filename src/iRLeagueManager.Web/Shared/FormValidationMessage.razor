@@ -6,7 +6,7 @@
     {
         <ValidationMessage For=For />
     }
-    @if (Message is not null)
+    @if (string.IsNullOrEmpty(Message) == false)
     {
         <div class="validation-message">@Message</div>
     }

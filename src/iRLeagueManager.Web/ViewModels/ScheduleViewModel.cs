@@ -1,5 +1,6 @@
 ﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Extensions;
 using MvvmBlazor.ViewModel;
 using System.Collections.ObjectModel;
 
@@ -21,8 +22,8 @@ namespace iRLeagueManager.Web.ViewModels
             this.model = model;
         }
 
-        public long ScheduleId { get => model.ScheduleId; set => Set(model, x => x.ScheduleId, value); }
-        public string Name { get => model.Name; set => Set(model, x => model.Name, value); }
+        public long ScheduleId { get => model.ScheduleId; set => SetP(model.ScheduleId, value => model.ScheduleId = value, value); }
+        public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
 
         public int MaxRaceCount => Events.Count > 0 ? Events.Max(x => x.RaceCount) : 0;
 
@@ -71,11 +72,50 @@ namespace iRLeagueManager.Web.ViewModels
             }
 
             var result = await ApiService.CurrentLeague.Schedules().WithId(ScheduleId).Get(cancellationToken);
-            if (result.Success == false)
+            if (result.Success == false || result.Content is null)
             {
                 return;
             }
             await SetModel(result.Content);
+        }
+
+        public async Task<StatusResult> AddEvent(EventViewModel @event, CancellationToken cancellationToken = default)
+        {
+            if (ApiService.CurrentLeague == null)
+            {
+                return LeagueNullResult();
+            }
+
+            var request = ApiService.CurrentLeague.Schedules()
+                .WithId(ScheduleId)
+                .Events()
+                .Post(@event.GetModel(), cancellationToken);
+            var result = await request;
+            if (result.Success)
+            {
+                await LoadEvents(cancellationToken);
+            }
+
+            return result.ToStatusResult();
+        }
+
+        public async Task<StatusResult> RemoveEvent(EventViewModel @event, CancellationToken cancellationToken = default)
+        {
+            if (ApiService.CurrentLeague == null)
+            {
+                return LeagueNullResult();
+            }
+
+            var request = ApiService.CurrentLeague.Events()
+                .WithId(@event.EventId)
+                .Delete(cancellationToken);
+            var result = await request;
+            if (result.Success)
+            {
+                await LoadEvents(cancellationToken);
+            }
+
+            return result.ToStatusResult();
         }
 
         public async Task LoadEvents(CancellationToken cancellationToken = default)
@@ -86,7 +126,7 @@ namespace iRLeagueManager.Web.ViewModels
             //await Task.Delay(500);
 
             var result = await ApiService.CurrentLeague.Schedules().WithId(ScheduleId).Events().Get(cancellationToken);
-            if (result.Success == false)
+            if (result.Success == false || result.Content is null)
             {
                 return;
             }

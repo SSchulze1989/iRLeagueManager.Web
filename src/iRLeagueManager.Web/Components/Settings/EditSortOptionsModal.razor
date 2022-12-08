@@ -1,0 +1,134 @@
+﻿@using System.ComponentModel
+@using iRLeagueApiCore.Common.Enums
+@inherits MvvmComponentBase
+@inject SortOptionsViewModel sortOptions
+
+<EditForm Model=sortOptions>
+    <div class="input-group-list mb-3">
+        @{ var optionsAvailable = Enum.GetValues<SortValue>().Except(sortOptions.Options.Select(x => x.SortValue)); }
+        @foreach((var option, var index) in @Bind(sortOptions, x => x.Options).Select((x, i) => (x, i)))
+        {
+            <InputGroup Label=@(index == 0 ? "Sort by" : "..then by")>
+                <InputSelect class="form-select" @bind-Value=option.SortValue>
+                    <option value=@option.SortValue>@GetEnumString(option.SortValue)</option>
+                    @foreach(var enumValue in optionsAvailable)
+                    {
+                        <option value=@enumValue>@GetEnumString(enumValue)</option>
+                    }
+                </InputSelect>
+                <InputSelect class="form-select" style="max-width: 5.5rem" @bind-Value=option.SortDirection>
+                    <option value=@SortDirection.Ascending><span class="oi oi-arrow-down">Asc.</span></option>
+                    <option value=@SortDirection.Descending><span class="oi oi-arrow-up">Desc.</span></option>
+                </InputSelect>
+                <button class="btn btn-outline-danger" type="button" @onclick=@(() => sortOptions.RemoveOption(option))>
+                    <span class="oi oi-x"/>
+                </button>
+            </InputGroup>
+        }
+        <InputGroup Label=@(sortOptions.Options.Count() == 0 ? "Sort by" : "..then by")>
+            <InputSelect @bind-Value=NewValue 
+                         @ref=NewValueInput
+                         class="form-select">
+                <option value="">Select...</option>
+                @foreach(var enumValue in optionsAvailable)
+                {
+                    <option value=@enumValue>@GetEnumString(enumValue)</option>
+                }
+            </InputSelect>
+            <InputSelect @bind-Value=NewSortDirection
+                         class="form-select"
+                         style="max-width: 5.5rem">
+                <option value=@SortDirection.Ascending><span class="oi oi-arrow-down">Asc.</span></option>
+                <option value=@SortDirection.Descending><span class="oi oi-arrow-up">Desc.</span></option>
+            </InputSelect>
+            <div class="input-group-text" type="button">
+                <span class="oi oi-x invisible"/>
+            </div>
+        </InputGroup>
+    </div>
+    <CancelSubmitButtons SubmitText="Ok" CancelText="Cancel" OnSubmit=Submit OnCancel=Cancel />
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    public BlazoredModalInstance ModalInstance { get; set; } = default!;
+
+    [Parameter]
+    public IList<SortOptions> Model { get; set; } = default!;
+
+    private SortDirection NewSortDirection { get; set; }
+
+    private SortValue? NewValue
+    {
+        get => default;
+        set
+        {
+            if(value is not null)
+            {
+                _ = SetNewValue(value, NewSortDirection);
+            }
+        }
+    }
+
+    private InputSelect<SortValue?> NewValueInput { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        _ = ModalInstance ?? throw BlazorParameterNullException.New(this, ModalInstance);
+        _ = Model ?? throw BlazorParameterNullException.New(this, Model);
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+        sortOptions.SetModel(Model);
+    }
+
+    private async Task SetNewValue(SortValue? value, SortDirection direction)
+    {
+        if (value.HasValue)
+        {
+            sortOptions.AddOption(value.Value, direction);
+        }
+        if (NewValueInput.Element  is not null)
+        {
+            await NewValueInput.Element.Value.FocusAsync();
+        }
+    }
+
+    private async Task Submit()
+    {
+        var result = ModalResult.Ok(sortOptions.GetModel());
+        await ModalInstance.CloseAsync(result);
+    }
+
+    private async Task Cancel()
+    {
+        await ModalInstance.CancelAsync();
+    }
+
+    private string GetEnumString(SortValue value)
+    {
+        return value switch
+        {
+            SortValue.Pos => "Position",
+            SortValue.PosChg => "Position Change",
+            SortValue.StartPos => "Start Position",
+            SortValue.RacePts => "Race Points",
+            SortValue.PenPts => "Penalty Points",
+            SortValue.BonusPts => "Bonus Points",
+            SortValue.TotalPts => "TotalPoints",
+            SortValue.Intvl => "Intervall",
+            SortValue.ComplLaps => "Completed Laps",
+            SortValue.LeadLaps => "Lead Laps",
+            SortValue.Incs => "Incidents",
+            SortValue.FastLap => "Fastest Lap",
+            SortValue.QualLap => "Qualy Lap",
+            SortValue.FinalPos => "Final Position",
+            _ => string.Empty,
+        };
+    }
+}

@@ -1,0 +1,27 @@
+﻿@using iRLeagueManager.Web.ViewModels
+
+<div @attributes=AdditionalAttributes>
+    <div>
+        <h5>@ResultConfig.Name</h5>
+    </div>
+    <h6>Display Name</h6> 
+    <small>@ResultConfig.DisplayName</small>
+    @foreach(var scoring in ResultConfig.Scorings)
+    {
+        
+    }
+</div>
+
+
+@code {
+    [Parameter(CaptureUnmatchedValues=true)]
+    public IDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [Parameter, EditorRequired]
+    public ResultConfigViewModel ResultConfig { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        _ = ResultConfig ?? throw BlazorParameterNullException.New(this, ResultConfig);
+    }
+}

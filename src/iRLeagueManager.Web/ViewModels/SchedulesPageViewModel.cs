@@ -28,7 +28,7 @@ public class SchedulesPageViewModel : LeagueViewModelBase<SchedulesPageViewModel
         //await Task.Delay(500);
 
         var result = await ApiService.CurrentSeason.Schedules().Get();
-        if (result.Success == false)
+        if (result.Success == false || result.Content is null)
         {
             Schedules.Clear();
             // do some state reporting...

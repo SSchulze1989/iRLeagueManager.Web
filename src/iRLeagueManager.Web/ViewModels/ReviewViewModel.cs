@@ -55,6 +55,12 @@ namespace iRLeagueManager.Web.ViewModels
             model.VoteResults.Add(vote.GetModel());
         }
 
+        public void AddVote(VoteModel vote)
+        {
+            model.VoteResults.Add(vote);
+            votes.Add(new(LoggerFactory, ApiService, vote));
+        }
+
         public void RemoveVote(VoteViewModel vote)
         {
             votes.Remove(vote);
@@ -268,7 +274,7 @@ namespace iRLeagueManager.Web.ViewModels
                     .WithId(ReviewId)
                     .Put(model, cancellationToken);
                 var result = await request;
-                if (result.Success == false)
+                if (result.Success == false || result.Content is null)
                 {
                     return result.ToStatusResult();
                 }

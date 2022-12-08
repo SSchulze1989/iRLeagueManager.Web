@@ -22,6 +22,7 @@ namespace iRLeagueManager.Web.ViewModels
 
         public long SeasonId => model.SeasonId;
         public string SessionName => model.SessionName;
+        public int? SessionNr => model.SessionNr;
 
         private Expression<Func<ResultRowModel, IComparable>> orderByPropertySelector;
         public Expression<Func<ResultRowModel, IComparable>> OrderByPropertySelector

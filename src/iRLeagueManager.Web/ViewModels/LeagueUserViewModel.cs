@@ -45,7 +45,7 @@ namespace iRLeagueManager.Web.ViewModels
                 .AddRole()
                 .Post(addRoleModel);
             var result = await request;
-            if (result.Success)
+            if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);
             }
@@ -67,7 +67,7 @@ namespace iRLeagueManager.Web.ViewModels
                 .RemoveRole()
                 .Post(addRoleModel);
             var result = await request;
-            if (result.Success)
+            if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);
             }

@@ -38,7 +38,7 @@ namespace iRLeagueManager.Web.ViewModels
                 Status = string.Empty;
                 var result = await ApiService.Client.Leagues().Get();
                 Status = result.Status;
-                if (result.Success)
+                if (result.Success && result.Content is not null)
                 {
                     var leagueModels = result.Content;
                     Leagues = new ObservableCollection<LeagueViewModel>(

@@ -2,6 +2,7 @@
 @using System.ComponentModel
 @using Blazored.Typeahead
 @using iRLeagueApiCore.Common.Models.Members
+@using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueManager.Web.ViewModels
 
 <CascadingValue Value=Review.InvolvedMembers>
@@ -104,9 +105,15 @@
                     <div>
                         @Bind(Review, x => x.ResultText)
                     </div>
+                    @if (IsSteward)
+                    {
+                        <div class="mt-2">
+                            <button class="btn btn-outline-secondary py-0" @onclick=EditResultClick>Edit</button>
+                        </div>
+                    }
                 </div>
                 <hr/>
-                @if (ShowComments)
+                @if (IsSteward)
                 {
                     <div>
                         <h5>Comments</h5>
@@ -114,7 +121,7 @@
                             @foreach (var comment in @Bind(Review, x => x.Comments))
                             {
                                 <li class="list-group-item">
-                                    <ReviewComment Comment=comment />
+                                    <ReviewComment Comment=comment OnStateHasChanged=@(async () => await InvokeAsync(StateHasChanged))/>
                                 </li>
                             }
                         </ul>
@@ -129,6 +136,8 @@
 @code {
     [CascadingParameter(Name = nameof(EventMembers))]
     public IEnumerable<MemberInfoModel> EventMembers { get; set; } = default!;
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues=true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter, EditorRequired]
@@ -138,7 +147,7 @@
     [Parameter]
     public EventCallback<MouseEventArgs> DeleteClick { get; set; }
     [Parameter]
-    public bool ShowComments { get; set; } = false;
+    public bool IsSteward { get; set; } = false;
 
     private ElementReference ReviewText { get; set; }
 
@@ -147,6 +156,7 @@
     protected override void OnParametersSet()
     {
         _ = Review ?? throw new InvalidOperationException($"Parameter {nameof(Review)} must have a value");
+        _ = ModalService ?? throw BlazorParameterNullException.New(this, ModalService);
         base.OnParametersSet();
     }
 
@@ -158,5 +168,23 @@
     private async Task Delete()
     {
         await Review.DeleteAsync();
+    }
+
+    private async Task EditResultClick()
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(EditReviewResultModal.Model), Review.CopyModel())
+            .Add(nameof(EditReviewResultModal.InvolvedMembers), Review.InvolvedMembers)
+            .Add(nameof(EditReviewResultModal.OnSubmit), 
+                new Func<ReviewViewModel, CancellationToken, Task<StatusResult>>(async (review, cancellationToken) => await review.SaveChangesAsync(cancellationToken)));
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true,
+        };
+        var result = await ModalService.Show<EditReviewResultModal>("Edit Result", parameters, options).Result;
+        if (result.Confirmed && result.Data is ReviewModel reviewModel)
+        {
+            Review.SetModel(reviewModel);
+        }
     }
 }

@@ -8,32 +8,34 @@
 
 <EditForm Model=Review OnValidSubmit=Submit>
     <StatusResultValidator @ref=ResultValidator/>
-    <InputGroup Label="Session">
-        <InputSelect class="form-select" placeholder="Select Session" ariaaria-label="Select Session" id="incident_session" @bind-Value="Review.SessionId"> 
-            @if (EventList.Selected != null)
-            {
-                @foreach(var session in EventList.Selected.Sessions)
+    <div class="input-group-list p-1">
+        <InputGroup Label="Session">
+            <InputSelect class="form-select" placeholder="Select Session" ariaaria-label="Select Session" id="incident_session" @bind-Value="Review.SessionId"> 
+                @if (EventList.Selected != null)
                 {
-                    <option value=@session.SessionId>@session.Name</option>
+                    @foreach(var session in EventList.Selected.Sessions)
+                    {
+                        <option value=@session.SessionId>@session.Name</option>
+                    }
                 }
-            }
-        </InputSelect>
-    </InputGroup>
-    <FormValidationMessage For=@(() => Review.SessionId) />
-    <InputGroup Label="Nr.">
-        <InputText class="form-control" placeholder="Incident Nr." aria-label="IncidentNr" id="incident_nr" @bind-Value="Review.IncidentNr"/>
-    </InputGroup>
-    <InputGroup Label="Lap">
-        <InputText class="form-control" placeholder="Lap" aria-label="Lap" id="incident_lap" @bind-Value="Review.OnLap" />
-    </InputGroup>
-    <InputGroup Label="Corner">
-        <InputText class="form-control" placeholder="Corner" aria-label="Corner" id="incident_corner" @bind-Value="Review.Corner" />
-    </InputGroup>
-    <InputGroup Label="Incident">
-        <InputText class="form-control" placeholder="Incident Kind" aria-label="Incident Kind" id="incident_kind" @bind-Value="Review.IncidentKind" />
-    </InputGroup>
+            </InputSelect>
+        </InputGroup>
+        <FormValidationMessage For=@(() => Review.SessionId) />
+        <InputGroup Label="Nr.">
+            <InputText class="form-control" placeholder="Incident Nr." aria-label="IncidentNr" id="incident_nr" @bind-Value="Review.IncidentNr"/>
+        </InputGroup>
+        <InputGroup Label="Lap">
+            <InputText class="form-control" placeholder="Lap" aria-label="Lap" id="incident_lap" @bind-Value="Review.OnLap" />
+        </InputGroup>
+        <InputGroup Label="Corner">
+            <InputText class="form-control" placeholder="Corner" aria-label="Corner" id="incident_corner" @bind-Value="Review.Corner" />
+        </InputGroup>
+        <InputGroup Label="Incident">
+            <InputText class="form-control" placeholder="Incident Kind" aria-label="Incident Kind" id="incident_kind" @bind-Value="Review.IncidentKind" />
+        </InputGroup>
+    </div>
     <FormValidationMessage For=@(() => Review.IncidentKind) />
-    <div class="p-1 mt-2">
+    <div class="p-1">
         <div class="row g-0">
             <div class="input-group-text" style="border-bottom-left-radius:0; border-bottom-right-radius:0; border-bottom: none">
                 <label>Involved Drivers</label>

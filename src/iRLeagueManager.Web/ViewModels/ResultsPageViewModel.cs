@@ -1,5 +1,6 @@
 ﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Extensions;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -52,7 +53,7 @@ namespace iRLeagueManager.Web.ViewModels
 
             var sessionsEndpoint = ApiService.CurrentSeason.Events();
             var result = await sessionsEndpoint.Get();
-            if (result.Success == false)
+            if (result.Success == false || result.Content is null)
             {
                 EventList.Clear();
                 return;
@@ -81,7 +82,7 @@ namespace iRLeagueManager.Web.ViewModels
                 {
                     // Load event list first if event is not in current event list
                     var eventRequest = await eventEndpoint.Get();
-                    if (eventRequest.Success == false)
+                    if (eventRequest.Success == false || eventRequest.Content is null)
                     {
                         return;
                     }
@@ -96,7 +97,7 @@ namespace iRLeagueManager.Web.ViewModels
 
                 var resultEndpoint = eventEndpoint.Results();
                 var requestResult = await resultEndpoint.Get();
-                if (requestResult.Success == false)
+                if (requestResult.Success == false || requestResult.Content is null)
                 {
                     Results.Clear();
                     return;
@@ -108,6 +109,41 @@ namespace iRLeagueManager.Web.ViewModels
                 {
                     SelectedResultIndex = Results.Count;
                 }
+            }
+            finally
+            {
+                Loading = false;
+            }
+        }
+
+        public async Task<StatusResult> TriggerCalculation(CancellationToken cancellationToken = default)
+        {
+            if (ApiService.CurrentLeague is null)
+            {
+                return LeagueNullResult();
+            }
+
+            if (SelectedEvent is null)
+            {
+                return new StatusResult(false, "No event selected");
+            }
+            try
+            {
+                Loading = true;
+                var request = ApiService.CurrentLeague.Events()
+                .WithId(SelectedEvent.EventId)
+                .Results()
+                .Calculate()
+                .Post(cancellationToken);
+                var result = await request;
+
+                if (result.Success)
+                {
+                    await Task.Delay(2000);
+                    await LoadFromEventAsync(SelectedEvent.EventId);
+                }
+
+                return result.ToStatusResult();
             }
             finally
             {

@@ -11,6 +11,7 @@
 @using iRLeagueManager.Web.Components.Results
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
+@inject SharedStateService sharedState
 @inject ResultsPageViewModel vm
 
 <div class="container-md">
@@ -36,9 +37,12 @@
         </ul>
         <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
             <Authorized>
-                <button class="btn btn-outline-secondary" @onclick=TriggerCalculation>
-                    Calculate
-                </button>
+                @if (vm.SelectedEvent?.HasResult == true && sharedState.SeasonFinished == false)
+                {
+                    <button class="btn btn-outline-secondary" @onclick=TriggerCalculation>
+                        Calculate
+                    </button>
+                }
             </Authorized>
         </AuthorizeView>
     </div>
@@ -51,9 +55,12 @@
     }
     <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
         <Authorized>
-            <div>
-                <button class="btn btn-outline-secondary" @onclick=OnUploadButtonClick>Upload Result</button>
-            </div>
+            @if (sharedState.SeasonFinished == false)
+            {
+                <div>
+                    <button class="btn btn-outline-secondary" @onclick=OnUploadButtonClick>Upload Result</button>
+                </div>
+            }
         </Authorized>
     </AuthorizeView>
 </div>

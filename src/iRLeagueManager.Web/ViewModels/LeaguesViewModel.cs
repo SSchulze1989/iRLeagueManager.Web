@@ -1,11 +1,4 @@
-﻿using iRLeagueApiCore.Client;
-using iRLeagueManager.Web.Data;
-using iRLeagueManager.Web.Extensions;
-using Microsoft.Extensions.Logging;
-using MvvmBlazor.ViewModel;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using iRLeagueManager.Web.Data;
 
 namespace iRLeagueManager.Web.ViewModels
 {
@@ -42,7 +35,7 @@ namespace iRLeagueManager.Web.ViewModels
                 {
                     var leagueModels = result.Content;
                     Leagues = new ObservableCollection<LeagueViewModel>(
-                        leagueModels.Select(x => new LeagueViewModel(LoggerFactory.CreateLogger<LeagueViewModel>(), ApiService.Client, x))
+                        leagueModels.Select(x => new LeagueViewModel(LoggerFactory, ApiService, x))
                     );
                 }
                 Loading = false;

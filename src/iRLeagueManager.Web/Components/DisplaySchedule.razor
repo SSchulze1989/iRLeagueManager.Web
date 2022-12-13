@@ -203,7 +203,7 @@
             return;
         }
         var parameters = new ModalParameters()
-            .Add(nameof(EditEventModal.EventModel), new EventModel())
+            .Add(nameof(EditEventModal.EventModel), new EventModel() { Date = DateTime.Now.Date })
             .Add(nameof(EditEventModal.OnSubmit),
                 new Func<EventViewModel, CancellationToken, 
                     Task<StatusResult>>(async (@event, cancellationToken) => await Schedule.AddEvent(@event)));

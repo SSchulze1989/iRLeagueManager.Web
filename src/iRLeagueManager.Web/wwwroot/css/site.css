@@ -162,6 +162,26 @@ a, .btn-link {
     border-bottom-right-radius: 0;
 }
 
+.input-group-list-flush > .input-group > * {
+    border-radius: 0;
+}
+
+.input-group-list-flush > .input-group:first-child > * {
+    border-top: none;
+}
+
+.input-group-list-flush > .input-group:last-child > * {
+    border-bottom: none;
+}
+
+.input-group-list-flush > .input-group > *:first-child {
+    border-left: none;
+}
+
+.input-group-list-flush > .input-group > *:last-child {
+    border-right: none;
+}
+
 /* Tabs style */
 .tab-header {
     display: inline;

@@ -1,0 +1,32 @@
+﻿@using iRLeagueManager.Web.ViewModels
+
+<div @attributes=AdditionalAttributes>
+    <div>
+        <h5>@Season.Name</h5>
+    </div>
+    <h6>Finished</h6> 
+    <small>
+        @if (Season.Finished)
+        {
+            <span class="oi oi-check text-success" />
+        }
+        else
+        {
+            <span class="oi oi-delete text-danger" />
+        }
+    </small>
+</div>
+
+
+@code {
+    [Parameter(CaptureUnmatchedValues=true)]
+    public IDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [Parameter, EditorRequired]
+    public SeasonViewModel Season { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        _ = Season ?? throw BlazorParameterNullException.New(this, Season);
+    }
+}

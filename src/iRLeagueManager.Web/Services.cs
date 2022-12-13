@@ -19,6 +19,7 @@ namespace iRLeagueManager.Web
             services.TryAddScoped<SeasonViewModel>();
             services.TryAddScoped<SchedulesPageViewModel>();
             services.TryAddScoped<ScheduleViewModel>();
+            services.TryAddTransient<LeagueViewModel>();
             services.TryAddTransient<EventViewModel>();
             services.TryAddTransient<ReviewViewModel>();
             services.TryAddTransient<ReviewCommentViewModel>();

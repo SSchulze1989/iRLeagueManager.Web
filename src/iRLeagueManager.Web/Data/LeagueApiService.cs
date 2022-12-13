@@ -39,6 +39,7 @@ public class LeagueApiService
         CurrentSeason = null;
         Shared.SeasonId = 0;
         Shared.SeasonName = string.Empty;
+        Shared.SeasonFinished = true;
         var result = await CurrentLeague.Seasons().Get();
         if (result.Success && result.Content is not null)
         {
@@ -69,6 +70,7 @@ public class LeagueApiService
             var season = result.Content;
             Shared.SeasonId = seasonId;
             Shared.SeasonName = season.SeasonName;
+            Shared.SeasonFinished = season.Finished;
         }
     }
 

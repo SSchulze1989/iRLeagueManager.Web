@@ -11,6 +11,7 @@
 @using iRLeagueManager.Web.Components.Results
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
+@inject SharedStateService sharedState
 @inject ResultsPageViewModel vm
 
 <div class="container-md">
@@ -25,8 +26,8 @@
             <p class="results-scoring"><em>No Results</em></p>
         </div>
     }
-    <div class="d-flex justify-content-between">
-        <ul class="nav nav-tabs">
+    <div class="d-flex">
+        <ul class="nav nav-tabs flex-fill">
             @foreach((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x,i)))
             {
                 <li class="nav-item">
@@ -34,9 +35,22 @@
                 </li>
             }
         </ul>
-        <button class="btn btn-outline-secondary" @onclick=TriggerCalculation>
-            Calculate
-        </button>
+        <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+            <Authorized>
+                @if (vm.SelectedEvent?.HasResult == true && sharedState.SeasonFinished == false)
+                {
+                    <button class="btn btn-outline-secondary ms-2" @onclick=TriggerCalculation>
+                        Calculate
+                    </button>
+                    @if (vm.Results.Count > 0)
+                    {
+                        <button class="btn btn-outline-danger ms-2" @onclick=DeleteResultsClick>
+                            <span class="oi oi-trash" />
+                        </button>
+                    }
+                }
+            </Authorized>
+        </AuthorizeView>
     </div>
     @if (@Bind(vm, x => x.SelectedEvent) != null && @Bind(vm, x => x.SelectedEventResult) != null)
     {
@@ -47,9 +61,12 @@
     }
     <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
         <Authorized>
-            <div>
-                <button class="btn btn-outline-secondary" @onclick=OnUploadButtonClick>Upload Result</button>
-            </div>
+            @if (sharedState.SeasonFinished == false)
+            {
+                <div>
+                    <button class="btn btn-outline-secondary" @onclick=UploadButtonClick>Upload Result</button>
+                </div>
+            }
         </Authorized>
     </AuthorizeView>
 </div>
@@ -107,7 +124,7 @@
         return url;
     }
 
-    private async Task OnUploadButtonClick()
+    private async Task UploadButtonClick()
     {
         var @event = vm.SelectedEvent?.GetModel();
         if (@event is null)
@@ -126,6 +143,23 @@
             return;
         }
         await vm.TriggerCalculation();
+    }
+
+    private async Task DeleteResultsClick()
+    {
+        var @event = vm.SelectedEvent;
+        if (@event is null)
+        {
+            return;
+        }
+        var parameters = new ModalParameters()
+            .Add(nameof(ConfirmModal.Text), $"Really delete result for event \"{@event.Name} - {@event.Date.ToString(@"dd.MM.yyyy")}\"?")
+            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
+        var result = await ModalService.Show<ConfirmModal>("Delete Results", parameters).Result;
+        if (result.Confirmed)
+        {
+            await vm.DeleteEventResults();   
+        }
     }
 
     protected override void Dispose(bool disposing)

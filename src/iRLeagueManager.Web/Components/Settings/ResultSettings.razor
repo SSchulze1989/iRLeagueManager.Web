@@ -27,25 +27,11 @@
 </div>
 
 @code {
-    private ResultConfigViewModel? Selected => vm.Selected;
-
     [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
 
     [Parameter(CaptureUnmatchedValues = true)] 
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
-
-    private int selectedResultConfigIndex;
-    private int SelectedResultConfigIndex
-    {
-        get => selectedResultConfigIndex;
-        set
-        {
-            selectedResultConfigIndex = value;
-            vm.Selected = vm.ResultsConfigs.ElementAtOrDefault(selectedResultConfigIndex);
-            InvokeAsync(StateHasChanged);
-        }
-    }
 
     private async Task HandleSubmit()
     {
@@ -85,15 +71,6 @@
         }
     }
 
-    private void OnSelectedScoringChange(ChangeEventArgs e)
-    {
-        if (e.Value == null)
-        {
-            return;
-        }
-        SelectedResultConfigIndex = (int)e.Value;
-    }
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender == false)
@@ -104,7 +81,6 @@
         {
             await vm.LoadFromLeagueAsync();
         }
-        SelectedResultConfigIndex = 0;
         await InvokeAsync(StateHasChanged);
     }
 }

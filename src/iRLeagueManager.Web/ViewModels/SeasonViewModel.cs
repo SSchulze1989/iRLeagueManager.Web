@@ -1,46 +1,32 @@
-﻿using iRLeagueApiCore.Client;
-using iRLeagueApiCore.Client.Results;
-using iRLeagueApiCore.Common.Models;
+﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
-using MvvmBlazor.ViewModel;
-using System.Runtime.CompilerServices;
+using iRLeagueManager.Web.Extensions;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class SeasonViewModel : LeagueViewModelBase<SeasonViewModel>
+public class SeasonViewModel : LeagueViewModelBase<SeasonViewModel, SeasonModel>
 {
-    private SeasonModel model;
-
     public SeasonViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         this(loggerFactory, apiService, new SeasonModel())
-    { }
-
-    public SeasonViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, SeasonModel model) :
-        base (loggerFactory, apiService)
     {
-        this.model = model;
     }
 
-    private void SetProperty<T>(T get, Action<T> set, T value, [CallerMemberName] string? propertyName = null) where T : IEquatable<T>
+    public SeasonViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, SeasonModel model) :
+        base (loggerFactory, apiService, model)
     {
-        if (get.Equals(value) == false)
-        {
-            set.Invoke(value);
-            OnPropertyChanged(propertyName);
-        }
     }
 
     public long SeasonId => model.SeasonId;
     public long LeagueId => model.LeagueId;
     public DateTime? SeasonStart => model.SeasonStart;
-    public DateTime? SeasonEnd => SeasonEnd;
-    public string SeasonName { get => model.SeasonName; set => SetP(model.SeasonName, value => model.SeasonName = value, value); }
+    public DateTime? SeasonEnd => model.SeasonEnd;
+    public string Name { get => model.SeasonName; set => SetP(model.SeasonName, value => model.SeasonName = value, value); }
     public long? MainScoringId { get => model.MainScoringId; set => SetP(model.MainScoringId, value => model.MainScoringId = value, value); }
     public bool HideComments { get => model.HideComments; set => SetP(model.HideComments, value => model.HideComments = value, value); }
     public bool Finished { get => model.Finished; set => SetP(model.Finished, value => model.Finished = value, value); }
     public IEnumerable<long> ScheduleIds => model.ScheduleIds;
 
-    public void SetModel(SeasonModel model)
+    public override void SetModel(SeasonModel model)
     {
         model ??= new SeasonModel();
         this.model = model;
@@ -66,6 +52,33 @@ public class SeasonViewModel : LeagueViewModelBase<SeasonViewModel>
             {
                 SetModel(result.Content);
             }
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var request = ApiService.CurrentLeague.Seasons()
+                .WithId(SeasonId)
+                .Put(model, cancellationToken);
+            var result = await request;
+            if (result.Success && result.Content is SeasonModel seasonModel)
+            {
+                SetModel(seasonModel);
+            }
+
+            return result.ToStatusResult();
         }
         finally
         {

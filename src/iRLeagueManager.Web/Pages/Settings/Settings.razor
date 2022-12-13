@@ -14,7 +14,7 @@
             <div style="height: 600px">
                 <ul class="nav nav-tabs">
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="@GetTabLink(0)">Season</NavLink>
+                        <NavLink class="nav-link" href="@GetTabLink(0)">League</NavLink>
                     </li>
                     <li class="nav-item">
                         <NavLink class="nav-link" href="@GetTabLink(1)">Users</NavLink>
@@ -29,7 +29,7 @@
                     @switch (selectedTabIndex)
                     {
                         case 0:
-                            <SeasonSettings />
+                            <LeagueSettings class="container-md px-0 mb-2 mx-0" />
                             break;
                         case 1:
                             <UserSettings class="container-md px-0 mb-2 mx-0" />
@@ -94,6 +94,7 @@
             return;
         }
         SelectedTabIndex = navigationManager.QueryParameter<int>("tabIndex");
+        await InvokeAsync(StateHasChanged);
     }
 
     private string GetTabLink(int tabIndex)

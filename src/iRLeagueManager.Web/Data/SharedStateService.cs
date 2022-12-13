@@ -22,6 +22,9 @@ public class SharedStateService
     private string? seasonName;
     public string? SeasonName { get => seasonName; set => Set(ref seasonName, value); }
 
+    private bool seasonFinished;
+    public bool SeasonFinished { get => seasonFinished; set => Set(ref seasonFinished, value); }
+
     private ObservableCollection<SeasonModel> seasonList;
     public ObservableCollection<SeasonModel> SeasonList { get => seasonList; set => Set(ref seasonList, value); }
 

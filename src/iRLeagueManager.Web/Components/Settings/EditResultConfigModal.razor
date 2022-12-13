@@ -6,95 +6,156 @@
 
 <EditForm Model=vm OnValidSubmit=Submit>
     <StatusResultValidator @ref=ResultValidator />
-    <div class="input-group-list mb-2">
-        <InputGroup Label="Name">
-            <InputText class="form-control" id="input-name" placeholder="Name..." aria-label="input-name" @bind-Value=vm.Name/>
-        </InputGroup>
-        <InputGroup Label="Show as">
-            <InputText class="form-control" id="input-display-name" placeholder="Show as ..." aria-label="input-display-name" @bind-Value=vm.DisplayName/>
-        </InputGroup>
-        <InputGroup Label="Type">
-            <InputSelect class="form-select" id="input-type" placeholder="Type..." aria-label="input-type" @bind-Value=vm.ResultKind>
-                <option value=@ResultKind.Member>Member</option>
-                <option value=@ResultKind.Team>Team</option>
-            </InputSelect>
-        </InputGroup>
-        <InputGroup Label="Source">
-            <InputSelect class="form-select" id="input-source" placeholder="Source..." aria-label="input-source" @bind-Value=vm.SourceResultConfigId>
-                <option value="0">Raw</option>
-                @foreach(var config in @Bind(vm, x => x.AvailableResultConfigs).Where(CanSelectAsSourceConfig))
+    <div class="accordion mb-3">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeneralSettings" aria-expanded="true" aria-controls="collapseGeneralSettings">
+                    General Settings
+                </button>
+            </h2>
+            <div class="accordion-collapse collapse show input-group-list input-group-list-flush" id="collapseGeneralSettings">
+                <InputGroup Label="Name">
+                    <InputText class="form-control" id="input-name" placeholder="Name..." aria-label="input-name" @bind-Value=vm.Name/>
+                </InputGroup>
+                <InputGroup Label="Show as">
+                    <InputText class="form-control" id="input-display-name" placeholder="Show as ..." aria-label="input-display-name" @bind-Value=vm.DisplayName/>
+                </InputGroup>
+                <InputGroup Label="Type">
+                    <InputSelect class="form-select" id="input-type" placeholder="Type..." aria-label="input-type" @bind-Value=vm.ResultKind>
+                        <option value=@ResultKind.Member>Member</option>
+                        <option value=@ResultKind.Team>Team</option>
+                    </InputSelect>
+                </InputGroup>
+                <InputGroup Label="Source">
+                    <InputSelect class="form-select" id="input-source" placeholder="Source..." aria-label="input-source" @bind-Value=vm.SourceResultConfigId>
+                        <option value="0">Raw</option>
+                        @foreach(var config in @Bind(vm, x => x.AvailableResultConfigs).Where(CanSelectAsSourceConfig))
+                        {
+                            <option value=@config.ResultConfigId>@config.Name</option>
+                        }
+                    </InputSelect>
+                </InputGroup>
+                @if (vm.ResultKind == ResultKind.Team)
                 {
-                    <option value=@config.ResultConfigId>@config.Name</option>
+                    <InputGroup Label="Results per Team">
+                        <InputNumber class="form-control" id="input-results-per-team" aria-label="input-results-per-team" @bind-Value=vm.ResultsPerTeam/>
+                    </InputGroup>
                 }
-            </InputSelect>
-        </InputGroup>
-        @if (vm.ResultKind == ResultKind.Team)
-        {
-            <InputGroup Label="Take">
-                <InputNumber class="form-control" id="input-results-per-team" aria-label="input-results-per-team" @bind-Value=vm.ResultsPerTeam/>
-            </InputGroup>
-        }
-    </div>
-
-    <div class="input-group-list mb-2">
-        <InputGroup Label="Points Filter">
-            <button class="form-control" type="button" @onclick=PointsFilterClick>
-                @if (vm.FiltersForPoints.Count == 0)
-                {
-                    <span class="text-secondary"><em>Configure</em></span>
-                }
-                else
-                {
-                    <span class="text-secondary">@vm.FiltersForPoints.Count filters applied</span>
-                }
-            </button>
-        </InputGroup>
-        <InputGroup Label="Result Filter">
-            <button class="form-control" type="button" @onclick=ResultFilterClick>
-                @if (vm.FiltersForResult.Count == 0)
-                {
-                    <span class="text-secondary"><em>Configure</em></span>
-                }
-                else
-                {
-                    <span class="text-secondary">@vm.FiltersForResult.Count filters applied</span>
-                }
-            </button>
-        </InputGroup>
-    </div>
-
-    <div class="card mb-2">
-        <div class="card-body">
-            <div class="card-title">
-                Session Scorings
             </div>
-            @foreach(var scoring in @Bind(vm, x => x.Scorings).Where(x => x.IsCombinedResult == false))
-            {
-                <div class="input-group-list mb-3">
-                    <div class="input-group">
-                        <InputText class="form-control" id="scoring-name" aria-label="scoring-name" placeholder="Name..." @bind-Value=scoring.Name/>
-                        <button class="btn btn-outline-danger" type="button" @onclick="@(() => vm.RemoveScoring(scoring))"><span class="oi oi-trash"/></button>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="false" aria-controls="collapseFilters">
+                    Filters
+                </button>
+            </h2>
+            <div class="accordion-collapse collapse input-group-list input-group-list-flush" id="collapseFilters">
+                <InputGroup Label="Points Filter">
+                    <button class="form-control" type="button" @onclick=PointsFilterClick>
+                        @if (vm.FiltersForPoints.Count == 0)
+                        {
+                            <span class="text-secondary"><em>Configure</em></span>
+                        }
+                        else
+                        {
+                            <span class="text-secondary">@vm.FiltersForPoints.Count filters applied</span>
+                        }
+                    </button>
+                </InputGroup>
+                <InputGroup Label="Result Filter">
+                    <button class="form-control" type="button" @onclick=ResultFilterClick>
+                        @if (vm.FiltersForResult.Count == 0)
+                        {
+                            <span class="text-secondary"><em>Configure</em></span>
+                        }
+                        else
+                        {
+                            <span class="text-secondary">@vm.FiltersForResult.Count filters applied</span>
+                        }
+                    </button>
+                </InputGroup>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSessionScorings" aria-expanded="false" aria-controls="collapseSessionScorings">
+                    Session Scorings
+                </button>
+            </h2>
+            <div class="accordion-collapse collapse card" id="collapseSessionScorings">
+                <div class="card-body">
+                    <div class="card-title">
+                        Session Scorings
                     </div>
-                    <EditScoring Scoring=scoring />
+                    @foreach(var scoring in @Bind(vm, x => x.Scorings).Where(x => x.IsCombinedResult == false))
+                    {
+                        <div class="input-group-list mb-3">
+                            <div class="input-group">
+                                <InputText class="form-control" id="scoring-name" aria-label="scoring-name" placeholder="Name..." @bind-Value=scoring.Name/>
+                                <button class="btn btn-outline-danger" type="button" @onclick="@(() => vm.RemoveScoring(scoring))"><span class="oi oi-trash"/></button>
+                            </div>
+                            <EditScoring Scoring=scoring />
+                        </div>
+                    }
+                    <div class="mt-3">
+                        <button class="btn btn-outline-secondary" type="button" @onclick="@(() => vm.AddScoring())">Add Scoring</button>
+                    </div>
                 </div>
-            }
-            <div class="mt-3">
-                <button class="btn btn-outline-secondary" type="button" @onclick="@(() => vm.AddScoring())">Add Scoring</button>
             </div>
         </div>
-    </div>
 
-    <div class="input-group-list mb-3">
-        <div class="input-group" disabled>
-            <div class="input-group-text">
-                <InputCheckbox class="form-form-check-input mt-0" @bind-Value=vm.CalculateCombinedResult/>
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCombined" aria-expanded="false" aria-controls="collapseCombined">
+                    Combined Result
+                </button>
+            </h2>
+            <div class="accordion-collapse collapse input-group-list input-group-list-flush" id="collapseCombined">
+                <div class="input-group" disabled>
+                    <div class="input-group-text">
+                        <InputCheckbox class="form-check-input mt-0" @bind-Value=vm.CalculateCombinedResult/>
+                    </div>
+                    <label class="form-control">Get Combined Result</label>
+                </div>
+                @if (vm.CalculateCombinedResult)
+                {
+                    <EditScoring Scoring=@(vm.Scorings.First(x => x.IsCombinedResult)) />
+                }
             </div>
-            <label class="form-control">Get Combined Result</label>
         </div>
-        @if (vm.CalculateCombinedResult)
-        {
-            <EditScoring Scoring=@(vm.Scorings.First(x => x.IsCombinedResult)) />
-        }
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStandings" aria-expanded="false" aria-controls="collapseStandings">
+                    Standings
+                </button>
+            </h2>
+            <div class="accordion-collapse collapse input-group-list input-group-list-flush" id="collapseStandings">
+                <div class="input-group" disabled>
+                    <div class="input-group-text">
+                        <InputCheckbox class="form-check-input mt-0" @bind-Value=vm.CalculateStandings />
+                    </div>
+                    <label class="form-control">Calculate Standings</label>
+                </div>
+                @if (vm.CalculateStandings && vm.StandingConfig is not null)
+                {
+                    @if (vm.CalculateCombinedResult)
+                    {
+                        <div class="input-group">
+                            <div class="input-group-text">
+                                <InputCheckbox class="form-check-input mt-0" @bind-Value=vm.StandingConfig.UseCombinedResult />
+                            </div>
+                            <label class="form-control">Use combined Result</label>
+                        </div>
+                    }
+                    <InputGroup Label="Count Weeks">
+                        <InputNumber class="form-control" @bind-Value=vm.StandingConfig.WeeksCounted />
+                    </InputGroup>
+                }
+            </div>
+        </div>
     </div>
     <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
     <CancelSubmitButtons ModelState=vm SubmitText="Save" OnCancel=Cancel/>

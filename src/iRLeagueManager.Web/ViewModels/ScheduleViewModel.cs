@@ -86,17 +86,25 @@ namespace iRLeagueManager.Web.ViewModels
                 return LeagueNullResult();
             }
 
-            var request = ApiService.CurrentLeague.Schedules()
-                .WithId(ScheduleId)
-                .Events()
-                .Post(@event.GetModel(), cancellationToken);
-            var result = await request;
-            if (result.Success)
+            try
             {
-                await LoadEvents(cancellationToken);
-            }
+                Loading = true;
+                var request = ApiService.CurrentLeague.Schedules()
+                    .WithId(ScheduleId)
+                    .Events()
+                    .Post(@event.GetModel(), cancellationToken);
+                var result = await request;
+                if (result.Success)
+                {
+                    await LoadEvents(cancellationToken);
+                }
 
-            return result.ToStatusResult();
+                return result.ToStatusResult();
+            }
+            finally
+            {
+                Loading = false;
+            }
         }
 
         public async Task<StatusResult> RemoveEvent(EventViewModel @event, CancellationToken cancellationToken = default)

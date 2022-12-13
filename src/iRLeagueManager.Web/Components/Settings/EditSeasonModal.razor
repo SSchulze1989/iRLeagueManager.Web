@@ -1,0 +1,76 @@
+﻿@inherits MvvmComponentBase
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.ViewModels
+@inject SeasonViewModel vm
+
+<EditForm Model=vm OnValidSubmit=Submit>
+    <StatusResultValidator @ref=ResultValidator />
+    <div class="input-group-list">
+        <InputGroup Label="Name">
+            <InputText class="form-control" @bind-Value=vm.Name />
+        </InputGroup>
+        <div class="input-group disabled">
+            <div class="input-group-text">
+                <InputCheckbox class="form-check" @bind-Value=vm.Finished />
+            </div>
+            <label class="form-control">Finished</label>
+        </div>
+    </div>
+    <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+    <CancelSubmitButtons ModelState=vm SubmitText="Save" OnCancel=Cancel/>
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    public BlazoredModalInstance ModalInstance { get; set; } = default!;
+    [Parameter]
+    public SeasonModel Model { get; set; } = default!;
+    [Parameter]
+    public Func<SeasonViewModel, CancellationToken, Task<StatusResult>>? OnSubmit { get; set; }
+
+    private CancellationTokenSource cts = new();
+
+    private StatusResultValidator? ResultValidator { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _ = ModalInstance ?? throw BlazorParameterNullException.New(this, ModalInstance);
+        _ = Model ?? throw BlazorParameterNullException.New(this, Model);
+        vm.SetModel(Model);
+    }
+
+    private async Task Submit()
+    {
+        var success = true;
+        if (OnSubmit is not null)
+        {
+            var status = await OnSubmit(vm, cts.Token);
+            success &= status.IsSuccess;
+            ResultValidator?.ValidateResult(status);
+        }
+        if (success)
+        {
+            var result = ModalResult.Ok(vm.GetModel());
+            await ModalInstance.CloseAsync(result);
+        }
+    }
+
+    private async Task Cancel()
+    {
+        if (ModalInstance != null)
+        {
+            await ModalInstance.CancelAsync();   
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing == false)
+        {
+            cts.Cancel();
+            cts.Dispose();
+        }
+        base.Dispose(disposing);
+    }
+}

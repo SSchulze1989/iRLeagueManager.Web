@@ -1,0 +1,86 @@
+﻿@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.ViewModels
+@inherits MvvmComponentBase
+@inject LeagueViewModel vm
+@inject LeagueApiService apiService
+
+<div @attributes=AdditionalAttributes>
+    <div class="card my-2 pb-0">
+        <div class="card-header">
+            Seasons
+        </div>
+        <div class="list-group-flush">
+            @foreach((var season, var index) in @Bind(vm, x => x.Seasons).Select((x, i) => (x, i)))
+            {
+                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button" @onclick=@(() => SeasonClick(season))>
+                    <SeasonPreview Season=season />
+                    <button class="btn btn-outline-danger" @onclick=@(() => DeleteSeasonClick(season)) @onclick:stopPropagation="true">
+                        <span class="oi oi-trash"/>
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+    <button class="btn btn-outline-secondary" @onclick=AddSeasonClick>Add Season</button>
+</div>
+
+@code {
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
+
+    [Parameter(CaptureUnmatchedValues = true)] 
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+        await vm.LoadCurrent();
+        await vm.LoadSeasons();
+    }
+
+    private async Task AddSeasonClick()
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(EditSeasonModal.Model), new SeasonModel())
+            .Add(nameof(EditSeasonModal.OnSubmit), new Func<SeasonViewModel, CancellationToken, Task<StatusResult>>(async (season, cts) => 
+                await vm.AddSeason(season.GetModel(), cts)));
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true
+        };
+        var result = await ModalService.Show<EditSeasonModal>("Add Season", parameters, options).Result;
+    }
+
+    private async Task SeasonClick(SeasonViewModel season)
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(EditSeasonModal.Model), season.CopyModel())
+            .Add(nameof(EditSeasonModal.OnSubmit), new Func<SeasonViewModel, CancellationToken, Task<StatusResult>>(async (season, cts) => 
+                await season.SaveChangesAsync(cts)));
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true
+        };
+        var result = await ModalService.Show<EditSeasonModal>("Edit Season", parameters, options).Result;
+        if (result.Confirmed && result.Data is SeasonModel seasonModel)
+        {
+            season.SetModel(seasonModel);
+        }
+    }
+
+    private async Task DeleteSeasonClick(SeasonViewModel season)
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(ConfirmModal.Text), $"Really delete season \"{season.Name}\"?")
+            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
+        var result = await ModalService.Show<ConfirmModal>("Delete Season", parameters).Result;
+        if (result.Confirmed)
+        {
+            await vm.DeleteSeason(season.GetModel());   
+        }
+    }
+}

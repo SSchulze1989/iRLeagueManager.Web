@@ -67,6 +67,9 @@
             default:
                 break;
         }
+        <InputGroup Label="Bonus Points">
+            <InputText class="form-control" @bind-Value=PointRule.BonusPointsString />
+        </InputGroup>
     </div>
     <CancelSubmitButtons SubmitText="Ok" CancelText="Cancel" OnSubmit=Submit OnCancel=Cancel />
 </EditForm>

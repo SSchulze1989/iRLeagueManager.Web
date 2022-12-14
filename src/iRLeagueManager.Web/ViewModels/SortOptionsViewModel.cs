@@ -53,6 +53,8 @@ namespace iRLeagueManager.Web.ViewModels
         PenPts,
         BonusPts,
         TotalPts,
+        TotalPtsNoBonus,
+        TotalPtsNoPenalty,
         Intvl,
         ComplLaps,
         LeadLaps,

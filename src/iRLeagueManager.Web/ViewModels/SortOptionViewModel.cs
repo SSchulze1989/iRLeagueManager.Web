@@ -70,6 +70,10 @@ namespace iRLeagueManager.Web.ViewModels
                 SortOptions.QualLapDesc => (SortValue.QualLap, SortDirection.Descending),
                 SortOptions.FinPosAsc => (SortValue.FinalPos, SortDirection.Ascending),
                 SortOptions.FinPosDesc => (SortValue.FinalPos, SortDirection.Descending),
+                SortOptions.TotalPtsWoBonusAsc => (SortValue.TotalPtsNoBonus, SortDirection.Ascending),
+                SortOptions.TotalPtsWoBonusDesc => (SortValue.TotalPtsNoBonus, SortDirection.Descending),
+                SortOptions.TotalPtsWoPenaltyAsc => (SortValue.TotalPtsNoPenalty, SortDirection.Ascending),
+                SortOptions.TotalPtsWoPenaltyDesc => (SortValue.TotalPtsNoPenalty, SortDirection.Descending),
                 _ => (SortValue.TotalPts, SortDirection.Descending),
             };
         }
@@ -106,6 +110,10 @@ namespace iRLeagueManager.Web.ViewModels
                 (SortValue.QualLap, SortDirection.Descending) => SortOptions.QualLapDesc,
                 (SortValue.FinalPos, SortDirection.Ascending) => SortOptions.FinPosAsc,
                 (SortValue.FinalPos, SortDirection.Descending) => SortOptions.FinPosDesc,
+                (SortValue.TotalPtsNoBonus, SortDirection.Ascending) => SortOptions.TotalPtsWoBonusAsc,
+                (SortValue.TotalPtsNoBonus, SortDirection.Descending) => SortOptions.TotalPtsWoBonusDesc,
+                (SortValue.TotalPtsNoPenalty, SortDirection.Ascending) => SortOptions.TotalPtsWoPenaltyAsc,
+                (SortValue.TotalPtsNoPenalty, SortDirection.Descending) => SortOptions.TotalPtsWoPenaltyDesc,
                 _ => SortOptions.TotalPtsDesc,
             };
         }

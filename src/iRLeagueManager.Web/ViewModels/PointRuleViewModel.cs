@@ -38,6 +38,23 @@ namespace iRLeagueManager.Web.ViewModels
         public IDictionary<string, int> BonusPoints { get => model.BonusPoints; set => SetP(model.BonusPoints, value => model.BonusPoints = value, value); }
         public ICollection<SortOptions> PointsSortOptions { get => model.PointsSortOptions; set => SetP(model.PointsSortOptions, value => model.PointsSortOptions = value, value); }
         public ICollection<SortOptions> FinalSortOptions { get => model.FinalSortOptions; set => SetP(model.FinalSortOptions, value => model.FinalSortOptions = value, value); }
+        public string BonusPointsString
+        {
+            get => string.Join(';', BonusPoints.Select(x => string.Join(':', x.Key, x.Value)));
+            set
+            {
+                var points = new Dictionary<string, int>();
+                var bonus = value.Split(';');
+                foreach (var pair in bonus)
+                {
+                    var parts = pair.Split(':');
+                    var key = parts[0];
+                    var keyValue = parts.Length <= 1 ? 0 : int.TryParse(parts[1], out int res) ? res : 0;
+                    points.Add(key, keyValue);
+                }
+                BonusPoints = points;
+            }
+        }
 
         public enum PointRuleType
         {

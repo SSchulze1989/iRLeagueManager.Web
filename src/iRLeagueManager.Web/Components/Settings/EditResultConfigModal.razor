@@ -84,24 +84,19 @@
                     Session Scorings
                 </button>
             </h2>
-            <div class="accordion-collapse collapse card" id="collapseSessionScorings">
-                <div class="card-body">
-                    <div class="card-title">
-                        Session Scorings
-                    </div>
-                    @foreach(var scoring in @Bind(vm, x => x.Scorings).Where(x => x.IsCombinedResult == false))
-                    {
-                        <div class="input-group-list mb-3">
-                            <div class="input-group">
-                                <InputText class="form-control" id="scoring-name" aria-label="scoring-name" placeholder="Name..." @bind-Value=scoring.Name/>
-                                <button class="btn btn-outline-danger" type="button" @onclick="@(() => vm.RemoveScoring(scoring))"><span class="oi oi-trash"/></button>
-                            </div>
-                            <EditScoring Scoring=scoring />
+            <div class="accordion-collapse collapse m-1 mt-2" id="collapseSessionScorings">
+                @foreach(var scoring in @Bind(vm, x => x.Scorings).Where(x => x.IsCombinedResult == false))
+                {
+                    <div class="input-group-list mb-3">
+                        <div class="input-group">
+                            <InputText class="form-control" id="scoring-name" aria-label="scoring-name" placeholder="Name..." @bind-Value=scoring.Name/>
+                            <button class="btn btn-outline-danger" type="button" @onclick="@(() => vm.RemoveScoring(scoring))"><span class="oi oi-trash"/></button>
                         </div>
-                    }
-                    <div class="mt-3">
-                        <button class="btn btn-outline-secondary" type="button" @onclick="@(() => vm.AddScoring())">Add Scoring</button>
+                        <EditScoring Scoring=scoring />
                     </div>
+                }
+                <div class="mt-3">
+                    <button class="btn btn-outline-secondary" type="button" @onclick="@(() => vm.AddScoring())">Add Scoring</button>
                 </div>
             </div>
         </div>

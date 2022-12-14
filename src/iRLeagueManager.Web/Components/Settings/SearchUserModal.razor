@@ -49,7 +49,7 @@
             .Search()
             .Post(model);
         var result = await request;
-        if (result.Success)
+        if (result.Success && result.Content is not null)
         {
             return result.Content;
         }

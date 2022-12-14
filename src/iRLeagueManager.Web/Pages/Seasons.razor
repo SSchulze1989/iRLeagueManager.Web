@@ -39,7 +39,7 @@
             return;
         }
         var result = await apiService.CurrentLeague.Seasons().Get();
-        if (result.Success)
+        if (result.Success && result.Content is not null)
         {
             var seasons = result.Content;
             navigationManager.NavigateTo($"./{LeagueName}/Seasons/{seasons.Last().SeasonId}");

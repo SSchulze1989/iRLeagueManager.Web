@@ -2,9 +2,11 @@
 @using iRLeagueManager.Web.ViewModels
 @inject EventListViewModel EventList
 @inject LeagueApiService ApiService
+@inject SharedStateService SharedState
 
 
 <CascadingValue Value="EventList">
+<CascadingValue Value="SharedState">
 <CascadingBlazoredModal>
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
@@ -27,4 +29,5 @@
     </Router>
 </CascadingAuthenticationState>
 </CascadingBlazoredModal>
+</CascadingValue>
 </CascadingValue>

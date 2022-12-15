@@ -11,7 +11,6 @@
 @using iRLeagueManager.Web.Components.Results
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
-@inject SharedStateService sharedState
 @inject ResultsPageViewModel vm
 
 <div class="container-md">
@@ -37,7 +36,7 @@
         </ul>
         <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
             <Authorized>
-                @if (vm.SelectedEvent?.HasResult == true && sharedState.SeasonFinished == false)
+                @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
                 {
                     <button class="btn btn-outline-secondary ms-2" @onclick=TriggerCalculation>
                         Calculate
@@ -61,7 +60,7 @@
     }
     <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
         <Authorized>
-            @if (sharedState.SeasonFinished == false)
+            @if (SharedState.SeasonFinished == false)
             {
                 <div>
                     <button class="btn btn-outline-secondary" @onclick=UploadButtonClick>Upload Result</button>
@@ -74,6 +73,8 @@
 @code {
     private const string resultTabParam = "resultTab";
 
+    [CascadingParameter]
+    public SharedStateService SharedState { get; set; } = default!;
     [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
 

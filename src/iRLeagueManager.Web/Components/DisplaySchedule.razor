@@ -78,17 +78,23 @@
                             }
                         }
                         <td>
-                            <button class="btn btn-outline-danger btn-sm" @onclick=@(() => RemoveEventClick(@event)) @onclick:stopPropagation @onclick:preventDefault>
-                                <span class="oi oi-trash"/>
-                            </button>
+                            @if (ReadOnly == false)
+                            {
+                                <button class="btn btn-outline-danger btn-sm" @onclick=@(() => RemoveEventClick(@event)) @onclick:stopPropagation @onclick:preventDefault>
+                                    <span class="oi oi-trash"/>
+                                </button>
+                            }
                         </td>
                     </tr>
                 }
                 </tbody>
             </table>
-            <div class="mb-1">
-                <button class="btn btn-outline-secondary" @onclick=AddEventClick>Add Event</button>
-            </div>
+            @if (ReadOnly == false)
+            {
+                <div class="mb-1">
+                    <button class="btn btn-outline-secondary" @onclick=AddEventClick>Add Event</button>
+                </div>
+            }
         </div>
     </div>
 </div>

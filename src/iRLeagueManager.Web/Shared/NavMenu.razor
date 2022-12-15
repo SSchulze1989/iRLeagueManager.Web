@@ -1,7 +1,6 @@
 ﻿@using System.Net
 @using System.Security.Claims
 @inject LeagueApiService apiService
-@inject SharedStateService sharedState
 @inject NavigationManager navigationManager
 
 <div class="top-row ps-3 navbar navbar-dark">
@@ -24,34 +23,34 @@
             <Authorized>
                 <div class="nav-item @(seasonSelectDisabled)">
                     <select @bind="SeasonSelect" class="form-select no-radius">
-                        @foreach (var season in sharedState.SeasonList)
+                        @foreach (var season in SharedState.SeasonList)
                         {
                             <option value="@season.SeasonId" class="nav-option">@season.SeasonName</option>
                         }
                     </select>
                 </div>
                 <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Settings")">
+                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Settings")">
                         <span class="oi oi-cog" aria-hidden="true"></span> Settings
                     </NavLink>
                 </div>
                 <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Schedules/Season/{sharedState.SeasonId}")">
+                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Schedules/Season/{SharedState.SeasonId}")">
                         <span class="oi oi-calendar" aria-hidden="true"></span> Schedules
                     </NavLink>
                 </div>
                 <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Results")">
+                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Results")">
                         <span class="oi oi-clipboard" aria-hidden="true"></span> Results
                     </NavLink>
                 </div>
                 <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Standings")">
+                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Standings")">
                         <span class="oi oi-clipboard" aria-hidden="true"></span> Standings
                     </NavLink>
                 </div>
                 <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Reviews")">
+                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Reviews")">
                         <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Reviews
                     </NavLink>
                 </div>
@@ -65,34 +64,34 @@
             <NotAuthorized>
                 <div class="nav-item @(seasonSelectDisabled)">
                     <select @bind="SeasonSelect" class="form-select no-radius px-0">
-                        @foreach (var season in sharedState.SeasonList)
+                        @foreach (var season in SharedState.SeasonList)
                         {
                             <option value="@season.SeasonId" class="nav-option">@season.SeasonName</option>
                         }
                     </select>
                 </div>
                 <div class="nav-item disabled">
-                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Settings")">
+                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Settings")">
                         <span class="oi oi-cog" aria-hidden="true"></span> Settings
                     </NavLink>
                 </div>
                 <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Schedules/Season/{sharedState.SeasonId}")">
+                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Schedules/Season/{SharedState.SeasonId}")">
                         <span class="oi oi-calendar" aria-hidden="true"></span> Schedules
                     </NavLink>
                 </div>
                 <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Results")">
+                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Results")">
                         <span class="oi oi-clipboard" aria-hidden="true"></span> Results
                     </NavLink>
                 </div>
                 <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Standings")">
+                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Standings")">
                         <span class="oi oi-clipboard" aria-hidden="true"></span> Standings
                     </NavLink>
                 </div>
                 <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{sharedState.LeagueName}/Reviews")">
+                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Reviews")">
                         <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Reviews
                     </NavLink>
                 </div>
@@ -117,6 +116,8 @@
 
 @code {
     [CascadingParameter]
+    public SharedStateService SharedState { get; set; } = default!;
+    [CascadingParameter]
     public RouteData? RouteData { get; set; }
 
     private static string VersionString { get; } = $"{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.Major}.{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.Minor}.{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.Build}";
@@ -125,20 +126,20 @@
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : "nav-menu";
 
-    private bool leagueSelected => string.IsNullOrEmpty(sharedState.LeagueName) == false;
-    private bool seasonSelected => leagueSelected && string.IsNullOrEmpty(sharedState.SeasonName) == false && sharedState.SeasonId != 0;
+    private bool leagueSelected => string.IsNullOrEmpty(SharedState.LeagueName) == false;
+    private bool seasonSelected => leagueSelected && string.IsNullOrEmpty(SharedState.SeasonName) == false && SharedState.SeasonId != 0;
     private string seasonSelectDisabled => leagueSelected == false ? "disabled" : "";
     private string navItemsDisabled => seasonSelected == false ? "disabled": "";
 
     private long SeasonSelect
     {
-        get => sharedState.SeasonId;
+        get => SharedState.SeasonId;
         set => OnSeasonSelectChanged(value);
     }
 
     protected override void OnInitialized()
     {
-        sharedState.StateChanged += (sender, e) => InvokeAsync(StateHasChanged);
+        SharedState.StateChanged += (sender, e) => InvokeAsync(StateHasChanged);
 
     }
 
@@ -149,7 +150,7 @@
 
     private void OnSeasonSelectChanged(long value)
     {
-        navigationManager.NavigateTo($"./{sharedState.LeagueName}/Seasons/{value}");
+        navigationManager.NavigateTo($"./{SharedState.LeagueName}/Seasons/{value}");
         InvokeAsync(StateHasChanged);
     }
 

@@ -26,9 +26,13 @@
                             Review=review 
                             EditClick=@(async () => await OnEditClick(review)) 
                             DeleteClick=@(async () => await OnDeleteClick(review))
-                            IsSteward=true/>
+                            IsSteward=true
+                            ReadOnly=ReadOnly/>
             }
-            <button class="btn btn-outline-secondary" type="button" @onclick=OnAddClick>Add Review</button>
+            @if (ReadOnly == false)
+            {
+                <button class="btn btn-outline-secondary" type="button" @onclick=OnAddClick>Add Review</button>
+            }
         </Authorized>
         <NotAuthorized>
             @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
@@ -42,7 +46,11 @@
 
 @code {
     [CascadingParameter]
+    public SharedStateService SharedState { get; set; } = default!;
+    [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
+
+    private bool ReadOnly => SharedState.SeasonFinished;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

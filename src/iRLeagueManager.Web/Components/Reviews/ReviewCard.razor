@@ -211,7 +211,7 @@
     private async Task AddCommentClick()
     {
         var parameters = new ModalParameters()
-            .Add(nameof(EditCommentModal.Model), new ReviewCommentModel())
+            .Add(nameof(EditCommentModal.Model), new ReviewCommentModel() { Votes = new List<VoteModel>() })
             .Add(nameof(EditReviewResultModal.InvolvedMembers), Review.InvolvedMembers)
             .Add(nameof(EditCommentModal.OnSubmit), new Func<ReviewCommentViewModel, CancellationToken, Task<StatusResult>>((comment, cancellationToken) =>
                 Review.AddComment(comment.GetModel(), cancellationToken)));

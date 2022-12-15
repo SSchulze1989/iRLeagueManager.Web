@@ -6,15 +6,9 @@ using iRLeagueManager.Web;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Server.Data;
 using iRLeagueManager.Web.Shared;
-using iRLeagueManager.Web.ViewModels;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

@@ -124,26 +124,25 @@ namespace iRLeagueManager.Web.ViewModels
         /// </summary>
         /// <param name="postComment"></param>
         /// <returns></returns>
-        public async Task<bool> AddComment(PostReviewCommentModel postComment)
+        public async Task<StatusResult> AddComment(PostReviewCommentModel postComment, CancellationToken cancellationToken)
         {
             // Get the endpoint
             var reviewEndpoint = GetReviewEndpoint();
             if (reviewEndpoint == null)
             {
-                return false;
+                return LeagueNullResult();
             }
 
             // Upload comment
             var result = await reviewEndpoint.ReviewComments().Post(postComment);
-            if (result.Success == false)
+            if (result.Success && result.Content is not null)
             {
-                return false;
+                // Update comment list
+                model.ReviewComments = model.ReviewComments.Concat(new[] { result.Content });
+                RefreshCommentList();
             }
 
-            // Update comment list
-            RefreshCommentList();
-
-            return true;
+            return result.ToStatusResult();
         }
 
         /// <summary>
@@ -151,18 +150,25 @@ namespace iRLeagueManager.Web.ViewModels
         /// </summary>
         /// <param name="commentId"></param>
         /// <returns></returns>
-        public async Task<bool> RemoveComment(long commentId)
+        public async Task<StatusResult> RemoveComment(ReviewCommentViewModel comment, CancellationToken cancellationToken = default)
         {
-            var commentEndpoint = ApiService.CurrentLeague?
-                .ReviewComments()
-                .WithId(commentId);
-            if (commentEndpoint == null)
+            if (ApiService.CurrentLeague is null)
             {
-                return false;
+                return LeagueNullResult();
             }
 
-            var result = await commentEndpoint.Delete();
-            return result.Success;
+            var commentEndpoint = ApiService.CurrentLeague
+                .ReviewComments()
+                .WithId(comment.CommentId);
+
+            var result = await commentEndpoint.Delete(cancellationToken);
+            if (result.Success)
+            {
+                model.ReviewComments = model.ReviewComments.Except(new[] { comment.GetModel() });
+                RefreshCommentList();
+            }
+
+            return result.ToStatusResult();
         }
 
         /// <summary>

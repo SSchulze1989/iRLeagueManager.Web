@@ -24,10 +24,11 @@
             {
                 <ReviewCard class="container-md px-0 mb-2 mx-0" 
                             Review=review 
-                            EditClick=@(async () => await OnEditClick(review)) 
-                            DeleteClick=@(async () => await OnDeleteClick(review))
+                            OnEditClick=@(async () => await OnEditClick(review)) 
+                            OnDeleteClick=@(async () => await OnDeleteClick(review))
                             IsSteward=true
-                            ReadOnly=ReadOnly/>
+                            ReadOnly=@ReadOnly
+                            UserId=@UserId/>
             }
             @if (ReadOnly == false)
             {
@@ -49,8 +50,18 @@
     public SharedStateService SharedState { get; set; } = default!;
     [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthTask { get; set; } = default!;
+
+    private string UserId { get; set; } = string.Empty;
 
     private bool ReadOnly => SharedState.SeasonFinished;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _ = AuthTask ?? throw BlazorParameterNullException.New(this, AuthTask);
+        await SetCurrentUserId();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -64,6 +75,12 @@
             NavigationManager.NavigateTo($"./{LeagueName}/Reviews/Events/{@event.EventId}");
             await ReviewsVm.LoadFromEventAsync(@event.EventId);
         }
+    }
+
+    private async Task SetCurrentUserId()
+    {
+        var state = await AuthTask;
+        UserId = state.User.GetUserId() ?? string.Empty;
     }
 
     private async Task OnEditClick(ReviewViewModel review)

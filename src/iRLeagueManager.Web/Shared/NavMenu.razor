@@ -22,7 +22,7 @@
         <AuthorizeView>
             <Authorized>
                 <div class="nav-item @(seasonSelectDisabled)">
-                    <select @bind="SeasonSelect" class="form-select no-radius">
+                    <select @bind="SeasonSelect" class="form-select no-radius" @onclick:stopPropagation>
                         @foreach (var season in SharedState.SeasonList)
                         {
                             <option value="@season.SeasonId" class="nav-option">@season.SeasonName</option>
@@ -63,7 +63,7 @@
             </Authorized>
             <NotAuthorized>
                 <div class="nav-item @(seasonSelectDisabled)">
-                    <select @bind="SeasonSelect" class="form-select no-radius px-0">
+                    <select @bind="SeasonSelect" class="form-select no-radius px-0" @onclick:stopPropagation>
                         @foreach (var season in SharedState.SeasonList)
                         {
                             <option value="@season.SeasonId" class="nav-option">@season.SeasonName</option>

@@ -116,7 +116,14 @@
                 </div>
                 @if (vm.CalculateCombinedResult)
                 {
-                    <EditScoring Scoring=@(vm.Scorings.First(x => x.IsCombinedResult)) />
+                    var combinedScoring = vm.Scorings.First(x => x.IsCombinedResult);
+                    <div class="input-group" disabled>
+                        <div class="input-group-text">
+                            <InputCheckbox class="form-check-input mt-0" @bind-Value=combinedScoring.CalcPoints/>
+                        </div>
+                        <label class="form-control">Calculate Points</label>
+                    </div>
+                    <EditScoring Scoring=combinedScoring />
                 }
             </div>
         </div>

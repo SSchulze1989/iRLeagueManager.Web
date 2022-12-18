@@ -24,6 +24,7 @@ namespace iRLeagueManager.Web.ViewModels
         public bool UseResultSetTeam { get => model.UseResultSetTeam; set => SetP(model.UseResultSetTeam, value => model.UseResultSetTeam = value, value); }
         public bool UpdateTeamOnRecalculation { get => model.UpdateTeamOnRecalculation; set => SetP(model.UpdateTeamOnRecalculation, value => model.UpdateTeamOnRecalculation = value, value); }
         public int MaxResultsPerGroup { get => model.MaxResultsPerGroup; set => SetP(model.MaxResultsPerGroup, value => model.MaxResultsPerGroup = value, value); }
+        public bool CalcPoints { get => !model.UseSourcePoints; set => SetP(model.UseSourcePoints, value => model.UseSourcePoints = value, !value); }
 
         private PointRuleViewModel pointRule;
         public PointRuleViewModel PointRule { get => pointRule; set => Set(ref pointRule, value); }

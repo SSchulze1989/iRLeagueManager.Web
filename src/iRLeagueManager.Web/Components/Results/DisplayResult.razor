@@ -68,7 +68,7 @@
                             {
                                 <td class="@(IsFastestLap(resultRows, row, x => x.QualifyingTime) ? "fw-bold" : "")">@row.QualifyingTime.LapTimeString()</td>
                             }
-                            <td class="@(IsFastestLap(resultRows, row, x => x.FastestLapTime) ? "fw-bold" : "")">@row.FastestLapTime.LapTimeString() (@row.FastLapNr)</td>
+                            <td class="@(IsFastestLap(resultRows, row, x => x.FastestLapTime) ? "fw-bold" : "")">@row.FastestLapTime.LapTimeString() @(row.FastLapNr != 0 ? $"({row.FastLapNr})" : "")</td>
                             <td class="@(IsFastestLap(resultRows, row, x => x.AvgLapTime) ? "fw-bold" : "")">@row.AvgLapTime.LapTimeString()</td>
                             @if (isTeamResult == false)
                             {

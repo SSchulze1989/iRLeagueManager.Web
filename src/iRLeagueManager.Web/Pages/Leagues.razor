@@ -8,12 +8,11 @@
 @inject LeaguesViewModel vm
 @inject ILeagueApiClient apiClient
 
-
-<LoadingHeader Loading=@Bind(vm, x => x.Loading)>
-    <h3>Leagues</h3>
-</LoadingHeader>
-
 <div class="container">
+    <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+        <h3>Leagues</h3>
+    </LoadingHeader>
+
     <table class="table alternate select-table">
         <thead>
             <tr>

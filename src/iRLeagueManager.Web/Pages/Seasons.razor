@@ -9,11 +9,11 @@
 @inject SharedStateService sharedState
 @*@inject AuthenticationStateProvider authStateProvider*@
 
-<LoadingHeader Loading=@Bind(vm, x => x.Loading)>
-    <h3>Seasons</h3>
-</LoadingHeader>
-
 <div class="container">
+    <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+        <h3>Seasons</h3>
+    </LoadingHeader>
+
     <p>@sharedState.SeasonName</p>
 </div>
 

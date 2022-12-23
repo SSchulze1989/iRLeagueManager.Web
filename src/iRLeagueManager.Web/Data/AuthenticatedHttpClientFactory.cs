@@ -1,13 +1,12 @@
-﻿namespace iRLeagueManager.Web.Server.Data
+﻿namespace iRLeagueManager.Web.Server.Data;
+
+public class AuthenticatedHttpClientFactory : IHttpClientFactory
 {
-    public class AuthenticatedHttpClientFactory : IHttpClientFactory
+
+
+    public HttpClient CreateClient(string name)
     {
+        return new HttpClient();
 
-
-        public HttpClient CreateClient(string name)
-        {
-            return new HttpClient();
-
-        }
     }
 }

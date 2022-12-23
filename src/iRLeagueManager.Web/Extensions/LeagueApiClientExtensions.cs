@@ -5,76 +5,75 @@ using System.Collections.Specialized;
 using System.Runtime.Serialization;
 using System.Web;
 
-namespace iRLeagueManager.Web.Extensions
+namespace iRLeagueManager.Web.Extensions;
+
+public static class LeagueApiClientExtensions
 {
-    public static class LeagueApiClientExtensions
+    public static T? EnsureSuccess<T>(this ClientActionResult<T> clientActionResult)
     {
-        public static T? EnsureSuccess<T>(this ClientActionResult<T> clientActionResult)
+        if (clientActionResult.Success == true)
         {
-            if (clientActionResult.Success == true)
-            {
-                return clientActionResult.Content;
-            }
-            if (clientActionResult.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                return default(T);
-            }
-            throw new ActionResultException<T>(clientActionResult);
+            return clientActionResult.Content;
         }
-
-        public static StatusResult ToStatusResult<T>(this ClientActionResult<T> clientActionResult)
+        if (clientActionResult.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
         {
-            if (clientActionResult.Success)
-            {
-                return StatusResult.SuccessResult(clientActionResult.Message);
-            }
-            return StatusResult.FailedResult(clientActionResult.Status, clientActionResult.Message, clientActionResult.Errors);
+            return default(T);
         }
+        throw new ActionResultException<T>(clientActionResult);
     }
 
-    public static class ExtensionMethods
+    public static StatusResult ToStatusResult<T>(this ClientActionResult<T> clientActionResult)
     {
-        public static NameValueCollection QueryString(this NavigationManager navigationManager)
+        if (clientActionResult.Success)
         {
-            return HttpUtility.ParseQueryString(new Uri(navigationManager.Uri).Query);
+            return StatusResult.SuccessResult(clientActionResult.Message);
         }
+        return StatusResult.FailedResult(clientActionResult.Status, clientActionResult.Message, clientActionResult.Errors);
+    }
+}
 
-        public static string QueryString(this NavigationManager navigationManager, string key)
-        {
-            return navigationManager.QueryString()[key] ?? string.Empty;
-        }
-
-        public static T? QueryParameter<T>(this NavigationManager navigationManager, string key)
-        {
-            var paramString = navigationManager.QueryString()[key];
-            if (string.IsNullOrEmpty(paramString))
-            {
-                return default(T);
-            }
-            return (T)Convert.ChangeType(paramString, typeof(T));
-        }
+public static class ExtensionMethods
+{
+    public static NameValueCollection QueryString(this NavigationManager navigationManager)
+    {
+        return HttpUtility.ParseQueryString(new Uri(navigationManager.Uri).Query);
     }
 
-    public class ActionResultException<T> : InvalidOperationException
+    public static string QueryString(this NavigationManager navigationManager, string key)
     {
-        public ClientActionResult<T> ActionResult;
+        return navigationManager.QueryString()[key] ?? string.Empty;
+    }
 
-        public ActionResultException(ClientActionResult<T> actionResult) : this(actionResult, $"Action result did not indicate success: {actionResult.Status} -> {actionResult.Message} -- from Request: {actionResult.RequestUrl}")
+    public static T? QueryParameter<T>(this NavigationManager navigationManager, string key)
+    {
+        var paramString = navigationManager.QueryString()[key];
+        if (string.IsNullOrEmpty(paramString))
         {
+            return default(T);
         }
+        return (T)Convert.ChangeType(paramString, typeof(T));
+    }
+}
 
-        public ActionResultException(ClientActionResult<T> actionResult, string message) : this(actionResult, message, default)
-        {
-        }
+public class ActionResultException<T> : InvalidOperationException
+{
+    public ClientActionResult<T> ActionResult;
 
-        public ActionResultException(ClientActionResult<T> actionResult, string message, Exception? innerException) : base(message, innerException)
-        {
-            ActionResult = actionResult;
-        }
+    public ActionResultException(ClientActionResult<T> actionResult) : this(actionResult, $"Action result did not indicate success: {actionResult.Status} -> {actionResult.Message} -- from Request: {actionResult.RequestUrl}")
+    {
+    }
 
-        protected ActionResultException(ClientActionResult<T> actionResult, SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-            ActionResult = actionResult;
-        }
+    public ActionResultException(ClientActionResult<T> actionResult, string message) : this(actionResult, message, default)
+    {
+    }
+
+    public ActionResultException(ClientActionResult<T> actionResult, string message, Exception? innerException) : base(message, innerException)
+    {
+        ActionResult = actionResult;
+    }
+
+    protected ActionResultException(ClientActionResult<T> actionResult, SerializationInfo info, StreamingContext context) : base(info, context)
+    {
+        ActionResult = actionResult;
     }
 }

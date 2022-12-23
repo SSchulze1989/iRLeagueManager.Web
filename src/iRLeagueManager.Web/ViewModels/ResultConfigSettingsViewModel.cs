@@ -2,94 +2,93 @@
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 
-namespace iRLeagueManager.Web.ViewModels
+namespace iRLeagueManager.Web.ViewModels;
+
+public class ResultConfigSettingsViewModel : LeagueViewModelBase<ResultConfigSettingsViewModel>
 {
-    public class ResultConfigSettingsViewModel : LeagueViewModelBase<ResultConfigSettingsViewModel>
+    public ResultConfigSettingsViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
+        base(loggerFactory, apiService)
     {
-        public ResultConfigSettingsViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
-            base(loggerFactory, apiService)
+        resultConfigs = new ObservableCollection<ResultConfigViewModel>();
+    }
+
+    private ObservableCollection<ResultConfigViewModel> resultConfigs;
+    public ObservableCollection<ResultConfigViewModel> ResultsConfigs { get => resultConfigs; set => Set(ref resultConfigs, value); }
+
+    private ResultConfigViewModel? selected;
+    public ResultConfigViewModel? Selected { get => selected; set => Set(ref selected, value); }
+
+    public async Task LoadFromLeagueAsync()
+    {
+        if (ApiService.CurrentLeague == null)
         {
-            resultConfigs = new ObservableCollection<ResultConfigViewModel>();
+            return;
         }
 
-        private ObservableCollection<ResultConfigViewModel> resultConfigs;
-        public ObservableCollection<ResultConfigViewModel> ResultsConfigs { get => resultConfigs; set => Set(ref resultConfigs, value); }
-
-        private ResultConfigViewModel? selected;
-        public ResultConfigViewModel? Selected { get => selected; set => Set(ref selected, value); }
-
-        public async Task LoadFromLeagueAsync()
+        var resultConfigsEndpoint = ApiService.CurrentLeague.ResultConfigs();
+        var resultConfigsResult = await resultConfigsEndpoint.Get();
+        if (resultConfigsResult.Success == false || resultConfigsResult.Content is null)
         {
-            if (ApiService.CurrentLeague == null)
-            {
-                return;
-            }
-
-            var resultConfigsEndpoint = ApiService.CurrentLeague.ResultConfigs();
-            var resultConfigsResult = await resultConfigsEndpoint.Get();
-            if (resultConfigsResult.Success == false || resultConfigsResult.Content is null)
-            {
-                return;
-            }
-
-            ResultsConfigs = new ObservableCollection<ResultConfigViewModel>(
-                resultConfigsResult.Content.Select(x => new ResultConfigViewModel(LoggerFactory, ApiService, x)));
+            return;
         }
 
-        public async Task<StatusResult> AddConfiguration()
+        ResultsConfigs = new ObservableCollection<ResultConfigViewModel>(
+            resultConfigsResult.Content.Select(x => new ResultConfigViewModel(LoggerFactory, ApiService, x)));
+    }
+
+    public async Task<StatusResult> AddConfiguration()
+    {
+        if (ApiService.CurrentLeague is null)
         {
-            if (ApiService.CurrentLeague is null)
-            {
-                return LeagueNullResult();
-            }
-
-            try
-            {
-                Loading = true;
-                ResultConfigModel newConfig = new() { Name = "New Config", DisplayName = "New Config" };
-                var request = ApiService.CurrentLeague.ResultConfigs()
-                    .Post(newConfig);
-                var result = await request;
-
-                if (result.Success == true && result.Content is not null)
-                {
-                    ResultsConfigs.Add(new ResultConfigViewModel(LoggerFactory, ApiService, result.Content));
-                }
-
-                return result.ToStatusResult();
-            }
-            finally
-            {
-                Loading = false;
-            }
+            return LeagueNullResult();
         }
 
-        public async Task<StatusResult> DeleteConfiguration(ResultConfigViewModel config)
+        try
         {
-            if (ApiService.CurrentLeague is null)
+            Loading = true;
+            ResultConfigModel newConfig = new() { Name = "New Config", DisplayName = "New Config" };
+            var request = ApiService.CurrentLeague.ResultConfigs()
+                .Post(newConfig);
+            var result = await request;
+
+            if (result.Success == true && result.Content is not null)
             {
-                return LeagueNullResult();
+                ResultsConfigs.Add(new ResultConfigViewModel(LoggerFactory, ApiService, result.Content));
             }
 
-            try
-            {
-                Loading = true;
-                var request = ApiService.CurrentLeague.ResultConfigs()
-                    .WithId(config.ResultConfigId)
-                    .Delete();
-                var result = await request;
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
 
-                if (result.Success)
-                {
-                    ResultsConfigs.Remove(config);
-                }
+    public async Task<StatusResult> DeleteConfiguration(ResultConfigViewModel config)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
 
-                return result.ToStatusResult();
-            }
-            finally
+        try
+        {
+            Loading = true;
+            var request = ApiService.CurrentLeague.ResultConfigs()
+                .WithId(config.ResultConfigId)
+                .Delete();
+            var result = await request;
+
+            if (result.Success)
             {
-                Loading = false;
+                ResultsConfigs.Remove(config);
             }
+
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
         }
     }
 }

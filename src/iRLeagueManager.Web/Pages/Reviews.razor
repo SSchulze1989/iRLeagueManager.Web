@@ -11,7 +11,7 @@
 @inherits LeagueComponentBase
 @inject ReviewsPageViewModel ReviewsVm
 
-<div class="container-md">
+<div class="container">
     <LoadingHeader class="mb-2" Loading=@(Bind(ReviewsVm, x => x.Loading))>
         <h3>Reviews</h3>
     </LoadingHeader>
@@ -22,7 +22,7 @@
         <Authorized>
             @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
             {
-                <ReviewCard class="container-md px-0 mb-2 mx-0" 
+                <ReviewCard class="px-0 mb-2 mx-0" 
                             Review=review 
                             OnEditClick=@(async () => await OnEditClick(review)) 
                             OnDeleteClick=@(async () => await OnDeleteClick(review))
@@ -38,7 +38,7 @@
         <NotAuthorized>
             @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
             {
-                <ReviewCard class="container-md px-0 mb-2 mx-0" Review=review />
+                <ReviewCard class="px-0 mb-2 mx-0" Review=review />
             }
         </NotAuthorized>
     </AuthorizeView>

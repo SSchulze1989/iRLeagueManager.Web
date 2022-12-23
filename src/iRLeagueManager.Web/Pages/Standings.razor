@@ -14,7 +14,7 @@
 @inherits LeagueComponentBase
 @inject StandingsPageViewModel vm
 
-<div class="container-md">
+<div class="container">
     <LoadingHeader class="mb-2" Loading=@Bind(vm, x => x.Loading)>
         <h3>Standings</h3>
     </LoadingHeader>
@@ -36,7 +36,7 @@
     </ul>
     @if (@Bind(vm, x => x.SelectedStanding) != null)
     {
-        <DisplayStanding class="container-md px-0 mb-2 mx-0" Standing=@Bind(vm, x => x.SelectedStanding)/>
+        <DisplayStanding class="px-0 mb-2 mx-0" Standing=@Bind(vm, x => x.SelectedStanding)/>
     }
 </div>
 

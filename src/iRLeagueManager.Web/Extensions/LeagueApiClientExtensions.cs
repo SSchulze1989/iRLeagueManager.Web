@@ -1,7 +1,6 @@
 ﻿using iRLeagueApiCore.Client.Results;
 using iRLeagueManager.Web.Data;
 using Microsoft.AspNetCore.Components;
-using System;
 using System.Collections.Specialized;
 using System.Runtime.Serialization;
 using System.Web;

@@ -1,13 +1,12 @@
 ﻿using iRLeagueApiCore.Common.Models.Members;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
-using System.Collections.ObjectModel;
 
 namespace iRLeagueManager.Web.ViewModels
 {
     public class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewModel>
     {
-        public ReviewsPageViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+        public ReviewsPageViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
             base(loggerFactory, apiService)
         {
         }
@@ -51,7 +50,7 @@ namespace iRLeagueManager.Web.ViewModels
 
                 var reviewModels = result.Content;
                 Reviews = new(reviewModels.Select(x => new ReviewViewModel(LoggerFactory, ApiService, x)));
-                
+
                 var membersEndpoint = eventEndpoint
                     .Members();
                 var membersResult = await membersEndpoint.Get(cancellationToken);

@@ -6,7 +6,7 @@ namespace iRLeagueManager.Web.ViewModels
 {
     public class VoteViewModel : LeagueViewModelBase<VoteViewModel, VoteModel>
     {
-        public VoteViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, VoteModel model) : 
+        public VoteViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, VoteModel model) :
             base(loggerFactory, apiService, model)
         {
         }

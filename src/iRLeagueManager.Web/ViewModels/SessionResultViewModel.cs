@@ -8,7 +8,7 @@ namespace iRLeagueManager.Web.ViewModels
     {
         private ResultModel model;
 
-        public SessionResultViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+        public SessionResultViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
             this(loggerFactory, apiService, new ResultModel())
         {
         }
@@ -39,7 +39,7 @@ namespace iRLeagueManager.Web.ViewModels
             }
         }
         public bool OrderDescending { get; private set; }
-        
+
         public IEnumerable<ResultRowModel> ResultRows
         {
             get

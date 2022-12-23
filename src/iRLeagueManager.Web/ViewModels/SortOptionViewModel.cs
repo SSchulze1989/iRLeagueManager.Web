@@ -1,5 +1,4 @@
 ﻿using iRLeagueApiCore.Common.Enums;
-using iRLeagueManager.Web.Data;
 
 namespace iRLeagueManager.Web.ViewModels
 {
@@ -24,7 +23,7 @@ namespace iRLeagueManager.Web.ViewModels
                 }
             }
         }
-        
+
         private SortDirection sortDirection;
         public SortDirection SortDirection
         {

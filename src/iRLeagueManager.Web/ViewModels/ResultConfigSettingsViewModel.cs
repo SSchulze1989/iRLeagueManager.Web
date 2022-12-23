@@ -1,13 +1,12 @@
 ﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
-using System.Collections.ObjectModel;
 
 namespace iRLeagueManager.Web.ViewModels
 {
     public class ResultConfigSettingsViewModel : LeagueViewModelBase<ResultConfigSettingsViewModel>
     {
-        public ResultConfigSettingsViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+        public ResultConfigSettingsViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
             base(loggerFactory, apiService)
         {
             resultConfigs = new ObservableCollection<ResultConfigViewModel>();

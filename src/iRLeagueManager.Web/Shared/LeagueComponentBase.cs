@@ -103,7 +103,7 @@ namespace iRLeagueManager.Web.Shared
                 return;
             }
             SeasonId = ApiService.CurrentSeason.Id;
-            
+
             HasRendered = true;
             await LoadEventList(ApiService.CurrentSeason.Id);
             if (EventId != null)
@@ -143,7 +143,7 @@ namespace iRLeagueManager.Web.Shared
 
         private void OnEventListPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            switch(e.PropertyName)
+            switch (e.PropertyName)
             {
                 case nameof(EventList.Selected):
                     _ = OnEventChangedAsync(EventList.Selected);

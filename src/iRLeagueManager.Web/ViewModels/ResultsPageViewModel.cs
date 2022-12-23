@@ -171,7 +171,7 @@ public class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewModel>
             {
                 await LoadFromEventAsync(SelectedEvent.EventId);
             }
-            return result.ToStatusResult();                
+            return result.ToStatusResult();
         }
         finally
         {

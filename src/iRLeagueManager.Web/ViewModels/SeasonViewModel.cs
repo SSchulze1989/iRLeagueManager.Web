@@ -12,7 +12,7 @@ public class SeasonViewModel : LeagueViewModelBase<SeasonViewModel, SeasonModel>
     }
 
     public SeasonViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, SeasonModel model) :
-        base (loggerFactory, apiService, model)
+        base(loggerFactory, apiService, model)
     {
     }
 

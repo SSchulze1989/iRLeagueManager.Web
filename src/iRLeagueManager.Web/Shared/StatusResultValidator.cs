@@ -54,7 +54,7 @@ namespace iRLeagueManager.Web.Shared
 
         private void DisplayErrorMessage(StatusResult result)
         {
-            foreach(var error in result.Errors)
+            foreach (var error in result.Errors)
             {
                 if (error is Exception)
                 {

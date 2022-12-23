@@ -1,15 +1,12 @@
-﻿using iRLeagueApiCore.Client.Results;
-using iRLeagueApiCore.Common.Models.Users;
+﻿using iRLeagueApiCore.Common.Models.Users;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.ObjectModel;
 
 namespace iRLeagueManager.Web.ViewModels
 {
     public class LeagueUsersViewModel : LeagueViewModelBase<LeagueUsersViewModel>
     {
-        public LeagueUsersViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+        public LeagueUsersViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
             base(loggerFactory, apiService)
         {
         }

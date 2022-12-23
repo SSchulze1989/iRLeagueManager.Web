@@ -1,7 +1,6 @@
 ﻿using iRLeagueApiCore.Common.Models.Standings;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
-using System.Collections.ObjectModel;
 
 namespace iRLeagueManager.Web.ViewModels
 {

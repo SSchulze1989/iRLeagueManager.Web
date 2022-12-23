@@ -7,7 +7,7 @@ namespace iRLeagueManager.Web.ViewModels
         private string _status;
         public string Status { get => _status; set => Set(ref _status, value); }
 
-        public LeaguesViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+        public LeaguesViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
             base(loggerFactory, apiService)
         {
             _status = string.Empty;

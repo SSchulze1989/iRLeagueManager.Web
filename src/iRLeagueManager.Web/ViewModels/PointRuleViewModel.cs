@@ -11,7 +11,7 @@ namespace iRLeagueManager.Web.ViewModels
         {
         }
 
-        public PointRuleViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, PointRuleModel model) : 
+        public PointRuleViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, PointRuleModel model) :
             base(loggerFactory, apiService, model)
         {
         }

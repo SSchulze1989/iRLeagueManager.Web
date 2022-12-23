@@ -1,8 +1,6 @@
 ﻿using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Shared;
 using MvvmBlazor.ViewModel;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
@@ -23,8 +21,8 @@ namespace iRLeagueManager.Web.ViewModels
         protected CancellationTokenSource Cts { get; } = new();
 
         private bool loading;
-        public bool Loading 
-        { 
+        public bool Loading
+        {
             get => loading;
             protected set => Set(ref loading, value);
         }
@@ -85,10 +83,10 @@ namespace iRLeagueManager.Web.ViewModels
         //    return false;
         //}
 
-        protected static StatusResult LeagueNullResult() => 
+        protected static StatusResult LeagueNullResult() =>
             StatusResult.FailedResult("League Null", $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentLeague)} was null", Array.Empty<object>());
 
-        protected static StatusResult SeasonNullResult() => 
+        protected static StatusResult SeasonNullResult() =>
             StatusResult.FailedResult("Season Null", $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentSeason)} was null", Array.Empty<object>());
     }
 
@@ -96,7 +94,7 @@ namespace iRLeagueManager.Web.ViewModels
     {
         protected TModel model = default!;
 
-        public LeagueViewModelBase(ILoggerFactory loggerFactory, LeagueApiService apiService, TModel model) : 
+        public LeagueViewModelBase(ILoggerFactory loggerFactory, LeagueApiService apiService, TModel model) :
             base(loggerFactory, apiService)
         {
             SetModel(model);

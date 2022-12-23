@@ -1,9 +1,5 @@
-﻿using iRLeagueApiCore.Client;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Net.Http;
-using Blazored.LocalStorage;
-using System.Threading.Tasks;
+﻿using Blazored.LocalStorage;
+using iRLeagueApiCore.Client;
 using iRLeagueApiCore.Client.Http;
 using System.Text.Json;
 
@@ -20,7 +16,7 @@ namespace iRLeagueManager.Web.Server.Data
 
         private readonly string baseAddress;
 
-        public LeagueApiClientFactory(IConfiguration configuration, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, 
+        public LeagueApiClientFactory(IConfiguration configuration, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory,
             ILocalStorageService localStorage, ITokenStore tokenStore, JsonSerializerOptions jsonOptions)
         {
             baseAddress = configuration["APIServer"];

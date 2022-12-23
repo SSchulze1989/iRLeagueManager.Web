@@ -1,9 +1,8 @@
 ﻿using iRLeagueApiCore.Common.Responses;
-using System.Linq;
 
 namespace iRLeagueManager.Web.Data
 {
-    public class StatusResult 
+    public class StatusResult
     {
         public StatusResult(bool success, string status)
         {
@@ -11,13 +10,13 @@ namespace iRLeagueManager.Web.Data
             Status = status;
         }
 
-        public StatusResult(bool success, string status, string message) : 
+        public StatusResult(bool success, string status, string message) :
             this(success, status)
         {
             Message = message;
         }
 
-        public StatusResult(bool success, string status, string message, IEnumerable<object> errors) : 
+        public StatusResult(bool success, string status, string message, IEnumerable<object> errors) :
             this(success, status, message)
         {
             Message = message;

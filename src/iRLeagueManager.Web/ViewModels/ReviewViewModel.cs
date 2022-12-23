@@ -3,13 +3,12 @@ using iRLeagueApiCore.Common.Models.Members;
 using iRLeagueApiCore.Common.Models.Reviews;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
-using System.Collections.ObjectModel;
 
 namespace iRLeagueManager.Web.ViewModels
 {
     public class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, ReviewModel>
     {
-        public ReviewViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+        public ReviewViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
             base(loggerFactory, apiService, new())
         {
         }
@@ -20,7 +19,7 @@ namespace iRLeagueManager.Web.ViewModels
 
         public long ReviewId => model.ReviewId;
         public long EventId => model.EventId;
-        public string SessionName => model.SessionName;   
+        public string SessionName => model.SessionName;
         public int SessionNr => model.SessionNr;
         public long SeasonId => model.SeasonId;
         public string AuthorName => model.AuthorName;
@@ -186,14 +185,14 @@ namespace iRLeagueManager.Web.ViewModels
 
         private void UpdateModelMemberList()
         {
-            foreach(var member in InvolvedMembers)
+            foreach (var member in InvolvedMembers)
             {
                 if (model.InvolvedMembers.Any(x => x.MemberId == member.MemberId) == false)
                 {
                     model.InvolvedMembers.Add(member);
                 }
             }
-            foreach(var member in model.InvolvedMembers.ToArray())
+            foreach (var member in model.InvolvedMembers.ToArray())
             {
                 if (InvolvedMembers.Any(x => x.MemberId == member.MemberId) == false)
                 {
@@ -301,7 +300,7 @@ namespace iRLeagueManager.Web.ViewModels
         private IEnumerable<CountedVote> GetCountedVotes()
         {
             List<CountedVote> countedVotes = new();
-            foreach(var vote in Comments.SelectMany(x => x.Votes))
+            foreach (var vote in Comments.SelectMany(x => x.Votes))
             {
                 CountedVote? countedVote = countedVotes
                     .FirstOrDefault(x => CompareVotes(vote, x.Vote));

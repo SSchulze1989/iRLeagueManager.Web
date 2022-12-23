@@ -1,14 +1,6 @@
 ﻿using iRLeagueApiCore.Client.Http;
-using System.Threading.Tasks;
-using Blazored.LocalStorage;
-using Microsoft.Extensions.Logging;
-using System;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Server;
-using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace iRLeagueManager.Web.Data
 {

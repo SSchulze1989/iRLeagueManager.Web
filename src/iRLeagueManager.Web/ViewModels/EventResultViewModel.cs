@@ -1,7 +1,5 @@
 ﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
-using System.Collections.ObjectModel;
-using System.Linq.Expressions;
 
 namespace iRLeagueManager.Web.ViewModels
 {
@@ -9,7 +7,7 @@ namespace iRLeagueManager.Web.ViewModels
     {
         private EventResultModel model;
 
-        public EventResultViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+        public EventResultViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
             this(loggerFactory, apiService, new EventResultModel())
         {
         }

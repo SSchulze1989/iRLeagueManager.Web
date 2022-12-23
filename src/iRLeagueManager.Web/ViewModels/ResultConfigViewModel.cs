@@ -28,14 +28,14 @@ namespace iRLeagueManager.Web.ViewModels
         public ResultKind ResultKind { get => model.ResultKind; set => SetP(model.ResultKind, value => model.ResultKind = value, value); }
         public int ResultsPerTeam { get => model.ResultsPerTeam; set => SetP(model.ResultsPerTeam, value => model.ResultsPerTeam = value, value); }
         public ResultConfigInfoModel? SourceResultConfig { get => model.SourceResultConfig; set => SetP(model.SourceResultConfig, value => model.SourceResultConfig = value, value); }
-        public long SourceResultConfigId 
-        { 
+        public long SourceResultConfigId
+        {
             get => SourceResultConfig?.ResultConfigId ?? 0;
             set => SetP(SourceResultConfig, value => SourceResultConfig = value, GetConfigInfoModel(AvailableResultConfigs.FirstOrDefault(x => x.ResultConfigId == value)));
         }
-        public bool CalculateCombinedResult 
-        { 
-            get => Scorings.Any(x => x.IsCombinedResult); 
+        public bool CalculateCombinedResult
+        {
+            get => Scorings.Any(x => x.IsCombinedResult);
             set
             {
                 if (value && CalculateCombinedResult == false)
@@ -163,7 +163,7 @@ namespace iRLeagueManager.Web.ViewModels
 
         private void UpdateScoringIndex()
         {
-            foreach(var (scoring, index) in model.Scorings.Where(x => x.IsCombinedResult == false).Select((x, i) => (x, i)))
+            foreach (var (scoring, index) in model.Scorings.Where(x => x.IsCombinedResult == false).Select((x, i) => (x, i)))
             {
                 scoring.Index = index;
             }

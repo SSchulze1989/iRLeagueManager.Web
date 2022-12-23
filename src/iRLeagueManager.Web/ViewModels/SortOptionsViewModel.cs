@@ -5,7 +5,7 @@ namespace iRLeagueManager.Web.ViewModels
 {
     public class SortOptionsViewModel : LeagueViewModelBase<SortOptionsViewModel, IList<SortOptions>>
     {
-        public SortOptionsViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+        public SortOptionsViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
             this(loggerFactory, apiService, new List<SortOptions>())
         {
         }

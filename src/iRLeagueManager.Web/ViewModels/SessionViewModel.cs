@@ -8,7 +8,7 @@ namespace iRLeagueManager.Web.ViewModels
     {
         private SessionModel model;
 
-        public SessionViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+        public SessionViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
             base(loggerFactory, apiService)
         {
             model = new SessionModel();
@@ -22,9 +22,9 @@ namespace iRLeagueManager.Web.ViewModels
 
         public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
         public long SessionId { get => model.SessionId; set => SetP(model.SessionId, value => model.SessionId = value, value); }
-        public int SessionNr { get => model.SessionNr; set => SetP(model.SessionNr, value => model.SessionNr = value, value); }        
+        public int SessionNr { get => model.SessionNr; set => SetP(model.SessionNr, value => model.SessionNr = value, value); }
         public SessionType SessionType { get => model.SessionType; set => SetP(model.SessionType, value => model.SessionType = value, value); }
-        public DateTime Duration 
+        public DateTime Duration
         {
             get => DateTime.MinValue.Add(model.Duration);
             set => SetP(model.Duration, value => model.Duration = value, value.TimeOfDay);

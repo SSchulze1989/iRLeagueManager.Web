@@ -1,8 +1,6 @@
 ﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
-using MvvmBlazor.ViewModel;
-using System.Collections.ObjectModel;
 
 namespace iRLeagueManager.Web.ViewModels
 {
@@ -10,12 +8,12 @@ namespace iRLeagueManager.Web.ViewModels
     {
         private ScheduleModel model;
 
-        public ScheduleViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+        public ScheduleViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
             this(loggerFactory, apiService, new ScheduleModel())
         {
         }
 
-        public ScheduleViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, ScheduleModel model) : 
+        public ScheduleViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, ScheduleModel model) :
             base(loggerFactory, apiService)
         {
             events = new ObservableCollection<EventViewModel>();

@@ -1,12 +1,10 @@
 ﻿using iRLeagueManager.Web.Data;
-using MvvmBlazor.ViewModel;
-using System.Collections.ObjectModel;
 
 namespace iRLeagueManager.Web.ViewModels;
 
 public class SchedulesPageViewModel : LeagueViewModelBase<SchedulesPageViewModel>
 {
-    public SchedulesPageViewModel(ILoggerFactory loggerFactory, ILogger<SchedulesPageViewModel> logger, LeagueApiService apiService) 
+    public SchedulesPageViewModel(ILoggerFactory loggerFactory, ILogger<SchedulesPageViewModel> logger, LeagueApiService apiService)
         : base(loggerFactory, apiService)
     {
         schedules = new ObservableCollection<ScheduleViewModel>();

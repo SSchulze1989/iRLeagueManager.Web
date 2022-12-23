@@ -1,11 +1,10 @@
 ﻿using iRLeagueManager.Web.Data;
-using System.Collections.ObjectModel;
 
 namespace iRLeagueManager.Web.ViewModels
 {
     public class EventListViewModel : LeagueViewModelBase<EventListViewModel>
     {
-        public EventListViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+        public EventListViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
             base(loggerFactory, apiService)
         {
         }

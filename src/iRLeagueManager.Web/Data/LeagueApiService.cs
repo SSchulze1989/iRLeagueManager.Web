@@ -2,7 +2,6 @@
 using iRLeagueApiCore.Client.Endpoints.Leagues;
 using iRLeagueApiCore.Client.Endpoints.Seasons;
 using iRLeagueApiCore.Common.Models;
-using System.Collections.ObjectModel;
 using System.Text.Json;
 
 namespace iRLeagueManager.Web.Data;

@@ -15,7 +15,7 @@
 
     public class BlazorParameterNullException<TComponent, TParameter> : InvalidOperationException
     {
-        public BlazorParameterNullException() : 
+        public BlazorParameterNullException() :
             base($"Usage of {typeof(TComponent)} requires a Parameter of type {typeof(TParameter)} but value was 'null'")
         {
         }

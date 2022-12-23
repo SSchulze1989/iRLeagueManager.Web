@@ -1,17 +1,17 @@
 ﻿using iRLeagueApiCore.Common.Models;
-using iRLeagueManager.Web.Extensions;
 using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Extensions;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public partial class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, LeagueModel>
+public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, LeagueModel>
 {
     public LeagueViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         this(loggerFactory, apiService, new())
     {
     }
 
-    public LeagueViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, LeagueModel model) : 
+    public LeagueViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, LeagueModel model) :
         base(loggerFactory, apiService, model)
     {
         seasons = new ObservableCollection<SeasonViewModel>();
@@ -74,7 +74,7 @@ public partial class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leag
         }
         finally
         {
-            Loading = false;    
+            Loading = false;
         }
     }
 

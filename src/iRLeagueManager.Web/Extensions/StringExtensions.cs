@@ -1,16 +1,15 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace iRLeagueManager.Web.Extensions
+namespace iRLeagueManager.Web.Extensions;
+
+public static class StringExtensions
 {
-    public static class StringExtensions
+    public static string PadNumbers(this string input, int n = 10)
     {
-        public static string PadNumbers(this string input, int n = 10)
+        if (string.IsNullOrEmpty(input))
         {
-            if (string.IsNullOrEmpty(input))
-            {
-                return input;
-            }
-            return Regex.Replace(input, "[0-9]+", match => match.Value.PadLeft(n, '0'));
+            return input;
         }
+        return Regex.Replace(input, "[0-9]+", match => match.Value.PadLeft(n, '0'));
     }
 }

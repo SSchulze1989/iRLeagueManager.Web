@@ -1,7 +1,6 @@
-﻿namespace iRLeagueManager.Web.Shared
+﻿namespace iRLeagueManager.Web.Shared;
+
+public interface IModalBody
 {
-    public interface IModalBody
-    {
-        public Task<bool> CanSubmit();
-    }
+    public Task<bool> CanSubmit();
 }

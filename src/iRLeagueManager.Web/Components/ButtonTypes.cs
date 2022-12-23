@@ -1,9 +1,8 @@
-﻿namespace iRLeagueManager.Web.Components
+﻿namespace iRLeagueManager.Web.Components;
+
+public enum ButtonTypes
 {
-    public enum ButtonTypes
-    {
-        Ok,
-        OkCancel,
-        YesNo,
-    }
+    Ok,
+    OkCancel,
+    YesNo,
 }

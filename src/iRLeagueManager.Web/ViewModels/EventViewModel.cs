@@ -5,7 +5,7 @@ using iRLeagueManager.Web.Extensions;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class EventViewModel : LeagueViewModelBase<EventViewModel, EventModel>
+public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventModel>
 {
     public EventViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         this(loggerFactory, apiService, new EventModel())

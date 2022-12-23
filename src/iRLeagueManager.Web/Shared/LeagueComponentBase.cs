@@ -6,162 +6,161 @@ using Microsoft.AspNetCore.Components;
 using MvvmBlazor.Components;
 using System.ComponentModel;
 
-namespace iRLeagueManager.Web.Shared
+namespace iRLeagueManager.Web.Shared;
+
+public abstract partial class LeagueComponentBase : MvvmComponentBase
 {
-    public abstract partial class LeagueComponentBase : MvvmComponentBase
+    [Inject]
+    public SharedStateService Shared { get; set; } = default!;
+    [Inject]
+    public LeagueApiService ApiService { get; set; } = default!;
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+
+    private EventListViewModel eventList = default!;
+
+    [CascadingParameter]
+    public EventListViewModel EventList
     {
-        [Inject]
-        public SharedStateService Shared { get; set; } = default!;
-        [Inject]
-        public LeagueApiService ApiService { get; set; } = default!;
-        [Inject]
-        public NavigationManager NavigationManager { get; set; } = default!;
-
-        private EventListViewModel eventList = default!;
-
-        [CascadingParameter]
-        public EventListViewModel EventList
+        get => eventList;
+        set
         {
-            get => eventList;
-            set
+            if (eventList != null)
             {
-                if (eventList != null)
-                {
-                    eventList.PropertyChanged -= OnEventListPropertyChanged;
-                }
-                eventList = value;
-                if (eventList != null)
-                {
-                    eventList.PropertyChanged += OnEventListPropertyChanged;
-                }
+                eventList.PropertyChanged -= OnEventListPropertyChanged;
+            }
+            eventList = value;
+            if (eventList != null)
+            {
+                eventList.PropertyChanged += OnEventListPropertyChanged;
             }
         }
-        [Parameter]
-        public string? LeagueName { get; set; }
-        [Parameter]
-        public long? SeasonId { get; set; }
-        [Parameter]
-        public long? EventId { get; set; }
+    }
+    [Parameter]
+    public string? LeagueName { get; set; }
+    [Parameter]
+    public long? SeasonId { get; set; }
+    [Parameter]
+    public long? EventId { get; set; }
 
-        protected bool ParametersSet { get; set; } = false;
-        protected bool HasRendered { get; set; } = false;
+    protected bool ParametersSet { get; set; } = false;
+    protected bool HasRendered { get; set; } = false;
 
-        protected virtual void SharedStateChanged(object? sender, EventArgs e)
+    protected virtual void SharedStateChanged(object? sender, EventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    protected virtual void RedirectUrl()
+    {
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (SeasonId == null && EventId == null && Shared.SeasonId != 0)
         {
-            InvokeAsync(StateHasChanged);
+            SeasonId = Shared.SeasonId;
+        }
+        ParametersSet = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false || ParametersSet == false)
+        {
+            return;
         }
 
-        protected virtual void RedirectUrl()
+        if (LeagueName == null)
         {
+            return;
         }
+        await ApiService.SetCurrentLeagueAsync(LeagueName);
 
-        protected override void OnParametersSet()
+        if (ApiService.CurrentLeague == null)
         {
-            if (SeasonId == null && EventId == null && Shared.SeasonId != 0)
-            {
-                SeasonId = Shared.SeasonId;
-            }
-            ParametersSet = true;
+            return;
         }
-
-        protected override async Task OnAfterRenderAsync(bool firstRender)
+        if (EventId != null)
         {
-            await base.OnAfterRenderAsync(firstRender);
-            if (firstRender == false || ParametersSet == false)
+            await ApiService.SetCurrentSeasonByEventId(LeagueName, EventId.Value);
+        }
+        if (ApiService.CurrentSeason == null && SeasonId != null)
+        {
+            await ApiService.SetCurrentSeasonAsync(ApiService.CurrentLeague.Name, SeasonId.Value);
+        }
+        if (ApiService.CurrentSeason == null)
+        {
+            var lastSeason = Shared.SeasonList.LastOrDefault();
+            if (lastSeason != null)
             {
-                return;
-            }
-
-            if (LeagueName == null)
-            {
-                return;
-            }
-            await ApiService.SetCurrentLeagueAsync(LeagueName);
-
-            if (ApiService.CurrentLeague == null)
-            {
-                return;
-            }
-            if (EventId != null)
-            {
-                await ApiService.SetCurrentSeasonByEventId(LeagueName, EventId.Value);
-            }
-            if (ApiService.CurrentSeason == null && SeasonId != null)
-            {
-                await ApiService.SetCurrentSeasonAsync(ApiService.CurrentLeague.Name, SeasonId.Value);
-            }
-            if (ApiService.CurrentSeason == null)
-            {
-                var lastSeason = Shared.SeasonList.LastOrDefault();
-                if (lastSeason != null)
-                {
-                    await ApiService.SetCurrentSeasonAsync(ApiService.CurrentLeague.Name, lastSeason.SeasonId);
-                }
-            }
-            if (ApiService.CurrentSeason == null)
-            {
-                return;
-            }
-            SeasonId = ApiService.CurrentSeason.Id;
-            
-            HasRendered = true;
-            await LoadEventList(ApiService.CurrentSeason.Id);
-            if (EventId != null)
-            {
-                EventList.Selected = EventList.EventList.FirstOrDefault(x => x.EventId == EventId);
-                return;
-            }
-            if (EventList.Selected == null)
-            {
-                EventList.Selected = EventList.EventList.LastOrDefault(x => x.HasResult);
-                EventId = EventList.Selected?.EventId;
+                await ApiService.SetCurrentSeasonAsync(ApiService.CurrentLeague.Name, lastSeason.SeasonId);
             }
         }
-
-        protected async Task LoadEventList(long seasonId)
+        if (ApiService.CurrentSeason == null)
         {
-            await EventList.LoadEventListAsync(seasonId);
+            return;
         }
+        SeasonId = ApiService.CurrentSeason.Id;
 
-        protected virtual async Task OnEventChangedAsync(EventViewModel? @event)
+        HasRendered = true;
+        await LoadEventList(ApiService.CurrentSeason.Id);
+        if (EventId != null)
         {
-            await Task.CompletedTask;
+            EventList.Selected = EventList.EventList.FirstOrDefault(x => x.EventId == EventId);
+            return;
         }
+        if (EventList.Selected == null)
+        {
+            EventList.Selected = EventList.EventList.LastOrDefault(x => x.HasResult);
+            EventId = EventList.Selected?.EventId;
+        }
+    }
 
-        protected override void OnInitialized()
-        {
-            Shared.StateChanged += SharedStateChanged;
-            base.OnInitialized();
-        }
+    protected async Task LoadEventList(long seasonId)
+    {
+        await EventList.LoadEventListAsync(seasonId);
+    }
 
-        protected override void Dispose(bool disposing)
-        {
-            Shared.StateChanged -= SharedStateChanged;
-            EventList.PropertyChanged -= OnEventListPropertyChanged;
-            base.Dispose(disposing);
-        }
+    protected virtual async Task OnEventChangedAsync(EventViewModel? @event)
+    {
+        await Task.CompletedTask;
+    }
 
-        private void OnEventListPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            switch(e.PropertyName)
-            {
-                case nameof(EventList.Selected):
-                    _ = OnEventChangedAsync(EventList.Selected);
-                    break;
-            }
-        }
+    protected override void OnInitialized()
+    {
+        Shared.StateChanged += SharedStateChanged;
+        base.OnInitialized();
+    }
 
-        protected string GetRoleString(params string[] roleNames)
+    protected override void Dispose(bool disposing)
+    {
+        Shared.StateChanged -= SharedStateChanged;
+        EventList.PropertyChanged -= OnEventListPropertyChanged;
+        base.Dispose(disposing);
+    }
+
+    private void OnEventListPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
         {
-            IEnumerable<string> roles = new[] { "Admin" };
-            if (LeagueName != null)
-            {
-                var leagueRoleNames = roleNames
-                    .Select(x => LeagueRoles.GetLeagueRoleName(LeagueName, x))
-                    .NotNull();
-                roles = roles.Concat(leagueRoleNames);
-            }
-            return string.Join(',', roles);
+            case nameof(EventList.Selected):
+                _ = OnEventChangedAsync(EventList.Selected);
+                break;
         }
+    }
+
+    protected string GetRoleString(params string[] roleNames)
+    {
+        IEnumerable<string> roles = new[] { "Admin" };
+        if (LeagueName != null)
+        {
+            var leagueRoleNames = roleNames
+                .Select(x => LeagueRoles.GetLeagueRoleName(LeagueName, x))
+                .NotNull();
+            roles = roles.Concat(leagueRoleNames);
+        }
+        return string.Join(',', roles);
     }
 }

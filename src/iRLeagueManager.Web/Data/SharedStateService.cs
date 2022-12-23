@@ -1,11 +1,9 @@
 ﻿using iRLeagueApiCore.Common.Models;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace iRLeagueManager.Web.Data;
 
-public class SharedStateService
+public sealed class SharedStateService
 {
     private bool loggedIn;
     public bool LoggedIn { get => loggedIn; set => Set(ref loggedIn, value); }

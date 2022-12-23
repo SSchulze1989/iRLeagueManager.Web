@@ -3,9 +3,9 @@ using iRLeagueManager.Web.Data;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class ResultFiltersViewModel : LeagueViewModelBase<ResultFiltersViewModel>
+public sealed class ResultFiltersViewModel : LeagueViewModelBase<ResultFiltersViewModel>
 {
-    public ResultFiltersViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
+    public ResultFiltersViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         base(loggerFactory, apiService)
     {
         filters = new();

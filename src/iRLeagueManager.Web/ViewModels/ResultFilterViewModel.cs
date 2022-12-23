@@ -4,7 +4,7 @@ using iRLeagueManager.Web.Data;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class ResultFilterViewModel : LeagueViewModelBase<ResultFilterViewModel, ResultFilterModel>
+public sealed class ResultFilterViewModel : LeagueViewModelBase<ResultFilterViewModel, ResultFilterModel>
 {
     public ResultFilterViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         this(loggerFactory, apiService, new())

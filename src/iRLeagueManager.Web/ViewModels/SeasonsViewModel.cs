@@ -1,14 +1,9 @@
-﻿using iRLeagueApiCore.Client;
-using iRLeagueManager.Web.Data;
+﻿using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
-using iRLeagueManager.Web.ViewModels;
-using Microsoft.AspNetCore.Components;
-using MvvmBlazor.ViewModel;
-using System.Collections.ObjectModel;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class SeasonsViewModel : LeagueViewModelBase<SeasonsViewModel>
+public sealed class SeasonsViewModel : LeagueViewModelBase<SeasonsViewModel>
 {
     private string status = string.Empty;
     public string Status { get => status; set => Set(ref status, value); }

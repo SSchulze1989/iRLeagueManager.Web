@@ -1,15 +1,12 @@
-﻿using System.Net.Http;
+﻿namespace iRLeagueManager.Web.Server.Data;
 
-namespace iRLeagueManager.Web.Server.Data
+internal sealed class AuthenticatedHttpClientFactory : IHttpClientFactory
 {
-    public class AuthenticatedHttpClientFactory : IHttpClientFactory
+
+
+    public HttpClient CreateClient(string name)
     {
+        return new HttpClient();
 
-
-        public HttpClient CreateClient(string name)
-        {
-            return new HttpClient();
-
-        }
     }
 }

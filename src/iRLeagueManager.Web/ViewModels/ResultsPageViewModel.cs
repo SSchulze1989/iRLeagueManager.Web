@@ -3,7 +3,7 @@ using iRLeagueManager.Web.Extensions;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewModel>
+public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewModel>
 {
     public ResultsPageViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, EventListViewModel eventList) :
         base(loggerFactory, apiService)

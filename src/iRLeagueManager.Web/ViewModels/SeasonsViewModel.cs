@@ -3,7 +3,7 @@ using iRLeagueManager.Web.Extensions;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class SeasonsViewModel : LeagueViewModelBase<SeasonsViewModel>
+public sealed class SeasonsViewModel : LeagueViewModelBase<SeasonsViewModel>
 {
     private string status = string.Empty;
     public string Status { get => status; set => Set(ref status, value); }

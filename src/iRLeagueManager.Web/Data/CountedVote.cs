@@ -2,7 +2,7 @@
 
 namespace iRLeagueManager.Web.Data;
 
-public class CountedVote
+public sealed class CountedVote
 {
     public int Count { get; set; }
     public VoteViewModel Vote { get; set; }

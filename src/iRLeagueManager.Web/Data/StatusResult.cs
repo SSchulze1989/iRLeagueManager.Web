@@ -2,7 +2,7 @@
 
 namespace iRLeagueManager.Web.Data;
 
-public class StatusResult
+public sealed class StatusResult
 {
     public StatusResult(bool success, string status)
     {

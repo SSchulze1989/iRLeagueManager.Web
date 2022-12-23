@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace iRLeagueManager.Web.Data;
 
-public class SamePropertyEqualityComparer<T> : IEqualityComparer<Expression<Func<T, IComparable>>>
+internal sealed class SamePropertyEqualityComparer<T> : IEqualityComparer<Expression<Func<T, IComparable>>>
 {
     public bool Equals(Expression<Func<T, IComparable>>? x, Expression<Func<T, IComparable>>? y)
     {

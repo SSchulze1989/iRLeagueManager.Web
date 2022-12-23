@@ -2,7 +2,7 @@
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class SortOptionViewModel : MvvmBlazor.ViewModel.ViewModelBase
+public sealed class SortOptionViewModel : MvvmBlazor.ViewModel.ViewModelBase
 {
     private SortOptions model;
 

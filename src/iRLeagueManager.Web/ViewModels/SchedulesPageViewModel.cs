@@ -2,7 +2,7 @@
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class SchedulesPageViewModel : LeagueViewModelBase<SchedulesPageViewModel>
+public sealed class SchedulesPageViewModel : LeagueViewModelBase<SchedulesPageViewModel>
 {
     public SchedulesPageViewModel(ILoggerFactory loggerFactory, ILogger<SchedulesPageViewModel> logger, LeagueApiService apiService)
         : base(loggerFactory, apiService)

@@ -4,7 +4,7 @@ using iRLeagueManager.Web.Extensions;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class SeasonViewModel : LeagueViewModelBase<SeasonViewModel, SeasonModel>
+public sealed class SeasonViewModel : LeagueViewModelBase<SeasonViewModel, SeasonModel>
 {
     public SeasonViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         this(loggerFactory, apiService, new SeasonModel())

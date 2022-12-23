@@ -5,7 +5,7 @@ using System.Security.Claims;
 
 namespace iRLeagueManager.Web.Shared;
 
-public class JwtAuthenticationStateProvicer : AuthenticationStateProvider, IDisposable
+internal sealed class JwtAuthenticationStateProvicer : AuthenticationStateProvider, IDisposable
 {
     private readonly JwtSecurityTokenHandler tokenHandler = new();
     private readonly IAsyncTokenProvider tokenStore;

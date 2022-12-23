@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace iRLeagueManager.Web.Server.Data;
 
-public class LeagueApiClientFactory
+internal sealed class LeagueApiClientFactory
 {
     private readonly ILoggerFactory loggerFactory;
     private readonly ILogger<LeagueApiClientFactory> logger;

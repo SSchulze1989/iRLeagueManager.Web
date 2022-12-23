@@ -2,7 +2,7 @@
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class LeaguesViewModel : LeagueViewModelBase<LeaguesViewModel>
+public sealed class LeaguesViewModel : LeagueViewModelBase<LeaguesViewModel>
 {
     private string _status;
     public string Status { get => _status; set => Set(ref _status, value); }

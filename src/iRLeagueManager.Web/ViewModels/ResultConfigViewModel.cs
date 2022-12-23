@@ -5,7 +5,7 @@ using iRLeagueManager.Web.Extensions;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class ResultConfigViewModel : LeagueViewModelBase<ResultConfigViewModel, ResultConfigModel>
+public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigViewModel, ResultConfigModel>
 {
     public ResultConfigViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService)
         : this(loggerFactory, apiService, new())

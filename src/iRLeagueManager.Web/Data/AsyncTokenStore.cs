@@ -4,7 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace iRLeagueManager.Web.Data;
 
-public class AsyncTokenStore : ITokenStore
+internal sealed class AsyncTokenStore : ITokenStore
 {
     private readonly ILogger<AsyncTokenStore> logger;
     private readonly ProtectedLocalStorage localStore;

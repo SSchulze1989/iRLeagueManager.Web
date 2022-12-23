@@ -2,7 +2,7 @@
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class EventListViewModel : LeagueViewModelBase<EventListViewModel>
+public sealed class EventListViewModel : LeagueViewModelBase<EventListViewModel>
 {
     public EventListViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         base(loggerFactory, apiService)

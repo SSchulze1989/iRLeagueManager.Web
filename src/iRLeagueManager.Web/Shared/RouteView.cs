@@ -6,7 +6,7 @@ using System.Net;
 
 namespace iRLeagueManager.Web.Shared;
 
-public class AppRouteView : RouteView
+internal sealed class AppRouteView : RouteView
 {
     [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;

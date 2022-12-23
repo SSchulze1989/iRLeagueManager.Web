@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace iRLeagueManager.Web.Data;
 
-public class LeagueApiService
+public sealed class LeagueApiService
 {
     //private readonly ILogger<LeagueApiService> logger;
 

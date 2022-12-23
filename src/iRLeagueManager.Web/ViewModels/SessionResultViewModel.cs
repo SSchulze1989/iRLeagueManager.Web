@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class SessionResultViewModel : LeagueViewModelBase<SessionResultViewModel>
+public sealed class SessionResultViewModel : LeagueViewModelBase<SessionResultViewModel>
 {
     private ResultModel model;
 

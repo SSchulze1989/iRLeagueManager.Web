@@ -3,7 +3,7 @@ using iRLeagueManager.Web.Data;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class EventResultViewModel : LeagueViewModelBase<EventResultViewModel>
+public sealed class EventResultViewModel : LeagueViewModelBase<EventResultViewModel>
 {
     private EventResultModel model;
 

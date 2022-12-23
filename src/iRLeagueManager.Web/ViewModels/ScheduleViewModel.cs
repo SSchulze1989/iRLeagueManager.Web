@@ -4,7 +4,7 @@ using iRLeagueManager.Web.Extensions;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class ScheduleViewModel : LeagueViewModelBase<ScheduleViewModel>
+public sealed class ScheduleViewModel : LeagueViewModelBase<ScheduleViewModel>
 {
     private ScheduleModel model;
 

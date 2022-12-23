@@ -4,7 +4,7 @@ using iRLeagueManager.Web.Data;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class PointRuleViewModel : LeagueViewModelBase<PointRuleViewModel, PointRuleModel>
+public sealed class PointRuleViewModel : LeagueViewModelBase<PointRuleViewModel, PointRuleModel>
 {
     public PointRuleViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         this(loggerFactory, apiService, new())

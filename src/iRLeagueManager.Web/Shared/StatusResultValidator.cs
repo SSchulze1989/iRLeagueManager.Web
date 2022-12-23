@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components.Forms;
 
 namespace iRLeagueManager.Web.Shared;
 
-public class StatusResultValidator : ComponentBase
+public sealed class StatusResultValidator : ComponentBase
 {
     private ValidationMessageStore messageStore = default!;
     [CascadingParameter]

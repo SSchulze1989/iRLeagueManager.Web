@@ -6,7 +6,7 @@ using iRLeagueManager.Web.Extensions;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, ReviewModel>
+public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, ReviewModel>
 {
     public ReviewViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         base(loggerFactory, apiService, new())

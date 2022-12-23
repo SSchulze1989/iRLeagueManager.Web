@@ -4,7 +4,7 @@ using iRLeagueManager.Web.Data;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class SessionViewModel : LeagueViewModelBase<SessionViewModel>
+public sealed class SessionViewModel : LeagueViewModelBase<SessionViewModel>
 {
     private SessionModel model;
 

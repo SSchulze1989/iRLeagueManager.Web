@@ -1,6 +1,6 @@
 ﻿namespace iRLeagueManager.Web.Server.Data;
 
-public class AuthenticatedHttpClientFactory : IHttpClientFactory
+internal sealed class AuthenticatedHttpClientFactory : IHttpClientFactory
 {
 
 

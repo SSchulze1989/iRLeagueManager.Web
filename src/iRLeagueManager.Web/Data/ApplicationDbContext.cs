@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace iRLeagueManager.Web.Data;
 
-public class ApplicationDbContext : IdentityDbContext
+internal sealed class ApplicationDbContext : IdentityDbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)

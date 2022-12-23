@@ -4,7 +4,7 @@ using System.Net;
 
 namespace iRLeagueManager.Web.Shared;
 
-public class LoginRedirect : ComponentBase
+public sealed class LoginRedirect : ComponentBase
 {
     [CascadingParameter]
     public Task<AuthenticationState> AuthStateTask { get; set; } = default!;

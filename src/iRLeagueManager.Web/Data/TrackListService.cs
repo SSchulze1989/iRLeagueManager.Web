@@ -2,7 +2,7 @@
 
 namespace iRLeagueManager.Web.Data;
 
-public class TrackListService
+internal sealed class TrackListService
 {
     private readonly LeagueApiService apiService;
     private readonly TimeSpan updateInterval = TimeSpan.FromHours(1);

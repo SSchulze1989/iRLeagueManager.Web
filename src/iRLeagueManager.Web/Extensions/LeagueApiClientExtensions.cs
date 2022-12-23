@@ -7,7 +7,7 @@ using System.Web;
 
 namespace iRLeagueManager.Web.Extensions;
 
-public static class LeagueApiClientExtensions
+internal static class LeagueApiClientExtensions
 {
     public static T? EnsureSuccess<T>(this ClientActionResult<T> clientActionResult)
     {
@@ -55,7 +55,7 @@ public static class ExtensionMethods
     }
 }
 
-public class ActionResultException<T> : InvalidOperationException
+public sealed class ActionResultException<T> : InvalidOperationException
 {
     public ClientActionResult<T> ActionResult;
 
@@ -72,7 +72,7 @@ public class ActionResultException<T> : InvalidOperationException
         ActionResult = actionResult;
     }
 
-    protected ActionResultException(ClientActionResult<T> actionResult, SerializationInfo info, StreamingContext context) : base(info, context)
+    public ActionResultException(ClientActionResult<T> actionResult, SerializationInfo info, StreamingContext context) : base(info, context)
     {
         ActionResult = actionResult;
     }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class ScoringViewModel : LeagueViewModelBase<ScoringViewModel, ScoringModel>
+public sealed class ScoringViewModel : LeagueViewModelBase<ScoringViewModel, ScoringModel>
 {
     public ScoringViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, ScoringModel model) :
         base(loggerFactory, apiService, model)

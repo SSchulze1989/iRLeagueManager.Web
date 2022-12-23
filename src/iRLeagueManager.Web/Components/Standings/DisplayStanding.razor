@@ -4,7 +4,7 @@
         <div class="card-header">
             @Standing.Name
         </div>
-        <div class="card-body overflow-scroll p-1">
+        <div class="card-body overflow-auto p-1">
             <table class="table table-sm table-striped table-hover" style="font-size: 0.9rem; line-height: 1rem;">
                 @{
                     var showDriver = HasDriver(Standing.StandingRows) && Standing.IsTeamStanding == false;

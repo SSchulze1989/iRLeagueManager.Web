@@ -13,7 +13,7 @@
 @inherits LeagueComponentBase
 @inject ResultsPageViewModel vm
 
-<div class="container-md">
+<div class="container">
     <LoadingHeader class="mb-2" Loading=@Bind(vm, x => x.Loading)>
         <h3>Results</h3>
     </LoadingHeader>
@@ -55,7 +55,7 @@
     {
         @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
         {
-            <DisplayResult class="container-md px-0 mb-2 mx-0" Result=result/>
+            <DisplayResult class="px-0 mb-2 mx-0" Result=result/>
         }
     }
     <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>

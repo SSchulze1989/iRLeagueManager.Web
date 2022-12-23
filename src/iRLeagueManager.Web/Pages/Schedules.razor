@@ -9,7 +9,7 @@
 @inject SchedulesPageViewModel vm
 @inject JsonSerializerOptions jsonOptions
 
-<div class="container-md">
+<div class="container">
     <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
         <h3>Schedules</h3>
     </LoadingHeader>
@@ -19,7 +19,7 @@
             <div>
                 @foreach(var schedule in @Bind(vm, x => x.Schedules))
                 {
-                    <DisplaySchedule class="container-md px-0 mb-2 mx-0" Schedule=schedule ReadOnly=SharedState.SeasonFinished/>
+                    <DisplaySchedule class="px-0 mb-2 mx-0" Schedule=schedule ReadOnly=SharedState.SeasonFinished/>
                 }
             </div>
         </Authorized>
@@ -27,7 +27,7 @@
             <div>
                 @foreach(var schedule in @Bind(vm, x => x.Schedules))
                 {
-                    <DisplaySchedule class="container-md px-0 mb-2 mx-0" Schedule=schedule ReadOnly=true/>
+                    <DisplaySchedule class="px-0 mb-2 mx-0" Schedule=schedule ReadOnly=true/>
                 }
             </div>
         </NotAuthorized>

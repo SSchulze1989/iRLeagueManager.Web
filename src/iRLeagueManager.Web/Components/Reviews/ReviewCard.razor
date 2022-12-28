@@ -20,7 +20,7 @@
                     <span class="oi oi-task" /><span>@Bind(Review, x => x.Comments).Where(x => x.Votes.Any()).Count()</span>
                     @if (UserHasCommented(Review))
                     {
-                        <span class="oi oi-check text-success"></span>
+                        <span class="oi oi-task text-success"></span>
                     }
                 </div>
                 <div class="col-md-auto d-grid d-flex flex-nowrap justify-content-end">

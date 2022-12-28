@@ -91,6 +91,16 @@
                     </div>
                 </div>
                 <hr/>
+                @if (string.IsNullOrWhiteSpace(Review.FullDescription) == false)
+                {
+                    <div>
+                        <h5>Description</h5>
+                        <div class="preserve-format">
+                            @Review.FullDescription
+                        </div>
+                    </div>
+                    <hr/>
+                }
                 <div>
                     <h5>Result</h5>
                     <div>
@@ -102,7 +112,7 @@
                             </span>
                         }
                     </div>
-                    <div>
+                    <div class="preserve-format">
                         @Bind(Review, x => x.ResultText)
                     </div>
                     @if (IsSteward && ReadOnly == false)

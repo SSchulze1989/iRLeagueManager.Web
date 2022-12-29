@@ -13,7 +13,7 @@
             Teams
         </div>
         <div class="list-group-flush">
-            @foreach((var team, var index) in @Bind(vm, x => x.Teams).Select((x, i) => (x, i)))
+            @foreach(var team in @Bind(vm, x => x.Teams).OrderBy(x => x.Name))
             {
                 <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button" @onclick=@(() => OnTeamClick(team))>
                     <TeamPreview Team=team />

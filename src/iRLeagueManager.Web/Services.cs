@@ -27,6 +27,7 @@ public static class Services
         services.TryAddTransient<PointRuleViewModel>();
         services.TryAddTransient<SortOptionsViewModel>();
         services.TryAddTransient<ResultFiltersViewModel>();
+        services.TryAddTransient<TeamViewModel>();
         services.TryAddScoped<ResultsPageViewModel>();
         services.TryAddScoped<ResultConfigSettingsViewModel>();
         services.TryAddScoped<ReviewsPageViewModel>();
@@ -34,6 +35,7 @@ public static class Services
         services.TryAddScoped<LeagueUsersViewModel>();
         services.TryAddScoped<StandingsPageViewModel>();
         services.TryAddScoped<ResultConfigSettingsViewModel>();
+        services.TryAddScoped<TeamsViewModel>();
         return services;
     }
 }

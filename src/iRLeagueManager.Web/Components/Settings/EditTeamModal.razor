@@ -1,0 +1,143 @@
+﻿@inherits MvvmComponentBase
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Members
+@using iRLeagueManager.Web.ViewModels
+@inject TeamViewModel vm
+
+<EditForm Model=vm OnValidSubmit=Submit>
+    <StatusResultValidator @ref=ResultValidator />
+    <div class="input-group-list mb-3">
+        <InputGroup Label="Name">
+            <InputText class="form-control" @bind-Value=vm.Name/>
+        </InputGroup>
+        <InputGroup Label="Color">
+            <InputText class="form-control" @bind-Value=vm.TeamColor />
+        </InputGroup>
+    </div>
+    <div>
+        <div class="row g-0">
+            <div class="input-group-text" style="border-bottom-left-radius:0; border-bottom-right-radius:0; border-bottom: none">
+                <label>Team Members</label>
+            </div>
+        </div>
+        <div>
+            <BlazoredTypeahead
+                @bind-Values=vm.Members
+                class="form-control p-0"
+                style="border-top-right-radius:0; border-top-left-radius:0;"
+                EnableDropDown=true  
+                SearchMethod=SearchMembers 
+                MinimumLength=1
+                MaximumSuggestions=100
+                DeleteItemsOnBackspace=false
+                placeholder="Search driver by name...">
+
+                <SelectedTemplate Context=member>
+                    @member.FirstName @member.LastName
+                </SelectedTemplate>
+                <ResultTemplate Context=member>
+                    @member.FirstName @member.LastName
+                </ResultTemplate>
+                <NotFoundTemplate Context=name>
+                    <span>Driver <b>@name</b> Not found!</span>
+                </NotFoundTemplate>
+            </BlazoredTypeahead>
+        </div>
+    </div>
+    <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+    <CancelSubmitButtons ModelState=vm SubmitText="Save" OnCancel=Cancel/>
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    public BlazoredModalInstance ModalInstance { get; set; } = default!;
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
+
+    private TeamModel model = default!;
+    [Parameter]
+    public TeamModel Model
+    {
+        get => model;
+        set
+        {
+            if (EqualityComparer<TeamModel>.Default.Equals(model, value) == false)
+            {
+                model = value;
+                vm.SetModel(model);
+            }
+        }
+    }
+    [Parameter]
+    public IEnumerable<MemberInfoModel> LeagueMembers { get; set; } = default!;
+
+    [Parameter]
+    public Func<TeamViewModel, CancellationToken, Task<StatusResult>>? OnSubmit { get; set; }
+
+    private CancellationTokenSource cts = new();
+
+    private StatusResultValidator? ResultValidator { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _ = ModalInstance ?? throw BlazorParameterNullException.New(this, ModalInstance);
+        _ = ModalService ?? throw BlazorParameterNullException.New(this, ModalService);
+        _ = Model ?? throw BlazorParameterNullException.New(this, Model);
+        _ = LeagueMembers ?? throw BlazorParameterNullException.New(this, LeagueMembers);
+    }
+
+    private async Task<IEnumerable<MemberInfoModel>> SearchMembers(string searchString)
+    {
+        if (string.IsNullOrEmpty(searchString))
+        {
+            return await Task.FromResult(LeagueMembers);
+        }
+
+        var terms = searchString.ToLower().Split(',', ' ', ';')
+        .Where(x => string.IsNullOrWhiteSpace(x) == false)
+            .ToArray();
+        return await Task.FromResult(LeagueMembers
+            .Where(x => MatchMemberSearchTerms(x, terms)));
+    }
+
+    private bool MatchMemberSearchTerms(MemberInfoModel member, params string[] terms)
+    {
+        var searchName = member.FirstName + member.LastName;
+        return terms.Any(x => searchName.Contains(x, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private async Task Submit()
+    {
+        var success = true;
+        if (OnSubmit is not null)
+        {
+            var status = await OnSubmit(vm, cts.Token);
+            success &= status.IsSuccess;
+            ResultValidator?.ValidateResult(status);
+        }
+        if (success)
+        {
+            var result = ModalResult.Ok(vm.GetModel());
+            await ModalInstance.CloseAsync(result);
+        }
+    }
+
+    private async Task Cancel()
+    {
+        if (ModalInstance != null)
+        {
+            await ModalInstance.CancelAsync();   
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing == false)
+        {
+            cts.Cancel();
+            cts.Dispose();
+        }
+        base.Dispose(disposing);
+    }
+}

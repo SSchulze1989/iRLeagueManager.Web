@@ -9,18 +9,25 @@
 
 <div class="container-md">
     <LoadingHeader><h3>Settings</h3></LoadingHeader>
-    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin)>
+    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
         <Authorized>
             <div>
                 <ul class="nav nav-tabs">
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href="@GetTabLink(0)">League</NavLink>
-                    </li>
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href="@GetTabLink(1)">Users</NavLink>
-                    </li>
+                    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin)>
+                        <Authorized Context=AdminContext>
+                            <li class="nav-item">
+                                <NavLink class="nav-link" href="@GetTabLink(0)">League</NavLink>
+                            </li>
+                            <li class="nav-item">
+                                <NavLink class="nav-link" href="@GetTabLink(1)">Users</NavLink>
+                            </li>
+                        </Authorized>
+                    </AuthorizeView>
                     <li class="nav-item">
                         <NavLink class="nav-link" href="@GetTabLink(2)">Results</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="@GetTabLink(3)">Teams</NavLink>
                     </li>
                 </ul>
 
@@ -29,13 +36,16 @@
                     @switch (selectedTabIndex)
                     {
                         case 0:
-                            <LeagueSettings class="container-md px-0 mb-2 mx-0" />
+                            <LeagueSettings class="container px-0 mb-2 mx-0" />
                             break;
                         case 1:
-                            <UserSettings class="container-md px-0 mb-2 mx-0" />
+                            <UserSettings class="container px-0 mb-2 mx-0" />
                             break;
                         case 2:
-                            <ResultSettings class="container-md px-0 mb-2 mx-0" />
+                            <ResultSettings class="container px-0 mb-2 mx-0" />
+                            break;
+                        case 3:
+                            <TeamSettings class="container px-0 mb-2 mx-0" />
                             break;
                         default:
                             <p><em>Index out of bounds!</em></p>

@@ -1,0 +1,100 @@
+﻿@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Members
+@using iRLeagueManager.Web.ViewModels
+@inherits MvvmComponentBase
+@inject TeamsViewModel vm
+@inject LeagueApiService apiService
+@inject ILogger<ResultSettings> logger
+
+<div @attributes=AdditionalAttributes>
+    <div class="card my-2 pb-0">
+        <div class="card-header">
+            Teams
+        </div>
+        <div class="list-group-flush">
+            @foreach((var team, var index) in @Bind(vm, x => x.Teams).Select((x, i) => (x, i)))
+            {
+                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button" @onclick=@(() => OnTeamClick(team))>
+                    <TeamPreview Team=team />
+                    <button class="btn btn-outline-danger" @onclick=@(() => OnDeleteTeamClick(team)) @onclick:stopPropagation="true">
+                        <span class="oi oi-trash"/>
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+    <button class="btn btn-outline-secondary" @onclick=OnAddTeamClick>Add Team</button>
+</div>
+
+@code {
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
+
+    [Parameter(CaptureUnmatchedValues = true)] 
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private async Task OnTeamClick(TeamViewModel config)
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(EditTeamModal.Model), config.CopyModel())
+            .Add(nameof(EditTeamModal.LeagueMembers), GetMembersWithoutTeam(vm.Members))
+            .Add(nameof(EditTeamModal.OnSubmit), new Func<TeamViewModel, CancellationToken, Task<StatusResult>>(
+                async (team, cancellationToken) => await team.SaveChangesAsync(cancellationToken)));
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true,
+        };
+        var result = await ModalService.Show<EditTeamModal>("Edit Team", parameters, options).Result;
+        if (result.Confirmed && result.Data is TeamModel model)
+        {
+            config.SetModel(model);
+        }
+    }
+
+    private async Task OnAddTeamClick()
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(EditTeamModal.Model), new TeamModel())
+            .Add(nameof(EditTeamModal.LeagueMembers), GetMembersWithoutTeam(vm.Members))
+            .Add(nameof(EditTeamModal.OnSubmit), new Func<TeamViewModel, CancellationToken, Task<StatusResult>>(
+                async (team, cancellationToken) => await vm.AddTeam(team.GetModel(), cancellationToken)));
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true,
+        };
+        var result = await ModalService.Show<EditTeamModal>("Add new Team", parameters, options).Result;
+    }
+
+    private IEnumerable<MemberInfoModel> GetMembersWithoutTeam(IEnumerable<MemberInfoModel> members)
+    {
+        return members
+            .Where(member => vm.Teams.Any(team => team.Members.Any(teamMember => member.MemberId == teamMember.MemberId)) == false)
+            .ToList();
+    }
+
+    private async Task OnDeleteTeamClick(TeamViewModel team)
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(ConfirmModal.Text), $"Really delete Team \"{team.Name}\"?")
+            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
+        var result = await ModalService.Show<ConfirmModal>("Delete Result Config", parameters).Result;
+        if (result.Confirmed)
+        {
+            await vm.DeleteTeam(team.GetModel());   
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+        if (apiService.CurrentLeague != null)
+        {
+            await vm.LoadFromLeagueAsync();
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+}

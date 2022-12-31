@@ -1,4 +1,4 @@
-﻿using iRLeagueApiCore.Common.Models.Members;
+﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 

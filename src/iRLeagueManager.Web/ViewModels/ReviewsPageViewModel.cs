@@ -14,6 +14,9 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
     private ObservableCollection<ReviewViewModel> reviews = new();
     public ObservableCollection<ReviewViewModel> Reviews { get => reviews; set => Set(ref reviews, value); }
 
+    private ObservableCollection<ProtestViewModel> protests = new();
+    public ObservableCollection<ProtestViewModel> Protests { get => protests; set => Set(ref protests, value); }
+
     private IEnumerable<MemberInfoModel> eventMembers = Array.Empty<MemberInfoModel>();
     public IEnumerable<MemberInfoModel> EventMembers { get => eventMembers; set => Set(ref eventMembers, value); }
 
@@ -59,6 +62,40 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
                 return;
             }
             EventMembers = membersResult.Content;
+
+            var protestsRequest = eventEndpoint
+                .Protests()
+                .Get(cancellationToken);
+            var protestsResult = await protestsRequest;
+            if (protestsResult.Success == false || protestsResult.Content is null)
+            {
+                return;
+            }
+            Protests = new(protestsResult.Content.Select(x => new ProtestViewModel(LoggerFactory, ApiService, x)));
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    public async Task<StatusResult> FileProtest(long sessionId, PostProtestModel protest, CancellationToken cancellationToken = default)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var request = ApiService.CurrentLeague
+                .Sessions()
+                .WithId(sessionId)
+                .Protests()
+                .Post(protest, cancellationToken);
+            var result = await request;
+            return result.ToStatusResult();
         }
         finally
         {

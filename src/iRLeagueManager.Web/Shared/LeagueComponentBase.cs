@@ -45,6 +45,7 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
 
     protected bool ParametersSet { get; set; } = false;
     protected bool HasRendered { get; set; } = false;
+    protected EventViewModel? Event => EventList?.Selected;
 
     protected virtual void SharedStateChanged(object? sender, EventArgs e)
     {
@@ -106,15 +107,17 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
 
         HasRendered = true;
         await LoadEventList(ApiService.CurrentSeason.Id);
-        if (EventId != null)
+        if (EventId != null && EventList.Selected?.EventId != EventId)
         {
             EventList.Selected = EventList.EventList.FirstOrDefault(x => x.EventId == EventId);
+            await InvokeAsync(StateHasChanged);
             return;
         }
         if (EventList.Selected == null)
         {
             EventList.Selected = EventList.EventList.LastOrDefault(x => x.HasResult);
             EventId = EventList.Selected?.EventId;
+            await InvokeAsync(StateHasChanged);
         }
     }
 

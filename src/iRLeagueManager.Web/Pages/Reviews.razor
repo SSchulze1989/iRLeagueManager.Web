@@ -17,31 +17,77 @@
     </LoadingHeader>
 
     <EventSelect />
-    <CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
+
     <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
         <Authorized>
-            @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
-            {
-                <ReviewCard class="px-0 mb-2 mx-0" 
-                            Review=review 
-                            OnEditClick=@(async () => await OnEditClick(review)) 
-                            OnDeleteClick=@(async () => await OnDeleteClick(review))
-                            IsSteward=true
-                            ReadOnly=@ReadOnly
-                            UserId=@UserId/>
-            }
-            @if (ReadOnly == false)
-            {
-                <button class="btn btn-outline-secondary" type="button" @onclick=OnAddClick>Add Review</button>
-            }
+            <ul class="nav nav-tabs mb-2">
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="@GetTabLink(0)">Reviews</NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="@GetTabLink(1)">Protests</NavLink>
+                </li>
+            </ul>
         </Authorized>
-        <NotAuthorized>
-            @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
-            {
-                <ReviewCard class="px-0 mb-2 mx-0" Review=review />
-            }
-        </NotAuthorized>
     </AuthorizeView>
+
+    <CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
+    @switch (SelectedTabIndex)
+    {
+        case 0:
+            @if (ReviewsVm.Reviews.Count == 0)
+            {
+                <p class="results-scoring"><em>No Reviews</em></p>
+            }
+            <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
+                <Authorized>
+                    @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
+                    {
+                        <ReviewCard class="px-0 mb-2 mx-0" 
+                                    Review=review 
+                                    OnEditClick=@(async () => await OnEditClick(review)) 
+                                    OnDeleteClick=@(async () => await OnDeleteClick(review))
+                                    IsSteward=true
+                                    ReadOnly=@ReadOnly
+                                    UserId=@UserId/>
+                    }
+                    @if (ReadOnly == false)
+                    {
+                        <button class="btn btn-outline-secondary" type="button" @onclick=OnAddClick>Add Review</button>
+                    }
+                </Authorized>
+                <NotAuthorized>
+                    @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
+                    {
+                        <ReviewCard class="px-0 mb-2 mx-0" Review=review />
+                    }
+                </NotAuthorized>
+            </AuthorizeView>
+            break;
+        case 1:
+            @if (ReviewsVm.Protests.Count == 0)
+            {
+                <p class="results-scoring"><em>No Protests</em></p>
+            }
+            <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
+                <Authorized>
+                    @foreach(var protest in @Bind(ReviewsVm, x => x.Protests))
+                    {
+                        <ProtestCard class="px-0 mb-2 mx-0" Protest=protest OnDeleteClick=@(() => OnProtestDeleteClick(protest)) />
+                    }
+                </Authorized>
+                <NotAuthorized>
+                    @foreach(var protest in @Bind(ReviewsVm, x => x.Protests))
+                    {
+                        <ProtestCard class="px-0 mb-2 mx-0" Protest=protest />
+                    }
+                </NotAuthorized>
+            </AuthorizeView>
+            <button class="btn btn-outline-secondary" type="button" @onclick=@(() => NavigationManager.NavigateTo($"./{LeagueName}/Protests/Events/{EventId}"))>File Protest</button>
+            break;
+        default:
+            break;
+    }
     </CascadingValue>
 </div>
 
@@ -57,6 +103,30 @@
 
     private bool ReadOnly => SharedState.SeasonFinished;
 
+    // Query parameters
+    private const string tabIndexParam = "tabIndex";
+
+    private int selectedTabIndex;
+    private int SelectedTabIndex 
+    {
+        get => selectedTabIndex;
+        set
+        {
+            if (selectedTabIndex != value)
+            {
+                selectedTabIndex = value;
+                _ = SelectedTabChanged();
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+        SelectedTabIndex = NavigationManager.QueryParameter<int>(tabIndexParam);
+        await Task.FromResult(true);
+    }
+
     protected override async Task OnParametersSetAsync()
     {
         _ = AuthTask ?? throw BlazorParameterNullException.New(this, AuthTask);
@@ -66,15 +136,26 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        SelectedTabIndex = NavigationManager.QueryParameter<int>(tabIndexParam);
     }
 
     protected override async Task OnEventChangedAsync(EventViewModel? @event)
     {
         if (@event?.EventId != null)
         {
-            NavigationManager.NavigateTo($"./{LeagueName}/Reviews/Events/{@event.EventId}");
+            var navUrl = $"./{LeagueName}/Reviews/Events/{@event.EventId}?{tabIndexParam}={SelectedTabIndex}";
+            NavigationManager.NavigateTo(navUrl);
             await ReviewsVm.LoadFromEventAsync(@event.EventId);
         }
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        SelectedTabIndex = NavigationManager.QueryParameter<int>(tabIndexParam);
     }
 
     private async Task SetCurrentUserId()
@@ -121,6 +202,23 @@
         }
     }
 
+    private async Task OnProtestDeleteClick(ProtestViewModel protest)
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(ConfirmModal.Text), "Are you sure you want to delete this protest?")
+            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
+        var confirm = await ModalService.Show<ConfirmModal>("Delete Protest", parameters).Result;
+        if (confirm.Cancelled)
+        {
+            return;
+        }
+        var result = await protest.DeleteAsync();
+        if (result.IsSuccess)
+        {
+            ReviewsVm.Protests.Remove(protest);
+        }
+    }
+
     private async Task OnAddClick()
     {
         var parameters = new ModalParameters()
@@ -148,5 +246,22 @@
             .ThenBy(x => x.IncidentNr.PadNumbers())
             .ThenBy(x => x.OnLap.PadNumbers())
             .ThenBy(x => x.Corner.PadNumbers());
+    }
+
+    public async Task SelectedTabChanged()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string GetTabLink(int tabIndex)
+    {
+        var url = NavigationManager.GetUriWithQueryParameter(tabIndexParam, tabIndex);
+        return url;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+        base.Dispose(disposing);
     }
 }

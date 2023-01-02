@@ -18,14 +18,18 @@
 
     <EventSelect />
 
-    <ul class="nav nav-tabs mb-2">
-        <li class="nav-item">
-            <NavLink class="nav-link" href="@GetTabLink(0)">Reviews</NavLink>
-        </li>
-        <li class="nav-item">
-            <NavLink class="nav-link" href="@GetTabLink(1)">Protests</NavLink>
-        </li>
-    </ul>
+    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
+        <Authorized>
+            <ul class="nav nav-tabs mb-2">
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="@GetTabLink(0)">Reviews</NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="@GetTabLink(1)">Protests</NavLink>
+                </li>
+            </ul>
+        </Authorized>
+    </AuthorizeView>
 
     <CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
     @switch (SelectedTabIndex)

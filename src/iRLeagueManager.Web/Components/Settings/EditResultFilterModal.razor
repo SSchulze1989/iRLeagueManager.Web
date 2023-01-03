@@ -34,6 +34,21 @@
                 {
                     <label class="form-control disabled" type="text" />
                 }
+                else if (filter.Comparator == ComparatorType.InList)
+                {
+                    <BlazoredTypeahead
+                        @bind-Values=filter.FilterValues
+                        SearchMethod=@(str => Task.FromResult((IEnumerable<string>)Array.Empty<string>()))
+                        AddItemOnEmptyResultMethod=@(str => Task.FromResult(str))
+                        class="form-control">
+                        <SelectedTemplate Context=value>
+                            @value
+                        </SelectedTemplate>
+                        <ResultTemplate Context=value>
+                            @value
+                        </ResultTemplate>
+                    </BlazoredTypeahead>
+                }
                 else if (propertyType == typeof(string))
                 {
                     <InputText class="form-control" @bind-Value=filter.Value />

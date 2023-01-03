@@ -40,6 +40,7 @@
                         @bind-Values=filter.FilterValues
                         SearchMethod=@(str => Task.FromResult((IEnumerable<string>)Array.Empty<string>()))
                         AddItemOnEmptyResultMethod=@(str => Task.FromResult(str))
+                        DeleteItemsOnBackspace=false
                         class="form-control">
                         <SelectedTemplate Context=value>
                             @value
@@ -47,6 +48,9 @@
                         <ResultTemplate Context=value>
                             @value
                         </ResultTemplate>
+                        <NotFoundTemplate Context=value>
+                            @value
+                        </NotFoundTemplate>
                     </BlazoredTypeahead>
                 }
                 else if (propertyType == typeof(string))

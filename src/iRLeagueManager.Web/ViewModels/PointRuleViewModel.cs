@@ -43,6 +43,11 @@ public sealed class PointRuleViewModel : LeagueViewModelBase<PointRuleViewModel,
         get => string.Join(';', BonusPoints.Select(x => string.Join(':', x.Key, x.Value)));
         set
         {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                BonusPoints.Clear();
+                return;
+            }
             var points = new Dictionary<string, int>();
             var bonus = value.Split(';');
             foreach (var pair in bonus)

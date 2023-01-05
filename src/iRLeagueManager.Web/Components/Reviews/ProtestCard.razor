@@ -11,7 +11,10 @@
                 <span>@Protest.SessionName:&nbsp;&nbsp;</span>
                 <span class="oi oi-flag m-1" /><span>@Bind(Protest, x => x.OnLap)</span>
                 <span class="oi oi-action-undo m-1" /><span>@Bind(Protest, x => x.Corner)</span>
-                <span>&nbsp;&nbsp;By: @Protest.Author.FirstName @Protest.Author.LastName</span>
+                @if (string.IsNullOrWhiteSpace(Protest.Author.FirstName) == false || string.IsNullOrWhiteSpace(Protest.Author.LastName) == false)
+                {
+                    <span>&nbsp;&nbsp;By: @Protest.Author.FirstName @Protest.Author.LastName</span>
+                }
             </div>
             <div>
                 @if (OnDeleteClick.HasDelegate)

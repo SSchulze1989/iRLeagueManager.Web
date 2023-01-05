@@ -1,4 +1,5 @@
-﻿using iRLeagueApiCore.Common.Models;
+﻿using iRLeagueApiCore.Common.Enums;
+using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 
@@ -25,6 +26,10 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
     private ObservableCollection<SeasonViewModel> seasons;
     public ObservableCollection<SeasonViewModel> Seasons { get => seasons; set => Set(ref seasons, value); }
 
+    public bool EnableProtests { get => model.EnableProtests; set => SetP(model.EnableProtests, value => model.EnableProtests = value, value); }
+    public TimeSpan ProtestCoolDownPeriod { get => model.ProtestCoolDownPeriod; set => SetP(model.ProtestCoolDownPeriod, value => model.ProtestCoolDownPeriod = value, value); }
+    public TimeSpan ProtestsClosedAfter { get => model.ProtestsClosedAfter; set => SetP(model.ProtestsClosedAfter, value => model.ProtestsClosedAfter = value, value); }
+    public ProtestPublicSetting ProtestPublic { get => model.ProtestsPublic; set => SetP(model.ProtestsPublic, value => model.ProtestsPublic = value, value); }
 
     public async Task<StatusResult> LoadCurrent(CancellationToken cancellationToken = default)
     {

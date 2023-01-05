@@ -1,4 +1,5 @@
-﻿using iRLeagueApiCore.Common.Models;
+﻿using iRLeagueApiCore.Common.Enums;
+using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 
@@ -9,7 +10,16 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
     public ReviewsPageViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         base(loggerFactory, apiService)
     {
+        leagueModel = new();
     }
+
+    private LeagueModel leagueModel;
+
+    public bool ProtestsEnabled => leagueModel.EnableProtests;
+    public bool ProtestsPublic => leagueModel.ProtestsPublic != ProtestPublicSetting.Hidden;
+    public TimeSpan CooldownPeriod => leagueModel.ProtestCoolDownPeriod;
+    public TimeSpan ProtestClosedAfter => leagueModel.ProtestsClosedAfter;
+
 
     private ObservableCollection<ReviewViewModel> reviews = new();
     public ObservableCollection<ReviewViewModel> Reviews { get => reviews; set => Set(ref reviews, value); }
@@ -30,12 +40,24 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
         try
         {
             Loading = true;
+
+            var leagueRequest = ApiService.Client.Leagues()
+                .WithName(ApiService.CurrentLeague.Name)
+                .Get(cancellationToken);
+            var leagueResult = await leagueRequest;
+            if (leagueResult.Success == false || leagueResult.Content is null)
+            {
+                return;
+            }
+            leagueModel = leagueResult.Content;
+
             var eventEndpoint = ApiService.CurrentLeague
                 .Events()
                 .WithId(eventId);
+            EventModel? @event;
             if (ApiService.CurrentSeason == null)
             {
-                var @event = (await eventEndpoint.Get(cancellationToken)).EnsureSuccess();
+                @event = (await eventEndpoint.Get(cancellationToken)).EnsureSuccess();
                 if (@event == null)
                 {
                     return;
@@ -101,5 +123,27 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
         {
             Loading = false;
         }
+    }
+
+    public bool CanFileProtest(EventViewModel? @event)
+    {
+        if (@event is null || @event.HasResult == false)
+        {
+            return false;
+        }
+
+        var canFile = true;
+        var eventEnd = @event.Date + @event.Duration.TimeOfDay;
+        if (leagueModel?.ProtestCoolDownPeriod > TimeSpan.Zero)
+        {
+            var canFileAfter = eventEnd + leagueModel.ProtestCoolDownPeriod;
+            canFile &= DateTime.UtcNow > canFileAfter;
+        }
+        if (leagueModel?.ProtestsClosedAfter > TimeSpan.Zero)
+        {
+            var canFileBefore = eventEnd + leagueModel.ProtestsClosedAfter;
+            canFile &= DateTime.UtcNow < canFileBefore;
+        }
+        return canFile;
     }
 }

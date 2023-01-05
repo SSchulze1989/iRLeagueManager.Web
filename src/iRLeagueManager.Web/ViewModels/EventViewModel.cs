@@ -21,13 +21,18 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
         SetModel(model);
     }
 
+    private TimeSpan LocalTimeOffset => ApiService.Shared.LocalTimeOffset;
+    private ClientLocalTimeProvider ClientTime => ApiService.ClientTimeProvider;
+
     public long EventId { get => model.Id; }
     public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
     public DateTime Date
     {
-        get => model.Date.GetValueOrDefault();
-        set => SetP(model.Date, value => model.Date = value.GetValueOrDefault().Add(model.Date.GetValueOrDefault().TimeOfDay), value);
+        get => ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
+        set => SetP(ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()), value => model.Date = ClientTime.ConvertToUtc(value.Add(ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()).TimeOfDay)), value);
     }
+
+    public DateTime End => Date + Duration.TimeOfDay;
 
     public long? TrackId
     {
@@ -54,8 +59,8 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
 
     public DateTime StartTime
     {
-        get => model.Date.GetValueOrDefault();
-        set => SetP(model.Date.GetValueOrDefault().TimeOfDay, value => model.Date = model.Date.GetValueOrDefault().Date.Add(value), value.TimeOfDay);
+        get => ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
+        set => SetP(ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()).TimeOfDay, value => model.Date = ClientTime.ConvertToUtc(ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()).Date.Add(value)), value.TimeOfDay);
     }
 
     public DateTime Duration

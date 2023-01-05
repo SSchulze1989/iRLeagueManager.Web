@@ -3,7 +3,7 @@
 @inject EventListViewModel EventList
 @inject LeagueApiService ApiService
 @inject SharedStateService SharedState
-
+@inject IJSRuntime JsRuntime
 
 <CascadingValue Value="EventList">
 <CascadingValue Value="SharedState">
@@ -31,3 +31,29 @@
 </CascadingBlazoredModal>
 </CascadingValue>
 </CascadingValue>
+
+@code {
+    public DateTimeOffset LocalTimeOffset { get; set; }
+
+    private TimeSpan? userTime { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (userTime == null)
+        {
+            try
+            {
+                int timeDiffer = await JsRuntime.InvokeAsync<int>("GetTimezoneValue");
+                userTime = TimeSpan.FromMinutes(-timeDiffer);
+            }
+            catch (InvalidOperationException)
+            {
+                // this throws when jsinterop is not yet available
+            }
+        }
+
+        // Converting to local time using UTC and local time minute difference.
+        LocalTimeOffset = DateTimeOffset.UtcNow.ToOffset(userTime ?? TimeSpan.Zero);
+        SharedState.LocalTimeOffset = LocalTimeOffset.Offset;
+    }
+}

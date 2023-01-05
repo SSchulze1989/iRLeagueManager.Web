@@ -25,7 +25,7 @@ builder.Services.AddLeagueApiService();
 
 var apiHttpClient = new HttpClient();
 apiHttpClient.BaseAddress = new Uri(builder.Configuration["APIServer"]);
-builder.Services.AddScoped<JsonSerializerOptions>(configure =>
+builder.Services.AddScoped(configure =>
 {
     var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
     jsonOptions.Converters.Add(new JsonStringEnumConverter());
@@ -34,6 +34,7 @@ builder.Services.AddScoped<JsonSerializerOptions>(configure =>
     return jsonOptions;
 });
 builder.Services.AddScoped<LeagueApiClientFactory>();
+builder.Services.AddScoped<ClientLocalTimeProvider>();
 builder.Services.AddScoped<ITokenStore, AsyncTokenStore>();
 builder.Services.AddScoped<IAsyncTokenProvider>(x => x.GetRequiredService<ITokenStore>());
 builder.Services.AddScoped(sp => sp.GetRequiredService<LeagueApiClientFactory>().CreateClient());

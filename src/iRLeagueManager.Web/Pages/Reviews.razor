@@ -10,6 +10,7 @@
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
 @inject ReviewsPageViewModel ReviewsVm
+@inject ClientLocalTimeProvider ClientTime
 
 <div class="container">
     <LoadingHeader class="mb-2" Loading=@(Bind(ReviewsVm, x => x.Loading))>
@@ -18,18 +19,17 @@
 
     <EventSelect />
 
-    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
-        <Authorized>
-            <ul class="nav nav-tabs mb-2">
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="@GetTabLink(0)">Reviews</NavLink>
-                </li>
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="@GetTabLink(1)">Protests</NavLink>
-                </li>
-            </ul>
-        </Authorized>
-    </AuthorizeView>
+    @if (ReviewsVm.ProtestsEnabled)
+    {
+        <ul class="nav nav-tabs mb-2">
+            <li class="nav-item">
+                <NavLink class="nav-link" href="@GetTabLink(0)">Reviews</NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link" href="@GetTabLink(1)">Protests</NavLink>
+            </li>
+        </ul>
+    }
 
     <CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
     @switch (SelectedTabIndex)
@@ -65,7 +65,7 @@
             </AuthorizeView>
             break;
         case 1:
-            @if (ReviewsVm.Protests.Count == 0)
+            @if (ReviewsVm.Protests.Count == 0 && ReviewsVm.ProtestsPublic)
             {
                 <p class="results-scoring"><em>No Protests</em></p>
             }
@@ -83,7 +83,36 @@
                     }
                 </NotAuthorized>
             </AuthorizeView>
-            <button class="btn btn-outline-secondary" type="button" @onclick=@(() => NavigationManager.NavigateTo($"./{LeagueName}/Protests/Events/{EventId}"))>File Protest</button>
+            @if (Event is not null && Event.HasResult)
+            {
+                var protestsOpenAt = Event.End + ReviewsVm.CooldownPeriod;
+                var protestsCloseAt = Event.End + ReviewsVm.ProtestClosedAfter;
+                @if (ReviewsVm.CanFileProtest(Event))
+                {
+                    <button class="btn btn-outline-secondary mb-3" type="button" @onclick=@(() => NavigationManager.NavigateTo($"./{LeagueName}/Protests/Events/{EventId}"))>File Protest</button>
+                    @if (ReviewsVm.ProtestClosedAfter > TimeSpan.Zero)
+                    {
+                        <div class="alert alert-info">
+                            Protests can be filed until @protestsCloseAt.ToString();
+                        </div>
+                    }
+                }
+                else
+                {
+                    @if (ClientTime.Now < protestsOpenAt)
+                    {
+                        <div class="alert alert-warning">
+                            Protests can be filed after @protestsOpenAt.ToString();
+                        </div>
+                    }
+                    else if (ClientTime.Now > protestsCloseAt)
+                    {
+                        <div class="alert alert-warning">
+                            Protest period ended on @protestsOpenAt.ToString();
+                        </div>
+                    }
+                }
+            }
             break;
         default:
             break;

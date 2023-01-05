@@ -18,39 +18,13 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
     }
 
     public long LeagueId => model.Id;
-    public string LeagueName
-    {
-        get => model.Name;
-        set
-        {
-            model.Name = value;
-            OnPropertyChanged();
-        }
-    }
+    public string LeagueName { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
 
-    public string NameFull
-    {
-        get => model.NameFull;
-        set
-        {
-            model.NameFull = value;
-            OnPropertyChanged();
-        }
-    }
+    public string NameFull { get => model.Name; set => SetP(model.NameFull, value => model.Name = value, value); }
 
     private ObservableCollection<SeasonViewModel> seasons;
-    public ObservableCollection<SeasonViewModel> Seasons
-    {
-        get => seasons;
-        set => Set(ref seasons, value);
-    }
+    public ObservableCollection<SeasonViewModel> Seasons { get => seasons; set => Set(ref seasons, value); }
 
-    private bool _isLoading;
-    public bool IsLoading
-    {
-        get => _isLoading;
-        set => Set(ref _isLoading, value);
-    }
 
     public async Task<StatusResult> LoadCurrent(CancellationToken cancellationToken = default)
     {
@@ -156,27 +130,6 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
         finally
         {
             Loading = false;
-        }
-    }
-
-    public override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            IsLoading = true;
-            try
-            {
-                Seasons = new ObservableCollection<SeasonViewModel>();
-                await Task.FromResult(true);
-            }
-            catch (ActionResultException<LeagueModel> ex)
-            {
-                Logger.LogError(ex.ActionResult.Message);
-            }
-            finally
-            {
-                IsLoading = false;
-            }
         }
     }
 }

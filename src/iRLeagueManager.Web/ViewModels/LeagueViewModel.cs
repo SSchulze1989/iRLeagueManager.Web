@@ -28,8 +28,26 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
 
     public bool EnableProtests { get => model.EnableProtests; set => SetP(model.EnableProtests, value => model.EnableProtests = value, value); }
     public TimeSpan ProtestCoolDownPeriod { get => model.ProtestCoolDownPeriod; set => SetP(model.ProtestCoolDownPeriod, value => model.ProtestCoolDownPeriod = value, value); }
+    public int CoolDownHrs { get => (int)ProtestCoolDownPeriod.TotalHours; set => SetP((int)ProtestCoolDownPeriod.TotalHours, value => model.ProtestCoolDownPeriod = SetHours(model.ProtestCoolDownPeriod, value), value); }
+    public int CoolDownMinutes { get => ProtestCoolDownPeriod.Minutes; set => SetP(ProtestCoolDownPeriod.Minutes, value => model.ProtestCoolDownPeriod = SetMinutes(model.ProtestCoolDownPeriod, value), value); }
     public TimeSpan ProtestsClosedAfter { get => model.ProtestsClosedAfter; set => SetP(model.ProtestsClosedAfter, value => model.ProtestsClosedAfter = value, value); }
+    public int ProtestsClosedHrs { get => (int)model.ProtestsClosedAfter.TotalHours; set => SetP((int)model.ProtestsClosedAfter.TotalHours, value => model.ProtestsClosedAfter = SetHours(model.ProtestsClosedAfter, value), value); }
+    public int ProtestsClosedMinutes { get => model.ProtestsClosedAfter.Minutes; set => SetP(model.ProtestsClosedAfter.Minutes, value => model.ProtestsClosedAfter = SetMinutes(model.ProtestsClosedAfter, value), value); }
     public ProtestPublicSetting ProtestPublic { get => model.ProtestsPublic; set => SetP(model.ProtestsPublic, value => model.ProtestsPublic = value, value); }
+
+    private TimeSpan SetHours(TimeSpan time, int hours)
+    {
+        time = TimeSpan.FromMinutes(time.Minutes);
+        time = time.Add(TimeSpan.FromHours(hours));
+        return time;
+    }
+
+    private TimeSpan SetMinutes(TimeSpan time, int minutes)
+    {
+        time = time.Subtract(TimeSpan.FromMinutes(time.Minutes));
+        time = time.Add(TimeSpan.FromMinutes(minutes));
+        return time;
+    }
 
     public async Task<StatusResult> LoadCurrent(CancellationToken cancellationToken = default)
     {
@@ -129,6 +147,27 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
             if (result.Success)
             {
                 return await LoadSeasons(cancellationToken);
+            }
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            Loading = true;
+            var request = ApiService.Client.Leagues()
+                .WithId(LeagueId)
+                .Put(model, cancellationToken);
+            var result = await request;
+            if (result.Success && result.Content is not null)
+            {
+                SetModel(result.Content);
             }
             return result.ToStatusResult();
         }

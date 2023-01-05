@@ -20,12 +20,26 @@
                     </button>
                 </div>
             }
+            <div class="list-group-item">
+                <button class="btn btn-outline-secondary" @onclick=AddSeasonClick>Add Season</button>
+            </div>
         </div>
     </div>
-    <button class="btn btn-outline-secondary mb-3" @onclick=AddSeasonClick>Add Season</button>
+
     <div class="card my-2 pb-0">
-        <div class="card-header" type="button" @onclick=ProtestSettingsClick>
+        <div class="card-header">
             Protest Settings
+        </div>
+        <div class="list-group-flush">
+            <div class="list-group-item list-group-item-action" type="button" @onclick=ProtestSettingsClick>
+               <b>Enabled:</b> @(vm.EnableProtests ? "True" : "False")<br/>
+               @if (vm.EnableProtests)
+                {
+                    <b>Cooldown Period: </b> @($"{vm.CoolDownHrs:00}:{vm.CoolDownMinutes:00}")<br/>
+                    <b>Protests closed after: </b> @($"{vm.ProtestsClosedHrs:00}:{vm.ProtestsClosedMinutes:00}")<br/>
+                    <b>Public: </b> @vm.ProtestPublic
+                }
+            </div>
         </div>
     </div>
 </div>
@@ -80,17 +94,17 @@
     private async Task ProtestSettingsClick()
     {
         var parameters = new ModalParameters()
-            .Add(nameof(EditSeasonModal.Model), season.CopyModel())
-            .Add(nameof(EditSeasonModal.OnSubmit), new Func<SeasonViewModel, CancellationToken, Task<StatusResult>>(async (season, cts) => 
+            .Add(nameof(EditProtestSettingsModal.Model), vm.CopyModel())
+            .Add(nameof(EditProtestSettingsModal.OnSubmit), new Func<LeagueViewModel, CancellationToken, Task<StatusResult>>(async (season, cts) => 
                 await season.SaveChangesAsync(cts)));
         var options = new ModalOptions()
         {
             DisableBackgroundCancel = true
         };
-        var result = await ModalService.Show<EditSeasonModal>("Edit Season", parameters, options).Result;
-        if (result.Confirmed && result.Data is SeasonModel seasonModel)
+        var result = await ModalService.Show<EditProtestSettingsModal>("Edit Protest Settings", parameters, options).Result;
+        if (result.Confirmed && result.Data is LeagueModel leagueModel)
         {
-            season.SetModel(seasonModel);
+            vm.SetModel(leagueModel);
         }
     }
 

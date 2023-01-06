@@ -68,7 +68,7 @@
                         <InputSelect class="form-select" placeholder="Select Session" aria-label="Select Session" id="incident_session" @bind-Value="SessionId"> 
                             @if (EventList.Selected != null)
                             {
-                                @foreach(var session in EventList.Selected.Sessions)
+                                @foreach(var session in EventList.Selected.Sessions.Where(x => x.SessionType == iRLeagueApiCore.Common.Enums.SessionType.Race))
                                 {
                                     <option value=@session.SessionId>@session.Name</option>
                                 }

@@ -44,6 +44,7 @@ builder.Services.AddTrackList();
 builder.Services.AddViewModels();
 
 builder.Services.AddBlazoredModal();
+builder.Services.AddLocalization();
 
 var app = builder.Build();
 
@@ -69,6 +70,9 @@ else
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseRequestLocalization(new RequestLocalizationOptions()
+    .AddSupportedCultures(new[] { "en-US", "de" })
+    .AddSupportedUICultures(new[] { "en-US", "de" }));
 
 app.UseAuthentication();
 app.UseAuthorization();

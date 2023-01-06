@@ -37,7 +37,9 @@ A list of supported features by now. The app is in constant development and more
   - Customizeable sorting
   - Bonus points (position, pole, least incidents ...)
   - Aumotaed penalty points for incidents
-- Fully open REST API: access 100% of your league data and publish them to your own webpage
+- Fully open REST API: access 100% of your league data and publish them to your own webpage  
+  Access documentation at: https://irleaguemanager.net/irleagueapi/swagger/index.html  
+  Checkout https://github.com/SSchulze1989/iRLeagueApiCore
 - Role based user access: Manage admins, organizers and stewards through the role based access system
 - Review system  
   - Register incidents and discuss with other stewards before finalizing the results  

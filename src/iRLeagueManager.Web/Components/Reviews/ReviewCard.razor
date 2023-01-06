@@ -1,7 +1,7 @@
 ﻿@inherits MvvmComponentBase
 @using System.ComponentModel
 @using Blazored.Typeahead
-@using iRLeagueApiCore.Common.Models.Members
+@using iRLeagueApiCore.Common.Models
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueManager.Web.ViewModels
 
@@ -14,15 +14,19 @@
                     <span>@Review.SessionName:</span>
                     <span>@Bind(Review, x => x.IncidentNr)</span>
                     <span class="oi oi-flag m-1" /><span>@Bind(Review, x => x.OnLap)</span>
-                    <span class="oi oi-timer m-1" /><span>@Bind(Review, x => x.Corner)</span>
+                    <span class="oi oi-action-undo m-1" /><span>@Bind(Review, x => x.Corner)</span>
                     <span class="oi oi-chevron-right m1" /><span>@Bind(Review, x => x.IncidentKind)</span>
                     <span class="oi oi-chat m1" /><span>@Bind(Review, x => x.Comments).Count</span>
                     <span class="oi oi-task" /><span>@Bind(Review, x => x.Comments).Where(x => x.Votes.Any()).Count()</span>
+                    @if (UserHasCommented(Review))
+                    {
+                        <span class="oi oi-task text-success"></span>
+                    }
                 </div>
                 <div class="col-md-auto d-grid d-flex flex-nowrap justify-content-end">
-                    @if (EditClick.HasDelegate)
+                    @if (OnEditClick.HasDelegate && ReadOnly == false)
                     {
-                        <button class="oi oi-pencil btn review-header-button" @onclick=EditClick />
+                        <button class="oi oi-pencil btn review-header-button" @onclick=OnEditClick />
                     }
                     @if (Collapsed)
                     {
@@ -32,9 +36,9 @@
                     {
                         <button class="oi oi-chevron-top btn review-header-button" @onclick=ToggleCollapsed/>
                     }
-                    @if (DeleteClick.HasDelegate)
+                    @if (OnDeleteClick.HasDelegate && ReadOnly == false)
                     {
-                        <button class="oi oi-x btn review-header-button" @onclick=DeleteClick/>
+                        <button class="oi oi-x btn review-header-button" @onclick=OnDeleteClick/>
                     }
                 </div>
             </div>
@@ -91,6 +95,16 @@
                     </div>
                 </div>
                 <hr/>
+                @if (string.IsNullOrWhiteSpace(Review.FullDescription) == false)
+                {
+                    <div>
+                        <h5>Description</h5>
+                        <div class="preserve-format">
+                            @Review.FullDescription
+                        </div>
+                    </div>
+                    <hr/>
+                }
                 <div>
                     <h5>Result</h5>
                     <div>
@@ -102,10 +116,10 @@
                             </span>
                         }
                     </div>
-                    <div>
+                    <div class="preserve-format">
                         @Bind(Review, x => x.ResultText)
                     </div>
-                    @if (IsSteward)
+                    @if (IsSteward && ReadOnly == false)
                     {
                         <div class="mt-2">
                             <button class="btn btn-outline-secondary py-0" @onclick=EditResultClick>Edit</button>
@@ -121,10 +135,18 @@
                             @foreach (var comment in @Bind(Review, x => x.Comments))
                             {
                                 <li class="list-group-item">
-                                    <ReviewComment Comment=comment OnStateHasChanged=@(async () => await InvokeAsync(StateHasChanged))/>
+                                    <ReviewComment Comment=comment 
+                                                   OnStateHasChanged=@(() => InvokeAsync(StateHasChanged)) 
+                                                   OnDeleteClick=@(() => DeleteCommentClick(comment))/>
                                 </li>
                             }
                         </ul>
+                        @if (ReadOnly == false && UserHasCommented(Review) == false)
+                        {
+                            <button class="btn btn-outline-secondary mt-2" @onclick=AddCommentClick>
+                                Add Comment
+                            </button>
+                        }
                     </div>
                 }
             </div>
@@ -138,16 +160,22 @@
     public IEnumerable<MemberInfoModel> EventMembers { get; set; } = default!;
     [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationTask { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues=true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter, EditorRequired]
     public ReviewViewModel Review { get; set; } = default!;
     [Parameter]
-    public EventCallback<MouseEventArgs> EditClick { get; set; } 
+    public EventCallback<MouseEventArgs> OnEditClick { get; set; } 
     [Parameter]
-    public EventCallback<MouseEventArgs> DeleteClick { get; set; }
+    public EventCallback<MouseEventArgs> OnDeleteClick { get; set; }
     [Parameter]
     public bool IsSteward { get; set; } = false;
+    [Parameter]
+    public bool ReadOnly { get; set; } = false;
+    [Parameter]
+    public string UserId { get; set; } = string.Empty;
 
     private ElementReference ReviewText { get; set; }
 
@@ -170,6 +198,12 @@
         await Review.DeleteAsync();
     }
 
+    private bool UserHasCommented(ReviewViewModel review)
+    {
+        var hasCommented = Review.Comments.Any(x => x.AuthorUserId == UserId);
+        return hasCommented;
+    }
+
     private async Task EditResultClick()
     {
         var parameters = new ModalParameters()
@@ -185,6 +219,33 @@
         if (result.Confirmed && result.Data is ReviewModel reviewModel)
         {
             Review.SetModel(reviewModel);
+        }
+    }
+
+    private async Task AddCommentClick()
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(EditCommentModal.Model), new ReviewCommentModel() { Votes = new List<VoteModel>() })
+            .Add(nameof(EditReviewResultModal.InvolvedMembers), Review.InvolvedMembers)
+            .Add(nameof(EditCommentModal.OnSubmit), new Func<ReviewCommentViewModel, CancellationToken, Task<StatusResult>>((comment, cancellationToken) =>
+                Review.AddComment(comment.GetModel(), cancellationToken)));
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = false
+        };
+        await ModalService.Show<EditCommentModal>("Add Comment", parameters, options).Result;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task DeleteCommentClick(ReviewCommentViewModel comment)
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(ConfirmModal.Text), "Are you sure you want to delete this comment?")
+            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
+        var confirm = await ModalService.Show<ConfirmModal>("Delete Comment", parameters).Result;
+        if (confirm.Confirmed)
+        {
+            await Review.RemoveComment(comment);
         }
     }
 }

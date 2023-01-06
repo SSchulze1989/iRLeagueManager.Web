@@ -1,55 +1,52 @@
-﻿using iRLeagueApiCore.Common.Models;
-using iRLeagueManager.Web.Extensions;
+﻿using iRLeagueApiCore.Common.Enums;
+using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Extensions;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public partial class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, LeagueModel>
+public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, LeagueModel>
 {
     public LeagueViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         this(loggerFactory, apiService, new())
     {
     }
 
-    public LeagueViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, LeagueModel model) : 
+    public LeagueViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, LeagueModel model) :
         base(loggerFactory, apiService, model)
     {
         seasons = new ObservableCollection<SeasonViewModel>();
     }
 
     public long LeagueId => model.Id;
-    public string LeagueName
-    {
-        get => model.Name;
-        set
-        {
-            model.Name = value;
-            OnPropertyChanged();
-        }
-    }
+    public string LeagueName { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
 
-    public string NameFull
-    {
-        get => model.NameFull;
-        set
-        {
-            model.NameFull = value;
-            OnPropertyChanged();
-        }
-    }
+    public string NameFull { get => model.Name; set => SetP(model.NameFull, value => model.Name = value, value); }
 
     private ObservableCollection<SeasonViewModel> seasons;
-    public ObservableCollection<SeasonViewModel> Seasons
+    public ObservableCollection<SeasonViewModel> Seasons { get => seasons; set => Set(ref seasons, value); }
+
+    public bool EnableProtests { get => model.EnableProtests; set => SetP(model.EnableProtests, value => model.EnableProtests = value, value); }
+    public TimeSpan ProtestCoolDownPeriod { get => model.ProtestCoolDownPeriod; set => SetP(model.ProtestCoolDownPeriod, value => model.ProtestCoolDownPeriod = value, value); }
+    public int CoolDownHrs { get => (int)ProtestCoolDownPeriod.TotalHours; set => SetP((int)ProtestCoolDownPeriod.TotalHours, value => model.ProtestCoolDownPeriod = SetHours(model.ProtestCoolDownPeriod, value), value); }
+    public int CoolDownMinutes { get => ProtestCoolDownPeriod.Minutes; set => SetP(ProtestCoolDownPeriod.Minutes, value => model.ProtestCoolDownPeriod = SetMinutes(model.ProtestCoolDownPeriod, value), value); }
+    public TimeSpan ProtestsClosedAfter { get => model.ProtestsClosedAfter; set => SetP(model.ProtestsClosedAfter, value => model.ProtestsClosedAfter = value, value); }
+    public int ProtestsClosedHrs { get => (int)model.ProtestsClosedAfter.TotalHours; set => SetP((int)model.ProtestsClosedAfter.TotalHours, value => model.ProtestsClosedAfter = SetHours(model.ProtestsClosedAfter, value), value); }
+    public int ProtestsClosedMinutes { get => model.ProtestsClosedAfter.Minutes; set => SetP(model.ProtestsClosedAfter.Minutes, value => model.ProtestsClosedAfter = SetMinutes(model.ProtestsClosedAfter, value), value); }
+    public ProtestPublicSetting ProtestPublic { get => model.ProtestsPublic; set => SetP(model.ProtestsPublic, value => model.ProtestsPublic = value, value); }
+
+    private TimeSpan SetHours(TimeSpan time, int hours)
     {
-        get => seasons;
-        set => Set(ref seasons, value);
+        time = TimeSpan.FromMinutes(time.Minutes);
+        time = time.Add(TimeSpan.FromHours(hours));
+        return time;
     }
 
-    private bool _isLoading;
-    public bool IsLoading
+    private TimeSpan SetMinutes(TimeSpan time, int minutes)
     {
-        get => _isLoading;
-        set => Set(ref _isLoading, value);
+        time = time.Subtract(TimeSpan.FromMinutes(time.Minutes));
+        time = time.Add(TimeSpan.FromMinutes(minutes));
+        return time;
     }
 
     public async Task<StatusResult> LoadCurrent(CancellationToken cancellationToken = default)
@@ -74,7 +71,7 @@ public partial class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leag
         }
         finally
         {
-            Loading = false;    
+            Loading = false;
         }
     }
 
@@ -159,24 +156,24 @@ public partial class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leag
         }
     }
 
-    public override async Task OnAfterRenderAsync(bool firstRender)
+    public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken)
     {
-        if (firstRender)
+        try
         {
-            IsLoading = true;
-            try
+            Loading = true;
+            var request = ApiService.Client.Leagues()
+                .WithId(LeagueId)
+                .Put(model, cancellationToken);
+            var result = await request;
+            if (result.Success && result.Content is not null)
             {
-                Seasons = new ObservableCollection<SeasonViewModel>();
-                await Task.FromResult(true);
+                SetModel(result.Content);
             }
-            catch (ActionResultException<LeagueModel> ex)
-            {
-                Logger.LogError(ex.ActionResult.Message);
-            }
-            finally
-            {
-                IsLoading = false;
-            }
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
         }
     }
 }

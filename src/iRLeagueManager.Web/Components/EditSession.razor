@@ -2,14 +2,12 @@
 
 @if (Session != null)
 {
-    <div class="input-group">
-        <span class="input-group-text w-25">Duration</span>
+    <InputGroup Label="Duration">
         <input class="form-control" type="time" arial-label="StartTime" @bind="Session!.Duration"/>
-    </div>
-    <div class="input-group">
-        <span class="input-group-text w-25">Laps</span>
-        <input class="form-control" type="number" placholder="10" aria-label="TrackId" @bind="Session!.LapsString"/>
-    </div>
+    </InputGroup>
+    <InputGroup Label="Laps">
+        <InputNumber class="form-control" placholder="10" aria-label="TrackId" @bind-Value=Session!.Laps/>
+    </InputGroup>
 }
 
 @code {

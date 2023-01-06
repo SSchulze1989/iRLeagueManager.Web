@@ -1,6 +1,6 @@
 ﻿@using Blazored.Typeahead
 @using iRLeagueApiCore.Common.Enums
-@using iRLeagueApiCore.Common.Models.Members
+@using iRLeagueApiCore.Common.Models
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
@@ -32,6 +32,9 @@
         </InputGroup>
         <InputGroup Label="Incident">
             <InputText class="form-control" placeholder="Incident Kind" aria-label="Incident Kind" id="incident_kind" @bind-Value="Review.IncidentKind" />
+        </InputGroup>
+        <InputGroup Label="Description">
+            <InputTextArea class="form-control" placeholder="Description" aria-label="Description" id="description" @bind-Value="Review.FullDescription" style="height: 140px;"/>
         </InputGroup>
     </div>
     <FormValidationMessage For=@(() => Review.IncidentKind) />

@@ -1,0 +1,64 @@
+﻿@inherits MvvmComponentBase
+@using System.ComponentModel
+@using Blazored.Typeahead
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.ViewModels
+
+<div @attributes=AdditionalAttributes>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between">
+            <div class="col d-md-flex justify-content-start">
+                <span>@Protest.SessionName:&nbsp;&nbsp;</span>
+                <span class="oi oi-flag m-1" /><span>@Bind(Protest, x => x.OnLap)</span>
+                <span class="oi oi-action-undo m-1" /><span>@Bind(Protest, x => x.Corner)</span>
+                @if (string.IsNullOrWhiteSpace(Protest.Author.FirstName) == false || string.IsNullOrWhiteSpace(Protest.Author.LastName) == false)
+                {
+                    <span>&nbsp;&nbsp;By: @Protest.Author.FirstName @Protest.Author.LastName</span>
+                }
+            </div>
+            <div>
+                @if (OnDeleteClick.HasDelegate)
+                {
+                    <button class="btn btn-outline-danger" @onclick=OnDeleteClick>
+                        <span class="oi oi-trash" />
+                    </button>
+                }
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="container">
+                <div class="row">
+                    <h5>Description</h5>
+                    <div class="preserve-format">
+                        @Protest.FullDescription
+                    </div>
+                </div>
+                <div class="row">
+                    <h5>Involved</h5>
+                    <div class="d-flex">
+                        @foreach(var member in @Bind(Protest, x => x.InvolvedMembers))
+                        {
+                            <div class="badge bg-secondary h-auto me-1">@member.FirstName @member.LastName</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter(CaptureUnmatchedValues=true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+    [Parameter, EditorRequired]
+    public ProtestViewModel Protest { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnDeleteClick { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _ = Protest ?? throw new InvalidOperationException($"Parameter {nameof(Protest)} must have a value");
+        base.OnParametersSet();
+    }
+}

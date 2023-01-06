@@ -34,6 +34,25 @@
                 {
                     <label class="form-control disabled" type="text" />
                 }
+                else if (filter.Comparator == ComparatorType.InList)
+                {
+                    <BlazoredTypeahead
+                        @bind-Values=filter.FilterValues
+                        SearchMethod=@(str => Task.FromResult((IEnumerable<string>)Array.Empty<string>()))
+                        AddItemOnEmptyResultMethod=@(str => Task.FromResult(str))
+                        DeleteItemsOnBackspace=false
+                        class="form-control">
+                        <SelectedTemplate Context=value>
+                            @value
+                        </SelectedTemplate>
+                        <ResultTemplate Context=value>
+                            @value
+                        </ResultTemplate>
+                        <NotFoundTemplate Context=value>
+                            @value
+                        </NotFoundTemplate>
+                    </BlazoredTypeahead>
+                }
                 else if (propertyType == typeof(string))
                 {
                     <InputText class="form-control" @bind-Value=filter.Value />
@@ -65,6 +84,8 @@
     private static IEnumerable<string> ColumnNames { get; } = new[]
     {
         nameof(ResultRowModel.Car),
+        nameof(ResultRowModel.CarClass),
+        nameof(ResultRowModel.ClassId),
         nameof(ResultRowModel.CompletedLaps),
         nameof(ResultRowModel.CompletedPct),
         nameof(ResultRowModel.SeasonStartIrating),

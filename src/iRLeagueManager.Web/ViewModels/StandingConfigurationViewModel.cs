@@ -4,9 +4,9 @@ using iRLeagueManager.Web.Data;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class StandingConfigurationViewModel : LeagueViewModelBase<StandingConfigurationViewModel, StandingConfigModel>
+public sealed class StandingConfigurationViewModel : LeagueViewModelBase<StandingConfigurationViewModel, StandingConfigModel>
 {
-    public StandingConfigurationViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, StandingConfigModel model) : 
+    public StandingConfigurationViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, StandingConfigModel model) :
         base(loggerFactory, apiService, model)
     {
     }

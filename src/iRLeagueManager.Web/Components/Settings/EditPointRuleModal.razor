@@ -23,7 +23,7 @@
                 break;
             case @PointRuleViewModel.PointRuleType.PointList:
                 <div class="input-group">
-                    <div class="form-control overflow-scroll">
+                    <div class="form-control overflow-auto">
                         @{var pointsPerPlace = @Bind(PointRule, x => x.PointsPerPlace);}
                         <table class="mb-3">
                             <thead>
@@ -67,6 +67,9 @@
             default:
                 break;
         }
+        <InputGroup Label="Bonus Points">
+            <InputText class="form-control" @bind-Value=PointRule.BonusPointsString />
+        </InputGroup>
     </div>
     <CancelSubmitButtons SubmitText="Ok" CancelText="Cancel" OnSubmit=Submit OnCancel=Cancel />
 </EditForm>

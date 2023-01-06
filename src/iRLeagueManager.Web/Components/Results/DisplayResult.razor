@@ -14,7 +14,7 @@
             var displayStartPos = resultRows.Any(x => x.StartPosition != 0);
             var displayQualyLap = resultRows.Any(x => x.QualifyingTime > TimeSpan.FromSeconds(1));
         }
-        <div class="card-body overflow-scroll p-1">
+        <div class="card-body overflow-auto p-1">
             <table class="table table-sm table-striped table-hover" style="font-size: 0.9rem; line-height: 1rem">
                 <thead>
                     <tr>
@@ -68,7 +68,7 @@
                             {
                                 <td class="@(IsFastestLap(resultRows, row, x => x.QualifyingTime) ? "fw-bold" : "")">@row.QualifyingTime.LapTimeString()</td>
                             }
-                            <td class="@(IsFastestLap(resultRows, row, x => x.FastestLapTime) ? "fw-bold" : "")">@row.FastestLapTime.LapTimeString() (@row.FastLapNr)</td>
+                            <td class="@(IsFastestLap(resultRows, row, x => x.FastestLapTime) ? "fw-bold" : "")">@row.FastestLapTime.LapTimeString() @(row.FastLapNr != 0 ? $"({row.FastLapNr})" : "")</td>
                             <td class="@(IsFastestLap(resultRows, row, x => x.AvgLapTime) ? "fw-bold" : "")">@row.AvgLapTime.LapTimeString()</td>
                             @if (isTeamResult == false)
                             {

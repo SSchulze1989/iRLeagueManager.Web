@@ -1,5 +1,5 @@
 ﻿@using iRLeagueApiCore.Common.Enums
-@using iRLeagueApiCore.Common.Models.Members
+@using iRLeagueApiCore.Common.Models
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
@@ -62,7 +62,7 @@
     public ReviewCommentModel Model { get; set; } = default!;
 
     [Parameter]
-    public Func<ReviewCommentViewModel, CancellationToken, Task<bool>>? OnSubmit { get; set; }
+    public Func<ReviewCommentViewModel, CancellationToken, Task<StatusResult>>? OnSubmit { get; set; }
 
     private long? NewValue
     {
@@ -137,7 +137,7 @@
         bool success = true;
         if (OnSubmit != null)
         {
-            success |= await OnSubmit.Invoke(Comment, cts.Token);
+            success &= (await OnSubmit.Invoke(Comment, cts.Token)).IsSuccess;
         }
         if (success && ModalInstance != null)
         {

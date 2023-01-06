@@ -1,89 +1,87 @@
 ﻿using iRLeagueApiCore.Common.Models.Standings;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
-using System.Collections.ObjectModel;
 
-namespace iRLeagueManager.Web.ViewModels
+namespace iRLeagueManager.Web.ViewModels;
+
+public sealed class StandingsPageViewModel : LeagueViewModelBase<StandingsPageViewModel>
 {
-    public class StandingsPageViewModel : LeagueViewModelBase<StandingsPageViewModel>
+    public StandingsPageViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
+        base(loggerFactory, apiService)
     {
-        public StandingsPageViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
-            base(loggerFactory, apiService)
+        standings = new ObservableCollection<StandingsModel>();
+    }
+
+    private ObservableCollection<StandingsModel> standings;
+    public ObservableCollection<StandingsModel> Standings { get => standings; set => Set(ref standings, value); }
+
+    private int selectedStandingIndex;
+    public int SelectedStandingIndex { get => selectedStandingIndex; set { if (Set(ref selectedStandingIndex, value)) OnPropertyChanged(nameof(SelectedStanding)); } }
+
+    public StandingsModel? SelectedStanding => Standings.ElementAtOrDefault(SelectedStandingIndex);
+
+    public async Task<StatusResult> LoadFromEventAsync(long eventId)
+    {
+        if (ApiService.CurrentLeague == null)
         {
-            standings = new ObservableCollection<StandingsModel>();
+            return LeagueNullResult();
         }
 
-        private ObservableCollection<StandingsModel> standings;
-        public ObservableCollection<StandingsModel> Standings { get => standings; set => Set(ref standings, value); }
-
-        private int selectedStandingIndex;
-        public int SelectedStandingIndex { get => selectedStandingIndex; set { if (Set(ref selectedStandingIndex, value)) OnPropertyChanged(nameof(SelectedStanding)); } }
-
-        public StandingsModel? SelectedStanding => Standings.ElementAtOrDefault(SelectedStandingIndex);
-
-        public async Task<StatusResult> LoadFromEventAsync(long eventId)
+        try
         {
-            if (ApiService.CurrentLeague == null)
+            Loading = true;
+            var request = ApiService.CurrentLeague
+            .Events()
+            .WithId(eventId)
+            .Standings()
+            .Get();
+            var result = await request;
+            if (result.Success && result.Content is not null)
             {
-                return LeagueNullResult();
+                var standingsData = result.Content;
+                Standings = new ObservableCollection<StandingsModel>(standingsData);
             }
 
-            try
-            {
-                Loading = true;
-                var request = ApiService.CurrentLeague
-                .Events()
-                .WithId(eventId)
-                .Standings()
-                .Get();
-                var result = await request;
-                if (result.Success && result.Content is not null)
-                {
-                    var standingsData = result.Content;
-                    Standings = new ObservableCollection<StandingsModel>(standingsData);
-                }
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
 
-                return result.ToStatusResult();
-            }
-            finally
-            {
-                Loading = false;
-            }
+    public async Task<StatusResult> LoadAsync(long? seasonId = null)
+    {
+        if (ApiService.CurrentLeague == null)
+        {
+            return LeagueNullResult();
         }
 
-        public async Task<StatusResult> LoadAsync(long? seasonId = null)
+        try
         {
-            if (ApiService.CurrentLeague == null)
+            Loading = true;
+            if ((ApiService.CurrentSeason == null || ApiService.CurrentSeason.Id != seasonId) && seasonId != null)
             {
-                return LeagueNullResult();
+                await ApiService.SetCurrentSeasonAsync(ApiService.CurrentLeague.Name, seasonId.Value);
+            }
+            if (ApiService.CurrentSeason == null)
+            {
+                return SeasonNullResult();
             }
 
-            try
+            var request = ApiService.CurrentSeason.Standings().Get();
+            var result = await request;
+            if (result.Success && result.Content is not null)
             {
-                Loading = true;
-                if ((ApiService.CurrentSeason == null || ApiService.CurrentSeason.Id != seasonId) && seasonId != null)
-                {
-                    await ApiService.SetCurrentSeasonAsync(ApiService.CurrentLeague.Name, seasonId.Value);
-                }
-                if (ApiService.CurrentSeason == null)
-                {
-                    return SeasonNullResult();
-                }
-
-                var request = ApiService.CurrentSeason.Standings().Get();
-                var result = await request;
-                if (result.Success && result.Content is not null)
-                {
-                    var standingsData = result.Content;
-                    Standings = new ObservableCollection<StandingsModel>(standingsData);
-                }
-
-                return result.ToStatusResult();
+                var standingsData = result.Content;
+                Standings = new ObservableCollection<StandingsModel>(standingsData);
             }
-            finally
-            {
-                Loading = false;
-            }
+
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
         }
     }
 }

@@ -31,7 +31,7 @@
                 <div>@Bind(Schedule, x => x.Name)</div>
             }
         </LoadingHeader>
-        <div class="card-body overflow-scroll">
+        <div class="card-body overflow-auto">
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
@@ -78,17 +78,23 @@
                             }
                         }
                         <td>
-                            <button class="btn btn-outline-danger btn-sm" @onclick=@(() => RemoveEventClick(@event)) @onclick:stopPropagation @onclick:preventDefault>
-                                <span class="oi oi-trash"/>
-                            </button>
+                            @if (ReadOnly == false)
+                            {
+                                <button class="btn btn-outline-danger btn-sm" @onclick=@(() => RemoveEventClick(@event)) @onclick:stopPropagation @onclick:preventDefault>
+                                    <span class="oi oi-trash"/>
+                                </button>
+                            }
                         </td>
                     </tr>
                 }
                 </tbody>
             </table>
-            <div class="mb-1">
-                <button class="btn btn-outline-secondary" @onclick=AddEventClick>Add Event</button>
-            </div>
+            @if (ReadOnly == false)
+            {
+                <div class="mb-1">
+                    <button class="btn btn-outline-secondary" @onclick=AddEventClick>Add Event</button>
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -203,7 +209,7 @@
             return;
         }
         var parameters = new ModalParameters()
-            .Add(nameof(EditEventModal.EventModel), new EventModel() { Date = DateTime.Now.Date })
+            .Add(nameof(EditEventModal.EventModel), GetNewEvent())
             .Add(nameof(EditEventModal.OnSubmit),
                 new Func<EventViewModel, CancellationToken, 
                     Task<StatusResult>>(async (@event, cancellationToken) => await Schedule.AddEvent(@event)));
@@ -212,6 +218,31 @@
             DisableBackgroundCancel = true,
         };
         var result = await ModalService.Show<EditEventModal>("Add Event", parameters, options).Result;
+    }
+
+    private EventModel GetNewEvent()
+    {
+        var newEvent = new EventModel() { Date = DateTime.Now.Date };
+        var lastEvent = Schedule.Events.LastOrDefault()?.CopyModel();
+        if (lastEvent == null)
+        {
+            return newEvent;
+        }
+
+        newEvent.Date = lastEvent.Date;
+        newEvent.Duration = lastEvent.Duration;
+        newEvent.EventType = lastEvent.EventType;
+        newEvent.ResultConfigs = lastEvent.ResultConfigs;
+        newEvent.Sessions = lastEvent.Sessions.Select(x => new SessionModel()
+        {
+            Duration = x.Duration,
+            Laps = x.Laps,
+            Name = x.Name,
+            SessionNr = x.SessionNr,
+            SessionType = x.SessionType,
+        }).ToList();
+
+        return newEvent;
     }
 
     private async Task RemoveEventClick(EventViewModel @event)

@@ -1,11 +1,10 @@
 ﻿using System.ComponentModel;
 
-namespace iRLeagueManager.Web.Shared
+namespace iRLeagueManager.Web.Shared;
+
+public interface IModelState : INotifyPropertyChanged
 {
-    public interface IModelState : INotifyPropertyChanged
-    {
-        public bool Loading { get; }
-        public bool Saving { get; }
-        public bool HasChanged { get; }
-    }
+    public bool Loading { get; }
+    public bool Saving { get; }
+    public bool HasChanged { get; }
 }

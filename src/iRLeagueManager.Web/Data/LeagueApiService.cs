@@ -2,26 +2,27 @@
 using iRLeagueApiCore.Client.Endpoints.Leagues;
 using iRLeagueApiCore.Client.Endpoints.Seasons;
 using iRLeagueApiCore.Common.Models;
-using System.Collections.ObjectModel;
 using System.Text.Json;
 
 namespace iRLeagueManager.Web.Data;
 
-public class LeagueApiService
+public sealed class LeagueApiService
 {
     //private readonly ILogger<LeagueApiService> logger;
 
-    public LeagueApiService(ILeagueApiClient apiClient, SharedStateService sharedState, JsonSerializerOptions jsonOptions)
+    public LeagueApiService(ILeagueApiClient apiClient, SharedStateService sharedState, ClientLocalTimeProvider localTimeProvider, JsonSerializerOptions jsonOptions)
     {
         //this.logger = logger;
         Client = apiClient;
         Shared = sharedState;
         JsonOptions = jsonOptions;
+        ClientTimeProvider= localTimeProvider;
     }
 
     public ILeagueApiClient Client { get; }
     public SharedStateService Shared { get; }
     public JsonSerializerOptions JsonOptions { get; }
+    public ClientLocalTimeProvider ClientTimeProvider { get; }
     public ILeagueByNameEndpoint? CurrentLeague { get; private set; }
     public ISeasonByIdEndpoint? CurrentSeason { get; private set; }
 

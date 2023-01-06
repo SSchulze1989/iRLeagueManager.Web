@@ -1,27 +1,35 @@
 ﻿@inherits MvvmComponentBase
-@using iRLeagueApiCore.Common.Models.Members
+@using iRLeagueApiCore.Common.Models
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueManager.Web.ViewModels
 
-<div class="container">
-    <h6 class="fw-bold">@Bind(Comment, x => x.AuthorName)</h6>
-    <div class="m-1">
-        @Bind(Comment, x=> x.Text)
-    </div>
+<div class="d-flex justify-content-between align-items-start">
     <div>
-        @foreach(var vote in @Bind(Comment, x => x.Votes))
-        {
-            var member = @Bind(vote, x => x.MemberAtFault);
-            <span class="badge bg-warning">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
-        }
+        <h6 class="fw-bold">@Bind(Comment, x => x.AuthorName)</h6>
+        <div class="m-1 preserve-format">
+            @Bind(Comment, x=> x.Text)
+        </div>
+        <div>
+            @foreach(var vote in @Bind(Comment, x => x.Votes))
+            {
+                var member = @Bind(vote, x => x.MemberAtFault);
+                <span class="badge bg-warning">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
+            }
+        </div>
     </div>
     @if (UserCanEdit)
     {
-        <div class="mt-2">
-            <button class="btn btn-outline-secondary py-0" @onclick=EditClick>Edit</button>
-        </div>
+        <button class="btn btn-outline-danger" @onclick=@OnDeleteClick>
+            <span class="oi oi-trash" />
+        </button>
     }
 </div>
+@if (UserCanEdit)
+{
+    <div class="mt-2">
+        <button class="btn btn-outline-secondary py-0" @onclick=EditClick>Edit</button>
+    </div>
+}
 
 @code {
     [CascadingParameter]
@@ -33,27 +41,21 @@
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
     [Parameter]
-    public EventCallback OnStateHasChanged { get; set; } = default!;
+    public EventCallback OnStateHasChanged { get; set; }
+    [Parameter]
+    public EventCallback OnDeleteClick { get; set; }
 
     private bool UserCanEdit;
 
     //[Parameter]
     //public EventCallback<MouseEventArgs> EditClick { get; set; }
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
-        _ = Comment ?? throw new InvalidOperationException($"Parameter {nameof(Comment)} must have a value");
+        _ = Comment ?? throw BlazorParameterNullException.New(this, Comment);
         _ = AuthenticationStateTask ?? throw BlazorParameterNullException.New(this, AuthenticationStateTask);
-        base.OnParametersSet();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender == false)
-        {
-            return;
-        }
         UserCanEdit = await GetUserCanEdit();
+        base.OnParametersSet();
     }
 
     private async Task<bool> GetUserCanEdit()
@@ -82,7 +84,8 @@
             .Add(nameof(EditCommentModal.Model), Comment.CopyModel())
             .Add(nameof(EditCommentModal.InvolvedMembers), InvolvedMembers)
             .Add(nameof(EditCommentModal.OnSubmit), 
-                new Func<ReviewCommentViewModel, CancellationToken, Task<bool>>(async (comment, cancellationToken) => await comment.SaveChangesAsync(cancellationToken)));
+                new Func<ReviewCommentViewModel, CancellationToken, Task<StatusResult>>((comment, cancellationToken) => 
+                    comment.SaveChangesAsync(cancellationToken)));
         var result = await ModalService.Show<EditCommentModal>("Edit Comment", parameters).Result;
         if (result.Confirmed && result.Data is ReviewCommentModel comment)
         {

@@ -1,11 +1,9 @@
 ﻿using iRLeagueApiCore.Common.Models;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace iRLeagueManager.Web.Data;
 
-public class SharedStateService
+public sealed class SharedStateService
 {
     private bool loggedIn;
     public bool LoggedIn { get => loggedIn; set => Set(ref loggedIn, value); }
@@ -29,6 +27,8 @@ public class SharedStateService
     public ObservableCollection<SeasonModel> SeasonList { get => seasonList; set => Set(ref seasonList, value); }
 
     public event EventHandler? StateChanged;
+    
+    public TimeSpan LocalTimeOffset { get; set; }
 
     public SharedStateService()
     {

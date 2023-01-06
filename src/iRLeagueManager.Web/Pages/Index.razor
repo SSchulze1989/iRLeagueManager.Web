@@ -3,3 +3,8 @@
 <PageTitle>Index</PageTitle>
 
 <NavLink class="nav-link" href="leagues">Start!</NavLink>
+
+@code {
+    [CascadingParameter]
+    SharedStateService SharedState { get; set; } = default!;
+}

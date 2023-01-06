@@ -6,15 +6,9 @@ using iRLeagueManager.Web;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Server.Data;
 using iRLeagueManager.Web.Shared;
-using iRLeagueManager.Web.ViewModels;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -31,7 +25,7 @@ builder.Services.AddLeagueApiService();
 
 var apiHttpClient = new HttpClient();
 apiHttpClient.BaseAddress = new Uri(builder.Configuration["APIServer"]);
-builder.Services.AddScoped<JsonSerializerOptions>(configure =>
+builder.Services.AddScoped(configure =>
 {
     var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
     jsonOptions.Converters.Add(new JsonStringEnumConverter());
@@ -40,6 +34,7 @@ builder.Services.AddScoped<JsonSerializerOptions>(configure =>
     return jsonOptions;
 });
 builder.Services.AddScoped<LeagueApiClientFactory>();
+builder.Services.AddScoped<ClientLocalTimeProvider>();
 builder.Services.AddScoped<ITokenStore, AsyncTokenStore>();
 builder.Services.AddScoped<IAsyncTokenProvider>(x => x.GetRequiredService<ITokenStore>());
 builder.Services.AddScoped(sp => sp.GetRequiredService<LeagueApiClientFactory>().CreateClient());
@@ -49,6 +44,7 @@ builder.Services.AddTrackList();
 builder.Services.AddViewModels();
 
 builder.Services.AddBlazoredModal();
+builder.Services.AddLocalization();
 
 var app = builder.Build();
 
@@ -74,6 +70,9 @@ else
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseRequestLocalization(new RequestLocalizationOptions()
+    .AddSupportedCultures(new[] { "en-US", "de" })
+    .AddSupportedUICultures(new[] { "en-US", "de" }));
 
 app.UseAuthentication();
 app.UseAuthorization();

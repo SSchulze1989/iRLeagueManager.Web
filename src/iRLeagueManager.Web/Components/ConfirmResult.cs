@@ -1,10 +1,9 @@
-﻿namespace iRLeagueManager.Web.Components
+﻿namespace iRLeagueManager.Web.Components;
+
+public enum ConfirmResult
 {
-    public enum ConfirmResult
-    {
-        Ok,
-        Yes,
-        No,
-        Cancel
-    }
+    Ok,
+    Yes,
+    No,
+    Cancel
 }

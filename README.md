@@ -7,7 +7,7 @@ build in stewarding system.
 > https://discord.gg/XUG2kad
 
 ## Description
-Online sim racing has gained strong popularity among hobbyist and professionals alike and iRacing is one of the leading platforms for competitive racing.
+Online sim racing has gained strong popularity among hobbyists and professionals alike and iRacing is one of the leading platforms for competitive racing.
 Many people choose to organize private hosted races in leagues to stir up the competition, recreate historical championships or just to have fun with friends.
 
 While iRacing does provide support for leagues and league scoring the capabilities fall short compared to the variety of race formats and points calculation formats 

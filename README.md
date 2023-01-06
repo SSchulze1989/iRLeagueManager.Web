@@ -17,8 +17,10 @@ up to full scale result hosters.
 Managing spredsheets can be a tedious and time consuming task and as the leagues grow the workload for keeping up with current and past results will grow larger. 
 Oftentimes leagues implement some kind of penalty system that also needs to be accounted for through points deduction or time penalties.
 
-iRLeagueManager is providing such a service for scoring and hosting your league results all-in-one.
-  <img src="https://user-images.githubusercontent.com/57634354/210998860-b9859c2f-2d07-4d4d-8981-0b47242aba51.png" width="75%" />  
+**iRLeagueManager is providing such a service for scoring and hosting your league results all-in-one.**
+
+<img src="https://user-images.githubusercontent.com/57634354/210998860-b9859c2f-2d07-4d4d-8981-0b47242aba51.png" width="75%" />  
+
 Once configured the software can generated results and standings, apply penalty points and publish to your website all with the click of one button, 
 you can generate extensive statistics and metrics spanning over years of races with minimal amount of effort and the build in reviews and stewarding 
 system gives a home to after race disscussions about incidents and can also apply automatic penalty points based on a incident category system.
@@ -38,7 +40,7 @@ A list of supported features by now. The app is in constant development and more
 - Fully open REST API: access 100% of your league data and publish them to your own webpage
 - Role based user access: Manage admins, organizers and stewards through the role based access system
 - Review system  
-  - <img src="https://user-images.githubusercontent.com/57634354/211000455-c8b03fc2-0635-4981-81ca-a22907711891.png" width="75%" />
-  - Register incidents and discuss with other stewards before finalizing the results
+  - Register incidents and discuss with other stewards before finalizing the results  
+    > <img src="https://user-images.githubusercontent.com/57634354/211000455-c8b03fc2-0635-4981-81ca-a22907711891.png" width="75%" />
   - Automatic penalty points for incident categories
-  - Protest form to let drivers report incidents from the previous race
+  - Protest form to let drivers report incidents from the previous race  

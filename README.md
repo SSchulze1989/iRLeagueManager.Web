@@ -7,7 +7,7 @@ build in stewarding system.
 > https://discord.gg/XUG2kad
 
 ## Description
-Online sim racing has gained strong popularity among hobbyist and proffesionals alike and iRacing is one of the leading platforms for competitive racing.
+Online sim racing has gained strong popularity among hobbyist and professionals alike and iRacing is one of the leading platforms for competitive racing.
 Many people choose to organize private hosted races in leagues to stir up the competition, recreate historical championships or just to have fun with friends.
 
 While iRacing does provide support for leagues and league scoring the capabilities fall short compared to the variety of race formats and points calculation formats 
@@ -23,7 +23,7 @@ Oftentimes leagues implement some kind of penalty system that also needs to be a
 
 Once configured the software can generated results and standings, apply penalty points and publish to your website all with the click of one button, 
 you can generate extensive statistics and metrics spanning over years of races with minimal amount of effort and the build in reviews and stewarding 
-system gives a home to after race disscussions about incidents and can also apply automatic penalty points based on a incident category system.
+system gives a home to after race discussions about incidents and can also apply automatic penalty points based on a incident category system.
 Finally you can either use the webapp directly to share the results with the world or if you already have a league webpage use the API to publish the data in real time.
 
 ## Features

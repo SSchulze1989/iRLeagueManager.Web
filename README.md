@@ -19,7 +19,7 @@ Oftentimes leagues implement some kind of penalty system that also needs to be a
 
 **iRLeagueManager is providing such a service for scoring and hosting your league results all-in-one.**
 
-<img src="https://user-images.githubusercontent.com/57634354/210998860-b9859c2f-2d07-4d4d-8981-0b47242aba51.png" width="75%" />  
+> <img src="https://user-images.githubusercontent.com/57634354/210998860-b9859c2f-2d07-4d4d-8981-0b47242aba51.png" width="75%" />  
 
 Once configured the software can generated results and standings, apply penalty points and publish to your website all with the click of one button, 
 you can generate extensive statistics and metrics spanning over years of races with minimal amount of effort and the build in reviews and stewarding 

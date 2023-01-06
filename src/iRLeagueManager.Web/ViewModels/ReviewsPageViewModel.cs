@@ -127,7 +127,7 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
 
     public bool CanFileProtest(EventViewModel? @event)
     {
-        if (@event is null || @event.HasResult == false)
+        if (@event is null || @event.HasResult == false || leagueModel.EnableProtests == false)
         {
             return false;
         }

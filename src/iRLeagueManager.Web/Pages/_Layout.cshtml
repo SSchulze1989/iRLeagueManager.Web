@@ -36,6 +36,9 @@
             // Returns the time difference in minutes between UTC time and local time.
             return new Date().getTimezoneOffset();
         }
+        function GetIANATimeZone() {
+            return Intl.DateTimeFormat().resolvedOptions().timeZone;
+        }
     </script>
 </body>
 </html>

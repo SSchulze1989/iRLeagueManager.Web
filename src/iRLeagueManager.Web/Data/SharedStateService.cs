@@ -29,6 +29,7 @@ public sealed class SharedStateService
     public event EventHandler? StateChanged;
     
     public TimeSpan LocalTimeOffset { get; set; }
+    public TimeZoneInfo LocalTimeZone { get; set; } = TimeZoneInfo.Utc;
 
     public SharedStateService()
     {

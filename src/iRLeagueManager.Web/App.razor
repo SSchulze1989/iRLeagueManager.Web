@@ -1,4 +1,5 @@
 ﻿@using Blazored.Modal
+@using System.Globalization;
 @using iRLeagueManager.Web.ViewModels
 @inject EventListViewModel EventList
 @inject LeagueApiService ApiService
@@ -34,6 +35,7 @@
 
 @code {
     public DateTimeOffset LocalTimeOffset { get; set; }
+    public TimeZoneInfo LocalTimeZone { get; set; } = TimeZoneInfo.Utc;
 
     private TimeSpan? userTime { get; set; }
 
@@ -45,6 +47,10 @@
             {
                 int timeDiffer = await JsRuntime.InvokeAsync<int>("GetTimezoneValue");
                 userTime = TimeSpan.FromMinutes(-timeDiffer);
+                var ianaTimeZone = await JsRuntime.InvokeAsync<string>("GetIANATimeZone");
+                var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(ianaTimeZone);
+                LocalTimeZone = timeZoneInfo;
+                SharedState.LocalTimeZone = LocalTimeZone;
             }
             catch (InvalidOperationException)
             {

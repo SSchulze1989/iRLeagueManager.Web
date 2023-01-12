@@ -1,0 +1,20 @@
+﻿@inject SharedStateService SharedState
+
+<footer class="d-flex flex-row justify-content-end">
+    <small class="font-monospace fw-light me-2">
+        @{var timeZone = SharedState.LocalTimeZone;}
+        &copy; 2022-2023 Simon Schulze  -  Time zone: @timeZone.Id (@($"{(timeZone.BaseUtcOffset >= TimeSpan.Zero ? "+" : "-")}{timeZone.BaseUtcOffset.ToString(@"hh\:mm")}"))
+    </small>
+</footer>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+}

@@ -48,7 +48,7 @@ builder.Services.AddLocalization();
 
 var app = builder.Build();
 
-app.UsePathBase("/app");
+app.UsePathBase("/");
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {

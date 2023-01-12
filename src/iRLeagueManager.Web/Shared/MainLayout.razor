@@ -7,17 +7,21 @@
 </div>
 
 <div class="page">
-        <CascadingValue Value=LeagueName Name="LeagueName">
-            <div class="sidebar">
-                <NavMenu />
-            </div>
-        </CascadingValue>
+    <CascadingValue Value=LeagueName Name="LeagueName">
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+    </CascadingValue>
 
-        <main>
-            <article class="content px-2 pb-4">
-                @Body
-            </article>
-        </main>
+    <main>
+        <article class="content px-2 pb-4 mb-2">
+            @Body
+        </article>
+    </main>
+</div>
+
+<div class="page-footer">
+    <Footer />
 </div>
 
 @code {

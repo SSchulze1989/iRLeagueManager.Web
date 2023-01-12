@@ -12,7 +12,6 @@ public class ClientLocalTimeProvider
         this.sharedState = sharedState;
     }
 
-    public TimeSpan LocalTimeOffset => sharedState.LocalTimeOffset;
     public TimeZoneInfo LocalTimeZone => sharedState.LocalTimeZone;
 
     public DateTime Now => ConvertToLocal(DateTime.UtcNow);

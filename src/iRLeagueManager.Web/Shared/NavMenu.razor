@@ -115,7 +115,7 @@
         </Authorized>
     </AuthorizeView>
     <div class="container" style="position: fixed; bottom: 0;">
-        <small>TimeZone: UTC + @SharedState.LocalTimeOffset.AsDateTime().ToString(@"hh\:mm")</small>
+        <small>TimeZone: UTC + @SharedState.LocalTimeZone.BaseUtcOffset.AsDateTime().ToString(@"hh\:mm")</small>
     </div>
 </div>
 

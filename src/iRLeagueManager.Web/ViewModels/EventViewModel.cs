@@ -21,7 +21,6 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
         SetModel(model);
     }
 
-    private TimeSpan LocalTimeOffset => ApiService.Shared.LocalTimeOffset;
     private ClientLocalTimeProvider ClientTime => ApiService.ClientTimeProvider;
 
     public long EventId { get => model.Id; }

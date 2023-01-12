@@ -34,8 +34,6 @@
 </CascadingValue>
 
 @code {
-    public DateTimeOffset LocalTimeOffset { get; set; }
-    public TimeZoneInfo LocalTimeZone { get; set; } = TimeZoneInfo.Utc;
 
     private TimeSpan? userTime { get; set; }
 
@@ -45,21 +43,14 @@
         {
             try
             {
-                int timeDiffer = await JsRuntime.InvokeAsync<int>("GetTimezoneValue");
-                userTime = TimeSpan.FromMinutes(-timeDiffer);
                 var ianaTimeZone = await JsRuntime.InvokeAsync<string>("GetIANATimeZone");
                 var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(ianaTimeZone);
-                LocalTimeZone = timeZoneInfo;
-                SharedState.LocalTimeZone = LocalTimeZone;
+                SharedState.LocalTimeZone = timeZoneInfo;
             }
             catch (InvalidOperationException)
             {
                 // this throws when jsinterop is not yet available
             }
         }
-
-        // Converting to local time using UTC and local time minute difference.
-        LocalTimeOffset = DateTimeOffset.UtcNow.ToOffset(userTime ?? TimeSpan.Zero);
-        SharedState.LocalTimeOffset = LocalTimeOffset.Offset;
     }
 }

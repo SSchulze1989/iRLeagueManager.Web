@@ -27,8 +27,7 @@ public sealed class SharedStateService
     public ObservableCollection<SeasonModel> SeasonList { get => seasonList; set => Set(ref seasonList, value); }
 
     public event EventHandler? StateChanged;
-    
-    public TimeSpan LocalTimeOffset { get; set; }
+
     public TimeZoneInfo LocalTimeZone { get; set; } = TimeZoneInfo.Utc;
 
     public SharedStateService()

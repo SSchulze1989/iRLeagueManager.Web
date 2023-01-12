@@ -37,20 +37,20 @@
 
     private TimeSpan? userTime { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (userTime == null)
-        {
-            try
-            {
-                var ianaTimeZone = await JsRuntime.InvokeAsync<string>("GetIANATimeZone");
-                var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(ianaTimeZone);
-                SharedState.LocalTimeZone = timeZoneInfo;
-            }
-            catch (InvalidOperationException)
-            {
-                // this throws when jsinterop is not yet available
-            }
-        }
-    }
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    if (userTime == null)
+    //    {
+    //        try
+    //        {
+    //            var ianaTimeZone = await JsRuntime.InvokeAsync<string>("GetIANATimeZone");
+    //            var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(ianaTimeZone);
+    //            SharedState.LocalTimeZone = timeZoneInfo;
+    //        }
+    //        catch (InvalidOperationException)
+    //        {
+    //            // this throws when jsinterop is not yet available
+    //        }
+    //    }
+    //}
 }

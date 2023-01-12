@@ -13,7 +13,7 @@
 </div>
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
+    <nav class="d-flex flex-column">
         <div class="nav-item">
             <NavLink class="nav-link" href="leagues">
                 <span class="oi oi-list" aria-hidden="true"></span> Leagues
@@ -102,20 +102,22 @@
                 </div>
             </NotAuthorized>
         </AuthorizeView>
+        <AuthorizeView>
+            <Authorized>
+                <div class="container mb-3">
+                    User: @context.User.Identity?.Name;<br />
+                    @{
+                        var userRoles = @context.User.Claims
+                            .Where(x => x.Type == ClaimTypes.Role)
+                            .Select(x => x.Value);
+                    }
+                    Roles: @string.Join(", ", userRoles)
+                </div>
+            </Authorized>
+        </AuthorizeView>
     </nav>
-    <AuthorizeView>
-        <Authorized>
-            <div class="container mb-3">
-                User: @context.User.Identity?.Name;<br/>
-                @{var userRoles = @context.User.Claims
-                    .Where(x => x.Type == ClaimTypes.Role)
-                    .Select(x => x.Value);}
-                Roles: @string.Join(", ", userRoles)
-            </div>
-        </Authorized>
-    </AuthorizeView>
-    <div class="container" style="position: fixed; bottom: 0;">
-        <small>TimeZone: UTC + @SharedState.LocalTimeZone.BaseUtcOffset.AsDateTime().ToString(@"hh\:mm")</small>
+    <div class="container text-wrap" style="position:absolute; bottom: 0; max-width: 250px">
+        <small class="fw-light">TimeZone: @SharedState.LocalTimeZone.DisplayName</small>
     </div>
 </div>
 

@@ -223,7 +223,7 @@
 
     private EventModel GetNewEvent()
     {
-        var newEvent = new EventModel() { Date = ClientTime.Now.Date };
+        var newEvent = new EventModel() { Date = DateTime.UtcNow };
         var lastEvent = Schedule.Events.LastOrDefault()?.CopyModel();
         if (lastEvent == null)
         {

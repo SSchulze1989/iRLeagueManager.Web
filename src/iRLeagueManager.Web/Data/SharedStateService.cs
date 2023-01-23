@@ -27,12 +27,14 @@ public sealed class SharedStateService
     public ObservableCollection<SeasonModel> SeasonList { get => seasonList; set => Set(ref seasonList, value); }
 
     public event EventHandler? StateChanged;
-    
-    public TimeSpan LocalTimeOffset { get; set; }
+
+    private TimeZoneInfo localTimeZone;
+    public TimeZoneInfo LocalTimeZone { get => localTimeZone; set => Set(ref localTimeZone, value); }
 
     public SharedStateService()
     {
         seasonList = new ObservableCollection<SeasonModel>();
+        localTimeZone = TimeZoneInfo.Local;
     }
 
     private void Set<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

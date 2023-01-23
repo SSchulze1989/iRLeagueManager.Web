@@ -4,6 +4,16 @@
     flex-direction: column;
 }
 
+.page-footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1.25rem;
+    background-color: dimgray;
+    color: white;
+}
+
 main {
     flex: 1;
 }

@@ -1,0 +1,28 @@
+﻿@implements IDisposable
+@inject SharedStateService SharedState
+
+<footer class="d-flex flex-row justify-content-end">
+    <small class="font-monospace fw-light me-2">
+        &copy; 2022-2023 Simon Schulze  -  Tz: @TimeZone.Id)
+    </small>
+</footer>
+
+@code {
+    private TimeZoneInfo TimeZone { get; set; } = TimeZoneInfo.Local;
+
+    protected override void OnInitialized()
+    {
+        SharedState.StateChanged += OnSharedStateChanged;
+    }
+
+    private void OnSharedStateChanged(object? sender, EventArgs e)
+    {
+        TimeZone = SharedState.LocalTimeZone;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public virtual void Dispose()
+    {
+        SharedState.StateChanged -= OnSharedStateChanged;
+    }
+}

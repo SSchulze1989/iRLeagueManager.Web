@@ -4,7 +4,7 @@ public static class TimeSpanExtensions
 {
     public static DateTime AsDateTime(this TimeSpan timeSpan)
     {
-        return new DateTime(timeSpan.Ticks);
+        return DateTime.Today.Add(timeSpan);
     }
 
     public static string LapTimeString(this TimeSpan timeSpan)

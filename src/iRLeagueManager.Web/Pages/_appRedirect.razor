@@ -1,0 +1,18 @@
+﻿@inject NavigationManager NavigationManager
+
+@page "/app/{*pageRoute}"
+
+@code {
+    [Parameter]
+    public string PageRoute { get; set; } = string.Empty;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        NavigationManager.NavigateTo($"./{PageRoute}");
+    }
+}

@@ -43,6 +43,7 @@ h3 {
     color: #ffffff;
     text-align: center;
     padding: 0.5rem;
+    height: 4rem;
 }
 
 .alternate > tbody > tr:nth-child(odd) {

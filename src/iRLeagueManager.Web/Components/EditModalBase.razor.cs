@@ -39,7 +39,7 @@ public class EditModalBase<TViewModel, TModel> : MvvmComponentBase where TViewMo
     [Parameter]
     public Func<TViewModel, CancellationToken, Task>? OnCancel { get; set; }
 
-    private CancellationTokenSource cts = new();
+    protected CancellationTokenSource Cts { get; } = new();
     protected StatusResultValidator? ResultValidator { get; set; }
 
     protected override void OnParametersSet()
@@ -54,7 +54,7 @@ public class EditModalBase<TViewModel, TModel> : MvvmComponentBase where TViewMo
         var success = true;
         if (OnSubmit is not null)
         {
-            var status = await OnSubmit(Vm, cts.Token);
+            var status = await OnSubmit(Vm, Cts.Token);
             success &= status.IsSuccess;
             ResultValidator?.ValidateResult(status);
         }
@@ -69,7 +69,7 @@ public class EditModalBase<TViewModel, TModel> : MvvmComponentBase where TViewMo
     {
         if (OnCancel is not null)
         {
-            await OnCancel(Vm, cts.Token);
+            await OnCancel(Vm, Cts.Token);
         }
         await ModalInstance.CancelAsync();
     }
@@ -78,8 +78,8 @@ public class EditModalBase<TViewModel, TModel> : MvvmComponentBase where TViewMo
     {
         if (disposing == false)
         {
-            cts.Cancel();
-            cts.Dispose();
+            Cts.Cancel();
+            Cts.Dispose();
         }
         base.Dispose(disposing);
     }

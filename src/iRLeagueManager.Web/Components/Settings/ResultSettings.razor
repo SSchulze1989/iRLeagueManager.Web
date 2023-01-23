@@ -23,7 +23,7 @@
             }
         </div>
     </div>
-    <button class="btn btn-outline-secondary" @onclick=vm.AddConfiguration>Add Configuration</button>
+    <button class="btn btn-outline-secondary" @onclick=OnAddConfigurationClick>Add Configuration</button>
 </div>
 
 @code {
@@ -46,11 +46,13 @@
 
     private async Task OnResultConfigClick(ResultConfigViewModel config)
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(EditResultConfigModal.Model), config.CopyModel());
+        var parameters = new ModalParameters<EditResultConfigModal>()
+            .Add(x => x.Model, config.CopyModel())
+            .Add(x => x.OnSubmit, new(async (vm, ct) => await vm.SaveChangesAsync(ct)));
         var options = new ModalOptions()
         {
             DisableBackgroundCancel = true,
+            Size = ModalSize.Large,
         };
         var result = await ModalService.Show<EditResultConfigModal>("Edit Result Config", parameters, options).Result;
         if (result.Confirmed && result.Data is ResultConfigModel model)
@@ -61,14 +63,52 @@
 
     private async Task OnDeleteResultConfigClick(ResultConfigViewModel config)
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(ConfirmModal.Text), $"Really delete result config \"{config.Name}\"?")
-            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
+        var parameters = new ModalParameters<ConfirmModal>()
+            .Add(x => x.Text, $"Really delete result config \"{config.Name}\"?")
+            .Add(x => x.ButtonTypes, ButtonTypes.YesNo);
         var result = await ModalService.Show<ConfirmModal>("Delete Result Config", parameters).Result;
         if (result.Confirmed)
         {
             await vm.DeleteConfiguration(config);   
         }
+    }
+
+    private async Task OnAddConfigurationClick()
+    {
+        var parameters = new ModalParameters<EditResultConfigModal>()
+            .Add(x => x.Model, CreateConfigFromTemplate())
+            .Add(x => x.OnSubmit, new(async (config, ct) => await vm.AddConfiguration(config.GetModel())));
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true,
+            Size = ModalSize.Large,
+        };
+        var result = await ModalService.Show<EditResultConfigModal>("Add Config", parameters, options).Result;
+    }
+
+    private ResultConfigModel CreateConfigFromTemplate()
+    {
+        return new()
+        {
+            Name = "New Config",
+            DisplayName = "New Config",
+            Scorings = new List<ScoringModel>()
+            {
+                new()
+                {
+                    Name = "Race",
+                    PointRule = new()
+                    {
+                        PointsSortOptions = new[] { SortOptions.IntvlAsc },
+                        FinalSortOptions = new[] { SortOptions.TotalPtsDesc, SortOptions.PenPtsAsc }
+                    }
+                }
+            },
+            StandingConfig = new()
+            {
+                WeeksCounted = 8,
+            },
+        };
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

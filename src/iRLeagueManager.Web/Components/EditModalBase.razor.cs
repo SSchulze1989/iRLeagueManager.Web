@@ -5,6 +5,7 @@ using iRLeagueManager.Web.Exceptions;
 using iRLeagueManager.Web.Shared;
 using iRLeagueManager.Web.ViewModels;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using MvvmBlazor.Components;
 
 namespace iRLeagueManager.Web.Components;
@@ -13,6 +14,8 @@ public class EditModalBase<TViewModel, TModel> : MvvmComponentBase where TViewMo
 {
     [Inject]
     protected TViewModel Vm { get; set; } = default!;
+    [Inject]
+    protected IJSRuntime JSRuntime { get; set; } = default!;
 
     [CascadingParameter]
     public BlazoredModalInstance ModalInstance { get; set; } = default!;
@@ -41,6 +44,16 @@ public class EditModalBase<TViewModel, TModel> : MvvmComponentBase where TViewMo
 
     protected CancellationTokenSource Cts { get; } = new();
     protected StatusResultValidator? ResultValidator { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        await JSRuntime.InvokeVoidAsync("window.enableTooltips", "right");
+    }
 
     protected override void OnParametersSet()
     {

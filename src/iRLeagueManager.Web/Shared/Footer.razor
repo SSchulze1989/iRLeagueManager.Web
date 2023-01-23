@@ -1,24 +1,71 @@
-﻿@implements IDisposable
+﻿@using Blazored.LocalStorage;
+@using iRLeagueManager.Web.Components.Conformity;
+@implements IDisposable
 @inject SharedStateService SharedState
+@inject ILocalStorageService LocalStorage
 
 <footer class="d-flex flex-row justify-content-center">
     <small class="font-monospace fw-light me-2">
-        &copy; 2022-2023 Simon Schulze -  Tz: @TimeZone.Id
+        &copy; 2022-2023 Simon Schulze - 
+        <a class="link-light" href="show-cookie-banner" @onclick=OnCookieBannerClick @onclick:preventDefault>Cookies</a> 
+        -  Tz: @TimeZone.Id
     </small>
 </footer>
 
 @code {
     private TimeZoneInfo TimeZone { get; set; } = TimeZoneInfo.Local;
+    private const string cookieSettingsKey = "allowEssentialCookies";
+
+    [CascadingParameter]
+    private IModalService ModalService { get; set; } = default!;
 
     protected override void OnInitialized()
     {
         SharedState.StateChanged += OnSharedStateChanged;
+        BlazorParameterNullException.ThrowIfNull(this, ModalService);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+
+        // Check if cookie settings are already stored
+        if (await CheckCookieSettings() == false)
+        {
+            await OnCookieBannerClick();
+            await AllowEssentialCookies();
+        }
     }
 
     private void OnSharedStateChanged(object? sender, EventArgs e)
     {
         TimeZone = SharedState.LocalTimeZone;
         _ = InvokeAsync(StateHasChanged);
+    }
+
+    private async Task AllowEssentialCookies()
+    {
+        await LocalStorage.SetItemAsync(cookieSettingsKey, true);
+    }
+
+    private async Task<bool> CheckCookieSettings()
+    {
+        var cookieSettings = await LocalStorage.GetItemAsync<bool>(cookieSettingsKey);
+        return cookieSettings;
+    }
+
+    private async Task OnCookieBannerClick()
+    {
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true,
+            HideCloseButton = true,
+            HideHeader = true,
+        };
+        await ModalService.Show<CookieBannerModal>("", options).Result;
     }
 
     public virtual void Dispose()

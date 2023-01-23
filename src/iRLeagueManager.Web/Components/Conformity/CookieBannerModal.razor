@@ -1,0 +1,31 @@
+﻿<h3 class="mb-4">We are using essential cookies</h3>
+
+<p>This website requires the use of cookies that are essential to its functions. Usage of cookies includes:</p>
+<ul>
+    <li>User Authentication</li>
+    <li>Website & Cookie Preferences.</li>
+</ul>
+
+<p>If you have cookies disabled in your browser some features of this website might not function properly.</p>
+
+<p>The user will be informed and asked again when there are changes to the usage cookies in the future.</p>
+
+<div class="d-flex justify-content-end mt-4">
+    <button class="btn btn-outline-primary" @onclick=ContinueClick>Continue with essential cookies</button>
+</div>
+
+@code {
+    [CascadingParameter]
+    private BlazoredModalInstance ModalInstance { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BlazorParameterNullException.ThrowIfNull(this, ModalInstance);
+    }
+
+    private async Task ContinueClick()
+    {
+        await ModalInstance.CancelAsync();
+    }
+}

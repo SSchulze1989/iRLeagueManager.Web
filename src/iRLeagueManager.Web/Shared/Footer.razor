@@ -1,4 +1,5 @@
 ﻿@using Blazored.LocalStorage;
+@using System.Text.Json;
 @using iRLeagueManager.Web.Components.Conformity;
 @implements IDisposable
 @inject SharedStateService SharedState
@@ -15,6 +16,7 @@
 @code {
     private TimeZoneInfo TimeZone { get; set; } = TimeZoneInfo.Local;
     private const string cookieSettingsKey = "allowEssentialCookies";
+    private DateTime cookiePolicyValidFrom = new DateTime(2023, 01, 24);
 
     [CascadingParameter]
     private IModalService ModalService { get; set; } = default!;
@@ -48,13 +50,21 @@
 
     private async Task AllowEssentialCookies()
     {
-        await LocalStorage.SetItemAsync(cookieSettingsKey, true);
+        await LocalStorage.SetItemAsync(cookieSettingsKey, DateTime.UtcNow);
     }
 
     private async Task<bool> CheckCookieSettings()
     {
-        var cookieSettings = await LocalStorage.GetItemAsync<bool>(cookieSettingsKey);
-        return cookieSettings;
+        try 
+        {
+            var userCookiePolicyValidFrom = await LocalStorage.GetItemAsync<DateTime>(cookieSettingsKey);
+            return userCookiePolicyValidFrom >= cookiePolicyValidFrom;
+        }
+        catch (JsonException)
+        {
+            await LocalStorage.RemoveItemAsync(cookieSettingsKey);
+        }
+        return false;
     }
 
     private async Task OnCookieBannerClick()

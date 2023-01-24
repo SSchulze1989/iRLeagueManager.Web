@@ -9,14 +9,18 @@ internal sealed class AsyncTokenStore : ITokenStore
     private readonly ILogger<AsyncTokenStore> logger;
     private readonly ProtectedLocalStorage localStore;
 
-    private const string tokenKey = "LeagueApiToken";
+    private const string tokenKey = "idToken";
 
-    private string inMemoryToken = string.Empty;
+    private string inMemoryIdToken = string.Empty;
+    private string inMemoryAccessToken = string.Empty;
 
     public event EventHandler? TokenChanged;
+    public event EventHandler? TokenExpired;
 
     public bool IsLoggedIn { get; private set; }
-    public DateTime Expiration { get; private set; }
+    private bool AccessTokenExpired { get; set; } = false;
+    public DateTime IdTokenExpires { get; private set; }
+    public DateTime AccessTokenExpires { get; private set; }
 
     public AsyncTokenStore(ILogger<AsyncTokenStore> logger, ProtectedLocalStorage localStorage)
     {
@@ -24,26 +28,26 @@ internal sealed class AsyncTokenStore : ITokenStore
         this.localStore = localStorage;
     }
 
-    public async Task ClearTokenAsync()
+    public async Task ClearTokensAsync()
     {
-        var tokenValue = inMemoryToken;
+        var tokenValue = inMemoryIdToken;
 
         logger.LogDebug("Clear token in local browser store");
         IsLoggedIn = false;
-        inMemoryToken = string.Empty;
+        inMemoryIdToken = string.Empty;
         await localStore.DeleteAsync(tokenKey);
         await Task.FromResult(true);
-        if (inMemoryToken != tokenValue)
+        if (inMemoryIdToken != tokenValue)
         {
             TokenChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    public async Task<string> GetTokenAsync()
+    public async Task<string> GetIdTokenAsync()
     {
-        if (string.IsNullOrEmpty(inMemoryToken) == false)
+        if (string.IsNullOrEmpty(inMemoryIdToken) == false)
         {
-            return inMemoryToken;
+            return inMemoryIdToken;
         }
 
         logger.LogDebug("Reading token from local browser store");
@@ -65,19 +69,19 @@ internal sealed class AsyncTokenStore : ITokenStore
                     if (jsonToken.Claims.Any(x => x.Type == "exp"))
                     {
                         var expSeconds = Convert.ToInt64(jsonToken.Claims.First(x => x.Type == "exp").Value);
-                        Expiration = new DateTime(1970, 1, 1).AddSeconds(expSeconds);
+                        IdTokenExpires = new DateTime(1970, 1, 1).AddSeconds(expSeconds);
                     }
                 }
 
                 // check if token is still valid
-                if (Expiration < DateTime.UtcNow.AddMinutes(5))
+                if (IdTokenExpires < DateTime.UtcNow.AddMinutes(5))
                 {
-                    await ClearTokenAsync();
+                    await ClearTokensAsync();
                     logger.LogInformation("Token read from token store has expired");
                     return string.Empty;
                 }
                 IsLoggedIn = true;
-                return inMemoryToken = token.Value ?? string.Empty;
+                return inMemoryIdToken = token.Value ?? string.Empty;
             }
             IsLoggedIn = false;
             return string.Empty;
@@ -89,16 +93,42 @@ internal sealed class AsyncTokenStore : ITokenStore
         }
     }
 
-    public async Task SetTokenAsync(string token)
+    public async Task SetIdTokenAsync(string token)
     {
-        var oldToken = inMemoryToken;
+        var oldToken = inMemoryIdToken;
         logger.LogDebug("Set token to local browser session: {Token}", token);
         await localStore.SetAsync(tokenKey, token);
-        inMemoryToken = token;
+        inMemoryIdToken = token;
 
-        if (inMemoryToken != oldToken)
+        if (inMemoryIdToken != oldToken)
         {
             TokenChanged?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    public async Task SetAccessTokenAsync(string token)
+    {
+        inMemoryAccessToken = token;
+        AccessTokenExpired = false;
+
+        if (string.IsNullOrEmpty(inMemoryAccessToken) == false)
+        {
+            // set expiration date
+            var jwtToken = new JwtSecurityTokenHandler().ReadToken(inMemoryAccessToken);
+            AccessTokenExpires = jwtToken.ValidTo;
+        }
+
+        TokenChanged?.Invoke(this, EventArgs.Empty);
+        await Task.CompletedTask;
+    }
+
+    public async Task<string> GetAccessTokenAsync()
+    {
+        if (AccessTokenExpires <= DateTime.UtcNow && string.IsNullOrEmpty(inMemoryAccessToken) == false && AccessTokenExpired == false)
+        {
+            AccessTokenExpired = true;
+            TokenExpired?.Invoke(this, EventArgs.Empty);
+        }
+        return await Task.FromResult(inMemoryAccessToken);
     }
 }

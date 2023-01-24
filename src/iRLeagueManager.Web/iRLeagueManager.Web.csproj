@@ -124,15 +124,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="compilerconfig.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
     <PackageReference Include="Blazored.Modal" Version="7.1.0" />
     <PackageReference Include="bootstrap.sass" Version="5.2.3" />
-    <PackageReference Include="iRLeagueApiCore.Client" Version="0.4.1" />
-    <PackageReference Include="iRLeagueApiCore.Common" Version="0.4.1" />
+    <PackageReference Include="iRLeagueApiCore.Client" Version="0.4.2-dev.3" />
+    <PackageReference Include="iRLeagueApiCore.Common" Version="0.4.2-dev.1" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.3" />

@@ -61,7 +61,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (string.IsNullOrEmpty(await tokenStore.GetTokenAsync()) == false)
+        if (string.IsNullOrEmpty(await tokenStore.GetAccessTokenAsync()) == false)
         {
             var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";
             NavigationManager.NavigateTo(returnUrl);

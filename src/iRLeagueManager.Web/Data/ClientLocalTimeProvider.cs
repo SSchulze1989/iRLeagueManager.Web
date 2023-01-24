@@ -20,7 +20,7 @@ public class ClientLocalTimeProvider
     {
         //var localTimeOffset = new DateTimeOffset(utcTime, TimeSpan.Zero).ToOffset(LocalTimeOffset);
         //return localTimeOffset.DateTime;
-        return TimeZoneInfo.ConvertTimeFromUtc(utcTime, LocalTimeZone);
+        return new DateTime(TimeZoneInfo.ConvertTimeFromUtc(utcTime, LocalTimeZone).Ticks, DateTimeKind.Local);
     }
 
     public DateTime ConvertToUtc(DateTime localTime)

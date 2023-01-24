@@ -27,8 +27,15 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
     public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
     public DateTime Date
     {
-        get => ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
-        set => SetP(model.Date.GetValueOrDefault().TimeOfDay, value => model.Date = model.Date.GetValueOrDefault().Date.Add(value), ClientTime.ConvertToUtc(value).TimeOfDay);
+        get => ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()).Date;
+        //set => SetP(model.Date.GetValueOrDefault().Date, value => model.Date = value.Add(model.Date.GetValueOrDefault().TimeOfDay), ClientTime.ConvertToUtc(new DateTime(value.Ticks, DateTimeKind.Local).Date));
+        set
+        {
+            var localDateTime = ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
+            var localDate = value.Date.Add(localDateTime.TimeOfDay);
+            var utcDate = ClientTime.ConvertToUtc(localDate);
+            SetP(model.Date, value => model.Date = value, utcDate);
+        }
     }
 
     public DateTime End => Date + Duration.TimeOfDay;
@@ -59,7 +66,14 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
     public DateTime StartTime
     {
         get => ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
-        set => SetP(model.Date.GetValueOrDefault().TimeOfDay, value => model.Date = model.Date.GetValueOrDefault().Date.Add(value), ClientTime.ConvertToUtc(value).TimeOfDay);
+        //set => SetP(model.Date.GetValueOrDefault().TimeOfDay, value => model.Date = model.Date.GetValueOrDefault().Date.Add(value), ClientTime.ConvertToUtc(new DateTime(value.Ticks, DateTimeKind.Local)).TimeOfDay);
+        set
+        {
+            var localDateTime = ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
+            var localTimeNew = localDateTime.Date.Add(value.TimeOfDay);
+            var utcTimeNew = ClientTime.ConvertToUtc(localTimeNew);
+            SetP(model.Date, value => model.Date = value, utcTimeNew);
+        }
     }
 
     public DateTime Duration

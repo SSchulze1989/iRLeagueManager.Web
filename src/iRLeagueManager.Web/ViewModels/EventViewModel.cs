@@ -28,7 +28,7 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
     public DateTime Date
     {
         get => ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
-        set => SetP(ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()), value => model.Date = ClientTime.ConvertToUtc(value.Add(ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()).TimeOfDay)), value);
+        set => SetP(model.Date.GetValueOrDefault().TimeOfDay, value => model.Date = model.Date.GetValueOrDefault().Date.Add(value), ClientTime.ConvertToUtc(value).TimeOfDay);
     }
 
     public DateTime End => Date + Duration.TimeOfDay;
@@ -59,7 +59,7 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
     public DateTime StartTime
     {
         get => ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
-        set => SetP(ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()).TimeOfDay, value => model.Date = ClientTime.ConvertToUtc(ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()).Date.Add(value)), value.TimeOfDay);
+        set => SetP(model.Date.GetValueOrDefault().TimeOfDay, value => model.Date = model.Date.GetValueOrDefault().Date.Add(value), ClientTime.ConvertToUtc(value).TimeOfDay);
     }
 
     public DateTime Duration

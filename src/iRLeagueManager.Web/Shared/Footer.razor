@@ -5,12 +5,11 @@
 @inject SharedStateService SharedState
 @inject ILocalStorageService LocalStorage
 
-<footer class="d-flex flex-row justify-content-center">
-    <small class="font-monospace fw-light me-2">
-        &copy; 2022-2023 Simon Schulze - 
-        <a class="link-light" href="show-cookie-banner" @onclick=OnCookieBannerClick @onclick:preventDefault>Cookies</a> 
-        -  Tz: @TimeZone.Id
-    </small>
+<footer class="d-flex flex-wrap justify-content-center font-monospace ms-2 me-2 mt-0 mb-0 fw-light small">
+    <p class="">&copy; 2022-2023 Simon Schulze</p> | 
+    <a class="link-light " href="show-cookie-banner" @onclick=OnCookieBannerClick @onclick:preventDefault>Cookies</a> | 
+    <a class="link-light " href="privacy">Privacy Policy</a> | 
+    <p class="">Tz: @TimeZone.Id</p>
 </footer>
 
 @code {

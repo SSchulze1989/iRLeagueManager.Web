@@ -2,6 +2,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
 }
 
 .page-footer {
@@ -12,6 +13,9 @@
     height: 1.25rem;
     background-color: dimgray;
     color: white;
+    padding: 0px, 4px, 0px, 4px !important;
+    text-overflow: clip !important;
+    overflow: hidden !important;
 }
 
 main {
@@ -53,6 +57,11 @@ main {
 
     .top-row a, .top-row .btn-link {
         margin-left: 0;
+    }
+
+    .page-footer {
+        position: relative;
+        height: auto;
     }
 }
 

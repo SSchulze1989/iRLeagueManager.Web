@@ -133,16 +133,16 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
         }
 
         var canFile = true;
-        var eventEnd = @event.End;
+        var eventEnd = @event.Date + @event.Duration.TimeOfDay;
         if (leagueModel?.ProtestCoolDownPeriod > TimeSpan.Zero)
         {
             var canFileAfter = eventEnd + leagueModel.ProtestCoolDownPeriod;
-            canFile &= ApiService.ClientTimeProvider.Now > canFileAfter;
+            canFile &= DateTime.UtcNow > canFileAfter;
         }
         if (leagueModel?.ProtestsClosedAfter > TimeSpan.Zero)
         {
             var canFileBefore = eventEnd + leagueModel.ProtestsClosedAfter;
-            canFile &= ApiService.ClientTimeProvider.Now < canFileBefore;
+            canFile &= DateTime.UtcNow < canFileBefore;
         }
         return canFile;
     }

@@ -35,6 +35,7 @@ internal sealed class AsyncTokenStore : ITokenStore
         logger.LogDebug("Clear token in local browser store");
         IsLoggedIn = false;
         inMemoryIdToken = string.Empty;
+        inMemoryAccessToken = string.Empty;
         await localStore.DeleteAsync(tokenKey);
         await Task.FromResult(true);
         if (inMemoryIdToken != tokenValue)
@@ -53,11 +54,6 @@ internal sealed class AsyncTokenStore : ITokenStore
         logger.LogDebug("Reading token from local browser store");
         try
         {
-            //if (contextAccessor.HttpContext?.Session.IsAvailable == true)
-            //{
-            //    string token = contextAccessor.HttpContext?.Session.GetString(tokenKey) ?? string.Empty;
-            //    return await Task.FromResult(token);
-            //}
             var token = await localStore.GetAsync<string>(tokenKey);
             if (token.Success)
             {
@@ -86,9 +82,9 @@ internal sealed class AsyncTokenStore : ITokenStore
             IsLoggedIn = false;
             return string.Empty;
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
-            logger.LogError("Could not read from local browser session: {Exception}", ex);
+            logger.LogWarning("Could not read from local browser session: {Exception}", ex);
             return string.Empty;
         }
     }

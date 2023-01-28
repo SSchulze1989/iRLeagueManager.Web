@@ -3,6 +3,7 @@ using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 using iRLeagueManager.Web.ViewModels;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using MvvmBlazor.Components;
 using System.ComponentModel;
 
@@ -16,6 +17,8 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
     public LeagueApiService ApiService { get; set; } = default!;
     [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;
+    [Inject]
+    protected IJSRuntime JsRuntime { get; set; } = default!;
 
     private EventListViewModel eventList = default!;
 
@@ -165,5 +168,10 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
             roles = roles.Concat(leagueRoleNames);
         }
         return string.Join(',', roles);
+    }
+
+    protected async Task ScrollToElementId(string id)
+    {
+        await JsRuntime.InvokeVoidAsync("scrollToElementId", id);
     }
 }

@@ -38,7 +38,9 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
         }
     }
 
-    public DateTime End => Date + Duration.TimeOfDay;
+    public DateTime Start => ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
+
+    public DateTime End => Start + Duration.TimeOfDay;
 
     public long? TrackId
     {

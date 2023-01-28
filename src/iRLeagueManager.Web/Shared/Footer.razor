@@ -1,6 +1,6 @@
 ﻿@using Blazored.LocalStorage;
 @using System.Text.Json;
-@using iRLeagueManager.Web.Components.Conformity;
+@using iRLeagueManager.Web.Components.Compliance;
 @implements IDisposable
 @inject SharedStateService SharedState
 @inject ILocalStorageService LocalStorage
@@ -15,7 +15,7 @@
 @code {
     private TimeZoneInfo TimeZone { get; set; } = TimeZoneInfo.Local;
     private const string cookieSettingsKey = "allowEssentialCookies";
-    private DateTime cookiePolicyValidFrom = new DateTime(2023, 01, 24);
+    private DateTime cookiePolicyValidFrom = new DateTime(2023, 01, 28);
 
     [CascadingParameter]
     private IModalService ModalService { get; set; } = default!;
@@ -33,10 +33,11 @@
             return;
         }
 
+        // Wait a short moment before checking cookie settings to prevent flickering of banner on first load
+        await Task.Delay(200);
         // Check if cookie settings are already stored
-        if (await CheckCookieSettings() == false)
+        if (await CheckCookieSettings() == false && await OnCookieBannerClick())
         {
-            await OnCookieBannerClick();
             await AllowEssentialCookies();
         }
     }
@@ -66,7 +67,7 @@
         return false;
     }
 
-    private async Task OnCookieBannerClick()
+    private async Task<bool> OnCookieBannerClick()
     {
         var options = new ModalOptions()
         {
@@ -74,7 +75,8 @@
             HideCloseButton = true,
             HideHeader = true,
         };
-        await ModalService.Show<CookieBannerModal>("", options).Result;
+        var result = await ModalService.Show<CookieBannerModal>("", options).Result;
+        return result.Confirmed;
     }
 
     public virtual void Dispose()

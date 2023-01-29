@@ -52,7 +52,7 @@ public class EditModalBase<TViewModel, TModel> : MvvmComponentBase where TViewMo
         {
             return;
         }
-        await JSRuntime.InvokeVoidAsync("window.enableTooltips", "right");
+        await JSRuntime.InvokeVoidAsync("enableTooltips", "right");
     }
 
     protected override void OnParametersSet()

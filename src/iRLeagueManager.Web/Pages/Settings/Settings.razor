@@ -29,6 +29,9 @@
                     <li class="nav-item">
                         <NavLink class="nav-link" href="@GetTabLink(3)">Teams</NavLink>
                     </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="@GetTabLink(4)">Reviews</NavLink>
+                    </li>
                 </ul>
 
                 @if (HasRendered)
@@ -46,6 +49,9 @@
                             break;
                         case 3:
                             <TeamSettings class="container px-0 mb-2 mx-0" />
+                            break;
+                        case 4:
+                            <ReviewSettings class="container px-0 mb-2 mx-0" />
                             break;
                         default:
                             <p><em>Index out of bounds!</em></p>

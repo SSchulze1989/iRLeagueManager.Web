@@ -11,11 +11,11 @@
         <InputGroup Label="Penalty">
             <InputNumber class="form-control" @bind-Value=Vm.DefaultPenalty data-bs-toggle="tooltip" title="Default penalty value in full points"/>
         </InputGroup>
+        <FormValidationMessage For=@(() => Vm.DefaultPenalty) />
         <InputGroup Label="Index">
             <InputNumber class="form-control" @bind-Value=Vm.Index data-bs-toggle="tooltip" title="Index for ordering categories in dropdown"/>
         </InputGroup>
     </div>
-    <FormValidationMessage For=@(() => Vm.DefaultPenalty) />
     <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
     <CancelSubmitButtons ModelState=Vm SubmitText="Save" OnCancel=Cancel />
 </EditForm>

@@ -1,0 +1,23 @@
+﻿@using iRLeagueManager.Web.ViewModels
+
+<div @attributes=AdditionalAttributes>
+    <div>
+        <h5>@Championship.Name</h5>
+    </div>
+    <h6>Display Name</h6> 
+    <small>@Championship.DisplayName</small>
+</div>
+
+
+@code {
+    [Parameter(CaptureUnmatchedValues=true)]
+    public IDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [Parameter, EditorRequired]
+    public ChampionshipViewModel Championship { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        _ = Championship ?? throw BlazorParameterNullException.New(this, Championship);
+    }
+}

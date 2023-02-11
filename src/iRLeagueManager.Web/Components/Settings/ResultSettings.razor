@@ -2,28 +2,41 @@
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
-@inject ResultConfigSettingsViewModel vm
+@inject ResultSettingsViewModel vm
 @inject LeagueApiService apiService
+@inject SharedStateService sharedState
 @inject ILogger<ResultSettings> logger
 
 <div @attributes=AdditionalAttributes>
     <div class="card my-2 pb-0">
         <div class="card-header">
-            Result Configurations
+            Championships
         </div>
         <div class="list-group-flush">
-            @foreach((var config, var index) in @Bind(vm, x => x.ResultsConfigs).Select((x, i) => (x, i)))
+            @foreach ((var championship, var index) in @Bind(vm, x => x.Championships).Select((x, i) => (x, i)))
             {
-                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button" @onclick=@(() => OnResultConfigClick(config))>
-                    <ResultConfigPreview ResultConfig=config />
-                    <button class="btn btn-outline-danger" @onclick=@(() => OnDeleteResultConfigClick(config)) @onclick:stopPropagation="true">
-                        <span class="oi oi-trash"/>
+                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button" @onclick=@(() => OnChampionshipClick(championship))>
+                    <ChampionshipPreview Championship=championship />
+                    <button class="btn btn-outline-danger" @onclick=@(() => OnDeleteChampionshipClick(championship)) @onclick:stopPropagation="true">
+                        <span class="oi oi-trash" />
                     </button>
                 </div>
             }
         </div>
     </div>
-    <button class="btn btn-outline-secondary" @onclick=OnAddConfigurationClick>Add Configuration</button>
+    <div class="card my-2 pb-0">
+        <div class="card-header">
+            Current Season - @sharedState.SeasonName
+        </div>
+        <div class="list-group-flush">
+            @foreach ((var champSeason, var index) in @Bind(vm, x => x.CurrentChampSeasons).Select((x, i) => (x, i)))
+            {
+                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button">
+                    <ChampSeasonPreview ChampSeason=champSeason />
+                </div>
+            }
+        </div>
+    </div>
 </div>
 
 @code {
@@ -59,6 +72,23 @@
         {
             config.SetModel(model);
         }
+    }
+
+    private async Task OnChampionshipClick(ChampionshipViewModel championship)
+    {
+        var parameters = new ModalParameters<EditChampionshipModal>()
+            .Add(x => x.Model, championship.CopyModel())
+            .Add(x => x.OnSubmit, new((x, cancellation) => x.SaveChangesAsync(cancellation)));
+        var result = await ModalService.Show<EditChampionshipModal>("Edit Championship", parameters).Result;
+        if (result.Confirmed && result.Data is ChampionshipModel model)
+        {
+            championship.SetModel(model);
+        }
+    }
+
+    private Task OnDeleteChampionshipClick(ChampionshipViewModel championship)
+    {
+        return Task.CompletedTask;
     }
 
     private async Task OnDeleteResultConfigClick(ResultConfigViewModel config)
@@ -104,10 +134,6 @@
                     }
                 }
             },
-            StandingConfig = new()
-            {
-                WeeksCounted = 8,
-            },
         };
     }
 
@@ -117,10 +143,7 @@
         {
             return;
         }
-        if (apiService.CurrentLeague != null)
-        {
-            await vm.LoadFromLeagueAsync();
-        }
+        await vm.LoadFromCurrentSeasonAsync();
         await InvokeAsync(StateHasChanged);
     }
 }

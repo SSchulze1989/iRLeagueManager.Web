@@ -57,25 +57,25 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         }
     }
 
-    private StandingConfigurationViewModel? standingConfig;
-    public StandingConfigurationViewModel? StandingConfig { get => standingConfig; set => Set(ref standingConfig, value); }
-    public bool CalculateStandings
-    {
-        get => StandingConfig is not null;
-        set
-        {
-            if (value && model.StandingConfig is null)
-            {
-                model.StandingConfig = new StandingConfigModel();
-                StandingConfig = new(LoggerFactory, ApiService, model.StandingConfig);
-            }
-            if (value == false && model.StandingConfig is not null)
-            {
-                model.StandingConfig = null;
-                StandingConfig = null;
-            }
-        }
-    }
+    //private StandingConfigurationViewModel? standingConfig;
+    //public StandingConfigurationViewModel? StandingConfig { get => standingConfig; set => Set(ref standingConfig, value); }
+    //public bool CalculateStandings
+    //{
+    //    get => StandingConfig is not null;
+    //    set
+    //    {
+    //        if (value && model.StandingConfig is null)
+    //        {
+    //            model.StandingConfig = new StandingConfigModel();
+    //            StandingConfig = new(LoggerFactory, ApiService, model.StandingConfig);
+    //        }
+    //        if (value == false && model.StandingConfig is not null)
+    //        {
+    //            model.StandingConfig = null;
+    //            StandingConfig = null;
+    //        }
+    //    }
+    //}
 
     private ObservableCollection<ScoringViewModel> scorings;
     public ObservableCollection<ScoringViewModel> Scorings { get => scorings; set => SetP(scorings, value => scorings = value, value); }
@@ -95,7 +95,7 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         Scorings = new(model.Scorings.Select(scoringModel => new ScoringViewModel(LoggerFactory, ApiService, scoringModel)));
         FiltersForPoints = new(model.FiltersForPoints.Select(filter => new ResultFilterViewModel(LoggerFactory, ApiService, filter)));
         FiltersForResult = new(model.FiltersForResult.Select(filter => new ResultFilterViewModel(LoggerFactory, ApiService, filter)));
-        StandingConfig = model.StandingConfig is not null ? new StandingConfigurationViewModel(LoggerFactory, ApiService, model.StandingConfig) : null;
+        //StandingConfig = model.StandingConfig is not null ? new StandingConfigurationViewModel(LoggerFactory, ApiService, model.StandingConfig) : null;
     }
 
     public async Task<StatusResult> LoadAvailableResultConfigs(CancellationToken cancellationToken)

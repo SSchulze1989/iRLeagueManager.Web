@@ -8,8 +8,8 @@
 @inject NavigationManager NavigationManager
 
 <CascadingValue Value=Review.InvolvedMembers>
-<div @attributes=AdditionalAttributes class="card @AddCssClass @(Selected ? "border-info" : "")" id="review-card-@Review.ReviewId" @ref=Card>
-    <div class="card-header accordion-header review-header">
+<div @attributes=AdditionalAttributes class="card @AddCssClass @GetBorderClass(Selected, Bind(Review, x => x.Status))" id="review-card-@Review.ReviewId" @ref=Card>
+     <div class="card-header accordion-header review-header @GetBorderClass(Selected, Bind(Review, x => x.Status))">
         <div class="row">
             <div class="col d-md-flex justify-content-start">
                 <span>@Review.SessionName:</span>
@@ -143,7 +143,7 @@
                         {
                             <li class="list-group-item">
                                 <ReviewComment Comment=comment 
-                                                OnStateHasChanged=@(() => InvokeAsync(StateHasChanged)) 
+                                                OnStateHasChanged=@(() => CommentStateChanged(comment)) 
                                                 OnDeleteClick=@(() => DeleteCommentClick(comment))/>
                             </li>
                         }
@@ -274,6 +274,32 @@
         {
             await Review.RemoveComment(comment);
         }
+    }
+
+    private async Task CommentStateChanged(ReviewCommentViewModel comment)
+    {
+        Review.UpdateReviewStatus();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string GetBorderClass(bool selected, ReviewStatus status)
+    {
+        if (selected)
+        {
+            return "border-info";
+        }
+        switch(status)
+        {
+            case ReviewStatus.Open:
+                return "border-warning";
+            case ReviewStatus.Closed:
+                return "border-success";
+            case ReviewStatus.OpenConflicted:
+                return "border-warning";
+            case ReviewStatus.OpenEnoughVotes:
+                return "border-primary";
+        }
+        return "";
     }
 
     private async Task CopyDirectLink()

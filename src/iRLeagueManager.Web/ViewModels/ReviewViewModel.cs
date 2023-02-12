@@ -3,6 +3,8 @@ using iRLeagueApiCore.Common.Models;
 using iRLeagueApiCore.Common.Models.Reviews;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
+using iRLeagueManager.Web.Shared;
+using System.IO.IsolatedStorage;
 
 namespace iRLeagueManager.Web.ViewModels;
 
@@ -41,10 +43,13 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
     public IList<MemberInfoModel> InvolvedMembers { get => involvedMembers; set => Set(ref involvedMembers, value); }
 
     private ObservableCollection<ReviewCommentViewModel> comments = new();
-    public ObservableCollection<ReviewCommentViewModel> Comments { get => comments; set => Set(ref comments, value); }
+    public ReadOnlyObservableCollection<ReviewCommentViewModel> Comments => new(comments);
 
     private ObservableCollection<VoteViewModel> votes = new();
     public ObservableCollection<VoteViewModel> Votes { get => votes; set => Set(ref votes, value); }
+
+    private ReviewStatus status;
+    public ReviewStatus Status { get => status; set => Set(ref status, value); }
 
     public IEnumerable<CountedVote> CountedVotes => GetCountedVotes();
 
@@ -52,18 +57,21 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
     {
         votes.Add(vote);
         model.VoteResults.Add(vote.GetModel());
+        UpdateReviewStatus();
     }
 
     public void AddVote(VoteModel vote)
     {
         model.VoteResults.Add(vote);
         votes.Add(new(LoggerFactory, ApiService, vote));
+        UpdateReviewStatus();
     }
 
     public void RemoveVote(VoteViewModel vote)
     {
         votes.Remove(vote);
         model.VoteResults.Remove(vote.GetModel());
+        UpdateReviewStatus();
     }
 
     /// <summary>
@@ -229,9 +237,10 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
         // Add comments from to list that are not already in there
         foreach (var comment in model.ReviewComments)
         {
-            if (Comments.Any(x => x.GetModel() == comment) == false)
+            if (comments.Any(x => x.GetModel() == comment) == false)
             {
-                Comments.Add(new ReviewCommentViewModel(LoggerFactory, ApiService, comment));
+                var commentViewModel = new ReviewCommentViewModel(LoggerFactory, ApiService, comment);
+                comments.Add(commentViewModel);
             }
         }
         // Remove comments that are no longer in the model
@@ -239,9 +248,10 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
         {
             if (model.ReviewComments.Any(x => x == commentViewModel.GetModel()) == false)
             {
-                Comments.Remove(commentViewModel);
+                comments.Remove(commentViewModel);
             }
         }
+        UpdateReviewStatus();
     }
 
     public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -312,6 +322,56 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
             countedVote.Count++;
         }
         return countedVotes;
+    }
+
+    public void UpdateReviewStatus()
+    {
+        if (IsClosed())
+        {
+            Status = ReviewStatus.Closed;
+            return;
+        }
+        if (IsVoteConflicted())
+        {
+            Status = ReviewStatus.OpenConflicted;
+            return;
+        }
+        if (HasMajorityVote(2))
+        {
+            Status = ReviewStatus.OpenEnoughVotes;
+            return;
+        }
+
+        Status = ReviewStatus.Open;
+    }
+
+    private bool IsClosed()
+    {
+        return Votes.Count > 0;
+    }
+
+    private bool IsVoteConflicted()
+    {
+        var votes = Comments
+            .Select(x => x.Votes.Select(y => y.GetModel()))
+            .ToList();
+        bool hasConflict = false;
+        for (int i=0; i<votes.Count-1; i++)
+        {
+            hasConflict |= !CompareVotes(votes[i], votes[i + 1]);
+        }
+        return hasConflict;
+    }
+
+    private bool CompareVotes(IEnumerable<VoteModel> first, IEnumerable<VoteModel> second)
+    {
+        return first.OrderBy(x => x.MemberAtFault?.MemberId).Zip(second.OrderBy(x => x.MemberAtFault?.MemberId))
+            .All(x => x.First.VoteCategoryId == x.Second.VoteCategoryId);
+    }
+
+    private bool HasMajorityVote(int minVoteCount)
+    {
+        return Comments.Count(x => x.Votes.Any()) >= minVoteCount;
     }
 
     private bool CompareVotes(VoteViewModel vote1, VoteViewModel vote2)
@@ -389,6 +449,7 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
         RefreshMemberList();
         RefreshCommentList();
         RefreshVoteList();
+        UpdateReviewStatus();
         SessionId = model.SessionId;
     }
 }

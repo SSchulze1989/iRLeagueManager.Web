@@ -118,7 +118,8 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
         }
         if (EventList.Selected == null)
         {
-            EventList.Selected = EventList.EventList.LastOrDefault(x => x.HasResult);
+            EventList.Selected = EventList.EventList.LastOrDefault(x => x.HasResult)
+                ?? EventList.EventList.FirstOrDefault();
             EventId = EventList.Selected?.EventId;
             await InvokeAsync(StateHasChanged);
         }

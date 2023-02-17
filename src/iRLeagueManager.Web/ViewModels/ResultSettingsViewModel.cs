@@ -59,15 +59,6 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
                 return getChampSeasons.ToStatusResult();
             }
             CurrentChampSeasons = new(getChampSeasons.Content.Select(x => new ChampSeasonViewModel(LoggerFactory, ApiService, x)));
-
-            var getResultConfigs = await ApiService.CurrentLeague
-                .ResultConfigs()
-                .Get(cancellationToken);
-            if (getResultConfigs.Success == false || getResultConfigs.Content is null)
-            {
-                return getResultConfigs.ToStatusResult();
-            }
-            ResultsConfigs = new(getResultConfigs.Content.Select(x => new ResultConfigViewModel(LoggerFactory, ApiService, x)));
             
             return StatusResult.SuccessResult();
         }

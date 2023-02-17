@@ -1,5 +1,6 @@
 ﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Extensions;
 
 namespace iRLeagueManager.Web.ViewModels;
 
@@ -23,4 +24,30 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
     public StandingConfigModel? StandingConfig { get => model.StandingConfig; set => SetP(model.StandingConfig, value => model.StandingConfig = value, value); }
 
     public ICollection<ResultConfigInfoModel> ResultConfigs => model.ResultConfigs;
+
+    public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await ApiService.CurrentLeague
+                .ChampSeasons()
+                .WithId(ChampSeasonId)
+                .Put(model, cancellationToken);
+            if (result.Success && result.Content is not null)
+            {
+                SetModel(result.Content);
+            }
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
 }

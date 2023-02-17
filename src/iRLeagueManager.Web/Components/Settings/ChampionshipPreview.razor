@@ -6,6 +6,26 @@
     </div>
     <h6>Display Name</h6> 
     <small>@Championship.DisplayName</small>
+    @if (ChampSeason is not null)
+    {
+        <div class="row">
+            <div class="col-5">
+                <h6>Results</h6>
+                <ul>
+                    @foreach(var config in ChampSeason.ResultConfigs)
+                    {
+                        <li>@config.Name</li>
+                    }
+                </ul>
+            </div>
+            <div class="col-5">
+                <h6>Standings</h6>
+                <ul>
+                    <li>@ChampSeason.StandingConfig?.Name</li>
+                </ul>
+            </div>
+        </div>
+    }
 </div>
 
 
@@ -15,6 +35,9 @@
 
     [Parameter, EditorRequired]
     public ChampionshipViewModel Championship { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public ChampSeasonViewModel? ChampSeason { get; set; }
 
     protected override void OnParametersSet()
     {

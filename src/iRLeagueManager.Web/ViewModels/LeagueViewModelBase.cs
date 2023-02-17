@@ -90,7 +90,7 @@ public class LeagueViewModelBase<T> : ViewModelBase, IModelState
         StatusResult.FailedResult("Season Null", $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentSeason)} was null", Array.Empty<object>());
 }
 
-public class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelBase<TViewModel>
+public class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelBase<TViewModel> where TModel : class where TViewModel : class
 {
     protected TModel model = default!;
 
@@ -112,7 +112,6 @@ public class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelBase<TView
 
     public virtual TModel CopyModel()
     {
-        return JsonSerializer.Deserialize<TModel>(JsonSerializer.Serialize(model))
-            ?? throw new InvalidOperationException("Could not copy model");
+        return ModelHelper.CopyModel(model)!;
     }
 }

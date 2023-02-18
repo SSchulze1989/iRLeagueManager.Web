@@ -10,7 +10,7 @@
         <div class="card-header">
             Seasons
         </div>
-        <div class="list-group-flush">
+        <div class="list-group list-group-flush">
             @foreach((var season, var index) in @Bind(vm, x => x.Seasons).Select((x, i) => (x, i)))
             {
                 <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button" @onclick=@(() => SeasonClick(season))>
@@ -30,7 +30,7 @@
         <div class="card-header">
             Protest Settings
         </div>
-        <div class="list-group-flush">
+        <div class="list-group list-group-flush">
             <div class="list-group-item list-group-item-action" type="button" @onclick=ProtestSettingsClick>
                <b>Enabled:</b> @(vm.EnableProtests ? "True" : "False")<br/>
                @if (vm.EnableProtests)

@@ -1,4 +1,6 @@
-﻿using iRLeagueManager.Web.Data;
+﻿using iRLeagueApiCore.Client.Endpoints.Leagues;
+using iRLeagueApiCore.Client.Endpoints.Seasons;
+using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Shared;
 using MvvmBlazor.ViewModel;
 using System.Runtime.CompilerServices;
@@ -19,6 +21,8 @@ public class LeagueViewModelBase<T> : ViewModelBase, IModelState
     protected ILogger<T> Logger { get; }
     protected LeagueApiService ApiService { get; }
     protected CancellationTokenSource Cts { get; } = new();
+    protected ILeagueByNameEndpoint? CurrentLeague => ApiService.CurrentLeague;
+    protected ISeasonByIdEndpoint? CurrentSeason => ApiService.CurrentSeason;
 
     private bool loading;
     public bool Loading

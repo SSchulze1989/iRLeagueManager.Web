@@ -74,23 +74,10 @@ public sealed class ChampionshipViewModel : LeagueViewModelBase<ChampionshipView
         try
         {
             Loading = true;
-            var previousSeasonId = Seasons.LastOrDefault()?.ChampSeasonId;
-            ChampSeasonModel? previousSeason = default;
-            if (previousSeasonId != null)
-            {
-                var previousSeasonResult = await ApiService.CurrentLeague
-                    .ChampSeasons()
-                    .WithId(previousSeasonId.GetValueOrDefault())
-                    .Get(cancellationToken);
-                if (previousSeasonResult.Success && previousSeasonResult.Content is not null)
-                {
-                    previousSeason = previousSeasonResult.Content;
-                }
-            }
             var result = await ApiService.CurrentSeason
                 .Championships()
                 .WithId(ChampionshipId)
-                .Post(CreateChampSeason(previousSeason));
+                .Post(new(), cancellationToken);
             if (result.Success == false)
             {
                 return result.ToStatusResult();
@@ -103,7 +90,6 @@ public sealed class ChampionshipViewModel : LeagueViewModelBase<ChampionshipView
             {
                 SetModel(getChampionshipResult.Content);
             }
-            IsActive = IsChampionshipActive();
             return getChampionshipResult.ToStatusResult();
         }
         finally
@@ -116,11 +102,11 @@ public sealed class ChampionshipViewModel : LeagueViewModelBase<ChampionshipView
     {
         IsActive = false;
 
-        if (ApiService.CurrentLeague is null)
+        if (CurrentLeague is null)
         {
             return LeagueNullResult();
         }
-        if (ApiService.CurrentSeason is null)
+        if (CurrentSeason is null)
         {
             return SeasonNullResult();
         }
@@ -128,49 +114,33 @@ public sealed class ChampionshipViewModel : LeagueViewModelBase<ChampionshipView
         try 
         {
             Loading = true;
-            var champSeason = Seasons.FirstOrDefault(x => x.SeasonId == ApiService.CurrentSeason.Id);
+            var champSeason = Seasons.FirstOrDefault(x => x.SeasonId == CurrentSeason.Id);
             if (champSeason is null)
             {
                 return StatusResult.SuccessResult();
             }
-            var result = await ApiService.CurrentLeague
+            var result = await CurrentLeague
                 .ChampSeasons()
                 .WithId(champSeason.ChampSeasonId)
-                .Delete();
+                .Delete(cancellationToken);
             if (result.Success == false)
             {
                 return result.ToStatusResult();
             }
-            var getChampionshipResult = await ApiService.CurrentLeague
+            var getChampionshipResult = await CurrentLeague
                 .Championships()
                 .WithId(ChampionshipId)
-                .Get();
+                .Get(cancellationToken);
             if (getChampionshipResult.Success && getChampionshipResult.Content is not null)
             {
                 SetModel(getChampionshipResult.Content);
             }
-            return getChampionshipResult.ToStatusResult();
+            return result.ToStatusResult();
         }
         finally
         {
             Loading = false;
         }
-    }
-
-    private ChampSeasonModel CreateChampSeason(ChampSeasonModel? previousChampSeason)
-    {
-        // make copies of previous settings
-        var standingConfig = ModelHelper.CopyModel(previousChampSeason?.StandingConfig);
-        var resultConfigs = previousChampSeason?.ResultConfigs
-            .Select(x => ModelHelper.CopyModel(x))
-            .NotNull()
-            .ToList() ?? new();
-        var champSeason = new ChampSeasonModel()
-        {
-            StandingConfig = standingConfig,
-            ResultConfigs = resultConfigs,
-        };
-        return champSeason;
     }
 
     public override void SetModel(ChampionshipModel model)

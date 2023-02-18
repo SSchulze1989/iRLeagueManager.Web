@@ -114,14 +114,7 @@
     {
         if (championship.IsActive)
         {
-            var parameters = new ModalParameters<ConfirmModal>()
-                .Add(x => x.Text, $"Caution. If you deactivate the championship it will remove all settings that you have made for the current season. This may lead to loss of result or standing configurations")
-                .Add(x => x.ButtonTypes, ButtonTypes.YesNo);
-            var result = await ModalService.Show<ConfirmModal>("Deactivate Championship Season", parameters).Result;
-            if (result.Confirmed)
-            {
-                await championship.DeactivateForCurrentSeasonAsync();
-            }
+            await championship.DeactivateForCurrentSeasonAsync();
         }
         else
         {

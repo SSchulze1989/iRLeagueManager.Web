@@ -12,7 +12,7 @@
         <div class="card-header">
             Championships
         </div>
-        <div class="list-group-flush">
+        <div class="list-group list-group-flush">
             @foreach ((var championship, var index) in @Bind(vm, x => x.Championships).OrderByDescending(x => x.IsActive).Select((x, i) => (x, i)))
             {
                 var champSeason = vm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipId == championship.ChampionshipId);

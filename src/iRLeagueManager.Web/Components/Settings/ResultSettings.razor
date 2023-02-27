@@ -16,7 +16,7 @@
             @foreach ((var championship, var index) in @Bind(vm, x => x.Championships).OrderByDescending(x => x.IsActive).Select((x, i) => (x, i)))
             {
                 var champSeason = vm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipId == championship.ChampionshipId);
-                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button" @onclick=@(() => OnChampionshipClick(championship))>
+                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button" @onclick=@(async () => { if (champSeason is not null) await OnChampionshipClick(champSeason); })>
                     <ChampionshipPreview Championship=championship ChampSeason=champSeason class="flex-fill"/>
                     <div>
                         <label class="switch" @onclick:stopPropagation>
@@ -68,15 +68,15 @@
         }
     }
 
-    private async Task OnChampionshipClick(ChampionshipViewModel championship)
+    private async Task OnChampionshipClick(ChampSeasonViewModel champSeason)
     {
-        var parameters = new ModalParameters<EditChampionshipModal>()
-            .Add(x => x.Model, championship.CopyModel())
+        var parameters = new ModalParameters<EditChampSeasonModal>()
+            .Add(x => x.Model, champSeason.CopyModel())
             .Add(x => x.OnSubmit, new((x, cancellation) => x.SaveChangesAsync(cancellation)));
-        var result = await ModalService.Show<EditChampionshipModal>("Edit Championship", parameters).Result;
-        if (result.Confirmed && result.Data is ChampionshipModel model)
+        var result = await ModalService.Show<EditChampSeasonModal>("Edit Championship", parameters).Result;
+        if (result.Confirmed && result.Data is ChampSeasonModel model)
         {
-            championship.SetModel(model);
+            champSeason.SetModel(model);
         }
     }
 

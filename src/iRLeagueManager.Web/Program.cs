@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.HttpOverrides;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<ServerAuthenticationStateProvider>();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName, config =>
+{
+    config.DefaultRequestHeaders.UserAgent.ParseAdd($"iRLeagueManager/{Assembly.GetEntryAssembly()!.GetName().Version!.Major}.{Assembly.GetEntryAssembly()!.GetName().Version!.Minor}.{Assembly.GetEntryAssembly()!.GetName().Version!.Build} (iRLeaguemanager Web App)");
+});
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddMvvm();
 builder.Services.AddLeagueApiService();

@@ -29,7 +29,7 @@
                 @foreach(var resultConfig in Vm.ResultConfigViewModels)
                 {
                     <div class="list-group-item list-group-item-action d-flex justify-content-between" type="button" @onclick=@(() => OnResultConfigClick(resultConfig))>
-                        <ResultConfigPreview ResultConfig="resultConfig" />
+                        <ResultConfigPreview ResultConfig="resultConfig" class="overflow-auto"/>
                         <div class="d-flex align-self-start">
                             <button class="btn btn-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#config_@(resultConfig.ResultConfigId)_details"
                                     aria-expanded="false" @onclick:stopPropagation>

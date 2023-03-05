@@ -3,7 +3,7 @@
 <div @attributes=AdditionalAttributes>
     @if (@Bind(PointRule, x => x.PointsPerPlace).Count() > 0)
     {
-        <table class="table table-sm">
+        <table class="overflow-scroll table table-sm">
             <thead>
                 <tr>
                     <th><small>Pos.</small></th>

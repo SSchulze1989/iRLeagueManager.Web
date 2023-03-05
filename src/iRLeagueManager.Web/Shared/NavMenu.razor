@@ -138,7 +138,7 @@
     private long SeasonSelect
     {
         get => SharedState.SeasonId;
-        set => OnSeasonSelectChanged(value);
+        set => _ = OnSeasonSelectChanged(value);
     }
 
     protected override void OnInitialized()
@@ -152,10 +152,15 @@
         collapseNavMenu = !collapseNavMenu;
     }
 
-    private void OnSeasonSelectChanged(long value)
+    private async Task OnSeasonSelectChanged(long value)
     {
+        if (SharedState.LeagueName is null)
+        {
+            return;
+        }
+        await apiService.SetCurrentSeasonAsync(SharedState.LeagueName, value);
         navigationManager.NavigateTo($"./{SharedState.LeagueName}/Seasons/{value}");
-        InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
     }
 
     private string GetCurrentUrl()

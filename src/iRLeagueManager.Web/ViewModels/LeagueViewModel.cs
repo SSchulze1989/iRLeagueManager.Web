@@ -91,6 +91,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
             if (result.Success && result.Content is IEnumerable<SeasonModel> seasonModels)
             {
                 Seasons = new(seasonModels.Select(x => new SeasonViewModel(LoggerFactory, ApiService, x)));
+                ApiService.Shared.SeasonList = new(Seasons.Select(x => x.GetModel()));
             }
             return result.ToStatusResult();
         }
@@ -122,7 +123,49 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
                 .Schedules()
                 .Post(new() { Name = "Schedule" }, cancellationToken);
             await scheduleRequest;
+            var activateSeasons = await ActivateChampSeasons(CurrentSeason?.Id, result.Content.SeasonId, cancellationToken);
+            if (activateSeasons.IsSuccess == false) return activateSeasons;
             return await LoadSeasons(cancellationToken);
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    public async Task<StatusResult> ActivateChampSeasons(long? previousSeasonId, long? seasonId = null, CancellationToken cancellationToken = default)
+    {
+        if (CurrentLeague is null) return LeagueNullResult();
+        seasonId ??= CurrentSeason?.Id;
+        if (seasonId == null) return SeasonNullResult();
+        // if previous season is same as current or previous season is null => success (none action taken)
+        if (previousSeasonId == null || previousSeasonId == seasonId) return StatusResult.SuccessResult();
+
+        try
+        {
+            Loading = true;
+            // get active champ seasons from previous season
+            var champSeasonsResult = await CurrentLeague.Seasons()
+                .WithId(previousSeasonId.Value)
+                .ChampSeasons()
+                .Get(cancellationToken);
+            if (champSeasonsResult.Success == false || champSeasonsResult.Content is null)
+            {
+                return champSeasonsResult.ToStatusResult();
+            }
+            foreach (var champSeason in champSeasonsResult.Content)
+            {
+                var activateChampSeasonResult = await CurrentLeague.Seasons()
+                    .WithId(seasonId.Value)
+                    .Championships()
+                    .WithId(champSeason.ChampionshipId)
+                    .Post(new(), cancellationToken);
+                if (activateChampSeasonResult.Success == false)
+                {
+                    return activateChampSeasonResult.ToStatusResult();
+                }
+            }
+            return StatusResult.SuccessResult();
         }
         finally
         {

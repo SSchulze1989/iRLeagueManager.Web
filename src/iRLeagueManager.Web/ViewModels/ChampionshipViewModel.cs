@@ -55,13 +55,13 @@ public sealed class ChampionshipViewModel : LeagueViewModelBase<ChampionshipView
         return Seasons.Any(x => x.SeasonId == ApiService.CurrentSeason?.Id);
     }
 
-    public async Task<StatusResult> ActivateForCurrentSeasonAsync(CancellationToken cancellationToken = default)
+    public async Task<StatusResult> ActivateForSeasonAsync(long? seasonId = null, CancellationToken cancellationToken = default)
     {
         if (ApiService.CurrentLeague is null)
         {
             return LeagueNullResult();
         }
-        if (ApiService.CurrentSeason is null)
+        if (ApiService.CurrentSeason is null && seasonId == null)
         {
             return SeasonNullResult();
         }
@@ -74,7 +74,9 @@ public sealed class ChampionshipViewModel : LeagueViewModelBase<ChampionshipView
         try
         {
             Loading = true;
-            var result = await ApiService.CurrentSeason
+            var season = seasonId == null ? CurrentSeason! : ApiService.CurrentLeague.Seasons()
+                .WithId(seasonId.Value);
+            var result = await season
                 .Championships()
                 .WithId(ChampionshipId)
                 .Post(new(), cancellationToken);

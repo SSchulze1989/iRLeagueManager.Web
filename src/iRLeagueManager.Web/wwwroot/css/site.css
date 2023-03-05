@@ -91,6 +91,7 @@ a, .btn-link {
 
 .validation-message {
     color: red;
+    font-size: 0.85em;
 }
 
 .input-plain::-webkit-outer-spin-button,

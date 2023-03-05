@@ -1,11 +1,12 @@
-﻿@using iRLeagueManager.Web.ViewModels
+﻿@using iRLeagueApiCore.Common.Models;
+@using iRLeagueManager.Web.ViewModels
 
 <div @attributes=AdditionalAttributes>
     <div>
         <h5>@ResultConfig.Name</h5>
         @if (ResultConfig.SourceResultConfig is not null)
         {
-            <small><i>From source => @GetReferencedResultConfigName(ResultConfig)</i></small>
+            <small><i>Use results from => @GetReferencedResultConfigName(ResultConfig.SourceResultConfig)</i></small>
         }
     </div>
 
@@ -39,7 +40,7 @@
         _ = ResultConfig ?? throw BlazorParameterNullException.New(this, ResultConfig);
     }
 
-    private string GetReferencedResultConfigName(ResultConfigViewModel config)
+    private string GetReferencedResultConfigName(ResultConfigInfoModel config)
     {
         if (string.IsNullOrEmpty(config.ChampionshipName))
         {

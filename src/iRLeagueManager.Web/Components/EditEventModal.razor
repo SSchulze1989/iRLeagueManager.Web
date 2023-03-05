@@ -107,10 +107,10 @@
                                style="border-color: #ced4da !important"
                                placeholder="Enter config name...">
                 <SelectedTemplate Context=config >
-                    @config?.Name
+                    @GetReferencedResultConfigName(config)
                 </SelectedTemplate>
                 <ResultTemplate Context=config>
-                    @config.Name
+                    @GetReferencedResultConfigName(config)
                 </ResultTemplate>
                 <NotFoundTemplate Context=name>
                     @name not found!
@@ -196,7 +196,17 @@
     private async Task<IEnumerable<ResultConfigInfoModel>> SearchResultConfigs(string name)
     {
         return await Task.FromResult(ResultConfigs
+            .Where(x => Event.ResultConfigs.Any(y => y.ResultConfigId == x.ResultConfigId) == false)
             .Where(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase) || x.DisplayName.Contains(name, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private string GetReferencedResultConfigName(ResultConfigInfoModel config)
+    {
+        if (string.IsNullOrEmpty(config.ChampionshipName))
+        {
+            return config.Name;
+        }
+        return $"{config.ChampionshipName} - {config.Name}";
     }
 
     private async Task Submit()

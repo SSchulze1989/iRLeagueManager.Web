@@ -29,6 +29,11 @@
                     </div>
                 </div>
             }
+            <div class="list-group-item">
+                <button class="btn btn-outline-secondary" type="button" @onclick=OnAddChampionshipClick>
+                    Create new Championship
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -80,20 +85,15 @@
         }
     }
 
-    private Task OnDeleteChampionshipClick(ChampionshipViewModel championship)
-    {
-        return Task.CompletedTask;
-    }
-
-    private async Task OnDeleteResultConfigClick(ResultConfigViewModel config)
+    private async Task OnDeleteChampionshipClick(ChampionshipViewModel championship)
     {
         var parameters = new ModalParameters<ConfirmModal>()
-            .Add(x => x.Text, $"Really delete result config \"{config.Name}\"?")
+            .Add(x => x.Text, $"Really delete championship {championship.Name}? This will also remove all settings from previous seasons but it will still keep the results.")
             .Add(x => x.ButtonTypes, ButtonTypes.YesNo);
-        var result = await ModalService.Show<ConfirmModal>("Delete Result Config", parameters).Result;
+        var result = await ModalService.Show<ConfirmModal>("Delete Championship", parameters).Result;
         if (result.Confirmed)
         {
-            await vm.DeleteConfiguration(config);   
+            await vm.DeleteChampionship(championship.GetModel());
         }
     }
 
@@ -108,6 +108,18 @@
             Size = ModalSize.Large,
         };
         var result = await ModalService.Show<EditResultConfigModal>("Add Config", parameters, options).Result;
+    }
+
+    private async Task OnAddChampionshipClick()
+    {
+        var parameters = new ModalParameters<EditChampSeasonModal>()
+            .Add(x => x.Model, CreateChampionshipFromTemplate())
+            .Add(x => x.OnSubmit, (x, c) => vm.AddChampionship(x.GetModel(), c));
+        var result = await ModalService.Show<EditChampSeasonModal>("Create Championship", parameters).Result;
+        if (result.Confirmed)
+        {
+            await vm.LoadFromCurrentSeasonAsync();
+        }
     }
 
     private async Task ToggleChampionshipActive(ChampionshipViewModel championship)
@@ -141,6 +153,16 @@
                     }
                 }
             },
+        };
+    }
+
+    private ChampSeasonModel CreateChampionshipFromTemplate()
+    {
+        return new()
+        {
+            ChampionshipName = "",
+            ChampionshipDisplayName = "",
+            StandingConfig = new(),
         };
     }
 

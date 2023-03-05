@@ -1,16 +1,22 @@
 ﻿@using iRLeagueManager.Web.ViewModels
 
 <div @attributes=AdditionalAttributes>
-    <div>
-        <h5>@Championship.Name</h5>
+    @{
+        var name = ChampSeason?.ChampionshipName ?? Championship.Name;
+        var displayName = ChampSeason?.ChampionshipDisplayName ?? Championship.DisplayName;
+    }
+    <div class="d-flex">
+        <h5>@name</h5>
+        @if (string.IsNullOrEmpty(displayName) == false && displayName != name)
+        {
+            <i>&nbsp;&nbsp;&nbsp;=> "@displayName"</i>
+        }
     </div>
-    <h6>Display Name</h6> 
-    <small>@Championship.DisplayName</small>
     @if (ChampSeason is not null)
     {
         <div class="row">
             <div class="col-5">
-                <h6>Results</h6>
+                <h6>Result Configurations</h6>
                 <ul>
                     @foreach(var config in ChampSeason.ResultConfigs)
                     {
@@ -21,7 +27,7 @@
             <div class="col-5">
                 <h6>Standings</h6>
                 <ul>
-                    <li>@ChampSeason.StandingConfig?.Name</li>
+                    <li>Count @ChampSeason.StandingConfig?.WeeksCounted weeks</li>
                 </ul>
             </div>
         </div>

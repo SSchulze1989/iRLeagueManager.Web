@@ -2,6 +2,7 @@
 using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
+using Microsoft.Extensions.Configuration.EnvironmentVariables;
 
 namespace iRLeagueManager.Web.ViewModels;
 
@@ -15,14 +16,16 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
     public ResultConfigViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, ResultConfigModel model)
         : base(loggerFactory, apiService, model)
     {
-        scorings = new();
-        filtersForPoints = new();
-        filtersForResult = new();
-        availableResultConfigs = new();
+        scorings ??= new();
+        filtersForPoints ??= new();
+        filtersForResult ??= new();
+        availableResultConfigs ??= new();
     }
 
     public long LeagueId => model.LeagueId;
     public long ResultConfigId => model.ResultConfigId;
+    public long? ChampSeasonId => model.ChampSeasonId;
+    public string ChampionshipName => model.ChampionshipName;
     public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
     public string DisplayName { get => model.DisplayName; set => SetP(model.DisplayName, value => model.DisplayName = value, value); }
     public ResultKind ResultKind { get => model.ResultKind; set => SetP(model.ResultKind, value => model.ResultKind = value, value); }
@@ -100,17 +103,21 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
 
     public async Task<StatusResult> LoadAvailableResultConfigs(CancellationToken cancellationToken)
     {
-        if (ApiService.CurrentLeague is null)
+        if (CurrentLeague is null)
         {
             return LeagueNullResult();
         }
+        if (CurrentSeason is null)
+        {
+            return SeasonNullResult();
+        }
 
-        var request = ApiService.CurrentLeague.ResultConfigs()
+        var request = CurrentSeason.ResultsConfigs()
             .Get(cancellationToken);
         var result = await request;
-        if (result.Success && result.Content is IEnumerable<ResultConfigModel> configs)
+        if (result.Success && result.Content is not null)
         {
-            AvailableResultConfigs = new(configs);
+            AvailableResultConfigs = new(result.Content);
         }
 
         return result.ToStatusResult();

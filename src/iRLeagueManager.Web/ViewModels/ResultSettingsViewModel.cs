@@ -68,6 +68,62 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
         }
     }
 
+    public async Task<StatusResult> AddChampionship(PutChampSeasonModel champSeason, CancellationToken cancellationToken = default)
+    {
+        if (CurrentLeague is null) return LeagueNullResult();
+        if (CurrentSeason is null) return SeasonNullResult();
+        try
+        {
+            Loading = true;
+            // Post a new championship
+            var postChampionship = new PostChampionshipModel() { Name = champSeason.ChampionshipName, DisplayName = champSeason.ChampionshipDisplayName };
+            var postChampionshipResult = await CurrentLeague.Championships()
+                .Post(postChampionship, cancellationToken);
+            if (postChampionshipResult.Success == false || postChampionshipResult.Content is null)
+            {
+                return postChampionshipResult.ToStatusResult();
+            }
+            // Post a champ season for the new championship and the current season
+            var postChampSeasonResult = await CurrentSeason.Championships()
+                .WithId(postChampionshipResult.Content.ChampionshipId)
+                .Post(champSeason);
+            if (postChampSeasonResult.Success == false || postChampSeasonResult.Content is null)
+            {
+                return postChampionshipResult.ToStatusResult();
+            }
+            // Update the champseason with data from model
+            var putChampSeasonResult = await CurrentLeague.ChampSeasons()
+                .WithId(postChampSeasonResult.Content.ChampSeasonId)
+                .Put(champSeason);
+            return putChampSeasonResult.ToStatusResult();
+        }
+        finally 
+        { 
+            Loading = false; 
+        }
+    }
+
+    public async Task<StatusResult> DeleteChampionship(ChampionshipModel championship, CancellationToken cancellationToken = default)
+    {
+        if (CurrentLeague is null) return LeagueNullResult();
+        try
+        {
+            Loading = true;
+            var result = await CurrentLeague.Championships()
+                .WithId(championship.ChampionshipId)
+                .Delete(cancellationToken);
+            if (result.Success == false)
+            {
+                return result.ToStatusResult();
+            }
+            return await LoadFromCurrentSeasonAsync(cancellationToken);
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
     public async Task<StatusResult> AddConfiguration(ResultConfigModel? newConfig = null)
     {
         if (ApiService.CurrentLeague is null)

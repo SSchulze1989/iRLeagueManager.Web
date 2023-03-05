@@ -22,35 +22,7 @@
             <small>MaxPoints: @pointRule.MaxPoints</small>
             <small>DropOff p.Pl: @pointRule.PointDropOff</small>
         }
-        @if (@Bind(pointRule, x => x.PointsPerPlace).Count() > 0)
-        {
-            <div class="overflow-auto">
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th><small>Pos.</small></th>
-                            @foreach ((var point, var position) in @Bind(pointRule, x => x.PointsPerPlace).Select((x, i) => (x, i + 1)))
-                            {
-                                <th><small>@position.</small></th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <th><small>Pts.</small></th>
-                            @foreach (var point in @Bind(pointRule, x => x.PointsPerPlace))
-                            {
-                                <td><small>@point</small></td>
-                            }
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        }
-        else
-        {
-            <span>Points from source</span>
-        }
+        <PointTable PointRule=pointRule/>
     </button>
 </InputGroup>
 <InputGroup Label="Sort Final">

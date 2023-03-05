@@ -103,7 +103,9 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
         try
         {
             Loading = true;
-            var result = await CurrentLeague.ResultConfigs()
+            var result = await CurrentLeague.ChampSeasons()
+                .WithId(model.ChampSeasonId)
+                .ResultConfigs()
                 .Post(config, cancellationToken);
             if (result.Success == false || result.Content is null)
             {

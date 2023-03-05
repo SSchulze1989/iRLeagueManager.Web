@@ -97,19 +97,6 @@
         }
     }
 
-    private async Task OnAddConfigurationClick()
-    {
-        var parameters = new ModalParameters<EditResultConfigModal>()
-            .Add(x => x.Model, CreateConfigFromTemplate())
-            .Add(x => x.OnSubmit, new(async (config, ct) => await vm.AddConfiguration(config.GetModel())));
-        var options = new ModalOptions()
-        {
-            DisableBackgroundCancel = true,
-            Size = ModalSize.Large,
-        };
-        var result = await ModalService.Show<EditResultConfigModal>("Add Config", parameters, options).Result;
-    }
-
     private async Task OnAddChampionshipClick()
     {
         var parameters = new ModalParameters<EditChampSeasonModal>()

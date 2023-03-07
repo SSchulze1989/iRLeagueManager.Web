@@ -6,23 +6,23 @@
         @switch (ButtonTypes)
         {
             case ButtonTypes.Ok:
-                <div class="col-sm-6 d-flex justify-content-center">
+                <div class="col d-flex justify-content-center">
                     <button class="btn btn-primary" @onclick=OkClick>Ok</button>
                 </div>
-                <div class="col-sm-6 d-flex justify-content-center">
+                <div class="col d-flex justify-content-center">
                     <button class="btn btn-secondary" @onclick=CancelClick>Cancel</button>
                 </div>
                 break;
             case ButtonTypes.OkCancel:
-                <div class="col-sm-6 d-flex justify-content-center">
+                <div class="col d-flex justify-content-center">
                     <button class="btn btn-primary" @onclick=CancelClick>Cancel</button>
                 </div>
                 break;
             case ButtonTypes.YesNo:
-                <div class="col-sm-6 d-flex justify-content-center">
+                <div class="col d-flex justify-content-center">
                     <button class="btn btn-outline-primary" @onclick=OkClick>Yes</button>
                 </div>
-                <div class="col-sm-6 d-flex justify-content-center">
+                <div class="col d-flex justify-content-center">
                     <button class="btn btn-secondary" @onclick=CancelClick>No</button>
                 </div>
                 break;

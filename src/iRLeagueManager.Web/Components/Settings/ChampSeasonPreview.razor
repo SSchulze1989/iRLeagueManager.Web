@@ -1,0 +1,38 @@
+﻿@using iRLeagueManager.Web.ViewModels
+
+<div @attributes=AdditionalAttributes>
+    <div class="mb-1">
+        <h5>@ChampSeason.ChampionshipName</h5>
+    </div>
+    <div class="d-flex mb-2 gap-3">
+        <h6>ResultConfigs</h6>
+        <div class="d-flex">
+            @foreach(var config in ChampSeason.ResultConfigs)
+            {
+                <div class="badge bg-secondary p-2">
+                    @config.Name
+                </div>
+            }
+        </div>
+    </div>
+    <div class="d-flex gap-3">
+        <h6>Standing Config</h6>
+        <div>
+            @ChampSeason.StandingConfig?.Name
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter(CaptureUnmatchedValues=true)]
+    public IDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [Parameter, EditorRequired]
+    public ChampSeasonViewModel ChampSeason { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        _ = ChampSeason ?? throw BlazorParameterNullException.New(this, ChampSeason);
+    }
+}

@@ -29,13 +29,15 @@ public static class Services
         services.TryAddTransient<SortOptionsViewModel>();
         services.TryAddTransient<ResultFiltersViewModel>();
         services.TryAddTransient<TeamViewModel>();
+        services.TryAddTransient<ChampionshipViewModel>();
+        services.TryAddTransient<ChampSeasonViewModel>();
         services.TryAddScoped<ResultsPageViewModel>();
-        services.TryAddScoped<ResultConfigSettingsViewModel>();
+        services.TryAddScoped<ResultSettingsViewModel>();
         services.TryAddScoped<ReviewsPageViewModel>();
         services.TryAddScoped<EventListViewModel>();
         services.TryAddScoped<LeagueUsersViewModel>();
         services.TryAddScoped<StandingsPageViewModel>();
-        services.TryAddScoped<ResultConfigSettingsViewModel>();
+        services.TryAddScoped<ResultSettingsViewModel>();
         services.TryAddScoped<ReviewSettingsViewModel>();
         services.TryAddScoped<TeamsViewModel>();
         return services;

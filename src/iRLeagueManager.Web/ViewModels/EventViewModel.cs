@@ -191,15 +191,13 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
 
     public async Task<StatusResult> LoadAvailableResultConfigs(CancellationToken cancellationToken = default)
     {
-        if (ApiService.CurrentLeague is null)
-        {
-            return LeagueNullResult();
-        }
+        if (CurrentLeague is null) return LeagueNullResult();
+        if (CurrentSeason is null) return SeasonNullResult();
 
         try
         {
             Loading = true;
-            var request = ApiService.CurrentLeague.ResultConfigs()
+            var request = CurrentSeason.ResultsConfigs()
                 .Get(cancellationToken);
             var result = await request;
             if (result.Success && result.Content is not null)
@@ -434,6 +432,8 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
     {
         LeagueId = config.LeagueId,
         ResultConfigId = config.ResultConfigId,
+        ChampSeasonId = config.ChampSeasonId,
+        ChampionshipName = config.ChampionshipName,
         Name = config.Name,
         DisplayName = config.DisplayName,
     };

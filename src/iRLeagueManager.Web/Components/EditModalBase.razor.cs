@@ -10,7 +10,7 @@ using MvvmBlazor.Components;
 
 namespace iRLeagueManager.Web.Components;
 
-public class EditModalBase<TViewModel, TModel> : MvvmComponentBase where TViewModel : LeagueViewModelBase<TViewModel, TModel>
+public class EditModalBase<TViewModel, TModel> : MvvmComponentBase where TViewModel : LeagueViewModelBase<TViewModel, TModel> where TModel : class
 {
     [Inject]
     protected TViewModel Vm { get; set; } = default!;

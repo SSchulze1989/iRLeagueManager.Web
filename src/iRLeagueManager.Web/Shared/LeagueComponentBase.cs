@@ -96,6 +96,16 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
         }
         if (ApiService.CurrentSeason == null)
         {
+            var currentSeason = await ApiService.CurrentLeague.Seasons()
+                .Current()
+                .Get();
+            if (currentSeason.Success && currentSeason.Content is not null)
+            {
+                await ApiService.SetCurrentSeasonAsync(ApiService.CurrentLeague.Name, currentSeason.Content.SeasonId);
+            }
+        }
+        if (ApiService.CurrentSeason == null)
+        {
             var lastSeason = Shared.SeasonList.LastOrDefault();
             if (lastSeason != null)
             {

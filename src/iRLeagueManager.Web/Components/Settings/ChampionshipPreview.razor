@@ -1,0 +1,52 @@
+﻿@using iRLeagueManager.Web.ViewModels
+
+<div @attributes=AdditionalAttributes>
+    @{
+        var name = ChampSeason?.ChampionshipName ?? Championship.Name;
+        var displayName = ChampSeason?.ChampionshipDisplayName ?? Championship.DisplayName;
+    }
+    <div class="d-flex">
+        <h5>@name</h5>
+        @if (string.IsNullOrEmpty(displayName) == false && displayName != name)
+        {
+            <i>&nbsp;&nbsp;&nbsp;=> "@displayName"</i>
+        }
+    </div>
+    @if (ChampSeason is not null)
+    {
+        <div class="row">
+            <div class="col-5">
+                <h6>Result Configurations</h6>
+                <ul>
+                    @foreach(var config in ChampSeason.ResultConfigs)
+                    {
+                        <li>@config.Name</li>
+                    }
+                </ul>
+            </div>
+            <div class="col-5">
+                <h6>Standings</h6>
+                <ul>
+                    <li>Count @ChampSeason.StandingConfig?.WeeksCounted weeks</li>
+                </ul>
+            </div>
+        </div>
+    }
+</div>
+
+
+@code {
+    [Parameter(CaptureUnmatchedValues=true)]
+    public IDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [Parameter, EditorRequired]
+    public ChampionshipViewModel Championship { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public ChampSeasonViewModel? ChampSeason { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _ = Championship ?? throw BlazorParameterNullException.New(this, Championship);
+    }
+}

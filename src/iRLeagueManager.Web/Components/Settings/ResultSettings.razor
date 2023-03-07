@@ -2,28 +2,50 @@
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
-@inject ResultConfigSettingsViewModel vm
+@inject ResultSettingsViewModel vm
 @inject LeagueApiService apiService
+@inject SharedStateService sharedState
 @inject ILogger<ResultSettings> logger
 
 <div @attributes=AdditionalAttributes>
+    <div class="input-group mt-2 mb-3">
+        <label class="input-group-text">Season</label>
+        <select @bind="SeasonSelect" class="form-select no-radius" @onclick:stopPropagation>
+            @foreach (var season in sharedState.SeasonList)
+            {
+                <option value="@season.SeasonId" class="nav-option">@season.SeasonName</option>
+            }
+        </select>
+    </div>
     <div class="card my-2 pb-0">
         <div class="card-header">
-            Result Configurations
+            Championships
         </div>
         <div class="list-group list-group-flush">
-            @foreach((var config, var index) in @Bind(vm, x => x.ResultsConfigs).Select((x, i) => (x, i)))
+            @foreach ((var championship, var index) in @Bind(vm, x => x.Championships).OrderByDescending(x => x.IsActive).Select((x, i) => (x, i)))
             {
-                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button" @onclick=@(() => OnResultConfigClick(config))>
-                    <ResultConfigPreview ResultConfig=config />
-                    <button class="btn btn-outline-danger" @onclick=@(() => OnDeleteResultConfigClick(config)) @onclick:stopPropagation="true">
-                        <span class="oi oi-trash"/>
-                    </button>
+                var champSeason = vm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipId == championship.ChampionshipId);
+                var disabled = champSeason == null;
+                <div class="list-group-item @(disabled ? "" : "list-group-item-action") d-flex justify-content-between align-items-start" type="button" @onclick=@(async () => { if (champSeason is not null) await OnChampionshipClick(champSeason); })>
+                    <ChampionshipPreview Championship=championship ChampSeason=champSeason class="flex-fill"/>
+                    <div>
+                        <label class="switch" @onclick:stopPropagation>
+                            <input type="checkbox" checked="@championship.IsActive" @onclick=@(() => ToggleChampionshipActive(championship)) @onclick:stopPropagation @onclick:preventDefault/>
+                            <span class="slider round"></span>
+                        </label>
+                        <button class="btn btn-outline-danger" @onclick=@(() => OnDeleteChampionshipClick(championship)) @onclick:stopPropagation="true">
+                            <span class="oi oi-trash" />
+                        </button>
+                    </div>
                 </div>
             }
+            <div class="list-group-item">
+                <button class="btn btn-outline-secondary" type="button" @onclick=OnAddChampionshipClick>
+                    Create new Championship
+                </button>
+            </div>
         </div>
     </div>
-    <button class="btn btn-outline-secondary" @onclick=OnAddConfigurationClick>Add Configuration</button>
 </div>
 
 @code {
@@ -32,6 +54,12 @@
 
     [Parameter(CaptureUnmatchedValues = true)] 
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private long SeasonSelect
+    {
+        get => sharedState.SeasonId;
+        set => _ = OnSeasonSelectChanged(value);
+    }
 
     private async Task HandleSubmit()
     {
@@ -61,29 +89,53 @@
         }
     }
 
-    private async Task OnDeleteResultConfigClick(ResultConfigViewModel config)
+    private async Task OnChampionshipClick(ChampSeasonViewModel champSeason)
     {
-        var parameters = new ModalParameters<ConfirmModal>()
-            .Add(x => x.Text, $"Really delete result config \"{config.Name}\"?")
-            .Add(x => x.ButtonTypes, ButtonTypes.YesNo);
-        var result = await ModalService.Show<ConfirmModal>("Delete Result Config", parameters).Result;
-        if (result.Confirmed)
+        var parameters = new ModalParameters<EditChampSeasonModal>()
+            .Add(x => x.Model, champSeason.CopyModel())
+            .Add(x => x.OnSubmit, new((x, cancellation) => x.SaveChangesAsync(cancellation)));
+        var result = await ModalService.Show<EditChampSeasonModal>("Edit Championship", parameters).Result;
+        if (result.Confirmed && result.Data is ChampSeasonModel model)
         {
-            await vm.DeleteConfiguration(config);   
+            champSeason.SetModel(model);
         }
     }
 
-    private async Task OnAddConfigurationClick()
+    private async Task OnDeleteChampionshipClick(ChampionshipViewModel championship)
     {
-        var parameters = new ModalParameters<EditResultConfigModal>()
-            .Add(x => x.Model, CreateConfigFromTemplate())
-            .Add(x => x.OnSubmit, new(async (config, ct) => await vm.AddConfiguration(config.GetModel())));
-        var options = new ModalOptions()
+        var parameters = new ModalParameters<ConfirmModal>()
+            .Add(x => x.Text, $"Really delete championship {championship.Name}? This will also remove all settings from previous seasons but it will still keep the results.")
+            .Add(x => x.ButtonTypes, ButtonTypes.YesNo);
+        var result = await ModalService.Show<ConfirmModal>("Delete Championship", parameters).Result;
+        if (result.Confirmed)
         {
-            DisableBackgroundCancel = true,
-            Size = ModalSize.Large,
-        };
-        var result = await ModalService.Show<EditResultConfigModal>("Add Config", parameters, options).Result;
+            await vm.DeleteChampionship(championship.GetModel());
+        }
+    }
+
+    private async Task OnAddChampionshipClick()
+    {
+        var parameters = new ModalParameters<EditChampSeasonModal>()
+            .Add(x => x.Model, CreateChampionshipFromTemplate())
+            .Add(x => x.OnSubmit, (x, c) => vm.AddChampionship(x.GetModel(), c));
+        var result = await ModalService.Show<EditChampSeasonModal>("Create Championship", parameters).Result;
+        if (result.Confirmed)
+        {
+            await vm.LoadFromCurrentSeasonAsync();
+        }
+    }
+
+    private async Task ToggleChampionshipActive(ChampionshipViewModel championship)
+    {
+        if (championship.IsActive)
+        {
+            await championship.DeactivateForCurrentSeasonAsync();
+        }
+        else
+        {
+            await championship.ActivateForSeasonAsync();
+        }
+        await vm.LoadFromCurrentSeasonAsync();
     }
 
     private ResultConfigModel CreateConfigFromTemplate()
@@ -104,11 +156,28 @@
                     }
                 }
             },
-            StandingConfig = new()
-            {
-                WeeksCounted = 8,
-            },
         };
+    }
+
+    private ChampSeasonModel CreateChampionshipFromTemplate()
+    {
+        return new()
+        {
+            ChampionshipName = "",
+            ChampionshipDisplayName = "",
+            StandingConfig = new(),
+        };
+    }
+
+    private async Task OnSeasonSelectChanged(long value)
+    {
+        if (sharedState.LeagueName == null || value == 0)
+        {
+            return;
+        }
+        await apiService.SetCurrentSeasonAsync(sharedState.LeagueName, value);
+        await vm.LoadFromCurrentSeasonAsync();
+        await InvokeAsync(StateHasChanged);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -117,10 +186,7 @@
         {
             return;
         }
-        if (apiService.CurrentLeague != null)
-        {
-            await vm.LoadFromLeagueAsync();
-        }
+        await vm.LoadFromCurrentSeasonAsync();
         await InvokeAsync(StateHasChanged);
     }
 }

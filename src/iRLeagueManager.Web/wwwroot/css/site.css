@@ -1,4 +1,9 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+@import url(toggle.css);
+
+.root {
+    --bs-border-radius: .25rem;
+}
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -86,6 +91,7 @@ a, .btn-link {
 
 .validation-message {
     color: red;
+    font-size: 0.85em;
 }
 
 .input-plain::-webkit-outer-spin-button,
@@ -159,12 +165,17 @@ a, .btn-link {
 .input-group-list > .input-group:not(:first-child) > * {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    border-top: none;
 }
 
 .input-group-list > .input-group:not(:last-child) > * {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
+    border-bottom: none;
+}
+
+.input-group-list > .input-group:last-child > * {
+    border-bottom-left-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
 }
 
 .input-group-list-flush > .input-group > * {
@@ -232,6 +243,13 @@ a, .btn-link {
         .lds-ring div:nth-child(3) {
             animation-delay: -0.15s;
         }
+
+.btn-toggle[aria-expanded=true] > .btn-toggle-off {
+    display: none;
+}
+.btn-toggle[aria-expanded=false] > .btn-toggle-on {
+    display: none;
+}
 
 @keyframes lds-ring {
     0% {

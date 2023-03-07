@@ -2,7 +2,7 @@
 @page "/{LeagueName}/Seasons/{SeasonId:long}"
 @using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.ViewModels
-@inherits MvvmComponentBase
+@inherits LeagueComponentBase
 @inject NavigationManager navigationManager
 @inject LeagueApiService apiService
 @inject SeasonsViewModel vm
@@ -18,40 +18,4 @@
 </div>
 
 @code {
-    [Parameter]
-    public string LeagueName { get; set; } = string.Empty;
-
-    [Parameter]
-    public long? SeasonId { get; set; }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        await apiService.SetCurrentLeagueAsync(LeagueName);
-        if (SeasonId != null)
-        {
-            await apiService.SetCurrentSeasonAsync(LeagueName, SeasonId.Value);
-            return;
-        }
-
-        // navigate to first season
-        if (apiService.CurrentLeague == null)
-        {
-            return;
-        }
-        var result = await apiService.CurrentLeague.Seasons().Get();
-        if (result.Success && result.Content is not null)
-        {
-            var seasons = result.Content;
-            navigationManager.NavigateTo($"./{LeagueName}/Seasons/{seasons.Last().SeasonId}");
-        }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await vm.OnAfterRenderAsync(firstRender);
-        if (firstRender == false)
-        {
-            return;
-        }
-    }
 }

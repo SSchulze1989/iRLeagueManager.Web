@@ -1,7 +1,15 @@
-﻿<div class="input-group @Class">
+﻿@using System.Linq.Expressions;
+<div class="input-group @Class">
     <label class="input-group-text w-25 text-wrap text-start">@Label</label>
     @ChildContent
 </div>
+@if (ValidationFor is not null)
+{
+    <div class="input-group">
+        <div class="w-25"> </div>
+        <FormValidationMessage For=@ValidationFor />
+    </div>
+}
 
 @code {
     [Parameter]
@@ -10,4 +18,6 @@
     public RenderFragment? ChildContent { get; set; }
     [Parameter]
     public string Label { get; set; } = string.Empty;
+    [Parameter]
+    public Expression<Func<object>>? ValidationFor { get; set; }
 }

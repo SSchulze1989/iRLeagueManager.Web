@@ -9,7 +9,7 @@
 @inject TrackListService trackListService
 
 <EditForm Model=Event OnValidSubmit=Submit>
-    <StatusResultValidator @ref=ResultValidator/>
+    <StatusResultValidator @ref=ResultValidator TrimPrefix="Event."/>
     <div class="input-group-list mb-2">
         <InputGroup Label="Name"> 
             <InputText class="form-control" placeholder="Event Name" aria-label="EventName" id="name" @bind-Value="Event.Name"/>
@@ -97,20 +97,19 @@
     </div>
     <div class="input-group-list mb-2">
         <InputGroup Label="Result Configs">
-            <BlazoredTypeahead @bind-Values=Event.ResultConfigs  
+            <BlazoredTypeahead @bind-Values=Event.ResultConfigs
                                SearchMethod=SearchResultConfigs 
                                MinimumLength=0
                                MaximumSuggestions=10
                                EnableDropDown=true
                                DeleteItemsOnBackspace=false
-                               class="form-control py-0 px-0 ps-1 border"
-                               style="border-color: #ced4da !important"
+                               class="form-control py-0 px-0 ps-1"
                                placeholder="Enter config name...">
                 <SelectedTemplate Context=config >
-                    @config?.Name
+                    @GetReferencedResultConfigName(config)
                 </SelectedTemplate>
                 <ResultTemplate Context=config>
-                    @config.Name
+                    @GetReferencedResultConfigName(config)
                 </ResultTemplate>
                 <NotFoundTemplate Context=name>
                     @name not found!
@@ -118,6 +117,7 @@
             </BlazoredTypeahead>
         </InputGroup>
     </div>
+    <FormValidationMessage For="() => Event.ResultConfigs" />
     <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
     <CancelSubmitButtons ModelState=Event SubmitText="Save" OnCancel=Cancel/>
 </EditForm>
@@ -196,7 +196,17 @@
     private async Task<IEnumerable<ResultConfigInfoModel>> SearchResultConfigs(string name)
     {
         return await Task.FromResult(ResultConfigs
+            .Where(x => Event.ResultConfigs.Any(y => y.ResultConfigId == x.ResultConfigId) == false)
             .Where(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase) || x.DisplayName.Contains(name, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private string GetReferencedResultConfigName(ResultConfigInfoModel config)
+    {
+        if (string.IsNullOrEmpty(config.ChampionshipName))
+        {
+            return config.Name;
+        }
+        return $"{config.ChampionshipName} - {config.Name}";
     }
 
     private async Task Submit()

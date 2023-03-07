@@ -1,6 +1,7 @@
 ﻿using iRLeagueManager.Web.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using System.Text.RegularExpressions;
 
 namespace iRLeagueManager.Web.Shared;
 
@@ -9,6 +10,13 @@ public sealed class StatusResultValidator : ComponentBase
     private ValidationMessageStore messageStore = default!;
     [CascadingParameter]
     private EditContext CurrentEditContext { get; set; } = default!;
+
+    /// <summary>
+    /// Regex string to trim the prefix of field identifiers from validation errors
+    /// -> Default = "Model."
+    /// </summary>
+    [Parameter]
+    public string TrimPrefix { get; set; } = "Model.";
 
     public string ErrorMessage { get; set; } = string.Empty;
 
@@ -84,12 +92,10 @@ public sealed class StatusResultValidator : ComponentBase
         }
     }
 
-    private static string GetModelFieldName(string requestFieldName)
+    private string GetModelFieldName(string requestFieldName)
     {
-        if (requestFieldName.StartsWith("Model."))
-        {
-            return requestFieldName.Substring("Model.".Length);
-        }
+        // Trim prefix from field identifier
+        requestFieldName = Regex.Replace(requestFieldName, TrimPrefix, "");
         return requestFieldName;
     }
 }

@@ -1,15 +1,27 @@
-﻿@using iRLeagueManager.Web.ViewModels
+﻿@using iRLeagueApiCore.Common.Models;
+@using iRLeagueManager.Web.ViewModels
 
 <div @attributes=AdditionalAttributes>
     <div>
         <h5>@ResultConfig.Name</h5>
+        @if (ResultConfig.SourceResultConfig is not null)
+        {
+            <small><i>Use results from => @GetReferencedResultConfigName(ResultConfig.SourceResultConfig)</i></small>
+        }
     </div>
-    <h6>Display Name</h6> 
-    <small>@ResultConfig.DisplayName</small>
-    @foreach(var scoring in ResultConfig.Scorings)
-    {
-        
-    }
+
+    <div class="collapse mt-2" id="config_@(ResultConfig.ResultConfigId)_details">
+        @foreach (var scoring in ResultConfig.Scorings)
+        {
+            <div class="mb-3">
+                <h6>@scoring.Name</h6>
+                <div class="ms-5">
+                    <PointTable PointRule=scoring.PointRule />
+                    <small>Sort results by: @string.Join(" then ", scoring.PointRule.FinalSortOptions)</small>
+                </div>
+            </div>
+        }
+    </div>
 </div>
 
 
@@ -20,8 +32,20 @@
     [Parameter, EditorRequired]
     public ResultConfigViewModel ResultConfig { get; set; } = default!;
 
+    [Parameter]
+    public bool Collapsed { get; set; } = false;
+
     protected override void OnParametersSet()
     {
         _ = ResultConfig ?? throw BlazorParameterNullException.New(this, ResultConfig);
+    }
+
+    private string GetReferencedResultConfigName(ResultConfigInfoModel config)
+    {
+        if (string.IsNullOrEmpty(config.ChampionshipName))
+        {
+            return config.Name;
+        }
+        return $"{config.ChampionshipName} - {config.Name}";
     }
 }

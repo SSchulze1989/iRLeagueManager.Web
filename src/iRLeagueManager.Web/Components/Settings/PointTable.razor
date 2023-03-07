@@ -1,0 +1,44 @@
+﻿@inherits MvvmComponentBase
+
+<div @attributes=AdditionalAttributes>
+    @if (@Bind(PointRule, x => x.PointsPerPlace).Count() > 0)
+    {
+        <table class="overflow-scroll table table-sm">
+            <thead>
+                <tr>
+                    <th><small>Pos.</small></th>
+                    @foreach ((var point, var position) in @Bind(PointRule, x => x.PointsPerPlace).Select((x, i) => (x, i + 1)))
+                    {
+                        <th><small>@position.</small></th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th><small>Pts.</small></th>
+                    @foreach (var point in @Bind(PointRule, x => x.PointsPerPlace))
+                    {
+                        <td><small>@point</small></td>
+                    }
+                </tr>
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <span>Points from source</span>
+    }
+</div>
+
+@code {
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+    [Parameter]
+    public PointRuleViewModel PointRule { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, PointRule);
+    }
+}

@@ -11,6 +11,22 @@ public static class BlazorParameterNullException
     {
         return new BlazorParameterNullException<TComponent, TParameter>(parameterName);
     }
+
+    public static void ThrowIfNull<TComponent, TParameter>(TComponent component, TParameter parameter)
+    {
+        if (parameter is null)
+        {
+            throw New(component, parameter);
+        }
+    }
+
+    public static void ThrowIfNull<TComponent, TParameter>(TComponent component, TParameter parameter, string parameterName)
+    {
+        if (parameter is null)
+        {
+            throw New(component, parameter, parameterName);
+        }
+    }
 }
 
 public sealed class BlazorParameterNullException<TComponent, TParameter> : InvalidOperationException

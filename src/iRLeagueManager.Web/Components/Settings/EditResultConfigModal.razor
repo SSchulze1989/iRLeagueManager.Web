@@ -1,44 +1,49 @@
-﻿@inherits MvvmComponentBase
+﻿@inherits EditModalBase<ResultConfigViewModel, ResultConfigModel>
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
-@inject ResultConfigViewModel vm
+@inject IJSRuntime JsRuntime
 
-<EditForm Model=vm OnValidSubmit=Submit>
+<EditForm Model=Vm OnValidSubmit=Submit>
     <StatusResultValidator @ref=ResultValidator />
-    <div class="accordion mb-3">
+    <div class="accordion mb-3" id="resultConfigSections">
         <div class="accordion-item">
             <h2 class="accordion-header">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeneralSettings" aria-expanded="true" aria-controls="collapseGeneralSettings">
                     General Settings
                 </button>
             </h2>
-            <div class="accordion-collapse collapse show input-group-list input-group-list-flush" id="collapseGeneralSettings">
+            <div class="accordion-collapse collapse show input-group-list input-group-list-flush" id="collapseGeneralSettings" data-bs-parent="#resultConfigSections">
                 <InputGroup Label="Name">
-                    <InputText class="form-control" id="input-name" placeholder="Name..." aria-label="input-name" @bind-Value=vm.Name/>
+                    <InputText class="form-control" id="input-name" placeholder="Name..." aria-label="input-name" @bind-Value=Vm.Name data-bs-toggle="tooltip" title="Identifying name of the result config" />
                 </InputGroup>
                 <InputGroup Label="Show as">
-                    <InputText class="form-control" id="input-display-name" placeholder="Show as ..." aria-label="input-display-name" @bind-Value=vm.DisplayName/>
+                    <InputText class="form-control" id="input-display-name" placeholder="Show as ..." aria-label="input-display-name" @bind-Value=Vm.DisplayName data-bs-toggle="tooltip" title="Name displayed on results and standings" />
                 </InputGroup>
                 <InputGroup Label="Type">
-                    <InputSelect class="form-select" id="input-type" placeholder="Type..." aria-label="input-type" @bind-Value=vm.ResultKind>
+                    <InputSelect class="form-select" id="input-type" placeholder="Type..." aria-label="input-type" @bind-Value=Vm.ResultKind data-bs-toggle="tooltip" title="Type of the race that will be scored: select from Member or Team race">
                         <option value=@ResultKind.Member>Member</option>
                         <option value=@ResultKind.Team>Team</option>
                     </InputSelect>
                 </InputGroup>
                 <InputGroup Label="Source">
-                    <InputSelect class="form-select" id="input-source" placeholder="Source..." aria-label="input-source" @bind-Value=vm.SourceResultConfigId>
+                    <InputSelect class="form-select" id="input-source" placeholder="Source..." aria-label="input-source" @bind-Value=Vm.SourceResultConfigId data-bs-toggle="tooltip" 
+                        title="<div class='text-start'>Data source for the results: 
+                            <ul>
+                                <li>select 'Raw' to use uploaded result</li>
+                                <li>other result config to re-use a calculated result set</li>
+                            </ul></div>">
                         <option value="0">Raw</option>
-                        @foreach(var config in @Bind(vm, x => x.AvailableResultConfigs).Where(CanSelectAsSourceConfig))
+                        @foreach(var config in @Bind(Vm, x => x.AvailableResultConfigs).Where(CanSelectAsSourceConfig))
                         {
                             <option value=@config.ResultConfigId>@config.Name</option>
                         }
                     </InputSelect>
                 </InputGroup>
-                @if (vm.ResultKind == ResultKind.Team)
+                @if (Vm.ResultKind == ResultKind.Team)
                 {
                     <InputGroup Label="Results per Team">
-                        <InputNumber class="form-control" id="input-results-per-team" aria-label="input-results-per-team" @bind-Value=vm.ResultsPerTeam/>
+                        <InputNumber class="form-control" id="input-results-per-team" aria-label="input-results-per-team" @bind-Value=Vm.ResultsPerTeam data-bs-toggle="tooltip" title="Number of member results that are counted in a team race. E.g: 2 will take the top 2 results from all team members in this race" />
                     </InputGroup>
                 }
             </div>
@@ -50,28 +55,28 @@
                     Filters
                 </button>
             </h2>
-            <div class="accordion-collapse collapse input-group-list input-group-list-flush" id="collapseFilters">
+            <div class="accordion-collapse collapse input-group-list input-group-list-flush" id="collapseFilters" data-bs-parent="#resultConfigSections">
                 <InputGroup Label="Points Filter">
-                    <button class="form-control" type="button" @onclick=PointsFilterClick>
-                        @if (vm.FiltersForPoints.Count == 0)
+                    <button class="form-control" type="button" @onclick=PointsFilterClick data-bs-toggle="tooltip" title="Filter rows that can score points. Only rows that fulfill all filter requirements will be given points. Rows are still displayed in the output result set">
+                        @if (Vm.FiltersForPoints.Count == 0)
                         {
                             <span class="text-secondary"><em>Configure</em></span>
                         }
                         else
                         {
-                            <span class="text-secondary">@vm.FiltersForPoints.Count filters applied</span>
+                            <span class="text-secondary">@Vm.FiltersForPoints.Count filters applied</span>
                         }
                     </button>
                 </InputGroup>
                 <InputGroup Label="Result Filter">
-                    <button class="form-control" type="button" @onclick=ResultFilterClick>
-                        @if (vm.FiltersForResult.Count == 0)
+                    <button class="form-control" type="button" @onclick=ResultFilterClick data-bs-toggle="tooltip" title="Filter rows and remove them from the result. Only rows that fulfill all filter requirements will be visible int the output result set">
+                        @if (Vm.FiltersForResult.Count == 0)
                         {
                             <span class="text-secondary"><em>Configure</em></span>
                         }
                         else
                         {
-                            <span class="text-secondary">@vm.FiltersForResult.Count filters applied</span>
+                            <span class="text-secondary">@Vm.FiltersForResult.Count filters applied</span>
                         }
                     </button>
                 </InputGroup>
@@ -79,24 +84,25 @@
         </div>
 
         <div class="accordion-item">
-            <h2 class="accordion-header">
+            <h2 class="accordion-header" data-bs-toggle="tooltip" data-bs-trigger="hover" title="<p>Scoring options for individual sessions.</p><p>Create one Scoring for each race type session in the event (1 is default - multiple for heat events)</p>">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSessionScorings" aria-expanded="false" aria-controls="collapseSessionScorings">
                     Session Scorings
                 </button>
             </h2>
-            <div class="accordion-collapse collapse m-1 mt-2" id="collapseSessionScorings">
-                @foreach(var scoring in @Bind(vm, x => x.Scorings).Where(x => x.IsCombinedResult == false))
+            <div class="accordion-collapse collapse m-1 mt-2" id="collapseSessionScorings" data-bs-parent="#resultConfigSections">
+                @foreach(var scoring in @Bind(Vm, x => x.Scorings).Where(x => x.IsCombinedResult == false))
                 {
                     <div class="input-group-list mb-3">
                         <div class="input-group">
-                            <InputText class="form-control" id="scoring-name" aria-label="scoring-name" placeholder="Name..." @bind-Value=scoring.Name/>
-                            <button class="btn btn-outline-danger" type="button" @onclick="@(() => vm.RemoveScoring(scoring))"><span class="oi oi-trash"/></button>
+                            <InputText class="form-control" id="scoring-name" aria-label="scoring-name" placeholder="Name..." @bind-Value=scoring.Name
+                                data-bs-toggle="tooltip" title="Name of the session scoring to be displayed on results"/>
+                            <button class="btn btn-outline-danger" type="button" @onclick="@(() => Vm.RemoveScoring(scoring))"><span class="oi oi-trash"/></button>
                         </div>
                         <EditScoring Scoring=scoring />
                     </div>
                 }
                 <div class="mt-3">
-                    <button class="btn btn-outline-secondary" type="button" @onclick="@(() => vm.AddScoring())">Add Scoring</button>
+                    <button class="btn btn-outline-secondary" type="button" @onclick="@(() => Vm.AddScoring())">Add Scoring</button>
                 </div>
             </div>
         </div>
@@ -107,21 +113,21 @@
                     Combined Result
                 </button>
             </h2>
-            <div class="accordion-collapse collapse input-group-list input-group-list-flush" id="collapseCombined">
+            <div class="accordion-collapse collapse input-group-list input-group-list-flush" id="collapseCombined" data-bs-parent="#resultConfigSections">
                 <div class="input-group" disabled>
                     <div class="input-group-text">
-                        <InputCheckbox class="form-check-input mt-0" @bind-Value=vm.CalculateCombinedResult/>
+                        <InputCheckbox class="form-check-input mt-0" @bind-Value=Vm.CalculateCombinedResult/>
                     </div>
-                    <label class="form-control">Get Combined Result</label>
+                    <label class="form-control" data-bs-toggle="tooltip" title="Combine results from heat sessions into a single event result">Get Combined Result</label>
                 </div>
-                @if (vm.CalculateCombinedResult)
+                @if (Vm.CalculateCombinedResult)
                 {
-                    var combinedScoring = vm.Scorings.First(x => x.IsCombinedResult);
+                    var combinedScoring = Vm.Scorings.First(x => x.IsCombinedResult);
                     <div class="input-group" disabled>
                         <div class="input-group-text">
                             <InputCheckbox class="form-check-input mt-0" @bind-Value=combinedScoring.CalcPoints/>
                         </div>
-                        <label class="form-control">Calculate Points</label>
+                        <label class="form-control" data-bs-toggle="tooltip" title="Run points calculation for the combined result">Calculate Points</label>
                     </div>
                     <EditScoring Scoring=combinedScoring />
                 }
@@ -134,80 +140,50 @@
                     Standings
                 </button>
             </h2>
-            <div class="accordion-collapse collapse input-group-list input-group-list-flush" id="collapseStandings">
+            <div class="accordion-collapse collapse input-group-list input-group-list-flush" id="collapseStandings" data-bs-parent="#resultConfigSections">
                 <div class="input-group" disabled>
                     <div class="input-group-text">
-                        <InputCheckbox class="form-check-input mt-0" @bind-Value=vm.CalculateStandings />
+                        <InputCheckbox class="form-check-input mt-0" @bind-Value=Vm.CalculateStandings />
                     </div>
-                    <label class="form-control">Calculate Standings</label>
+                    <label class="form-control" data-bs-toggle="tooltip" title="Calculate standings for this result configuration">Calculate Standings</label>
                 </div>
-                @if (vm.CalculateStandings && vm.StandingConfig is not null)
+                @if (Vm.CalculateStandings && Vm.StandingConfig is not null)
                 {
-                    @if (vm.CalculateCombinedResult)
+                    @if (Vm.CalculateCombinedResult)
                     {
                         <div class="input-group">
                             <div class="input-group-text">
-                                <InputCheckbox class="form-check-input mt-0" @bind-Value=vm.StandingConfig.UseCombinedResult />
+                                <InputCheckbox class="form-check-input mt-0" @bind-Value=Vm.StandingConfig.UseCombinedResult />
                             </div>
-                            <label class="form-control">Use combined Result</label>
+                            <label class="form-control" data-bs-toggle="tooltip" title="Treat events with multiple race sessions as single events (if they have a combined result). This will affect the statistics for race-nr, wins, fastest laps etc.">Treat as single event</label>
                         </div>
                     }
                     <InputGroup Label="Count Weeks">
-                        <InputNumber class="form-control" @bind-Value=vm.StandingConfig.WeeksCounted />
+                        <InputNumber class="form-control" @bind-Value=Vm.StandingConfig.WeeksCounted data-bs-toggle="tooltip" title="Number of races counted per season. (used for Dropweeks)"/>
                     </InputGroup>
                 }
             </div>
         </div>
     </div>
     <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
-    <CancelSubmitButtons ModelState=vm SubmitText="Save" OnCancel=Cancel/>
+    <CancelSubmitButtons ModelState=Vm SubmitText="Save" OnCancel=Cancel/>
 </EditForm>
 
 @code {
-    [CascadingParameter]
-    public BlazoredModalInstance ModalInstance { get; set; } = default!;
-    [CascadingParameter]
-    public IModalService ModalService { get; set; } = default!;
-
-    private ResultConfigModel model = default!;
-    [Parameter]
-    public ResultConfigModel Model
-    {
-        get => model;
-        set
-        {
-            if (EqualityComparer<ResultConfigModel>.Default.Equals(model, value) == false)
-            {
-                model = value;
-                vm.SetModel(model);
-            }
-        }
-    }
-
-    private CancellationTokenSource cts = new();
-
-    private StatusResultValidator? ResultValidator { get; set; }
-
-    protected override void OnParametersSet()
-    {
-        _ = ModalService ?? throw BlazorParameterNullException.New(this, ModalService);
-        _ = ModalInstance ?? throw BlazorParameterNullException.New(this, ModalInstance);
-        _ = Model ?? throw BlazorParameterNullException.New(this, Model);
-    }
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
         if (firstRender == false)
         {
             return;
         }
-        await vm.LoadAvailableResultConfigs(cts.Token);
+        await Vm.LoadAvailableResultConfigs(Cts.Token);
     }
 
     private async Task PointsFilterClick()
     {
         var parameters = new ModalParameters()
-            .Add(nameof(EditResultFilterModal.Model), vm.GetModel().FiltersForPoints);
+            .Add(nameof(EditResultFilterModal.Model), Vm.GetModel().FiltersForPoints);
         var options = new ModalOptions()
         {
             DisableBackgroundCancel = true,
@@ -215,15 +191,15 @@
         var result = await ModalService.Show<EditResultFilterModal>("Edit Points Filter", parameters, options).Result;
         if (result.Confirmed && result.Data is IEnumerable<ResultFilterModel> model)
         {
-            vm.GetModel().FiltersForPoints = model.ToList();
-            vm.SetModel(vm.GetModel());
+            Vm.GetModel().FiltersForPoints = model.ToList();
+            Vm.SetModel(Vm.GetModel());
         }
     }
 
     private async Task ResultFilterClick()
     {
         var parameters = new ModalParameters()
-            .Add(nameof(EditResultFilterModal.Model), vm.GetModel().FiltersForResult);
+            .Add(nameof(EditResultFilterModal.Model), Vm.GetModel().FiltersForResult);
         var options = new ModalOptions()
         {
             DisableBackgroundCancel = true,
@@ -231,45 +207,15 @@
         var result = await ModalService.Show<EditResultFilterModal>("Edit Result Filter", parameters, options).Result;
         if (result.Confirmed && result.Data is IEnumerable<ResultFilterModel> model)
         {
-            vm.GetModel().FiltersForResult = model.ToList();
-            vm.SetModel(vm.GetModel());
-        }
-    }
-
-    private async Task Submit()
-    {
-        var status = await vm.SaveChangesAsync(cts.Token);
-        ResultValidator?.ValidateResult(status);
-        if (status.IsSuccess)
-        {
-            var result = ModalResult.Ok(vm.GetModel());
-            await ModalInstance.CloseAsync(result);
-            return;
+            Vm.GetModel().FiltersForResult = model.ToList();
+            Vm.SetModel(Vm.GetModel());
         }
     }
 
     private bool CanSelectAsSourceConfig(ResultConfigModel model)
     {
-        bool isSelf = model.ResultConfigId == vm.ResultConfigId;
-        bool isDepending = model.SourceResultConfig != null && model.SourceResultConfig.ResultConfigId == vm.ResultConfigId;
+        bool isSelf = model.ResultConfigId == Vm.ResultConfigId;
+        bool isDepending = model.SourceResultConfig != null && model.SourceResultConfig.ResultConfigId == Vm.ResultConfigId;
         return isSelf == false && isDepending == false;
-    }
-
-    private async Task Cancel()
-    {
-        if (ModalInstance != null)
-        {
-            await ModalInstance.CancelAsync();   
-        }
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing == false)
-        {
-            cts.Cancel();
-            cts.Dispose();
-        }
-        base.Dispose(disposing);
     }
 }

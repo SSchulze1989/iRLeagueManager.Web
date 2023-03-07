@@ -1,0 +1,21 @@
+﻿<CookiePolicy/>
+
+<div class="d-flex justify-content-end mt-4">
+    <button class="btn btn-outline-primary" @onclick=ContinueClick>Continue with required cookies</button>
+</div>
+
+@code {
+    [CascadingParameter]
+    private BlazoredModalInstance ModalInstance { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BlazorParameterNullException.ThrowIfNull(this, ModalInstance);
+    }
+
+    private async Task ContinueClick()
+    {
+        await ModalInstance.CloseAsync();
+    }
+}

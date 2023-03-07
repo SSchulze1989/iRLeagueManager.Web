@@ -1,155 +1,161 @@
 ﻿@inherits MvvmComponentBase
+@inject IJSRuntime JsRuntime
 @using System.ComponentModel
 @using Blazored.Typeahead
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueManager.Web.ViewModels
+@inject NavigationManager NavigationManager
 
 <CascadingValue Value=Review.InvolvedMembers>
-<div @attributes=AdditionalAttributes>
-    <div class="card">
-        <div class="card-header accordion-header review-header">
+<div @attributes=AdditionalAttributes class="card @AddCssClass @GetBorderClass(Selected, Bind(Review, x => x.Status))" id="review-card-@Review.ReviewId" @ref=Card>
+     <div class="card-header accordion-header review-header @GetBorderClass(Selected, Bind(Review, x => x.Status))">
+        <div class="row">
+            <div class="col d-md-flex justify-content-start">
+                <span>@Review.SessionName:</span>
+                <span>@Bind(Review, x => x.IncidentNr)</span>
+                <span class="oi oi-flag m-1" /><span>@Bind(Review, x => x.OnLap)</span>
+                <span class="oi oi-action-undo m-1" /><span>@Bind(Review, x => x.Corner)</span>
+                <span class="oi oi-chevron-right m1" /><span>@Bind(Review, x => x.IncidentKind)</span>
+                <span class="oi oi-chat m1" /><span>@Bind(Review, x => x.Comments).Count</span>
+                <span class="oi oi-task" /><span>@Bind(Review, x => x.Comments).Where(x => x.Votes.Any()).Count()</span>
+                @if (UserHasCommented(Review))
+                {
+                    <span class="oi oi-task text-success"></span>
+                }
+            </div>
+            <div class="col-md-auto d-grid d-flex flex-nowrap justify-content-end">
+                @if (Collapsed)
+                {
+                    <button class="oi oi-chevron-bottom btn review-header-button" @onclick=ToggleCollapsed />
+                }
+                else
+                {
+                    <button class="oi oi-chevron-top btn review-header-button" @onclick=ToggleCollapsed />
+                }
+                <div class="dropdown">
+                    <button class="oi oi-ellipses btn review-header-button" type="button" id="DropDownMenuButton-@Review.ReviewId" data-bs-toggle="dropdown" aria-expanded="false" />
+                    <ul class="dropdown-menu">
+                        @if (OnEditClick.HasDelegate && ReadOnly == false)
+                        {
+                            <li><a class="dropdown-item" @onclick=OnEditClick><span class="oi oi-pencil"/>Edit</a></li>
+                        }
+                        <li><a class="dropdown-item" href="" @onclick=CopyDirectLink @onclick:preventDefault><span class="oi oi-clipboard"/>Copy direct link</a></li>
+                        @if (OnDeleteClick.HasDelegate && ReadOnly == false)
+                        {
+                            <li><a class="dropdown-item" @onclick=OnDeleteClick><span class="oi oi-x text-danger"/>Delete</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="container @(Collapsed ? "" : " collapse")">
             <div class="row">
-                <div class="col d-md-flex justify-content-start">
-                    <span>@Review.SessionName:</span>
-                    <span>@Bind(Review, x => x.IncidentNr)</span>
-                    <span class="oi oi-flag m-1" /><span>@Bind(Review, x => x.OnLap)</span>
-                    <span class="oi oi-action-undo m-1" /><span>@Bind(Review, x => x.Corner)</span>
-                    <span class="oi oi-chevron-right m1" /><span>@Bind(Review, x => x.IncidentKind)</span>
-                    <span class="oi oi-chat m1" /><span>@Bind(Review, x => x.Comments).Count</span>
-                    <span class="oi oi-task" /><span>@Bind(Review, x => x.Comments).Where(x => x.Votes.Any()).Count()</span>
-                    @if (UserHasCommented(Review))
+                <div class="col-md-auto">
+                    <h5>Involved</h5>
+                </div>
+                <div class="col">
+                    @foreach(var member in @Bind(Review, x => x.InvolvedMembers))
                     {
-                        <span class="oi oi-task text-success"></span>
+                        <span class="badge bg-secondary h-auto me-1">@member.FirstName @member.LastName</span>
                     }
                 </div>
-                <div class="col-md-auto d-grid d-flex flex-nowrap justify-content-end">
-                    @if (OnEditClick.HasDelegate && ReadOnly == false)
+            </div>
+            <div class="row">
+                <div class="col-md-auto">
+                    <h5>Result</h5>
+                </div>
+                <div class="col">
+                    @foreach(var vote in @Bind(Review, x => x.Votes))
                     {
-                        <button class="oi oi-pencil btn review-header-button" @onclick=OnEditClick />
-                    }
-                    @if (Collapsed)
-                    {
-                        <button class="oi oi-chevron-bottom btn review-header-button" @onclick=ToggleCollapsed/>
-                    }
-                    else
-                    {
-                        <button class="oi oi-chevron-top btn review-header-button" @onclick=ToggleCollapsed/>
-                    }
-                    @if (OnDeleteClick.HasDelegate && ReadOnly == false)
-                    {
-                        <button class="oi oi-x btn review-header-button" @onclick=OnDeleteClick/>
+                        var member = @Bind(vote, x => x.MemberAtFault);
+                        <span class="badge bg-danger h-auto me-1">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
                     }
                 </div>
             </div>
         </div>
-        <div class="card-body">
-            <div class="container @(Collapsed ? "" : " collapse")">
-                <div class="row">
-                    <div class="col-md-auto">
-                        <h5>Involved</h5>
-                    </div>
-                    <div class="col">
+        <div class="container @(Collapsed ? " collapse" : "")" id="review_text_@Review.ReviewId" @ref=ReviewText>
+            <div class="row">
+                <div class="col">
+                    <h5>Involved Drivers</h5>
+                    <div class="d-flex flex-wrap">
                         @foreach(var member in @Bind(Review, x => x.InvolvedMembers))
                         {
-                            <span class="badge bg-secondary h-auto me-1">@member.FirstName @member.LastName</span>
+                            <span class="badge bg-secondary me-1 mb-1">@member.FirstName @member.LastName</span>
                         }
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-auto">
-                        <h5>Result</h5>
-                    </div>
-                    <div class="col">
-                        @foreach(var vote in @Bind(Review, x => x.Votes))
+                <div class="col">
+                    <h5>Votes</h5>
+                    <div class="d-flex flex-wrap">
+                        @foreach(var countedVote in @Bind(Review, x => x.CountedVotes))
                         {
-                            var member = @Bind(vote, x => x.MemberAtFault);
-                            <span class="badge bg-danger h-auto me-1">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
-                        }
-                    </div>
-                </div>
-            </div>
-            <div class="container @(Collapsed ? " collapse" : "")" id="review_text_@Review.ReviewId" @ref=ReviewText>
-                <div class="row">
-                    <div class="col">
-                        <h5>Involved Drivers</h5>
-                        <div class="d-flex flex-wrap">
-                            @foreach(var member in @Bind(Review, x => x.InvolvedMembers))
-                            {
-                                <span class="badge bg-secondary me-1 mb-1">@member.FirstName @member.LastName</span>
-                            }
-                        </div>
-                    </div>
-                    <div class="col">
-                        <h5>Votes</h5>
-                        <div class="d-flex flex-wrap">
-                            @foreach(var countedVote in @Bind(Review, x => x.CountedVotes))
-                            {
-                                var member = countedVote.Vote.MemberAtFault;
-                                <span class="badge bg-warning me-1 mb-1">
-                                    @countedVote.Vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
-                                    <span class="badge rounded-pill bg-danger ms-1">@(countedVote.Count)x</span>
-                                </span>
-                            }
-                        </div>
-                    </div>
-                </div>
-                <hr/>
-                @if (string.IsNullOrWhiteSpace(Review.FullDescription) == false)
-                {
-                    <div>
-                        <h5>Description</h5>
-                        <div class="preserve-format">
-                            @Review.FullDescription
-                        </div>
-                    </div>
-                    <hr/>
-                }
-                <div>
-                    <h5>Result</h5>
-                    <div>
-                        @foreach(var vote in @Bind(Review, x => x.Votes))
-                        {
-                            var member = vote.MemberAtFault;
-                            <span class="badge bg-danger me-1 mb-1">
-                                @vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
+                            var member = countedVote.Vote.MemberAtFault;
+                            <span class="badge bg-warning me-1 mb-1">
+                                @countedVote.Vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
+                                <span class="badge rounded-pill bg-danger ms-1">@(countedVote.Count)x</span>
                             </span>
                         }
                     </div>
+                </div>
+            </div>
+            <hr/>
+            @if (string.IsNullOrWhiteSpace(Review.FullDescription) == false)
+            {
+                <div>
+                    <h5>Description</h5>
                     <div class="preserve-format">
-                        @Bind(Review, x => x.ResultText)
+                        @Review.FullDescription
                     </div>
-                    @if (IsSteward && ReadOnly == false)
-                    {
-                        <div class="mt-2">
-                            <button class="btn btn-outline-secondary py-0" @onclick=EditResultClick>Edit</button>
-                        </div>
-                    }
                 </div>
                 <hr/>
-                @if (IsSteward)
+            }
+            <div>
+                <h5>Result</h5>
+                <div>
+                    @foreach(var vote in @Bind(Review, x => x.Votes))
+                    {
+                        var member = vote.MemberAtFault;
+                        <span class="badge bg-danger me-1 mb-1">
+                            @vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
+                        </span>
+                    }
+                </div>
+                <div class="preserve-format">
+                    @Bind(Review, x => x.ResultText)
+                </div>
+                @if (IsSteward && ReadOnly == false)
                 {
-                    <div>
-                        <h5>Comments</h5>
-                        <ul class="list-group">
-                            @foreach (var comment in @Bind(Review, x => x.Comments))
-                            {
-                                <li class="list-group-item">
-                                    <ReviewComment Comment=comment 
-                                                   OnStateHasChanged=@(() => InvokeAsync(StateHasChanged)) 
-                                                   OnDeleteClick=@(() => DeleteCommentClick(comment))/>
-                                </li>
-                            }
-                        </ul>
-                        @if (ReadOnly == false && UserHasCommented(Review) == false)
-                        {
-                            <button class="btn btn-outline-secondary mt-2" @onclick=AddCommentClick>
-                                Add Comment
-                            </button>
-                        }
+                    <div class="mt-2">
+                        <button class="btn btn-outline-secondary py-0" @onclick=EditResultClick>Edit</button>
                     </div>
                 }
             </div>
+            <hr/>
+            @if (IsSteward)
+            {
+                <div>
+                    <h5>Comments</h5>
+                    <ul class="list-group">
+                        @foreach (var comment in @Bind(Review, x => x.Comments))
+                        {
+                            <li class="list-group-item">
+                                <ReviewComment Comment=comment 
+                                                OnStateHasChanged=@(() => CommentStateChanged(comment)) 
+                                                OnDeleteClick=@(() => DeleteCommentClick(comment))/>
+                            </li>
+                        }
+                    </ul>
+                    @if (ReadOnly == false && UserHasCommented(Review) == false)
+                    {
+                        <button class="btn btn-outline-secondary mt-2" @onclick=AddCommentClick>
+                            Add Comment
+                        </button>
+                    }
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -176,16 +182,37 @@
     public bool ReadOnly { get; set; } = false;
     [Parameter]
     public string UserId { get; set; } = string.Empty;
+    [Parameter]
+    public bool Selected { get; set; }
 
+    private string AddCssClass { get; set; } = string.Empty;
+
+    public ElementReference Card { get; set; }
     private ElementReference ReviewText { get; set; }
 
     public bool Collapsed { get; set; } = true;
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
         _ = Review ?? throw new InvalidOperationException($"Parameter {nameof(Review)} must have a value");
         _ = ModalService ?? throw BlazorParameterNullException.New(this, ModalService);
-        base.OnParametersSet();
+        var addClassAttribute = (AdditionalAttributes?.TryGetValue("class", out var @class) == true) ? @class : string.Empty;
+        AddCssClass = addClassAttribute.ToString()!;
+        Collapsed &= !Selected;
+        await base.OnParametersSetAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        if (Selected)
+        {
+            await ScrollToElementId($"review-card-{Review.ReviewId}");
+        }
     }
 
     private void ToggleCollapsed()
@@ -247,5 +274,42 @@
         {
             await Review.RemoveComment(comment);
         }
+    }
+
+    private async Task CommentStateChanged(ReviewCommentViewModel comment)
+    {
+        Review.UpdateReviewStatus();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string GetBorderClass(bool selected, ReviewStatus status)
+    {
+        if (selected)
+        {
+            return "border-info";
+        }
+        switch(status)
+        {
+            case ReviewStatus.Open:
+                return "border-warning";
+            case ReviewStatus.Closed:
+                return "border-success";
+            case ReviewStatus.OpenConflicted:
+                return "border-warning";
+            case ReviewStatus.OpenEnoughVotes:
+                return "border-primary";
+        }
+        return "";
+    }
+
+    private async Task CopyDirectLink()
+    {
+        var url = NavigationManager.GetUriWithQueryParameter("reviewId", Review.ReviewId);
+        await JsRuntime.InvokeVoidAsync("clipboardCopy.copyText", url);
+    }
+
+    protected async Task ScrollToElementId(string id)
+    {
+        await JsRuntime.InvokeVoidAsync("scrollToElementId", id);
     }
 }

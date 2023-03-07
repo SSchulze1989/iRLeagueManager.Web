@@ -1,0 +1,86 @@
+﻿@using Blazored.LocalStorage;
+@using System.Text.Json;
+@using iRLeagueManager.Web.Components.Compliance;
+@implements IDisposable
+@inject SharedStateService SharedState
+@inject ILocalStorageService LocalStorage
+
+<footer class="d-flex flex-wrap justify-content-center font-monospace ms-2 me-2 mt-0 mb-0 fw-light small">
+    <p class="">&copy; 2022-2023 Simon Schulze</p>&nbsp;|&nbsp;
+    <a class="link-light " href="show-cookie-banner" @onclick=OnCookieBannerClick @onclick:preventDefault>Cookies</a>&nbsp;|&nbsp;
+    <a class="link-light " href="privacy">Privacy Policy</a>&nbsp;|&nbsp;
+    <p class="">Tz: @TimeZone.Id</p>
+</footer>
+
+@code {
+    private TimeZoneInfo TimeZone { get; set; } = TimeZoneInfo.Local;
+    private const string cookieSettingsKey = "allowEssentialCookies";
+    private DateTime cookiePolicyValidFrom = new DateTime(2023, 01, 28);
+
+    [CascadingParameter]
+    private IModalService ModalService { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        SharedState.StateChanged += OnSharedStateChanged;
+        BlazorParameterNullException.ThrowIfNull(this, ModalService);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+
+        // Wait a short moment before checking cookie settings to prevent flickering of banner on first load
+        await Task.Delay(200);
+        // Check if cookie settings are already stored
+        if (await CheckCookieSettings() == false && await OnCookieBannerClick())
+        {
+            await AllowEssentialCookies();
+        }
+    }
+
+    private void OnSharedStateChanged(object? sender, EventArgs e)
+    {
+        TimeZone = SharedState.LocalTimeZone;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private async Task AllowEssentialCookies()
+    {
+        await LocalStorage.SetItemAsync(cookieSettingsKey, DateTime.UtcNow);
+    }
+
+    private async Task<bool> CheckCookieSettings()
+    {
+        try 
+        {
+            var userCookiePolicyValidFrom = await LocalStorage.GetItemAsync<DateTime>(cookieSettingsKey);
+            return userCookiePolicyValidFrom >= cookiePolicyValidFrom;
+        }
+        catch (JsonException)
+        {
+            await LocalStorage.RemoveItemAsync(cookieSettingsKey);
+        }
+        return false;
+    }
+
+    private async Task<bool> OnCookieBannerClick()
+    {
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true,
+            HideCloseButton = true,
+            HideHeader = true,
+        };
+        var result = await ModalService.Show<CookieBannerModal>("", options).Result;
+        return result.Confirmed;
+    }
+
+    public virtual void Dispose()
+    {
+        SharedState.StateChanged -= OnSharedStateChanged;
+    }
+}

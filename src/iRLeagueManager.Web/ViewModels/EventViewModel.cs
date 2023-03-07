@@ -21,18 +21,26 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
         SetModel(model);
     }
 
-    private TimeSpan LocalTimeOffset => ApiService.Shared.LocalTimeOffset;
     private ClientLocalTimeProvider ClientTime => ApiService.ClientTimeProvider;
 
     public long EventId { get => model.Id; }
     public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
     public DateTime Date
     {
-        get => ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
-        set => SetP(ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()), value => model.Date = ClientTime.ConvertToUtc(value.Add(ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()).TimeOfDay)), value);
+        get => ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()).Date;
+        //set => SetP(model.Date.GetValueOrDefault().Date, value => model.Date = value.Add(model.Date.GetValueOrDefault().TimeOfDay), ClientTime.ConvertToUtc(new DateTime(value.Ticks, DateTimeKind.Local).Date));
+        set
+        {
+            var localDateTime = ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
+            var localDate = value.Date.Add(localDateTime.TimeOfDay);
+            var utcDate = ClientTime.ConvertToUtc(localDate);
+            SetP(model.Date, value => model.Date = value, utcDate);
+        }
     }
 
-    public DateTime End => Date + Duration.TimeOfDay;
+    public DateTime Start => ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
+
+    public DateTime End => Start + Duration.TimeOfDay;
 
     public long? TrackId
     {
@@ -60,7 +68,14 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
     public DateTime StartTime
     {
         get => ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
-        set => SetP(ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()).TimeOfDay, value => model.Date = ClientTime.ConvertToUtc(ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()).Date.Add(value)), value.TimeOfDay);
+        //set => SetP(model.Date.GetValueOrDefault().TimeOfDay, value => model.Date = model.Date.GetValueOrDefault().Date.Add(value), ClientTime.ConvertToUtc(new DateTime(value.Ticks, DateTimeKind.Local)).TimeOfDay);
+        set
+        {
+            var localDateTime = ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
+            var localTimeNew = localDateTime.Date.Add(value.TimeOfDay);
+            var utcTimeNew = ClientTime.ConvertToUtc(localTimeNew);
+            SetP(model.Date, value => model.Date = value, utcTimeNew);
+        }
     }
 
     public DateTime Duration

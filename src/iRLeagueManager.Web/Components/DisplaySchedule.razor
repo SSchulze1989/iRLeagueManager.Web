@@ -1,6 +1,7 @@
 ﻿@using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
+@inject ClientLocalTimeProvider ClientTime
 
 @{var maxRaceCount = @Schedule.MaxRaceCount;}
 <div @attributes=AdditionalAttributes>
@@ -222,7 +223,7 @@
 
     private EventModel GetNewEvent()
     {
-        var newEvent = new EventModel() { Date = DateTime.Now.Date };
+        var newEvent = new EventModel() { Date = DateTime.UtcNow };
         var lastEvent = Schedule.Events.LastOrDefault()?.CopyModel();
         if (lastEvent == null)
         {

@@ -36,7 +36,7 @@ public sealed class ResultConfigSettingsViewModel : LeagueViewModelBase<ResultCo
             resultConfigsResult.Content.Select(x => new ResultConfigViewModel(LoggerFactory, ApiService, x)));
     }
 
-    public async Task<StatusResult> AddConfiguration()
+    public async Task<StatusResult> AddConfiguration(ResultConfigModel? newConfig = null)
     {
         if (ApiService.CurrentLeague is null)
         {
@@ -46,7 +46,7 @@ public sealed class ResultConfigSettingsViewModel : LeagueViewModelBase<ResultCo
         try
         {
             Loading = true;
-            ResultConfigModel newConfig = new() { Name = "New Config", DisplayName = "New Config" };
+            newConfig ??= new() { Name = "New Config", DisplayName = "New Config" };
             var request = ApiService.CurrentLeague.ResultConfigs()
                 .Post(newConfig);
             var result = await request;

@@ -30,12 +30,43 @@
 
     <script src="_framework/blazor.server.js"></script>
     <script src="_content/Blazored.Typeahead/blazored-typeahead.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function GetTimezoneValue() {
-            // Returns the time difference in minutes between UTC time and local time.
-            return new Date().getTimezoneOffset();
+        window.enableTooltips = (defaultPlacement) => {
+
+            document.querySelectorAll('[data-bs-toggle="tooltip"]')
+                .forEach(function (tooltip) {
+                    new bootstrap.Tooltip(tooltip, {delay: {"show": 500, "hide": 100}, placement: defaultPlacement, html: true});
+                });
         }
+    </script>
+    <script>
+        window.GetIANATimeZone = () => {
+            return Intl.DateTimeFormat().resolvedOptions().timeZone;
+        }
+    </script>
+    <script>
+        window.scrollToElementId = (elementId) => {
+            var element = document.getElementById(elementId);
+            if (!element) {
+                console.warn('element was not found', elementId);
+                return false;
+            }
+            element.scrollIntoView();
+            return true;
+        }
+    </script>
+    <script>
+        window.clipboardCopy = {
+            copyText: function (text) {
+                navigator.clipboard.writeText(text).then(function () {
+                    alert("Copied to clipboard!");
+                })
+                    .catch(function (error) {
+                        alert(error);
+                    });
+            }
+        };
     </script>
 </body>
 </html>

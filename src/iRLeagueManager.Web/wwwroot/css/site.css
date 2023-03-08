@@ -1,6 +1,20 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 @import url(toggle.css);
 
+.logo {
+    margin: 0;
+    height: 45px;
+    width: auto;
+    overflow: hidden;
+    align-items: center;
+}
+
+    .logo img {
+        height: 100%;
+        vertical-align: central;
+        margin-bottom: 4px;
+    }
+
 .root {
     --bs-border-radius: .25rem;
 }
@@ -46,9 +60,8 @@ h3 {
 .page-header {
     background: #34495e;
     color: #ffffff;
-    text-align: center;
-    padding: 0.5rem;
-    height: 4rem;
+    padding: 0.25rem 0.75rem;
+    height: auto;
 }
 
 .alternate > tbody > tr:nth-child(odd) {

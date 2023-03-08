@@ -1,18 +1,9 @@
 ﻿@inherits LayoutComponentBase
 
 <PageTitle>iRLeagueManager.Web</PageTitle>
+<Header />
 
-<div class="page-header">
-    <Header/>
-</div>
-
-<div class="page">
-    <CascadingValue Value=LeagueName Name="LeagueName">
-        <div class="sidebar">
-            <NavMenu />
-        </div>
-    </CascadingValue>
-
+<div class="page"> 
     <main>
         <article class="content px-2 pb-4 mb-2">
             @Body

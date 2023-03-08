@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using MvvmBlazor.Components;
 using System.ComponentModel;
+using System.Net;
 
 namespace iRLeagueManager.Web.Shared;
 
@@ -17,6 +18,7 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
     public LeagueApiService ApiService { get; set; } = default!;
     [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;
+
     [Inject]
     protected IJSRuntime JsRuntime { get; set; } = default!;
 
@@ -64,6 +66,13 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
         if (SeasonId == null && EventId == null && Shared.SeasonId != 0)
         {
             SeasonId = Shared.SeasonId;
+        }
+        if (HasRendered)
+        {
+            if (EventId != Event?.EventId)
+            {
+                EventList.Selected = EventList.EventList.FirstOrDefault(x => x.EventId == EventId);
+            }
         }
         ParametersSet = true;
     }
@@ -135,7 +144,7 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
         }
     }
 
-    protected async Task LoadEventList(long seasonId)
+    public async Task LoadEventList(long seasonId)
     {
         await EventList.LoadEventListAsync(seasonId);
     }
@@ -184,5 +193,45 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
     protected async Task ScrollToElementId(string id)
     {
         await JsRuntime.InvokeVoidAsync("scrollToElementId", id);
+    }
+
+    protected void NavigateTo(string url, bool replace = false)
+    {
+        NavigationManager.NavigateTo(url, replace: replace);
+    }
+
+    protected void ForceNavigateTo(string url, bool fullReload = false)
+    {
+        if (fullReload)
+        {
+            NavigationManager.NavigateTo(url, forceLoad: true);
+            return;
+        }
+
+        NavigationManager.NavigateTo("/");
+        NavigationManager.NavigateTo(url);
+    }
+
+    /// <summary>
+    /// Get the current url as HTML encoded
+    /// </summary>
+    /// <returns></returns>
+    protected string GetCurrentUrlEncoded()
+    {
+        return WebUtility.UrlEncode(new Uri(NavigationManager.Uri).PathAndQuery);
+    }
+
+    /// <summary>
+    /// Get the url from returnUrl= parameter. If returnUrl is not set -> return the current url as HTML encoded instead
+    /// </summary>
+    /// <returns></returns>
+    protected string GetReturnUrl()
+    {
+        var returnUrl = NavigationManager.QueryParameter<string>("returnUrl");
+        if (string.IsNullOrEmpty(returnUrl))
+        {
+            return GetCurrentUrlEncoded();
+        }
+        return WebUtility.UrlEncode(returnUrl);
     }
 }

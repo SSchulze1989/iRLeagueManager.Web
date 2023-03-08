@@ -22,7 +22,7 @@
 .sticky-header {
     position: sticky;
     z-index: 10;
-    top: 0;
+    top: 4rem;
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
     background: var(--bs-white);
@@ -70,7 +70,7 @@ h3 {
     background: #34495e;
     color: #ffffff;
     padding: 0.25rem 0.75rem;
-    height: auto;
+    height: 4rem;
 }
 
 .alternate > tbody > tr:nth-child(odd) {

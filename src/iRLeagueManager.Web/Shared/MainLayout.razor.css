@@ -1,5 +1,5 @@
 .page {
-    top: 4rem;
+    padding-top: 4rem;
     position: relative;
     display: flex;
     flex-direction: column;

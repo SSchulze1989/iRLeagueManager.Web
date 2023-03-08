@@ -67,10 +67,10 @@ h3 {
 }
 
 .page-header {
+    z-index:11;
     background: #34495e;
     color: #ffffff;
     padding: 0.25rem 0.75rem;
-    height: 4rem;
 }
 
 .alternate > tbody > tr:nth-child(odd) {

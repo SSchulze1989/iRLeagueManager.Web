@@ -15,25 +15,28 @@
 @inject StandingsPageViewModel vm
 
 <div class="container">
-    <LoadingHeader class="mb-2" Loading=@Bind(vm, x => x.Loading)>
-        <h3>Standings</h3>
-    </LoadingHeader>
+    <div class="sticky-header">
+        <LoadingHeader class="mb-2" Loading=@Bind(vm, x => x.Loading)>
+            <h3>Standings</h3>
+        </LoadingHeader>
 
-    <EventSelect />
-    @if (@Bind(vm, x => x.Standings)?.Count == 0)
-    {
-        <div class="card-body">
-            <p class="results-scoring"><em>No Standings</em></p>
-        </div>
-    }
-    <ul class="nav nav-tabs">
-    @foreach((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x,i)))
-    {
-        <li class="nav-item">
-            <NavLink class="nav-link" href="@GetTabLink(i)">@standing.Name</NavLink>
-        </li>
-    }
-    </ul>
+        <EventSelect />
+        @if (@Bind(vm, x => x.Standings)?.Count == 0)
+        {
+            <div class="card-body">
+                <p class="results-scoring"><em>No Standings</em></p>
+            </div>
+        }
+        <ul class="nav nav-tabs">
+        @foreach((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x,i)))
+        {
+            <li class="nav-item">
+                <NavLink class="nav-link" href="@GetTabLink(i)">@standing.Name</NavLink>
+            </li>
+        }
+        </ul>
+    </div>
+
     @if (@Bind(vm, x => x.SelectedStanding) != null)
     {
         <DisplayStanding class="px-0 mb-2 mx-0" Standing=@Bind(vm, x => x.SelectedStanding)/>

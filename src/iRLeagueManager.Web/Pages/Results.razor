@@ -14,7 +14,7 @@
 @inject ResultsPageViewModel vm
 
 <div class="container">
-    <div class="sticky-md-top bg-white pb-1">
+    <div class="sticky-header">
         <LoadingHeader class="mb-2" Loading=@Bind(vm, x => x.Loading)>
             <h3>Results</h3>
         </LoadingHeader>
@@ -52,6 +52,7 @@
             </AuthorizeView>
         </div>
     </div>
+
     @if (@Bind(vm, x => x.SelectedEvent) != null && @Bind(vm, x => x.SelectedEventResult) != null)
     {
         @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults).OrderByDescending(x => x.SessionNr))

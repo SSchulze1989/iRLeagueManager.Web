@@ -2,13 +2,12 @@
 @inject LeaguesViewModel Vm
 
 <header class="page-header p-0">
-    <nav class="navbar navbar-expand-lg navbar-dark p-1 pe-2 ps-2">
+    <nav class="navbar navbar-expand-md navbar-dark p-1 pe-2 ps-2">
         <div class="container-fluid">
             <div class="navbar-brand d-flex align-items-center gap-2">
                 <figure class="logo">
-                    <img src="logo/iRLM_Logo_17_darkbg.png" />
+                    <img src="logo/iRLM_Logo_17_darkbg.png" title="iRLeagueManager v@(VersionString)"/>
                 </figure>
-                <label class="text-muted"> v@(VersionString)</label>
             </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#headerNavbarContent" aria-controls="headerNavbarContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -95,11 +94,6 @@
                                 </div>
                             </Authorized>
                         </AuthorizeView>
-                         <AuthorizeView>
-                            <Authorized>
-                                <label class="d-none d-lg-block">@context.User.Identity?.Name</label>
-                            </Authorized>
-                        </AuthorizeView>
                         <div class="dropdown">
                             <button class="btn btn-outline-light" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Account">
                                 <span class="oi oi-person" />
@@ -107,6 +101,7 @@
                             <ul class="dropdown-menu dropdown-menu-lg-end" aria-labelledby="userMenuDropdown">
                                 <AuthorizeView>
                                     <Authorized>
+                                        <li><label class="dropdown-item-text">User: @context.User.Identity?.Name</label></li>
                                         <li><NavLink class="dropdown-item" href="@($"/member/logout?returnUrl={GetReturnUrl()}")">Logout</NavLink></li>
                                     </Authorized>
                                     <NotAuthorized>
@@ -115,11 +110,6 @@
                                 </AuthorizeView>
                             </ul>
                         </div>
-                        <AuthorizeView>
-                            <Authorized>
-                                <label class="d-lg-none">@context.User.Identity?.Name</label>
-                            </Authorized>
-                        </AuthorizeView>
                     </div>
                 </div>
             </div>

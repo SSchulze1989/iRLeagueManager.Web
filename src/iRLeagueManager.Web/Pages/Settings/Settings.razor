@@ -7,11 +7,11 @@
 @inherits LeagueComponentBase
 @inject NavigationManager navigationManager
 
-<div class="container-md">
-    <LoadingHeader><h3>Settings</h3></LoadingHeader>
-    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
-        <Authorized>
-            <div>
+<div class="container">
+    <div class="sticky-header">
+        <LoadingHeader><h3>Settings</h3></LoadingHeader>
+        <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+            <Authorized>
                 <ul class="nav nav-tabs">
                     <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin)>
                         <Authorized Context=AdminContext>
@@ -33,7 +33,13 @@
                         <NavLink class="nav-link" href="@GetTabLink(4)">Reviews</NavLink>
                     </li>
                 </ul>
+            </Authorized>
+        </AuthorizeView>
+    </div>
 
+    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+        <Authorized>
+            <div>
                 @if (HasRendered)
                 {
                     @switch (selectedTabIndex)

@@ -189,7 +189,7 @@
         if (@event?.EventId != null)
         {
             var navUrl = $"./{LeagueName}/Protests/Events/{@event.EventId}";
-            NavigationManager.NavigateTo(navUrl);
+            NavigationManager.NavigateTo(navUrl, replace: true);
             await ReviewsVm.LoadFromEventAsync(@event.EventId);
         }
         SessionId = @event?.Sessions.FirstOrDefault()?.SessionId;

@@ -30,7 +30,7 @@
             @foreach((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x,i)))
             {
                 <li class="nav-item">
-                    <a class="nav-link @((i==Bind(vm, x => x.SelectedResultIndex)) ? "active" : "")" href="@(GetTabLink(i))">@Bind(eventResult, x => x.Name)</a>
+                    <NavLink class="nav-link" href="@GetTabLink(i)">@Bind(eventResult, x => x.Name)</NavLink>
                 </li>
             }
         </ul>
@@ -96,8 +96,9 @@
             {
                 resultIndex = 0;
             }
-            var navUri = $"./{LeagueName}/Results/Events/{@event.EventId}?{resultTabParam}={resultIndex}";
-            NavigationManager.NavigateTo(navUri);
+            var navUri = $"/{LeagueName}/Results/Events/{@event.EventId}?{resultTabParam}={resultIndex}";
+            bool replace = NavigationManager.Uri.Contains($"/Events/") == false || NavigationManager.Uri.Contains(navUri);
+            NavigationManager.NavigateTo(navUri, replace: replace);
         }
     }
 
@@ -116,7 +117,7 @@
 
     private void SetSelectedResultIndex(int index)
     {
-        NavigationManager.NavigateTo(GetTabLink(index));
+        NavigationManager.NavigateTo(GetTabLink(index), replace: true);
     }
 
     private string GetTabLink(int index)

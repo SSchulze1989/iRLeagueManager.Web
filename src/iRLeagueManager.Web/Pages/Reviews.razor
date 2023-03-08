@@ -23,10 +23,10 @@
     {
         <ul class="nav nav-tabs mb-2">
             <li class="nav-item">
-                <NavLink class="nav-link" href="@GetTabLink(0)">Reviews</NavLink>
+                <NavLink class="nav-link" href="@GetTabLink(0)")>Reviews</NavLink>
             </li>
             <li class="nav-item">
-                <NavLink class="nav-link" href="@GetTabLink(1)">Protests</NavLink>
+                <NavLink class="nav-link" href="@GetTabLink(1)")>Protests</NavLink>
             </li>
         </ul>
     }
@@ -183,9 +183,10 @@
     {
         if (@event?.EventId != null)
         {
-            var navUrl = $"./{LeagueName}/Reviews/Events/{@event.EventId}?{NavigationManager.QueryString()}";
+            var navUrl = $"/{LeagueName}/Reviews/Events/{@event.EventId}?{NavigationManager.QueryString()}";
             navUrl = NavigationManager.GetUriWithQueryParameters(navUrl, GetQueryParameters());
-            NavigationManager.NavigateTo(navUrl);
+            bool replace = NavigationManager.Uri.Contains($"/Events/") == false || NavigationManager.Uri.Contains(navUrl);
+            NavigationManager.NavigateTo(navUrl, replace: replace);
             await ReviewsVm.LoadFromEventAsync(@event.EventId);
         }
     }

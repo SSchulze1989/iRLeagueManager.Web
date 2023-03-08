@@ -30,7 +30,7 @@
     @foreach((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x,i)))
     {
         <li class="nav-item">
-            <a class="nav-link @((i==Bind(vm, x => x.SelectedStandingIndex)) ? "active" : "")" href="@(GetTabLink(i))">@standing.Name</a>
+            <NavLink class="nav-link" href="@GetTabLink(i)">@standing.Name</NavLink>
         </li>
     }
     </ul>
@@ -54,15 +54,15 @@
         if (@event?.EventId != null)
         {
             var standingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
-            NavigationManager.NavigateTo($"./{LeagueName}/Standings/Events/{@event.EventId}");
             await vm.LoadFromEventAsync(@event.EventId);
-            
+
             if (standingIndex >= vm.Standings.Count() || standingIndex < 0)
             {
                 standingIndex = 0;
             }
-            var navUri = $"./{LeagueName}/Standings/Events/{@event.EventId}?{standingTabParam}={standingIndex}";
-            NavigationManager.NavigateTo(navUri);
+            var navUri = $"/{LeagueName}/Standings/Events/{@event.EventId}?{standingTabParam}={standingIndex}";
+            bool replace = NavigationManager.Uri.Contains($"/Events/") == false || NavigationManager.Uri.Contains(navUri);
+            NavigationManager.NavigateTo(navUri, replace: replace);
         }
     }
 

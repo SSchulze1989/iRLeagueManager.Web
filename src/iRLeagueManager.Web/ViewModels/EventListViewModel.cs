@@ -29,7 +29,7 @@ public sealed class EventListViewModel : LeagueViewModelBase<EventListViewModel>
         }
     }
 
-    public event EventHandler<EventChangedEventArgs> EventChanged;
+    public event EventHandler<EventChangedEventArgs>? EventChanged;
 
     public async Task LoadEventListAsync(long seasonId)
     {

@@ -32,6 +32,14 @@
     background: var(--bs-body-bg);
 }
 
+@media (max-height: 900px) {
+    .sticky-header {
+        position: unset;
+        z-index: inherit;
+        top: 0;
+    }
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 1rem;
@@ -75,6 +83,7 @@ h3 {
     background: #34495e;
     color: #ffffff;
     padding: 0.25rem 0.75rem;
+    min-height: 4em;
 }
 
 .alternate > tbody > tr:nth-child(odd) {

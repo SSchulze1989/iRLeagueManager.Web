@@ -19,13 +19,17 @@
     --bs-border-radius: .25rem;
 }
 
+.blazored-modal {
+    background-color: var(--bs-body-bg) !important;
+}
+
 .sticky-header {
     position: sticky;
     z-index: 10;
     top: 4rem;
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
-    background: var(--bs-white);
+    background: var(--bs-body-bg);
 }
 
 html, body {

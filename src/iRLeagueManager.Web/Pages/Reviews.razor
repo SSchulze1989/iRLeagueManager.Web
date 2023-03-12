@@ -12,13 +12,14 @@
 @inject ReviewsPageViewModel ReviewsVm
 @inject ClientLocalTimeProvider ClientTime
 
-<div class="container">
+<div class="container-xxl">
     <div class="sticky-header">
-        <LoadingHeader class="mb-2" Loading=@(Bind(ReviewsVm, x => x.Loading))>
-            <h3>Reviews</h3>
-        </LoadingHeader>
-
-        <EventSelect />
+        <div class="d-flex align-items-bottom gap-2">
+            <LoadingHeader Loading=@Bind(ReviewsVm, x => x.Loading)>
+                <h3>Reviews</h3>
+            </LoadingHeader>
+            <EventSelect class="mb-2" />
+        </div>
 
         @if (ReviewsVm.ProtestsEnabled)
         {

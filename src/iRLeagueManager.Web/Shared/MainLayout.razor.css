@@ -3,7 +3,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 2em);
+    min-height: calc(100vh - 2.4em);
 }
 
 .page-footer {
@@ -11,6 +11,7 @@
     left: 0;
     bottom: 0;
     width: 100%;
+    min-height: 0.4em;
     height: auto;
     background-color: dimgray;
     color: white;

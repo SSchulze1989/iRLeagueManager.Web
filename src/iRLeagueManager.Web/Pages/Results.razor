@@ -13,12 +13,14 @@
 @inherits LeagueComponentBase
 @inject ResultsPageViewModel vm
 
-<div class="container">
+<div class="container-xxl">
     <div class="sticky-header">
-        <LoadingHeader class="mb-2" Loading=@Bind(vm, x => x.Loading)>
-            <h3>Results</h3>
-        </LoadingHeader>
-        <EventSelect />
+        <div class="d-flex align-items-bottom gap-2">
+            <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+                <h3>Results</h3>
+            </LoadingHeader>
+            <EventSelect class="mb-2" />
+        </div>
         @if (@Bind(vm, x => x.Results)?.Count == 0)
         {
             <div class="card-body">

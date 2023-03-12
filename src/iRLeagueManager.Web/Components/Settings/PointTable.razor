@@ -1,6 +1,8 @@
-﻿@inherits MvvmComponentBase
+﻿@using static iRLeagueManager.Web.ViewModels.PointRuleViewModel;
+@inherits MvvmComponentBase
 
 <div @attributes=AdditionalAttributes>
+    <small>@GetPointTypeString()</small>
     @if (@Bind(PointRule, x => x.PointsPerPlace).Count() > 0)
     {
         <table class="overflow-scroll table table-sm">
@@ -24,10 +26,6 @@
             </tbody>
         </table>
     }
-    else
-    {
-        <span>Points from source</span>
-    }
 </div>
 
 @code {
@@ -40,5 +38,23 @@
     {
         base.OnParametersSet();
         BlazorParameterNullException.ThrowIfNull(this, PointRule);
+    }
+
+    private string GetPointTypeString()
+    {
+        if (PointRule.PointsPerPlace.Count() == 0)
+        {
+            return "Keep points";
+        }
+        switch (PointRule.RuleType)
+        {
+            case PointRuleType.PointList:
+                return "Points per place";
+            case PointRuleType.MaxPoints:
+                return $"Max pts.: {PointRule.MaxPoints}; Drop-off: {PointRule.PointDropOff}";
+            case PointRuleType.Formula:
+                return $"Formula";
+        }
+        return "Unknown";
     }
 }

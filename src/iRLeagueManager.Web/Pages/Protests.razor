@@ -6,7 +6,7 @@
 @inject ReviewsPageViewModel ReviewsVm
 @inject ClientLocalTimeProvider ClientTime
 
-<div class="container">
+<div class="container-xxl">
     <h3 class="mb-3">
         File Protest
     </h3>
@@ -189,7 +189,7 @@
         if (@event?.EventId != null)
         {
             var navUrl = $"./{LeagueName}/Protests/Events/{@event.EventId}";
-            NavigationManager.NavigateTo(navUrl);
+            NavigationManager.NavigateTo(navUrl, replace: true);
             await ReviewsVm.LoadFromEventAsync(@event.EventId);
         }
         SessionId = @event?.Sessions.FirstOrDefault()?.SessionId;

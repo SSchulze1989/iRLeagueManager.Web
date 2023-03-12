@@ -13,44 +13,48 @@
 @inherits LeagueComponentBase
 @inject ResultsPageViewModel vm
 
-<div class="container">
-    <LoadingHeader class="mb-2" Loading=@Bind(vm, x => x.Loading)>
-        <h3>Results</h3>
-    </LoadingHeader>
-
-    <EventSelect />
-    @if (@Bind(vm, x => x.Results)?.Count == 0)
-    {
-        <div class="card-body">
-            <p class="results-scoring"><em>No Results</em></p>
+<div class="container-xxl">
+    <div class="sticky-header">
+        <div class="d-flex align-items-bottom gap-2">
+            <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+                <h3>Results</h3>
+            </LoadingHeader>
+            <EventSelect class="mb-2" />
         </div>
-    }
-    <div class="d-flex">
-        <ul class="nav nav-tabs flex-fill">
-            @foreach((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x,i)))
-            {
-                <li class="nav-item">
-                    <a class="nav-link @((i==Bind(vm, x => x.SelectedResultIndex)) ? "active" : "")" href="@(GetTabLink(i))">@Bind(eventResult, x => x.Name)</a>
-                </li>
-            }
-        </ul>
-        <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
-            <Authorized>
-                @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
+        @if (@Bind(vm, x => x.Results)?.Count == 0)
+        {
+            <div class="card-body">
+                <p class="results-scoring"><em>No Results</em></p>
+            </div>
+        }
+        <div class="d-flex">
+            <ul class="nav nav-tabs flex-fill">
+                @foreach((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x,i)))
                 {
-                    <button class="btn btn-outline-secondary ms-2" @onclick=TriggerCalculation>
-                        Calculate
-                    </button>
-                    @if (vm.Results.Count > 0)
-                    {
-                        <button class="btn btn-outline-danger ms-2" @onclick=DeleteResultsClick>
-                            <span class="oi oi-trash" />
-                        </button>
-                    }
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="@GetTabLink(i)">@Bind(eventResult, x => x.Name)</NavLink>
+                    </li>
                 }
-            </Authorized>
-        </AuthorizeView>
+            </ul>
+            <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+                <Authorized>
+                    @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
+                    {
+                        <button class="btn btn-outline-secondary ms-2" @onclick=TriggerCalculation>
+                            Calculate
+                        </button>
+                        @if (vm.Results.Count > 0)
+                        {
+                            <button class="btn btn-outline-danger ms-2" @onclick=DeleteResultsClick>
+                                <span class="oi oi-trash" />
+                            </button>
+                        }
+                    }
+                </Authorized>
+            </AuthorizeView>
+        </div>
     </div>
+
     @if (@Bind(vm, x => x.SelectedEvent) != null && @Bind(vm, x => x.SelectedEventResult) != null)
     {
         @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
@@ -96,8 +100,9 @@
             {
                 resultIndex = 0;
             }
-            var navUri = $"./{LeagueName}/Results/Events/{@event.EventId}?{resultTabParam}={resultIndex}";
-            NavigationManager.NavigateTo(navUri);
+            var navUri = $"/{LeagueName}/Results/Events/{@event.EventId}?{resultTabParam}={resultIndex}";
+            bool replace = NavigationManager.Uri.Contains($"/Events/") == false || NavigationManager.Uri.Contains(navUri);
+            NavigationManager.NavigateTo(navUri, replace: replace);
         }
     }
 
@@ -116,7 +121,7 @@
 
     private void SetSelectedResultIndex(int index)
     {
-        NavigationManager.NavigateTo(GetTabLink(index));
+        NavigationManager.NavigateTo(GetTabLink(index), replace: true);
     }
 
     private string GetTabLink(int index)

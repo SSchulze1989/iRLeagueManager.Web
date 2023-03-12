@@ -1,17 +1,16 @@
 ﻿@page "/{LeagueName}/Settings"
 @page "/{LeagueName}/Settings/Season/{SeasonId:long}"
-@attribute [Authorize]
 @using System.Text
 @using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.Components.Settings
 @inherits LeagueComponentBase
 @inject NavigationManager navigationManager
 
-<div class="container-md">
-    <LoadingHeader><h3>Settings</h3></LoadingHeader>
-    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
-        <Authorized>
-            <div>
+<div class="container-xxl">
+    <div class="sticky-header">
+        <LoadingHeader><h3>Settings</h3></LoadingHeader>
+        <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+            <Authorized>
                 <ul class="nav nav-tabs">
                     <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin)>
                         <Authorized Context=AdminContext>
@@ -33,25 +32,31 @@
                         <NavLink class="nav-link" href="@GetTabLink(4)">Reviews</NavLink>
                     </li>
                 </ul>
+            </Authorized>
+        </AuthorizeView>
+    </div>
 
+    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+        <Authorized>
+            <div>
                 @if (HasRendered)
                 {
                     @switch (selectedTabIndex)
                     {
                         case 0:
-                            <LeagueSettings class="container px-0 mb-2 mx-0" />
+                            <LeagueSettings />
                             break;
                         case 1:
-                            <UserSettings class="container px-0 mb-2 mx-0" />
+                            <UserSettings />
                             break;
                         case 2:
-                            <ResultSettings class="container px-0 mb-2 mx-0" />
+                            <ResultSettings />
                             break;
                         case 3:
-                            <TeamSettings class="container px-0 mb-2 mx-0" />
+                            <TeamSettings />
                             break;
                         case 4:
-                            <ReviewSettings class="container px-0 mb-2 mx-0" />
+                            <ReviewSettings />
                             break;
                         default:
                             <p><em>Index out of bounds!</em></p>

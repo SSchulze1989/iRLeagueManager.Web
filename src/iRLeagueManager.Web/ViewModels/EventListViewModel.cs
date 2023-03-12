@@ -15,7 +15,21 @@ public sealed class EventListViewModel : LeagueViewModelBase<EventListViewModel>
     public ObservableCollection<EventViewModel> EventList { get => eventList; set => Set(ref eventList, value); }
 
     private EventViewModel? selected;
-    public EventViewModel? Selected { get => selected; set => Set(ref selected, value); }
+    public EventViewModel? Selected
+    {
+        get => selected;
+        set
+        {
+            var old = selected;
+            Set(ref selected, value);
+            if (selected?.EventId != old?.EventId)
+            {
+                EventChanged?.Invoke(this, new EventChangedEventArgs(old, value));
+            }
+        }
+    }
+
+    public event EventHandler<EventChangedEventArgs>? EventChanged;
 
     public async Task LoadEventListAsync(long seasonId)
     {
@@ -81,6 +95,18 @@ public sealed class EventListViewModel : LeagueViewModelBase<EventListViewModel>
         finally
         {
             Loading = false;
+        }
+    }
+
+    public class EventChangedEventArgs : EventArgs
+    {
+        public EventViewModel? Old;
+        public EventViewModel? New;
+
+        public EventChangedEventArgs(EventViewModel? old, EventViewModel? @new)
+        {
+            Old = old;
+            New = @new;
         }
     }
 }

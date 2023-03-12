@@ -12,24 +12,27 @@
 @inject ReviewsPageViewModel ReviewsVm
 @inject ClientLocalTimeProvider ClientTime
 
-<div class="container">
-    <LoadingHeader class="mb-2" Loading=@(Bind(ReviewsVm, x => x.Loading))>
-        <h3>Reviews</h3>
-    </LoadingHeader>
+<div class="container-xxl">
+    <div class="sticky-header">
+        <div class="d-flex align-items-bottom gap-2">
+            <LoadingHeader Loading=@Bind(ReviewsVm, x => x.Loading)>
+                <h3>Reviews</h3>
+            </LoadingHeader>
+            <EventSelect class="mb-2" />
+        </div>
 
-    <EventSelect />
-
-    @if (ReviewsVm.ProtestsEnabled)
-    {
-        <ul class="nav nav-tabs mb-2">
-            <li class="nav-item">
-                <NavLink class="nav-link" href="@GetTabLink(0)">Reviews</NavLink>
-            </li>
-            <li class="nav-item">
-                <NavLink class="nav-link" href="@GetTabLink(1)">Protests</NavLink>
-            </li>
-        </ul>
-    }
+        @if (ReviewsVm.ProtestsEnabled)
+        {
+            <ul class="nav nav-tabs mb-2">
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="@GetTabLink(0)">Reviews</NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="@GetTabLink(1)">Protests</NavLink>
+                </li>
+            </ul>
+        }
+    </div>
 
     <CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
     @switch (SelectedTabIndex)
@@ -183,9 +186,10 @@
     {
         if (@event?.EventId != null)
         {
-            var navUrl = $"./{LeagueName}/Reviews/Events/{@event.EventId}?{NavigationManager.QueryString()}";
+            var navUrl = $"/{LeagueName}/Reviews/Events/{@event.EventId}?{NavigationManager.QueryString()}";
             navUrl = NavigationManager.GetUriWithQueryParameters(navUrl, GetQueryParameters());
-            NavigationManager.NavigateTo(navUrl);
+            bool replace = NavigationManager.Uri.Contains($"/Events/") == false || NavigationManager.Uri.Contains(navUrl);
+            NavigationManager.NavigateTo(navUrl, replace: replace);
             await ReviewsVm.LoadFromEventAsync(@event.EventId);
         }
     }

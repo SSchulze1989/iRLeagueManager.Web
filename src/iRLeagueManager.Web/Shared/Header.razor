@@ -1,4 +1,5 @@
-﻿@inherits LeagueComponentBase
+﻿@using System.Security.Claims;
+@inherits LeagueComponentBase
 @inject LeaguesViewModel Vm
 
 <header class="page-header fixed-top p-0">
@@ -12,25 +13,33 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#headerNavbarContent" aria-controls="headerNavbarContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div id="headerNavbarContent" class="collapse navbar-collapse gap-5 justify-content-lg-between">
+            <div id="headerNavbarContent" class="collapse navbar-collapse gap-5 justify-content-md-between">
                 <ul class="navbar-nav flex-lg-grow-1 gap-md-2">
                     <li class="nav-item">
                         <div class="btn-group">
-                            <NavLink class="nav-link pe-0 d-none d-lg-block"
-                                     type="button" 
-                                     href="@($"/{CurrentLeagueTarget}")"
-                                     Match="NavLinkMatch.Prefix">
-                                @CurrentLeagueTarget
-                            </NavLink>
                             <NavLink class="nav-link dropdown-toggle" type="button"
                                     id="navLeaguesDropdown"
                                     role="button"
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                     href="@($"/{CurrentLeagueTarget}")">
-                                <span class="d-lg-none">@CurrentLeagueTarget</span>
+                                @CurrentLeagueTarget
                             </NavLink>
                             <ul class="dropdown-menu" aria-labelledby="navLeaguesDropdown">
+                                <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
+                                    <Authorized>
+                                        <li><h6 class="dropdown-header">League Admin</h6></li>
+                                        <li>
+                                            <NavLink class="dropdown-item" title="Settings" href="@($"./{Shared.LeagueName}/Settings")">
+                                                    <span class="oi oi-cog" /> Settings
+                                            </NavLink>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                    </Authorized>
+                                </AuthorizeView>
+                                <li>
+                                    <h6 class="dropdown-header">Switch League</h6>
+                                </li>
                                 @foreach(var league in Bind(Vm, x => x.Leagues))
                                 {
                                     <li>
@@ -83,25 +92,22 @@
                         </li>
                     }
                 </ul>
-                <div class="navbar-nav gap-2 mt-2 mb-2">
-                    <div class="d-flex gap-2 align-items-center">
-                        <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
-                            <Authorized>
-                                <div class="nav-item">
-                                    <NavLink class="nav-link" title="Settings" href="@($"./{Shared.LeagueName}/Settings")">
-                                        <span class="oi oi-cog" />
-                                    </NavLink>
-                                </div>
-                            </Authorized>
-                        </AuthorizeView>
+                <ul class="navbar-nav gap-2 mt-2 mb-2">
+                    <li class="d-flex gap-2 align-items-center flex-nowrap flex-md-row-reverse">
                         <div class="dropdown">
                             <button class="btn btn-outline-light" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Account">
                                 <span class="oi oi-person" />
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-lg-end" aria-labelledby="userMenuDropdown">
+                            <ul class="dropdown-menu dropdown-menu-md-end" aria-labelledby="userMenuDropdown" style="width: 220px">
                                 <AuthorizeView>
                                     <Authorized>
-                                        <li><label class="dropdown-item-text">User: @context.User.Identity?.Name</label></li>
+                                        <li><label class="dropdown-item-text">User: @GetFullUserName(context.User)</label></li>
+                                        @{var leagueRoles = GetCurrentLeagueRoles(context.User);}
+                                        @if (leagueRoles.Count() > 0)
+                                        {
+                                            <li class="dropdown-item-text">&nbsp;&nbsp;@string.Join(", ", leagueRoles)</li>
+                                        }
+                                        <li><hr class="dropdown-divider"></li>
                                         <li><NavLink class="dropdown-item" href="@($"/member/logout?returnUrl={GetReturnUrl()}")">Logout</NavLink></li>
                                     </Authorized>
                                     <NotAuthorized>
@@ -110,8 +116,13 @@
                                 </AuthorizeView>
                             </ul>
                         </div>
-                    </div>
-                </div>
+                        <AuthorizeView>
+                            <Authorized>
+                                <label class="d-md-none d-lg-block">@GetFullUserName(context.User)</label>
+                            </Authorized>
+                        </AuthorizeView>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
@@ -168,5 +179,25 @@
             ForceNavigateTo($"{Shared.LeagueName}/Reviews");
         }
         await InvokeAsync(StateHasChanged);
+    }
+
+    private string GetFullUserName(ClaimsPrincipal user)
+    {
+        if (user.Identity?.Name is null)
+        {
+            return string.Empty;
+        }
+
+        return user.Identity.Name;
+    }
+
+    private IEnumerable<string> GetCurrentLeagueRoles(ClaimsPrincipal user)
+    {
+        var roles = user.Claims
+            .Where(x => x.Type == ClaimTypes.Role)
+            .Where(x => LeagueRoles.IsLeagueRoleName(Shared.LeagueName ?? string.Empty, x.Value))
+            .Select(x => LeagueRoles.GetRoleName(x.Value))
+            .NotNull();
+        return roles.ToList();
     }
 }

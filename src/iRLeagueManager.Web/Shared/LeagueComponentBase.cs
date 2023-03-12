@@ -180,10 +180,10 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
     protected string GetRoleString(params string[] roleNames)
     {
         IEnumerable<string> roles = new[] { "Admin" };
-        if (LeagueName != null)
+        if (Shared.LeagueName != null)
         {
             var leagueRoleNames = roleNames
-                .Select(x => LeagueRoles.GetLeagueRoleName(LeagueName, x))
+                .Select(x => LeagueRoles.GetLeagueRoleName(Shared.LeagueName, x))
                 .NotNull();
             roles = roles.Concat(leagueRoleNames);
         }

@@ -1,10 +1,10 @@
 ﻿@using System.ComponentModel
 
 <div @attributes=@AdditionalAttributes>
-    <div style="display:inline-block">
+    <div class="d-flex flex-nowrap gap-2">
         @ChildContent
+        <div class="spinner-border" style="height:1.5rem; width:1.5rem; @(Loading == false ? "visibility:hidden" : "")" role="status" />
     </div>
-    <div class="spinner-border mx-2" style="height:1.5rem; width:1.5rem; @(Loading == false ? "visibility:hidden" : "")" role="status" />
 </div>
 
 @code {

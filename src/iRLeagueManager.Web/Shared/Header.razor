@@ -1,13 +1,203 @@
-﻿@inherits LeagueComponentBase
+﻿@using System.Security.Claims;
+@inherits LeagueComponentBase
+@inject LeaguesViewModel Vm
 
-@if (string.IsNullOrEmpty(Shared.LeagueName))
-{
-    <h1>iRLeaguemanager</h1>
-}
-else
-{
-    <h1>@Shared.LeagueName</h1>
-}
+<header class="page-header fixed-top p-0">
+    <nav class="navbar navbar-expand-md navbar-dark p-1 pe-2 ps-2">
+        <div class="container-fluid">
+            <div class="navbar-brand d-flex align-items-center gap-2">
+                <figure class="logo">
+                    <img src="logo/iRLM_Logo_17_darkbg.png" title="iRLeagueManager v@(VersionString)"/>
+                </figure>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#headerNavbarContent" aria-controls="headerNavbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="headerNavbarContent" class="collapse navbar-collapse gap-5 justify-content-md-between">
+                <ul class="navbar-nav flex-lg-grow-1 gap-md-2">
+                    <li class="nav-item">
+                        <div class="btn-group">
+                            <NavLink class="nav-link dropdown-toggle" type="button"
+                                    id="navLeaguesDropdown"
+                                    role="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                    href="@($"/{CurrentLeagueTarget}")">
+                                @CurrentLeagueTarget
+                            </NavLink>
+                            <ul class="dropdown-menu" aria-labelledby="navLeaguesDropdown">
+                                <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
+                                    <Authorized>
+                                        <li><h6 class="dropdown-header">League Admin</h6></li>
+                                        <li>
+                                            <NavLink class="dropdown-item" title="Settings" href="@($"./{Shared.LeagueName}/Settings")">
+                                                    <span class="oi oi-cog" /> Settings
+                                            </NavLink>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                    </Authorized>
+                                </AuthorizeView>
+                                <li>
+                                    <h6 class="dropdown-header">Switch League</h6>
+                                </li>
+                                @foreach(var league in Bind(Vm, x => x.Leagues))
+                                {
+                                    <li>
+                                        <NavLink class="dropdown-item" href="@($"/{league.LeagueName}")" 
+                                                 @onclick=@(() => ForceNavigateTo($"/{league.LeagueName}", fullReload: true))
+                                                 Match="NavLinkMatch.Prefix">
+                                            @league.LeagueName
+                                        </NavLink>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </li>
+                    @if (string.IsNullOrEmpty(Shared.LeagueName) == false)
+                    {
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="@($"./{Shared.LeagueName}/Schedules")"
+                                 Match="NavLinkMatch.Prefix">
+                                Schedule
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="@($"./{Shared.LeagueName}/Results")"
+                                     Match="NavLinkMatch.Prefix">
+                                Results
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="@($"./{Shared.LeagueName}/Standings")"
+                                 Match="NavLinkMatch.Prefix">
+                                Standings
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="@($"./{Shared.LeagueName}/Reviews")"
+                                 Match="NavLinkMatch.Prefix">
+                                Reviews
+                            </NavLink>
+                        </li>
+                    }
+                    @if (string.IsNullOrEmpty(Shared.LeagueName) == false)
+                    {
+                        <li class="nav-item flex-fill">
+                            <select @bind="SeasonSelect" class="form-select" style="max-width: 240px">
+                                @foreach (var season in Shared.SeasonList)
+                                {
+                                    <option value="@season.SeasonId" class="nav-option">@season.SeasonName</option>
+                                }
+                            </select>
+                        </li>
+                    }
+                </ul>
+                <ul class="navbar-nav gap-2 mt-2 mb-2">
+                    <li class="d-flex gap-2 align-items-center flex-nowrap flex-md-row-reverse">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-light" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Account">
+                                <span class="oi oi-person" />
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-md-end" aria-labelledby="userMenuDropdown" style="width: 220px">
+                                <AuthorizeView>
+                                    <Authorized>
+                                        <li><label class="dropdown-item-text">User: @GetFullUserName(context.User)</label></li>
+                                        @{var leagueRoles = GetCurrentLeagueRoles(context.User);}
+                                        @if (leagueRoles.Count() > 0)
+                                        {
+                                            <li class="dropdown-item-text">&nbsp;&nbsp;@string.Join(", ", leagueRoles)</li>
+                                        }
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><NavLink class="dropdown-item" href="@($"/member/logout?returnUrl={GetReturnUrl()}")">Logout</NavLink></li>
+                                    </Authorized>
+                                    <NotAuthorized>
+                                        <li><NavLink class="dropdown-item" href="@($"/member/login?returnUrl={GetReturnUrl()}")">Login</NavLink></li>
+                                    </NotAuthorized>
+                                </AuthorizeView>
+                            </ul>
+                        </div>
+                        <AuthorizeView>
+                            <Authorized>
+                                <label class="d-md-none d-lg-block">@GetFullUserName(context.User)</label>
+                            </Authorized>
+                        </AuthorizeView>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
 
 @code {
+    private static string VersionString { get; } = $"{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.Major}.{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.Minor}.{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.Build}";
+
+    private string CurrentLeagueTarget => string.IsNullOrEmpty(Shared.LeagueName) ? "Leagues" : Shared.LeagueName;
+
+    private string UserName => Shared.Username ?? string.Empty;
+
+    private long SeasonSelect
+    {
+        get => Shared.SeasonId;
+        set => _ = OnSeasonSelectChanged(value);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        if (Vm.Leagues.Count > 0)
+        {
+            return;
+        }
+        await Vm.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task OnSeasonSelectChanged(long value)
+    {
+        if (Shared.LeagueName == null || value == 0)
+        {
+            return;
+        }
+        await ApiService.SetCurrentSeasonAsync(Shared.LeagueName, value);
+        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Results"))
+        {
+            ForceNavigateTo($"{Shared.LeagueName}/Results");
+        }
+        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Schedules"))
+        {
+            ForceNavigateTo($"{Shared.LeagueName}/Schedules");
+        }
+        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Standings"))
+        {
+            ForceNavigateTo($"{Shared.LeagueName}/Standings");
+        }
+        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Reviews"))
+        {
+            ForceNavigateTo($"{Shared.LeagueName}/Reviews");
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string GetFullUserName(ClaimsPrincipal user)
+    {
+        if (user.Identity?.Name is null)
+        {
+            return string.Empty;
+        }
+
+        return user.Identity.Name;
+    }
+
+    private IEnumerable<string> GetCurrentLeagueRoles(ClaimsPrincipal user)
+    {
+        var roles = user.Claims
+            .Where(x => x.Type == ClaimTypes.Role)
+            .Where(x => LeagueRoles.IsLeagueRoleName(Shared.LeagueName ?? string.Empty, x.Value))
+            .Select(x => LeagueRoles.GetRoleName(x.Value))
+            .NotNull();
+        return roles.ToList();
+    }
 }

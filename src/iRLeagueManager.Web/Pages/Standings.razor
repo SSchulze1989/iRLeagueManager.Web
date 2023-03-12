@@ -14,26 +14,31 @@
 @inherits LeagueComponentBase
 @inject StandingsPageViewModel vm
 
-<div class="container">
-    <LoadingHeader class="mb-2" Loading=@Bind(vm, x => x.Loading)>
-        <h3>Standings</h3>
-    </LoadingHeader>
-
-    <EventSelect />
-    @if (@Bind(vm, x => x.Standings)?.Count == 0)
-    {
-        <div class="card-body">
-            <p class="results-scoring"><em>No Standings</em></p>
+<div class="container-xxl">
+    <div class="sticky-header">
+        <div class="d-flex align-items-bottom gap-2">
+            <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+                <h3>Standings</h3>
+            </LoadingHeader>
+            <EventSelect class="mb-2" />
         </div>
-    }
-    <ul class="nav nav-tabs">
-    @foreach((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x,i)))
-    {
-        <li class="nav-item">
-            <a class="nav-link @((i==Bind(vm, x => x.SelectedStandingIndex)) ? "active" : "")" href="@(GetTabLink(i))">@standing.Name</a>
-        </li>
-    }
-    </ul>
+
+        @if (@Bind(vm, x => x.Standings)?.Count == 0)
+        {
+            <div class="card-body">
+                <p class="results-scoring"><em>No Standings</em></p>
+            </div>
+        }
+        <ul class="nav nav-tabs">
+        @foreach((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x,i)))
+        {
+            <li class="nav-item">
+                <NavLink class="nav-link" href="@GetTabLink(i)">@standing.Name</NavLink>
+            </li>
+        }
+        </ul>
+    </div>
+
     @if (@Bind(vm, x => x.SelectedStanding) != null)
     {
         <DisplayStanding class="px-0 mb-2 mx-0" Standing=@Bind(vm, x => x.SelectedStanding)/>
@@ -54,15 +59,15 @@
         if (@event?.EventId != null)
         {
             var standingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
-            NavigationManager.NavigateTo($"./{LeagueName}/Standings/Events/{@event.EventId}");
             await vm.LoadFromEventAsync(@event.EventId);
-            
+
             if (standingIndex >= vm.Standings.Count() || standingIndex < 0)
             {
                 standingIndex = 0;
             }
-            var navUri = $"./{LeagueName}/Standings/Events/{@event.EventId}?{standingTabParam}={standingIndex}";
-            NavigationManager.NavigateTo(navUri);
+            var navUri = $"/{LeagueName}/Standings/Events/{@event.EventId}?{standingTabParam}={standingIndex}";
+            bool replace = NavigationManager.Uri.Contains($"/Events/") == false || NavigationManager.Uri.Contains(navUri);
+            NavigationManager.NavigateTo(navUri, replace: replace);
         }
     }
 

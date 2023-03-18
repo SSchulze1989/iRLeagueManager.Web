@@ -43,24 +43,21 @@
                     new bootstrap.Tooltip(tooltip, {delay: {"show": 500, "hide": 100}, placement: defaultPlacement, html: true});
                 });
         }
-    </script>
-    <script>
+
         window.GetIANATimeZone = () => {
             return Intl.DateTimeFormat().resolvedOptions().timeZone;
         }
-    </script>
-    <script>
+
         window.scrollToElementId = (elementId) => {
             var element = document.getElementById(elementId);
             if (!element) {
                 console.warn('element was not found', elementId);
                 return false;
             }
-            element.scrollIntoView();
+            element.scrollIntoView(true);
             return true;
         }
-    </script>
-    <script>
+
         window.clipboardCopy = {
             copyText: function (text) {
                 navigator.clipboard.writeText(text).then(function () {
@@ -71,6 +68,30 @@
                     });
             }
         };
+
+        window.scrollPageElementToTop = (elementId) => {
+            var element = document.getElementById(elementId);
+            if (!element) {
+                console.warn('element was not found', elementId);
+                return false;
+            }
+            var em = parseFloat(getComputedStyle(document.documentElement).fontSize);
+            var headerOffset = 4 * em;
+            var elementPosition = element.getBoundingClientRect().top;
+            var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+  
+            window.scrollTo({
+                 top: offsetPosition,
+                 behavior: "smooth"
+            });
+        }
+
+        window.scrollPageToTop = (elementId) => {  
+            window.scrollTo({
+                 top: 0,
+                 behavior: "smooth"
+            });
+        }
     </script>
 </body>
 </html>

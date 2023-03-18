@@ -47,6 +47,10 @@
                         }
                         <th @onclick="() => SetOrderProperty(Result, row => row.PenaltyPoints)">Penalty</th>
                         <th @onclick="() => SetOrderProperty(Result, row => row.TotalPoints)">Total Pts.</th>
+                        @if (isTeamResult == false)
+                        {
+                            <th @onclick="() => SetOrderProperty(Result, row => row.OldIrating)">IR (@(AverageIrating(Result)))</th>
+                        }
                         <th @onclick="() => SetOrderProperty(Result, row => row.Incidents)">Incs.</th>
                     </tr>
                 </thead>
@@ -85,6 +89,10 @@
                                 @(row.PenaltyPoints != 0 ? $"-{row.PenaltyPoints}" : "")
                             </td>
                             <td>@row.TotalPoints</td>
+                            @if (isTeamResult == false)
+                            {
+                                <td>@row.OldIrating</td>
+                            }
                             <td>@row.Incidents</td>
                         </tr>
                     }
@@ -121,5 +129,10 @@
             .Where(x => x > TimeSpan.FromSeconds(1))
             .MinOrDefault();
         return rowValue == minValue;
+    }
+
+    private int AverageIrating(SessionResultViewModel result)
+    {
+        return result.ResultRows.Sum(x => x.OldIrating) / result.ResultRows.Count();
     }
 }

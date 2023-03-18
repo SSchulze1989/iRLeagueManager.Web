@@ -1,5 +1,5 @@
 ﻿@page "/member/Register"
-@using iRLeagueApiCore.Common.Models.Users;
+@using System.ComponentModel.DataAnnotations;
 
 <div class="container-sm" style="max-width: 790px;">
     <div class="card">
@@ -8,7 +8,8 @@
         </div>
         <div class="card-body">
             <EditForm Model="Model">
-                <StatusResultValidator @ref=ResultValidator/>
+                <DataAnnotationsValidator />
+                <StatusResultValidator @ref=ResultValidator />
                 <div class="form-group mb-3">
                     <label>Username</label>
                     <InputText @bind-Value="Model.Username" class="form-control" />
@@ -17,18 +18,35 @@
                 <div class="form-group mb-3">
                     <label>Email</label>
                     <InputText @bind-Value="Model.Email" type="email" class="form-control" />
-                    <ValidationMessage For="@(() => Model.Username)" />
+                    <ValidationMessage For="@(() => Model.Email)" />
                 </div>
                 <div class="form-group mb-3">
                     <label>Password</label>
                     <InputText @bind-Value="Model.Password" type="password" class="form-control" />
                     <ValidationMessage For="@(() => Model.Password)" />
                 </div>
-                <div class="form-check">
-                    <InputCheckbox @bind-Value="PrivacyPolicyAgreeed" class="form-check-input" type="checkbox" id="privacy-policy-agreed" />
+                <div class="form-group mb-3">
+                    <label>Password</label>
+                    <InputText @bind-Value="Model.PasswordConfirm" type="password" class="form-control" />
+                    <ValidationMessage For="@(() => Model.PasswordConfirm)" />
+                </div>
+                <div class="form-check mb-3">
+                    <InputCheckbox @bind-Value="Model.PrivacyPolicyAgreeed" class="form-check-input" type="checkbox" id="privacy-policy-agreed" />
                     <label class="form-check-label" for="privacy-policy-agreed">
-                        I have read and agree to the <a href="/privacy" target="_blank">privacy policy</a>.
+                        I have read and understood the <a href="/privacy" target="_blank">privacy policy</a>.
                     </label>
+                    <ValidationMessage For="@(() => Model.PrivacyPolicyAgreeed)" />
+                </div>
+                <div class="form-check mb-3">
+                    <InputCheckbox @bind-Value="Model.TermsConditionsAgreed" class="form-check-input" type="checkbox" id="terms-and-conditions-agreed" />
+                    <label class="form-check-label" for="terms-and-conditions-agreed">
+                        I have read and accept the <a href="/terms" target="_blank">terms and conditions</a>.
+                    </label>
+                    <ValidationMessage For="@(() => Model.TermsConditionsAgreed)" />
+                </div>
+                <div class="d-flex justify-content-evenly">
+                    <button class="btn btn-primary" type="submit">Submit</button>
+                    <button class="btn btn-outline-secondary" type="reset">Clear</button>
                 </div>
             </EditForm>
         </div>
@@ -38,7 +56,29 @@
 @code {
     private StatusResultValidator? ResultValidator { get; set; }
 
-    private RegisterModel Model { get; } = new();
+    private class RegisterModel : iRLeagueApiCore.Common.Models.Users.RegisterModel
+    {
+        [Required]
+        [MinLength(4)]
+        [RegularExpression("^[a-zA-Z0-9_-]{4,}$", ErrorMessage = "Username can only contain following characters: \"a-zA-Z0-9_-\"")]
+        public new string Username { get => base.Username; set => base.Username = value; }
 
-    private bool PrivacyPolicyAgreeed { get; set; } = false;
+        [Required]
+        [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])?(?=.*[#$^+=!*()@%&]).{8,255}$", ErrorMessage = @"Password must be at leas 8 characters long, contain upper and lowercase letters and at least one special character (#$^+=!*()@%&)")]
+        public new string Password { get => base.Password; set => base.Password = value; }
+
+        [Required(ErrorMessage = "Password confirmation is required")]
+        [Compare(nameof(Password), ErrorMessage = "Confirmed passsword does not match")]
+        public string PasswordConfirm { get; set; } = string.Empty;
+
+        [Required]
+        [Range(typeof(bool), "true", "true", ErrorMessage = "Please accept the privacy policy")]
+        public bool PrivacyPolicyAgreeed { get; set; } = false;
+
+        [Required]
+        [Range(typeof(bool), "true", "true", ErrorMessage = "Please accept the terms and conditions")]
+        public bool TermsConditionsAgreed { get; set; } = false;
+    }
+
+    private RegisterModel Model { get; set; } = new();
 }

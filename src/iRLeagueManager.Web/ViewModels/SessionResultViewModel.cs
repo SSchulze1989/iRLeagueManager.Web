@@ -20,6 +20,7 @@ public sealed class SessionResultViewModel : LeagueViewModelBase<SessionResultVi
         orderByPropertySelector = x => x.FinalPosition;
     }
 
+    public EventResultViewModel? EventResult { get; set; }
     public long SeasonId => model.SeasonId;
     public string SessionName => model.SessionName;
     public int? SessionNr => model.SessionNr;

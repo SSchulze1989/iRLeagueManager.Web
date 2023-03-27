@@ -1,0 +1,17 @@
+﻿@page "/member/{UserId}/confirm/{ConfirmationToken}"
+
+@code {
+    [Parameter]
+    public string UserId { get; set; } = default!;
+    [Parameter]
+    public string ConfirmationToken { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, UserId);
+        BlazorParameterNullException.ThrowIfNull(this, ConfirmationToken);
+    }
+
+
+}

@@ -40,7 +40,15 @@
                     Login
                 </button>
             </EditForm>
-            <a href="./member/PasswordReset">Forgot password</a>
+            <div class="mb-3">
+                <a href="./member/PasswordReset">Forgot password</a>
+            </div>
+            <div>
+                <small>Not a member yet?</small>
+            </div>
+            <button class="btn btn-secondary" @onclick=@(() => NavigationManager.NavigateTo("/member/register"))>
+                Sign Up
+            </button>
         </div>
     </div>
 </div>

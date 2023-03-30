@@ -132,7 +132,7 @@
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
     <PackageReference Include="Blazored.Modal" Version="7.1.0" />
     <PackageReference Include="iRLeagueApiCore.Client" Version="0.6.0-dev.7" />
-    <PackageReference Include="iRLeagueApiCore.Common" Version="0.6.0-dev.2" />
+    <PackageReference Include="iRLeagueApiCore.Common" Version="0.6.0-dev.3" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.3" />

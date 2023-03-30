@@ -1,0 +1,82 @@
+﻿@page "/member/resend-confirmation"
+@inject LeagueApiService ApiService
+@inject NavigationManager NavigationManager
+@using System.ComponentModel.DataAnnotations;
+@using iRLeagueApiCore.Client.Endpoints;
+
+<div class="container-sm" style="max-width: 790px;">
+    @if (Success)
+    {
+        <div>
+            <p>An email with a confirmation link has been send to the given email address. Please make sure to check your spam folder if you cannot find any mail from us.</p>
+            <p>If you continue having problems with this step please contact <a href="mailto:simon@irleaguemanager.net">simon@iRLeagueManager.net</a></p>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-header">
+                <label>Resend confirmation email</label>
+            </div>
+            <div class="card-body">
+                <EditForm Model="Context" OnValidSubmit="Submit">
+                    <DataAnnotationsValidator />
+                    <StatusResultValidator @ref=ResultValidator />
+                    <div class="form-group mb-3">
+                        <label>Email</label>
+                        <InputText class="form-control" type="email" placeholder="mail@example.com" @bind-Value=Context.Email />
+                        <ValidationMessage For="@(() => Context.Email)" />
+                    </div>
+                    <button disabled="@Loading" class="btn btn-primary mt-3">
+                        @if (Loading)
+                        {
+                            <span class="spinner-border spinner-border-sm mr-1"></span>
+                        }
+                        Send Email
+                    </button>
+                </EditForm>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private sealed class ConfirmationContext
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+    }
+
+    private StatusResultValidator? ResultValidator { get; set; }
+
+    private bool Loading { get; set; } = false;
+
+    private bool Success { get; set; } = false;
+
+    private ConfirmationContext Context { get; } = new();
+
+    private async Task Submit()
+    {
+        try
+        {
+            Loading = true;
+            var linkTemplate = $$"""{{NavigationManager.BaseUri}}member/{userId}/confirm/{token}""";
+            var result = await ApiService.Client
+                .Users()
+                .ResendConfirmation()
+                .AddQueryParameter(x => x.Add("linkTemplate", linkTemplate))
+                .Post(Context.Email);
+            if (result.Success == false)
+            {
+                ResultValidator?.ValidateResult(result.ToStatusResult());
+                return;
+            }
+            Success = true;
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+}

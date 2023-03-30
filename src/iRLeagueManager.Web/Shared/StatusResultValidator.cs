@@ -46,7 +46,7 @@ public sealed class StatusResultValidator : ComponentBase
         switch (result.Status)
         {
             case StatusResult.Unauthorized:
-                AddUnauthorizedValidationMessages();
+                AddUnauthorizedValidationMessages(result);
                 break;
             case StatusResult.BadRequest:
                 AddBadRequestValidationMessages(result);
@@ -73,8 +73,14 @@ public sealed class StatusResultValidator : ComponentBase
         }
     }
 
-    private void AddUnauthorizedValidationMessages()
+    private void AddUnauthorizedValidationMessages(StatusResult result)
     {
+        if (result.Message == "MailConfirm")
+        {
+            ErrorMessage = "Email confirmation is missing";
+            return;
+        }
+
         var usernameField = CurrentEditContext.Field("Username");
         var passwordField = CurrentEditContext.Field("Password");
         messageStore.Add(usernameField, "");

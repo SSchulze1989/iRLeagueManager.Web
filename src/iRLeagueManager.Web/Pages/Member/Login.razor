@@ -2,6 +2,7 @@
 @using System.ComponentModel.DataAnnotations
 @using iRLeagueApiCore.Client
 @using iRLeagueApiCore.Client.Http
+@using iRLeagueApiCore.Common.Responses;
 @using iRLeagueManager.Web.Extensions
 @inject IConfiguration configuration
 @inject ITokenStore tokenStore
@@ -26,7 +27,12 @@
                     <InputText @bind-Value="model.Password" type="password" class="form-control" />
                     <ValidationMessage For="@(() => model.Password)" />
                 </div>
-                <button disabled="@loading" class="btn btn-primary mb-3">
+                <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+                @if (ResendConfirmation)
+                {
+                    <a href="./member/resend-confirmation"><p>Resend confirmation Email</p></a>
+                }
+                <button disabled="@loading" class="btn btn-primary mt-3 mb-3">
                     @if (loading) 
                     {
                         <span class="spinner-border spinner-border-sm mr-1"></span>
@@ -34,7 +40,15 @@
                     Login
                 </button>
             </EditForm>
-            <a href="./member/PasswordReset">Forgot password</a>
+            <div class="mb-3">
+                <a href="./member/PasswordReset">Forgot password</a>
+            </div>
+            <div>
+                <small>Not a member yet?</small>
+            </div>
+            <button class="btn btn-secondary" @onclick=@(() => NavigationManager.NavigateTo("/member/register"))>
+                Sign Up
+            </button>
         </div>
     </div>
 </div>
@@ -51,7 +65,9 @@
     private bool loading;
     public bool Loading { get => loading; set { loading = value; InvokeAsync(StateHasChanged); } }
 
-    private StatusResultValidator ResultValidator { get; set; } = default!;
+    private bool ResendConfirmation { get; set; } = false;
+
+    private StatusResultValidator? ResultValidator { get; set; }
 
     public User model = new User();
 
@@ -85,10 +101,15 @@
             try 
             {
                 Loading = true;
+                ResendConfirmation = false;
                 var result = await ApiClient.LogIn(model.Username, model.Password);
                 if (result.Success == false)
                 {
-                    ResultValidator.ValidateResult(result.ToStatusResult());
+                    ResultValidator?.ValidateResult(result.ToStatusResult());
+                    if (result.ToStatusResult().Message == "MailConfirm")
+                    {
+                        ResendConfirmation = true;
+                    }
                     return;
                 }
                 var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";

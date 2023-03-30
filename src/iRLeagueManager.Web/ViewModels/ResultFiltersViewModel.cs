@@ -12,7 +12,7 @@ public sealed class ResultFiltersViewModel : LeagueViewModelBase<ResultFiltersVi
     }
 
     private ObservableCollection<ResultFilterViewModel> filters;
-    public ObservableCollection<ResultFilterViewModel> Filters { get => filters; set => SetP(filters, value => filters = value, value); }
+    public ObservableCollection<ResultFilterViewModel> Filters { get => filters; set => Set(ref filters, value); }
 
     public void SetModel(IEnumerable<ResultFilterModel> model)
     {

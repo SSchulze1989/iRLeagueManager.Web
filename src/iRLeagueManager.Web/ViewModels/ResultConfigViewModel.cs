@@ -92,6 +92,9 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
     private ObservableCollection<ResultConfigModel> availableResultConfigs;
     public ObservableCollection<ResultConfigModel> AvailableResultConfigs { get => availableResultConfigs; set => Set(ref availableResultConfigs, value); }
 
+    private ObservableCollection<MemberModel> leagueMembers;
+    public ObservableCollection<MemberModel> LeagueMembers { get => leagueMembers; set => Set(ref leagueMembers, value); }
+
     public override void SetModel(ResultConfigModel model)
     {
         base.SetModel(model);
@@ -121,6 +124,30 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         }
 
         return result.ToStatusResult();
+    }
+
+    public async Task<StatusResult> LoadLeagueMembers(CancellationToken cancellationToken = default)
+    {
+        if (CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await CurrentLeague.Members()
+                .Get(cancellationToken);
+            if (result.Success && result.Content is not null)
+            {
+                LeagueMembers = new(result.Content);
+            }
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
     }
 
     public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken)

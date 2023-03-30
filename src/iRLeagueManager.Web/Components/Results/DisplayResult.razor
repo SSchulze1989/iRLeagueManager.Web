@@ -47,6 +47,10 @@
                         }
                         <th @onclick="() => SetOrderProperty(Result, row => row.PenaltyPoints)">Penalty</th>
                         <th @onclick="() => SetOrderProperty(Result, row => row.TotalPoints)">Total Pts.</th>
+                        @if (isTeamResult == false)
+                        {
+                            <th @onclick="() => SetOrderProperty(Result, row => row.OldIrating)">IR (@(EvenStrengthOfField(Result)))</th>
+                        }
                         <th @onclick="() => SetOrderProperty(Result, row => row.Incidents)">Incs.</th>
                     </tr>
                 </thead>
@@ -85,6 +89,10 @@
                                 @(row.PenaltyPoints != 0 ? $"-{row.PenaltyPoints}" : "")
                             </td>
                             <td>@row.TotalPoints</td>
+                            @if (isTeamResult == false)
+                            {
+                                <td>@row.OldIrating</td>
+                            }
                             <td>@row.Incidents</td>
                         </tr>
                     }
@@ -95,6 +103,8 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    private EventListViewModel EventList { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues = true)]
     public IDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter, EditorRequired]
@@ -121,5 +131,10 @@
             .Where(x => x > TimeSpan.FromSeconds(1))
             .MinOrDefault();
         return rowValue == minValue;
+    }
+
+    private int EvenStrengthOfField(SessionResultViewModel result)
+    {
+        return result.EventResult?.StrengthOfField ?? 0;
     }
 }

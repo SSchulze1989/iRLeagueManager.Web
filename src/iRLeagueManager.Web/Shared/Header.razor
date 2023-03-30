@@ -108,10 +108,11 @@
                                             <li class="dropdown-item-text">&nbsp;&nbsp;@string.Join(", ", leagueRoles)</li>
                                         }
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><NavLink class="dropdown-item" href="@($"/member/logout?returnUrl={GetReturnUrl()}")">Logout</NavLink></li>
+                                        <li><NavLink class="dropdown-item" href="/member/logout" @onclick=@(() => NavigateTo($"/member/logout?returnUrl={GetReturnUrl()}"))>Logout</NavLink></li>
                                     </Authorized>
                                     <NotAuthorized>
-                                        <li><NavLink class="dropdown-item" href="@($"/member/login?returnUrl={GetReturnUrl()}")">Login</NavLink></li>
+                                        <li><NavLink class="dropdown-item" href="/member/login" @onclick=@(() => NavigateTo($"/member/login?returnUrl={GetReturnUrl()}"))>Login</NavLink></li>
+                                        <li><NavLink class="dropdown-item" href="/member/register">Sign Up</NavLink></li>
                                     </NotAuthorized>
                                 </AuthorizeView>
                             </ul>

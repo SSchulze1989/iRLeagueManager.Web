@@ -1,11 +1,12 @@
 ﻿@inherits MvvmComponentBase
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueApiCore.Common.Models.Reviews
+@using iRLeagueApiCore.Common.Models.Users;
 @using iRLeagueManager.Web.ViewModels
 
 <div class="d-flex justify-content-between align-items-start">
     <div>
-        <h6 class="fw-bold">@Bind(Comment, x => x.AuthorName)</h6>
+        <h6 class="fw-bold"><DisplayUser User=@GetUser(Comment.AuthorUserId) FallbackName=@Comment.AuthorName /></h6>
         <div class="m-1 preserve-format">
             @Bind(Comment, x=> x.Text)
         </div>
@@ -36,6 +37,8 @@
     public IModalService ModalService { get; set; } = default!;
     [CascadingParameter]
     public IEnumerable<MemberInfoModel> InvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
+    [CascadingParameter]
+    public IEnumerable<UserModel> LeagueUsers { get; set; } = Array.Empty<UserModel>();
     [Parameter, EditorRequired]
     public ReviewCommentViewModel Comment { get; set; } = default!;
     [CascadingParameter]
@@ -100,5 +103,10 @@
         {
             await OnStateHasChanged.InvokeAsync();
         }
+    }
+
+    private UserModel? GetUser(string userId)
+    {
+        return LeagueUsers.FirstOrDefault(x => x.UserId == userId);
     }
 }

@@ -30,14 +30,9 @@
                     @foreach(var user in @Bind(Users, x => x.LeagueUsers))
                     {
                         <tr>
-                            @if (string.IsNullOrWhiteSpace(user.FirstName) && string.IsNullOrWhiteSpace(user.LastName))
-                            {
-                                <th>@user.UserName</th>
-                            }
-                            else
-                            {
-                                <th>@user.FirstName @user.LastName</th>
-                            }
+                            <th>
+                                <DisplayUser User=@user.GetModel() ShowUserName=false/>
+                            </th>
                             @foreach(var role in LeagueRoles.RolesAvailable)
                             {
                                 <th>

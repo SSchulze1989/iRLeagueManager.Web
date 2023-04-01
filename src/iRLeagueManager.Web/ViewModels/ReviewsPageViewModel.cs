@@ -1,5 +1,6 @@
 ﻿using iRLeagueApiCore.Common.Enums;
 using iRLeagueApiCore.Common.Models;
+using iRLeagueApiCore.Common.Models.Users;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 
@@ -29,6 +30,9 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
 
     private IEnumerable<MemberInfoModel> eventMembers = Array.Empty<MemberInfoModel>();
     public IEnumerable<MemberInfoModel> EventMembers { get => eventMembers; set => Set(ref eventMembers, value); }
+
+    private ObservableCollection<UserModel> leagueUsers = new();
+    public ObservableCollection<UserModel> LeagueUsers { get => leagueUsers; set => Set(ref leagueUsers, value); }
 
     public async Task LoadFromEventAsync(long eventId, CancellationToken cancellationToken = default)
     {
@@ -98,6 +102,30 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
         finally
         {
             Loading = false;
+        }
+    }
+
+    public async Task<StatusResult> LoadUsers(CancellationToken cancellationToken = default)
+    {
+        if (CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await CurrentLeague.Users()
+                .Get(cancellationToken);
+            if (result.Success && result.Content is not null)
+            {
+                LeagueUsers = new(result.Content);
+            }
+            return result.ToStatusResult();
+        }
+        finally 
+        { 
+            Loading = false; 
         }
     }
 

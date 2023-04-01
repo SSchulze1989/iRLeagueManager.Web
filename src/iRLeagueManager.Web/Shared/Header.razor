@@ -101,17 +101,18 @@
                             <ul class="dropdown-menu dropdown-menu-md-end" aria-labelledby="userMenuDropdown" style="width: 220px">
                                 <AuthorizeView>
                                     <Authorized>
-                                        <li><label class="dropdown-item-text">User: @GetFullUserName(context.User)</label></li>
+                                        <li><NavLink class="dropdown-item" href=@($"/member/{context.User.GetUserId()}/profile")>User: @GetFullUserName(context.User)</NavLink></li>
                                         @{var leagueRoles = GetCurrentLeagueRoles(context.User);}
                                         @if (leagueRoles.Count() > 0)
                                         {
                                             <li class="dropdown-item-text">&nbsp;&nbsp;@string.Join(", ", leagueRoles)</li>
                                         }
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><NavLink class="dropdown-item" href="@($"/member/logout?returnUrl={GetReturnUrl()}")">Logout</NavLink></li>
+                                        <li><NavLink class="dropdown-item" href="/member/logout" @onclick=@(() => NavigateTo($"/member/logout?returnUrl={GetReturnUrl()}"))>Logout</NavLink></li>
                                     </Authorized>
                                     <NotAuthorized>
-                                        <li><NavLink class="dropdown-item" href="@($"/member/login?returnUrl={GetReturnUrl()}")">Login</NavLink></li>
+                                        <li><NavLink class="dropdown-item" href="/member/login" @onclick=@(() => NavigateTo($"/member/login?returnUrl={GetReturnUrl()}"))>Login</NavLink></li>
+                                        s
                                     </NotAuthorized>
                                 </AuthorizeView>
                             </ul>

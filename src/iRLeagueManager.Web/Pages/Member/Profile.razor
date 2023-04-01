@@ -1,0 +1,90 @@
+﻿@page "/member/{UserId}/profile"
+@inject UserViewModel User;
+@using iRLeagueApiCore.Common.Models.Users;
+
+<div class="container-sm" style="max-width: 790px;">
+    <div class="card">
+        <div class="card-header">
+            <label>User Profile</label>
+        </div>
+        <div class="card-body">
+            <AuthorizeView Policy=@ProfileOwnerRequirement.Policy Resource=@UserId Context="AuthorizeContext">
+                <Authorized>
+                    <EditForm Model=@User>
+                        <div class="d-flex flex-column gap-3">
+                            <StatusResultValidator @ref=ResultValidator />
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input value=@User.UserName class="form-control" disabled/>
+                                <ValidationMessage For="@(() => User.UserName)" />
+                            </div>
+                            <div class="form-group">
+                                <label>Firstname</label>
+                                <InputText @bind-Value="User.Firstname" class="form-control" />
+                                <ValidationMessage For="@(() => User.Firstname)" />
+                            </div>
+                            <div class="form-group">
+                                <label>Lastname</label>
+                                <InputText @bind-Value="User.Lastname" class="form-control" />
+                                <ValidationMessage For="@(() => User.Lastname)" />
+                            </div>
+                            <div class="form-check">
+                                <InputCheckbox @bind-Value="User.ShowFullname" class="form-check-input" type="checkbox" id="show-fullname" />
+                                <label class="form-check-label" for="show-fullname">
+                                    Allow other users to view your firstname & lastname
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <InputText @bind-Value="User.Email" type="email" class="form-control" disabled/>
+                                <ValidationMessage For="@(() => User.Email)" />
+                            </div>
+                            @if (User.HasChanged)
+                            {
+                                <div class="d-flex gap-3 mt-3">
+                                    <button class="btn btn-primary" @onclick=SaveChanges>
+                                        @if (User.Loading)
+                                        {
+                                            <span class="spinner-border spinner-border-sm mr-1"></span>
+                                        }
+                                        Save
+                                    </button>
+                                    <button class="btn btn-outline-secondary" type="button" @onclick=@(() => User.LoadUser(User.UserId))>
+                                        Reset
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </EditForm>
+                </Authorized>
+            </AuthorizeView>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string UserId { get; set; } = default!;
+
+    private StatusResultValidator? ResultValidator { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        await User.LoadUser(UserId);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SaveChanges()
+    {
+        var result = await User.SaveChangesAsync();
+        if (result.IsSuccess == false)
+        {
+            ResultValidator?.ValidateResult(result);
+        }
+    }
+}

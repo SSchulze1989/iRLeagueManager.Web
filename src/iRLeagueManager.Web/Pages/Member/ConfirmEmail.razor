@@ -1,0 +1,70 @@
+﻿@page "/member/{UserId}/confirm/{ConfirmationToken}"
+@inject LeagueApiService ApiService
+@inject NavigationManager NavigationManager
+
+<div class="container-sm" style="max-width: 790px;">
+    @if (Success)
+    {
+        <p class="mb-3">
+            Your email has been successfully verified.
+            You can now log into your account with your username and password
+        </p>
+        <a class="btn btn-primary" href="/member/login">
+            Login
+        </a>
+    }
+    else if (Error)
+    {
+        <p>Oops, something went wrong! Please contact the administrator if you continue having problems.</p>
+    }
+    else
+    {
+        <p>
+            <span class="spinner-border spinner-border-sm me-1" />Processing email confirmation ...
+        </p>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string UserId { get; set; } = default!;
+    [Parameter]
+    public string ConfirmationToken { get; set; } = default!;
+
+    private bool Success { get; set; } = false;
+    private bool Error { get; set; } = false;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, UserId);
+        BlazorParameterNullException.ThrowIfNull(this, ConfirmationToken);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+
+        var result = await ApiService.Client
+            .Users()
+            .WithId(UserId)
+            .ConfirmEmail(ConfirmationToken)
+            .Post();
+        if (result.Success)
+        {
+            Success = true;
+            await InvokeAsync(StateHasChanged);
+            await Task.Delay(3000);
+            NavigationManager.NavigateTo("/member/login");
+        }
+        else
+        {
+            Error = true;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+}

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Reflection;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +47,11 @@ builder.Services.AddScoped<SharedStateService>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvicer>();
 builder.Services.AddTrackList();
 builder.Services.AddViewModels();
+builder.Services.AddSingleton<IAuthorizationHandler, ProfileHandler>();
+builder.Services.AddAuthorization(config =>
+{
+    config.AddPolicy(ProfileOwnerRequirement.Policy, policy => policy.AddRequirements(new ProfileOwnerRequirement()));
+});
 
 builder.Services.AddBlazoredModal();
 builder.Services.AddLocalization();

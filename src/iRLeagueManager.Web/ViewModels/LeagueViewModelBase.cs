@@ -112,6 +112,7 @@ public class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelBase<TView
     public virtual void SetModel(TModel model)
     {
         this.model = model;
+        HasChanged = false;
     }
 
     public virtual TModel CopyModel()

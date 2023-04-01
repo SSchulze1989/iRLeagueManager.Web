@@ -10,10 +10,10 @@
     Debounce=500
     placeholder="Type Name ...">
     <SelectedTemplate Context=user>
-        @user?.UserName
+        <DisplayUser User=@user ShowUserName=false />
     </SelectedTemplate>
     <ResultTemplate Context=user>
-        @user.UserName (@user.Firstname @user.Lastname)
+        <DisplayUser User=@user />
     </ResultTemplate>
 </BlazoredTypeahead>
 <CancelSubmitButtons 

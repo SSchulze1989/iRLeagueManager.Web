@@ -1,0 +1,33 @@
+﻿@using iRLeagueApiCore.Common.Models.Users;
+
+<div title="@@@FallbackName" class="d-flex gap-2">
+    @if (User is null || (string.IsNullOrEmpty(User.Firstname) && string.IsNullOrEmpty(User.Firstname)))
+    {
+        <label>@FallbackName</label>
+    }
+    else
+    {
+        <label>@User.Firstname@User.Lastname</label>
+        @if (ShowUserName)
+        {
+            <label class="text-muted"><i>@User.UserName</i></label>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string FallbackName { get; set; } = string.Empty;
+    [Parameter]
+    public UserModel? User { get; set; }
+    [Parameter]
+    public bool ShowUserName { get; set; } = true;
+
+    protected override void OnParametersSet()
+    {
+        if (string.IsNullOrEmpty(FallbackName) && User is not null)
+        {
+            FallbackName = User.UserName;
+        }
+    }
+}

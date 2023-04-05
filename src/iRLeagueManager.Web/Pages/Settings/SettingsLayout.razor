@@ -1,0 +1,58 @@
+﻿@using iRLeagueManager.Web.Components
+@inherits LayoutComponentBase
+@layout MainLayout
+@inject SharedStateService Shared
+@inject NavigationManager NavigationManager
+
+<div class="container-xxl">
+    <div class="sticky-header">
+        <LoadingHeader><h3>Settings</h3></LoadingHeader>
+        <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+            <Authorized>
+                <ul class="nav nav-tabs">
+                    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin)>
+                        <Authorized Context=AdminContext>
+                            <li class="nav-item">
+                                <NavLink class="nav-link" href="@GetTabLink(0)">League</NavLink>
+                            </li>
+                            <li class="nav-item">
+                                <NavLink class="nav-link" href="@GetTabLink(1)">Users</NavLink>
+                            </li>
+                        </Authorized>
+                    </AuthorizeView>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="@GetTabLink(2)">Results</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="@GetTabLink(3)">Teams</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="@GetTabLink(4)">Reviews</NavLink>
+                    </li>
+                </ul>
+            </Authorized>
+        </AuthorizeView>
+    </div>
+    @Body
+</div>
+
+@code {
+    protected string GetRoleString(params string[] roleNames)
+    {
+        IEnumerable<string> roles = new[] { "Admin" };
+        if (Shared.LeagueName != null)
+        {
+            var leagueRoleNames = roleNames
+                .Select(x => LeagueRoles.GetLeagueRoleName(Shared.LeagueName, x))
+                .NotNull();
+            roles = roles.Concat(leagueRoleNames);
+        }
+        return string.Join(',', roles);
+    }
+
+    private string GetTabLink(int tabIndex)
+    {
+        var url = NavigationManager.GetUriWithQueryParameter("tabIndex", tabIndex);
+        return url;
+    }
+}

@@ -4,72 +4,44 @@
 @using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.Components.Settings
 @inherits LeagueComponentBase
+@layout SettingsLayout
 @inject NavigationManager navigationManager
 
-<div class="container-xxl">
-    <div class="sticky-header">
-        <LoadingHeader><h3>Settings</h3></LoadingHeader>
-        <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
-            <Authorized>
-                <ul class="nav nav-tabs">
-                    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin)>
-                        <Authorized Context=AdminContext>
-                            <li class="nav-item">
-                                <NavLink class="nav-link" href="@GetTabLink(0)">League</NavLink>
-                            </li>
-                            <li class="nav-item">
-                                <NavLink class="nav-link" href="@GetTabLink(1)">Users</NavLink>
-                            </li>
-                        </Authorized>
-                    </AuthorizeView>
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href="@GetTabLink(2)">Results</NavLink>
-                    </li>
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href="@GetTabLink(3)">Teams</NavLink>
-                    </li>
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href="@GetTabLink(4)">Reviews</NavLink>
-                    </li>
-                </ul>
-            </Authorized>
-        </AuthorizeView>
-    </div>
 
-    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
-        <Authorized>
-            <div>
-                @if (HasRendered)
+<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+    <Authorized>
+        <div>
+            @if (HasRendered)
+            {
+                @switch (selectedTabIndex)
                 {
-                    @switch (selectedTabIndex)
-                    {
-                        case 0:
-                            <LeagueSettings />
-                            break;
-                        case 1:
-                            <UserSettings />
-                            break;
-                        case 2:
-                            <ResultSettings />
-                            break;
-                        case 3:
-                            <TeamSettings />
-                            break;
-                        case 4:
-                            <ReviewSettings />
-                            break;
-                        default:
-                            <p><em>Index out of bounds!</em></p>
-                            break;
-                    }
+                    case 0:
+                        <LeagueSettings />
+                        break;
+                    case 1:
+                        <UserSettings />
+                        break;
+                    case 2:
+                        <ResultSettings />
+                        break;
+                    case 3:
+                        <TeamSettings />
+                        break;
+                    case 4:
+                        <ReviewSettings />
+                        break;
+                    default:
+                        <p><em>Index out of bounds!</em></p>
+                        break;
                 }
-            </div>
-        </Authorized>
-        <NotAuthorized>
-            You are not allowed Here!
-        </NotAuthorized>
-    </AuthorizeView>
-</div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        You are not allowed Here!
+    </NotAuthorized>
+</AuthorizeView>
+
 
 @code {
     // Query parameters
@@ -87,9 +59,12 @@
         }
     }
 
+    private IDisposable? locationChangingHandler { get; set; }
+
     protected override void OnInitialized()
     {
         navigationManager.LocationChanged += OnLocationChanged;
+        navigationManager.RegisterLocationChangingHandler(LocationChanging);
     }
 
     public async Task SelectedTabChanged()
@@ -100,6 +75,15 @@
     protected override void RedirectUrl()
     {
         navigationManager.NavigateTo($"./{LeagueName}/Settings/Season/{SeasonId}");
+    }
+
+    private async ValueTask LocationChanging(LocationChangingContext context)
+    {
+        if (context.TargetLocation.Contains($"/{LeagueName}/Settings") == false)
+        {
+            context.PreventNavigation();
+        }
+        await Task.CompletedTask;
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -118,15 +102,10 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private string GetTabLink(int tabIndex)
-    {
-        var url = navigationManager.GetUriWithQueryParameter("tabIndex", tabIndex);
-        return url;
-    }
-
     protected override void Dispose(bool disposing)
     {
         navigationManager.LocationChanged -= OnLocationChanged;
+        locationChangingHandler?.Dispose();
         base.Dispose(disposing);
     }
 }

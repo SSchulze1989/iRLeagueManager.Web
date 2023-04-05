@@ -1,5 +1,6 @@
 ﻿@using iRLeagueManager.Web.Components
 @inherits LayoutComponentBase
+@implements IDisposable
 @layout MainLayout
 @inject SharedStateService Shared
 @inject NavigationManager NavigationManager
@@ -13,21 +14,21 @@
                     <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin)>
                         <Authorized Context=AdminContext>
                             <li class="nav-item">
-                                <NavLink class="nav-link" href="@GetTabLink(0)">League</NavLink>
+                                <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/League")>League</NavLink>
                             </li>
                             <li class="nav-item">
-                                <NavLink class="nav-link" href="@GetTabLink(1)">Users</NavLink>
+                                <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Users")>Users</NavLink>
                             </li>
                         </Authorized>
                     </AuthorizeView>
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="@GetTabLink(2)">Results</NavLink>
+                        <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Results")>Results</NavLink>
                     </li>
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="@GetTabLink(3)">Teams</NavLink>
+                        <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Teams")>Teams</NavLink>
                     </li>
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="@GetTabLink(4)">Reviews</NavLink>
+                        <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Reviews")>Reviews</NavLink>
                     </li>
                 </ul>
             </Authorized>
@@ -37,6 +38,11 @@
 </div>
 
 @code {
+    protected override void OnInitialized()
+    {
+        Shared.StateChanged += SharedStateChanged;
+    }
+
     protected string GetRoleString(params string[] roleNames)
     {
         IEnumerable<string> roles = new[] { "Admin" };
@@ -50,9 +56,13 @@
         return string.Join(',', roles);
     }
 
-    private string GetTabLink(int tabIndex)
+    private async void SharedStateChanged(object? sender, EventArgs e)
     {
-        var url = NavigationManager.GetUriWithQueryParameter("tabIndex", tabIndex);
-        return url;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Shared.StateChanged -= SharedStateChanged;
     }
 }

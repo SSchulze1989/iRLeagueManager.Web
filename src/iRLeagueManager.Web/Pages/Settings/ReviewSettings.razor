@@ -1,5 +1,9 @@
-﻿@using iRLeagueApiCore.Common.Models.Reviews;
-@inherits MvvmComponentBase
+﻿@page "/{LeagueName}/Settings/Reviews"
+@using iRLeagueApiCore.Common.Models.Reviews;
+@using iRLeagueManager.Web.Components.Settings;
+@using iRLeagueManager.Web.Components;
+@inherits LeagueComponentBase
+@layout SettingsLayout
 @inject ReviewSettingsViewModel Vm
 
 <div @attributes=AdditionalAttributes>

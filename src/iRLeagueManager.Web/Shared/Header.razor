@@ -85,12 +85,7 @@
                     @if (string.IsNullOrEmpty(Shared.LeagueName) == false)
                     {
                         <li class="nav-item flex-fill">
-                            <select @bind="SeasonSelect" class="form-select" style="max-width: 240px">
-                                @foreach (var season in Shared.SeasonList)
-                                {
-                                    <option value="@season.SeasonId" class="nav-option">@season.SeasonName</option>
-                                }
-                            </select>
+                            <SeasonSelect SeasonChanged=OnSeasonChanged style="max-width: 240px"/>
                         </li>
                     }
                 </ul>
@@ -137,12 +132,6 @@
 
     private string UserName => Shared.Username ?? string.Empty;
 
-    private long SeasonSelect
-    {
-        get => Shared.SeasonId;
-        set => _ = OnSeasonSelectChanged(value);
-    }
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
@@ -157,13 +146,8 @@
         await Vm.OnAfterRenderAsync(firstRender);
     }
 
-    private async Task OnSeasonSelectChanged(long value)
-    {
-        if (Shared.LeagueName == null || value == 0)
+    private async Task OnSeasonChanged(SeasonModel? season)
         {
-            return;
-        }
-        await ApiService.SetCurrentSeasonAsync(Shared.LeagueName, value);
         if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Results"))
         {
             ForceNavigateTo($"{Shared.LeagueName}/Results");

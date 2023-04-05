@@ -1,0 +1,64 @@
+﻿@using iRLeagueApiCore.Common.Models;
+@implements IDisposable
+@inject LeagueApiService ApiService
+@inject SharedStateService Shared
+
+<select @bind="SelectedSeasonId" class="form-select" @attributes=AdditionalAttributes @onclick:stopPropagation>
+    @foreach (var season in Shared.SeasonList)
+    {
+        <option value="@season.SeasonId" class="nav-option">@season.SeasonName</option>
+    }
+</select>
+
+@code {
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+    [Parameter]
+    public EventCallback<SeasonModel?> SeasonChanged { get; set; }
+
+    private long selectedSeasonId;
+    private long SelectedSeasonId
+    {
+        get => selectedSeasonId;
+        set
+        {
+            if (selectedSeasonId != value)
+            {
+                selectedSeasonId = value;
+                _ = OnSeasonSelectChanged(value);
+            }
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        selectedSeasonId = Shared.SeasonId;
+        Shared.StateChanged += SharedStateChanged;
+    }
+
+    private async Task OnSeasonSelectChanged(long seasonId)
+    {
+        if (Shared.LeagueName == null || seasonId == 0)
+        {
+            return;
+        }
+        await ApiService.SetCurrentSeasonAsync(Shared.LeagueName, seasonId);
+        await SeasonChanged.InvokeAsync(Shared.SeasonList.FirstOrDefault(x => x.SeasonId == seasonId));
+    }
+
+    private async void SharedStateChanged(object? sender, EventArgs e)
+    {
+        var previousSeasonId = selectedSeasonId;
+        selectedSeasonId = Shared.SeasonId;
+        await InvokeAsync(StateHasChanged);
+        if (previousSeasonId != selectedSeasonId)
+        {
+            await SeasonChanged.InvokeAsync(Shared.SeasonList.FirstOrDefault(x => x.SeasonId == selectedSeasonId));
+        }
+    }
+
+    public void Dispose()
+    {
+        Shared.StateChanged -= SharedStateChanged;
+    }
+}

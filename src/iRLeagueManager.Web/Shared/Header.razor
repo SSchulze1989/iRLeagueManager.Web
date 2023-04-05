@@ -1,4 +1,6 @@
 ﻿@using System.Security.Claims;
+@using iRLeagueApiCore.Common.Models;
+@using iRLeagueManager.Web.Components
 @inherits LeagueComponentBase
 @inject LeaguesViewModel Vm
 
@@ -23,7 +25,7 @@
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                     href="@($"/{CurrentLeagueTarget}")">
-                                @CurrentLeagueTarget
+                                <DisplayLeague League=Shared.LeagueInfo Fallback="Leagues" />
                             </NavLink>
                             <ul class="dropdown-menu" aria-labelledby="navLeaguesDropdown">
                                 <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
@@ -46,7 +48,7 @@
                                         <NavLink class="dropdown-item" href="@($"/{league.LeagueName}")" 
                                                  @onclick=@(() => ForceNavigateTo($"/{league.LeagueName}", fullReload: true))
                                                  Match="NavLinkMatch.Prefix">
-                                            @league.LeagueName
+                                            <DisplayLeague League=league.GetModel() />
                                         </NavLink>
                                     </li>
                                 }
@@ -112,7 +114,6 @@
                                     </Authorized>
                                     <NotAuthorized>
                                         <li><NavLink class="dropdown-item" href="/member/login" @onclick=@(() => NavigateTo($"/member/login?returnUrl={GetReturnUrl()}"))>Login</NavLink></li>
-                                        s
                                     </NotAuthorized>
                                 </AuthorizeView>
                             </ul>
@@ -132,7 +133,7 @@
 @code {
     private static string VersionString { get; } = $"{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.Major}.{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.Minor}.{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.Build}";
 
-    private string CurrentLeagueTarget => string.IsNullOrEmpty(Shared.LeagueName) ? "Leagues" : Shared.LeagueName;
+    private string CurrentLeagueTarget => Shared.LeagueName ?? "Leagues";
 
     private string UserName => Shared.Username ?? string.Empty;
 

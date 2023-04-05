@@ -1,4 +1,5 @@
 ﻿using iRLeagueApiCore.Common.Models;
+using iRLeagueManager.Web.ViewModels;
 using System.Runtime.CompilerServices;
 
 namespace iRLeagueManager.Web.Data;
@@ -30,6 +31,9 @@ public sealed class SharedStateService
 
     private TimeZoneInfo localTimeZone;
     public TimeZoneInfo LocalTimeZone { get => localTimeZone; set => Set(ref localTimeZone, value); }
+
+    private LeagueModel? leagueInfo;
+    public LeagueModel? LeagueInfo { get => leagueInfo; set => Set(ref leagueInfo, value); }
 
     public SharedStateService()
     {

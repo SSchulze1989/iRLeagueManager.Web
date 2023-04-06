@@ -29,7 +29,7 @@ builder.Services.AddMvvm();
 builder.Services.AddLeagueApiService();
 
 var apiHttpClient = new HttpClient();
-apiHttpClient.BaseAddress = new Uri(builder.Configuration["APIServer"]);
+apiHttpClient.BaseAddress = new Uri(builder.Configuration["APIServer"] ?? string.Empty);
 builder.Services.AddScoped(configure =>
 {
     var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);

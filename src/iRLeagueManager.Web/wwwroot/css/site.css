@@ -1,6 +1,13 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 @import url(toggle.css);
 
+@media (min-width: 840.98px) {
+    html {
+        overflow-x: hidden;
+        margin-right: calc(-1 * (100vw - 100%));
+    }
+}
+
 .blazored-typeahead {
     border-color: rgb(206, 212, 218);
 }

@@ -1,14 +1,16 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 @import url(toggle.css);
 
-html {
-    overflow-y: scroll;
-}
-
-@supports (scrollbar-gutter: stable) {
+@media (min-width: 840.98px) {
     html {
-        overflow: auto;
-        scrollbar-gutter: stable;
+        overflow-y: scroll;
+    }
+
+    @supports (scrollbar-gutter: stable) {
+        html {
+            overflow: inherit;
+            scrollbar-gutter: stable;
+        }
     }
 }
 

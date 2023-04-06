@@ -2,7 +2,7 @@
 @import url(toggle.css);
 
 @media (min-width: 840.98px) {
-    body {
+    html {
         margin-right: calc(-1 * (100vw - 100%));
         max-width: 100%
     }

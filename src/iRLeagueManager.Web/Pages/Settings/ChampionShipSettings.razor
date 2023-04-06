@@ -2,14 +2,26 @@
 @using iRLeagueManager.Web.Components
 @inherits LeagueComponentBase
 @layout SettingsLayout
+@inject ChampSeasonViewModel ChampSeason
 
 <div class="input-group mt-2 mb-3">
     <label class="input-group-text">Season</label>
     <SeasonSelect />
 </div>
-<label>@ChampionshipId</label>
+<label>@ChampSeason.ChampionshipName</label>
 
 @code {
     [Parameter]
     public long ChampionshipId { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        await ChampSeason.Load(ChampionshipId);
+        await InvokeAsync(StateHasChanged);
+    }
 }

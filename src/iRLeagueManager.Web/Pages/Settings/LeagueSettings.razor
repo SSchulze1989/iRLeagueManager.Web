@@ -1,11 +1,26 @@
-﻿@using iRLeagueApiCore.Common.Enums
+﻿@page "/{LeagueName}/Settings/League"
+@using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.Components.Settings
 @using iRLeagueManager.Web.ViewModels
-@inherits MvvmComponentBase
+@inherits LeagueComponentBase
+@layout SettingsLayout
 @inject LeagueViewModel vm
 @inject LeagueApiService apiService
 
 <div @attributes=AdditionalAttributes>
+    <div class="card my-2 pb-0">
+        <div class="card-header">
+            League Name
+        </div>
+        <div class="list-group list-group-flush">
+            <div class="list-group-item list-group-item-action" type="button" @onclick=@(() => EditLeagueNameClick(vm))>
+                <DisplayLeague League="vm.GetModel()" MuteTextOnFallback=true />
+            </div>
+        </div>
+    </div>
+
     <div class="card my-2 pb-0">
         <div class="card-header">
             Seasons
@@ -53,6 +68,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
         if (firstRender == false)
         {
             return;
@@ -117,6 +133,18 @@
         if (result.Confirmed)
         {
             await vm.DeleteSeason(season.GetModel());   
+        }
+    }
+
+    private async Task EditLeagueNameClick(LeagueViewModel league)
+    {
+        var parameters = new ModalParameters<EditLeagueNameModal>()
+            .Add(x => x.Model, league.CopyModel())
+            .Add(x => x.OnSubmit, (vm, cancellation) => vm.SaveChangesAsync(cancellation));
+        var result = await ModalService.Show<EditLeagueNameModal>("Edit league name", parameters).Result;
+        if (result.Confirmed && result.Data is LeagueModel model)
+        {
+            league.SetModel(model);
         }
     }
 }

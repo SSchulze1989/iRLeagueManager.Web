@@ -7,6 +7,7 @@ using iRLeagueManager.Web.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using MvvmBlazor.Components;
+using Newtonsoft.Json.Linq;
 
 namespace iRLeagueManager.Web.Components;
 
@@ -22,20 +23,8 @@ public class EditModalBase<TViewModel, TModel> : MvvmComponentBase where TViewMo
     [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
 
-    private TModel model = default!;
     [Parameter, EditorRequired]
-    public TModel Model
-    {
-        get => model;
-        set
-        {
-            if (EqualityComparer<TModel>.Default.Equals(model, value) == false)
-            {
-                model = value;
-                Vm.SetModel(model);
-            }
-        }
-    }
+    public TModel Model { get; set; } = default!;
 
     [Parameter]
     public Func<TViewModel, CancellationToken, Task<StatusResult>>? OnSubmit { get; set; }
@@ -60,6 +49,11 @@ public class EditModalBase<TViewModel, TModel> : MvvmComponentBase where TViewMo
         _ = ModalInstance ?? throw BlazorParameterNullException.New(this, ModalInstance);
         _ = ModalService ?? throw BlazorParameterNullException.New(this, ModalService);
         _ = Model ?? throw BlazorParameterNullException.New(this, Model);
+
+        if (EqualityComparer<TModel>.Default.Equals(Model, Vm.GetModel()) == false)
+        {
+            Vm.SetModel(Model);
+        }
     }
 
     protected virtual async Task Submit()

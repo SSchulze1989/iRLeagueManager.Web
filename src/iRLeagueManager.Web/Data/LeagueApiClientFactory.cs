@@ -19,7 +19,7 @@ internal sealed class LeagueApiClientFactory
     public LeagueApiClientFactory(IConfiguration configuration, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory,
         ILocalStorageService localStorage, ITokenStore tokenStore, JsonSerializerOptions jsonOptions)
     {
-        baseAddress = configuration["APIServer"];
+        baseAddress = configuration["APIServer"] ?? string.Empty;
         this.loggerFactory = loggerFactory;
         logger = loggerFactory.CreateLogger<LeagueApiClientFactory>();
         this.httpClientFactory = httpClientFactory;

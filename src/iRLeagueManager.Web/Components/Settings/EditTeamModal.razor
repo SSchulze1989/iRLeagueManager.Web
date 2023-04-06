@@ -54,20 +54,8 @@
     [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
 
-    private TeamModel model = default!;
     [Parameter]
-    public TeamModel Model
-    {
-        get => model;
-        set
-        {
-            if (EqualityComparer<TeamModel>.Default.Equals(model, value) == false)
-            {
-                model = value;
-                vm.SetModel(model);
-            }
-        }
-    }
+    public TeamModel Model { get; set; } = default!;
     [Parameter]
     public IEnumerable<MemberInfoModel> LeagueMembers { get; set; } = default!;
 
@@ -84,6 +72,11 @@
         _ = ModalService ?? throw BlazorParameterNullException.New(this, ModalService);
         _ = Model ?? throw BlazorParameterNullException.New(this, Model);
         _ = LeagueMembers ?? throw BlazorParameterNullException.New(this, LeagueMembers);
+
+        if (EqualityComparer<TeamModel>.Default.Equals(Model, vm.GetModel()) == false)
+        {
+            vm.SetModel(Model);
+        }
     }
 
     private async Task<IEnumerable<MemberInfoModel>> SearchMembers(string searchString)

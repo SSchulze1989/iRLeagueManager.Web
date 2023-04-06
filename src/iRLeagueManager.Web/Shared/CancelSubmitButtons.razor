@@ -37,20 +37,18 @@
 
     private IModelState? modelState;
     [Parameter]
-    public IModelState? ModelState 
+    public IModelState? ModelState { get; set; }
+
+    protected override void OnParametersSet()
     {
-        get => modelState;
-        set
+        if (modelState != null)
         {
-            if (modelState != null)
-            {
-                modelState.PropertyChanged -= ModelState_PropertyChanged;
-            }
-            modelState = value;
-            if (modelState != null)
-            {
-                modelState.PropertyChanged += ModelState_PropertyChanged;
-            }
+            modelState.PropertyChanged -= ModelState_PropertyChanged;
+        }
+        modelState = ModelState;
+        if (modelState != null)
+        {
+            modelState.PropertyChanged += ModelState_PropertyChanged;
         }
     }
 

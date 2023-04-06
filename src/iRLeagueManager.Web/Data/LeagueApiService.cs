@@ -41,10 +41,15 @@ public sealed class LeagueApiService
         Shared.SeasonId = 0;
         Shared.SeasonName = string.Empty;
         Shared.SeasonFinished = true;
-        var result = await CurrentLeague.Seasons().Get();
-        if (result.Success && result.Content is not null)
+        var leagueResult = await CurrentLeague.Get();
+        if (leagueResult.Success && leagueResult.Content is not null)
         {
-            var seasons = result.Content;
+            Shared.LeagueInfo = leagueResult.Content;
+        }
+        var seasonResult = await CurrentLeague.Seasons().Get();
+        if (seasonResult.Success && seasonResult.Content is not null)
+        {
+            var seasons = seasonResult.Content;
             Shared.SeasonList = new ObservableCollection<SeasonModel>(seasons);
         }
     }

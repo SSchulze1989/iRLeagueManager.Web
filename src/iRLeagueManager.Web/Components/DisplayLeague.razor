@@ -1,0 +1,24 @@
+﻿@using iRLeagueApiCore.Common.Models;
+<label class="@(MuteTextOnFallback && string.IsNullOrEmpty(League?.NameFull) ? "text-muted" : "")">@GetLeagueName()</label>
+
+@code {
+    [Parameter]
+    public LeagueModel? League { get; set; }
+    [Parameter]
+    public string Fallback { get; set; } = string.Empty;
+    [Parameter]
+    public bool MuteTextOnFallback { get; set; } = false;
+
+    private string GetLeagueName()
+    {
+        if (League is null)
+        {
+            return Fallback;
+        }
+        if (string.IsNullOrEmpty(League.NameFull))
+        {
+            return League.Name;
+        }
+        return League.NameFull;
+    }
+}

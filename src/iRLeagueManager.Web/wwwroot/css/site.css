@@ -1,6 +1,20 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 @import url(toggle.css);
 
+@media (min-width: 840.98px) {
+    html {
+        overflow-y: scroll;
+    }
+
+    @supports (scrollbar-gutter: stable) {
+        html {
+            overflow: inherit;
+            scrollbar-gutter: stable;
+        }
+    }
+}
+
+
 .blazored-typeahead {
     border-color: rgb(206, 212, 218);
 }

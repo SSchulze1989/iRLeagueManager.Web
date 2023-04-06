@@ -1,7 +1,9 @@
-﻿@using iRLeagueManager.Web.Components
+﻿@page "/{LeagueName}/Settings/Users"
+@using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.Components.Settings
 @using iRLeagueManager.Web.ViewModels
-@inherits MvvmComponentBase
+@inherits LeagueComponentBase
+@layout SettingsLayout
 @inject LeagueUsersViewModel Users
 
 <section @attributes=AdditionalAttributes id="league_member_section">

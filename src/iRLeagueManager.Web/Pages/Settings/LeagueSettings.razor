@@ -1,7 +1,11 @@
-﻿@using iRLeagueApiCore.Common.Enums
+﻿@page "/{LeagueName}/Settings/League"
+@using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.Components.Settings
 @using iRLeagueManager.Web.ViewModels
-@inherits MvvmComponentBase
+@inherits LeagueComponentBase
+@layout SettingsLayout
 @inject LeagueViewModel vm
 @inject LeagueApiService apiService
 
@@ -64,6 +68,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
         if (firstRender == false)
         {
             return;

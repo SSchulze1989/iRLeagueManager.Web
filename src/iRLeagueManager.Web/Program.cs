@@ -55,6 +55,7 @@ builder.Services.AddAuthorization(config =>
 
 builder.Services.AddBlazoredModal();
 builder.Services.AddLocalization();
+builder.Services.AddMarkdown();
 
 var app = builder.Build();
 

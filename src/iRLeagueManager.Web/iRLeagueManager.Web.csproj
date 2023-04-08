@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
-	<Version>0.6.1</Version>
+	<Version>0.6.2-dev</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-iRLeagueManager.Web-2B05F9DC-55A3-49D1-BD64-31507000EDF3</UserSecretsId>
@@ -117,6 +117,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Components\InputMarkdown.razor.css" />
     <None Remove="Components\Reviews\ReviewCard.razor.css" />
   </ItemGroup>
 
@@ -125,14 +126,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Components\InputMarkdown.razor.css" />
     <Content Include="Components\Reviews\ReviewCard.razor.css" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
     <PackageReference Include="Blazored.Modal" Version="7.1.0" />
-    <PackageReference Include="iRLeagueApiCore.Client" Version="0.6.0" />
-    <PackageReference Include="iRLeagueApiCore.Common" Version="0.6.0" />
+    <PackageReference Include="HtmlSanitizer" Version="8.0.645" />
+    <PackageReference Include="iRLeagueApiCore.Client" Version="0.6.1-dev.2" />
+    <PackageReference Include="iRLeagueApiCore.Common" Version="0.6.1-dev.1" />
+    <PackageReference Include="Markdig" Version="0.31.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.3" />

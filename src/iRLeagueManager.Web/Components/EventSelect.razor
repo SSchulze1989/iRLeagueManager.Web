@@ -14,8 +14,8 @@
             <option value="@(index)">@((index + 1).ToString("00")). @(@event.Date.ToString("dd.MM.yy")): @(@event.TrackName)@(@event.ConfigName == "-" ? "" : $" - {@event.ConfigName}")</option>
         }
     </select>
-    <button class="btn btn-outline-secondary" type="button" @onclick=EventMovePrevious disabled=@(SelectedIndex == 0)><span class="oi oi-chevron-left"></span></button>
-    <button class="btn btn-outline-secondary" type="button" @onclick=EventMoveNext disabled=@(SelectedIndex == Events.Count-1)><span class="oi oi-chevron-right"></span></button>
+    <button class="btn btn-outline-secondary" type="button" @onclick=EventMovePrevious disabled="@(SelectedIndex == 0)"><span class="oi oi-chevron-left"></span></button>
+    <button class="btn btn-outline-secondary" type="button" @onclick=EventMoveNext disabled="@(SelectedIndex == Events.Count-1)"><span class="oi oi-chevron-right"></span></button>
 </div>
 
 @code {
@@ -47,8 +47,7 @@
 
     private ObservableCollection<EventViewModel> Events => EventList.EventList;
 
-    [Parameter]
-    public EventViewModel? Selected 
+    private EventViewModel? Selected 
     { 
         get => eventList?.Selected;
         set

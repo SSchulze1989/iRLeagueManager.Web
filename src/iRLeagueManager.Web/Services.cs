@@ -1,11 +1,25 @@
-﻿using iRLeagueManager.Web.Data;
+﻿using Ganss.Xss;
+using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.ViewModels;
+using Markdig;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace iRLeagueManager.Web;
 
 public static class Services
 {
+    public static IServiceCollection AddMarkdown(this IServiceCollection services)
+    {
+        services.TryAddScoped(config => 
+            new MarkdownPipelineBuilder()
+                .UseAdvancedExtensions()
+                .UseBootstrap()
+                .Build());
+        services.TryAddScoped(config =>
+            new HtmlSanitizer());
+        return services;
+    }
+
     public static IServiceCollection AddTrackList(this IServiceCollection services)
     {
         services.TryAddScoped<TrackListService>();

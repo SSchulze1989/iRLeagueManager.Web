@@ -1,4 +1,5 @@
 ﻿@page "/{LeagueName}/Settings/League"
+@using Markdig;
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.Components
@@ -8,15 +9,25 @@
 @layout SettingsLayout
 @inject LeagueViewModel vm
 @inject LeagueApiService apiService
+@inject MarkdownPipeline MarkdownPipeline
 
 <div @attributes=AdditionalAttributes>
     <div class="card my-2 pb-0">
         <div class="card-header">
-            League Name
+            General
         </div>
         <div class="list-group list-group-flush">
             <div class="list-group-item list-group-item-action" type="button" @onclick=@(() => EditLeagueNameClick(vm))>
-                <DisplayLeague League="vm.GetModel()" MuteTextOnFallback=true />
+                <label class="text-muted">Display Name</label>
+                <div class="ms-2 me-2">
+                    <DisplayLeague League="vm.GetModel()" MuteTextOnFallback=true />
+                </div>
+            </div>
+            <div class="list-group-item list-group-item-action" type="button" style="max-height: 400px; overflow:auto" @onclick=@(() => EditDescriptionClick(vm))>
+                <label class="text-muted">Description</label>
+                <div class="ms-2 me-2">
+                    @((MarkupString)RenderDescriptionPreview(vm.Description))
+                </div>
             </div>
         </div>
     </div>
@@ -146,5 +157,22 @@
         {
             league.SetModel(model);
         }
+    }
+
+    private async Task EditDescriptionClick(LeagueViewModel league)
+    {
+        var parameters = new ModalParameters<EditLeagueDescriptionModal>()
+            .Add(x => x.Model, league.CopyModel())
+            .Add(x => x.OnSubmit, (vm, cancellation) => vm.SaveChangesAsync(cancellation));
+        var result = await ModalService.Show<EditLeagueDescriptionModal>("Edit description", parameters).Result;
+        if (result.Confirmed && result.Data is LeagueModel model)
+        {
+            league.SetModel(model);
+        }
+    }
+
+    private string RenderDescriptionPreview(string markdown)
+    {
+        return Markdig.Markdown.ToHtml(markdown, MarkdownPipeline);
     }
 }

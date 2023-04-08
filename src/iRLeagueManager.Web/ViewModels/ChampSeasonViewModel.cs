@@ -1,6 +1,7 @@
 ﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
+using iRLeagueManager.Web.Shared;
 using System.Collections.Concurrent;
 
 namespace iRLeagueManager.Web.ViewModels;
@@ -25,15 +26,41 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
     public string SeasonName => model.SeasonName;
 
     private StandingConfigurationViewModel? standingConfig;
-    public StandingConfigurationViewModel? StandingConfig { get => standingConfig; private set => Set(ref standingConfig, value); }
+    public StandingConfigurationViewModel? StandingConfig 
+    { 
+        get => standingConfig;
+        private set
+        {
+            if (standingConfig is not null)
+            {
+                standingConfig.PropertyChanged -= ChildViewModel_PropertyChanged;
+            }
+            Set(ref standingConfig, value);
+            if (standingConfig is not null)
+            {
+                standingConfig.PropertyChanged += ChildViewModel_PropertyChanged;
+            }
+        }
+    }
+
+    private void ChildViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (sender is IModelState childState == false)
+        {
+            return;
+        }
+        switch (e.PropertyName)
+        {
+            case nameof(HasChanged):
+                HasChanged |= childState.HasChanged;
+                break;
+        }
+    }
 
     public ICollection<ResultConfigInfoModel> ResultConfigs => model.ResultConfigs;
 
     private ICollection<ResultConfigViewModel> resultConfigViewModels;
     public ICollection<ResultConfigViewModel> ResultConfigViewModels { get => resultConfigViewModels; set => Set(ref resultConfigViewModels, value); }
-
-    private StandingConfigurationViewModel? standingConfigViewModel;
-    public StandingConfigurationViewModel? StandingConfigViewModel { get => standingConfigViewModel; set => Set(ref standingConfigViewModel, value); }
 
     public async Task<StatusResult> Load(long championshipId, CancellationToken cancellationToken = default)
     {
@@ -64,7 +91,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
         }
     }
 
-    public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken)
+    public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         if (ApiService.CurrentLeague is null)
         {
@@ -186,5 +213,6 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
     {
         base.SetModel(model);
         StandingConfig = model.StandingConfig == null ? null : new(LoggerFactory, ApiService, model.StandingConfig);
+        ResetChangedState();
     }
 }

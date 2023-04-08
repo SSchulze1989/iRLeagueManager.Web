@@ -119,4 +119,9 @@ public class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelBase<TView
     {
         return ModelHelper.CopyModel(model)!;
     }
+
+    public virtual void ResetChangedState()
+    {
+        HasChanged = false;
+    }
 }

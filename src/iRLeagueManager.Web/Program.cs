@@ -13,6 +13,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
+using Blazored.Toast;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,8 @@ builder.Services.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName,
     config.DefaultRequestHeaders.UserAgent.ParseAdd($"iRLeagueManager/{Assembly.GetEntryAssembly()!.GetName().Version!.Major}.{Assembly.GetEntryAssembly()!.GetName().Version!.Minor}.{Assembly.GetEntryAssembly()!.GetName().Version!.Build} (iRLeaguemanager Web App)");
 });
 builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddBlazoredModal();
+builder.Services.AddBlazoredToast();
 builder.Services.AddMvvm();
 builder.Services.AddLeagueApiService();
 
@@ -53,7 +56,6 @@ builder.Services.AddAuthorization(config =>
     config.AddPolicy(ProfileOwnerRequirement.Policy, policy => policy.AddRequirements(new ProfileOwnerRequirement()));
 });
 
-builder.Services.AddBlazoredModal();
 builder.Services.AddLocalization();
 
 var app = builder.Build();

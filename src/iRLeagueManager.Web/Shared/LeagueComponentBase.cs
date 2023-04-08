@@ -3,6 +3,7 @@ using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 using iRLeagueManager.Web.ViewModels;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.JSInterop;
 using MvvmBlazor.Components;
 using System.ComponentModel;
@@ -51,6 +52,8 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
     protected bool ParametersSet { get; set; } = false;
     protected bool HasRendered { get; set; } = false;
     protected EventViewModel? Event => EventList?.Selected;
+
+    private IDisposable? locationChangingHandler;
 
     protected virtual void SharedStateChanged(object? sender, EventArgs e)
     {
@@ -164,6 +167,7 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
     {
         Shared.StateChanged -= SharedStateChanged;
         EventList.PropertyChanged -= OnEventListPropertyChanged;
+        locationChangingHandler?.Dispose();
         base.Dispose(disposing);
     }
 
@@ -195,6 +199,11 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
         await JsRuntime.InvokeVoidAsync("scrollToElementId", id);
     }
 
+    protected async Task ScrollToElement(ElementReference reference)
+    {
+        await JsRuntime.InvokeVoidAsync("scrollToElement", reference);
+    }
+
     protected void NavigateTo(string url, bool replace = false)
     {
         NavigationManager.NavigateTo(url, replace: replace);
@@ -210,6 +219,26 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
 
         NavigationManager.NavigateTo("/");
         NavigationManager.NavigateTo(url);
+    }
+
+    /// <summary>
+    /// Activate tracking for location changing.
+    /// Override <see cref="OnLocationChanging(LocationChangingContext)"/> to perform an action when the location changes
+    /// </summary>
+    protected void RegisterLocationChangingHandler()
+    {
+        locationChangingHandler = NavigationManager.RegisterLocationChangingHandler(OnLocationChanging);
+    }
+
+    /// <summary>
+    /// Perform action when location is changing (e.g. cancel location on certain conditions)
+    /// Requires call to <see cref="RegisterLocationChangingHandler()"/> once to initialize location change tracking
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    protected virtual async ValueTask OnLocationChanging(LocationChangingContext context)
+    {
+        await Task.CompletedTask;
     }
 
     /// <summary>

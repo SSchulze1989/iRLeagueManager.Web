@@ -48,14 +48,21 @@
             return Intl.DateTimeFormat().resolvedOptions().timeZone;
         }
 
+        window.scrollToElement = (element) => {
+            if (!element) {
+                return false;
+            }
+            element.scrollIntoView(true);
+            return true;
+        }
+
         window.scrollToElementId = (elementId) => {
             var element = document.getElementById(elementId);
             if (!element) {
                 console.warn('element was not found', elementId);
                 return false;
             }
-            element.scrollIntoView(true);
-            return true;
+            return scrollToElement(element);
         }
 
         window.clipboardCopy = {

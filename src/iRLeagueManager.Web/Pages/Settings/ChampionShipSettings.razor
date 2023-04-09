@@ -1,18 +1,147 @@
 ﻿@page "/{LeagueName}/Settings/Results/Championships/{ChampionshipId:long}"
+@using iRLeagueApiCore.Common.Models;
 @using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.Components.Settings
 @inherits LeagueComponentBase
 @layout SettingsLayout
 @inject ChampSeasonViewModel ChampSeason
+@inject IToastService ToastService
 
-<div class="input-group mt-2 mb-3">
-    <label class="input-group-text">Season</label>
-    <SeasonSelect />
+<div class="d-flex justify-content-between align-items-center mt-2 mb-2">
+    <div class="ms-2 mt-1" style="font-size: 1.25em">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb" style="--bs-breadcrumb-divider: '>';">
+                <li class="breadcrumb-item"><a href=@($"/{LeagueName}")>@LeagueName</a></li>
+                <li class="breadcrumb-item"><a href=@($"/{LeagueName}/Settings")>Settings</a></li>
+                <li class="breadcrumb-item"><a href=@($"/{LeagueName}/Settings/Results")>Results</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@ChampSeason.ChampionshipName</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="d-flex justify-content-end mb-1 gap-3">
+        @if (ChampSeason.HasChanged)
+        {
+            <button class="btn btn-primary" @onclick=Submit>Submit</button>
+        }
+        <button class="btn btn-outline-secondary" @onclick=Close>Back</button>
+    </div>
 </div>
-<label>@ChampSeason.ChampionshipName</label>
+
+<EditForm Model=ChampSeason>
+    <StatusResultValidator @ref=ResultValidator />
+    @{
+        var accordionId = $"champseason-{ChampSeason.ChampSeasonId}-accordion";
+    }
+    <div class="card mb-3">
+        <label class="card-header">
+            Championship
+        </label>
+        <div class="input-group-list input-group-list-flush">
+            <InputGroup Label="Name">
+                <InputText class="form-control" @bind-Value=ChampSeason.ChampionshipName placeholder="Enter championship name ..." data-bs-toggle="tooltip" title="Name to identify the championship" />
+            </InputGroup>
+            <InputGroup Label="Display Name">
+                <InputText class="form-control" @bind-Value=ChampSeason.ChampionshipDisplayName placeholder="@ChampSeason.ChampionshipName" data-bs-toggle="tooltip" title="Name of the championship to be shown displayed on results and standings" />
+            </InputGroup>
+        </div>
+    </div>
+    <div class="card mb-3">
+        <div class="card-header">
+            Result Configurations / Event types
+        </div>
+        <ul class="list-group list-group-flush">
+            @foreach (var resultConfig in ChampSeason.ResultConfigViewModels)
+            {
+                <div class="list-group-item list-group-item-action d-flex justify-content-between" type="button" @onclick=@(() => OnResultConfigClick(resultConfig))>
+                    <ResultConfigPreview ResultConfig="resultConfig" class="overflow-auto" />
+                    <div class="d-flex align-self-start">
+                        <button class="btn btn-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#config_@(resultConfig.ResultConfigId)_details"
+                            aria-expanded="true" @onclick:stopPropagation>
+                            <span class="oi oi-chevron-bottom btn-toggle-off" />
+                            <span class="oi oi-chevron-top btn-toggle-on" />
+                        </button>
+                        <button class="btn btn-outline-danger" type="button" @onclick=@(() =>OnDeleteResultConfigClick(resultConfig)) @onclick:stopPropagation>
+                            <span class="oi oi-trash" />
+                        </button>
+                    </div>
+                </div>
+            }
+            <div class="list-group-item">
+                <button class="btn btn-outline-secondary" type="button" @onclick=OnAddResultConfigClick>
+                    Add Result Configuration
+                </button>
+            </div>
+        </ul>
+    </div>
+    <div class="card mb-3">
+        <label class="card-header">
+            Standings
+        </label>
+        <div class="input-group-list input-group-list-flush">
+            @if (ChampSeason.StandingConfig is not null)
+            {
+                <div class="input-group">
+                    <div class="input-group-text">
+                        <InputCheckbox class="form-check-input mt-0" @bind-Value=ChampSeason.StandingConfig.UseCombinedResult />
+                    </div>
+                    <label class="form-control" data-bs-toggle="tooltip" title="Treat events with multiple race sessions as single events (if they have a combined result). This will affect the statistics for race-nr, wins, fastest laps etc.">Treat as single event</label>
+                </div>
+                <InputGroup Label="Count Weeks">
+                    <InputNumber class="form-control" @bind-Value=ChampSeason.StandingConfig.WeeksCounted data-bs-toggle="tooltip" title="Number of races counted per season. (used for Dropweeks)" />
+                </InputGroup>
+            }
+        </div>
+    </div>
+    <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+</EditForm>
+
+@if (DisplayLeaveWarning)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" @ref=LeaveWarning>
+        <span class="oi oi-warning" />
+        <strong>You have unsaved changes!</strong> Save changes or click <a class="link-light" href="" @onclick=Close>Back</a> to close this page.
+        <button type="button" class="btn-close" aria-label="Close" @onclick=@(() => DisplayLeaveWarning = false)></button>
+    </div>
+}
+else
+{
+    <div></div>
+}
+
+<div class="d-flex justify-content-end gap-3">
+    @if (ChampSeason.HasChanged)
+    {
+        <button class="btn btn-primary" @onclick=Submit>Submit</button>
+    }
+    <button class="btn btn-outline-secondary" @onclick=Close>Back</button>
+</div>
 
 @code {
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
     [Parameter]
     public long ChampionshipId { get; set; }
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string ReturnUrl { get; set; } = string.Empty;
+
+    private bool DisplayLeaveWarning { get; set; } = false;
+    private ElementReference LeaveWarning { get; set; }
+    private StatusResultValidator? ResultValidator { get; set; }
+
+    protected override void OnInitialized()
+    {
+        RegisterLocationChangingHandler();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (string.IsNullOrWhiteSpace(ReturnUrl))
+        {
+            ReturnUrl = $"/{LeagueName}/Settings/Results";
+        }
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -22,6 +151,84 @@
             return;
         }
         await ChampSeason.Load(ChampionshipId);
+        await ChampSeason.LoadResultConfigs();
         await InvokeAsync(StateHasChanged);
+    }
+
+    protected override async ValueTask OnLocationChanging(LocationChangingContext context)
+    {
+        // Do nothing when viewmodel has no changes or navigation on same page
+        var allowNavigation =
+            ChampSeason.HasChanged == false ||
+            context.TargetLocation.Contains($"/{LeagueName}/Settings/Results/Championships/{ChampionshipId}");
+        if (allowNavigation)
+        {
+            await base.OnLocationChanging(context);
+            return;
+        }
+
+        // If viewmodel has changes: Cancel navigation and display message
+        context.PreventNavigation();
+        await DisplayLeaveWarningMessage();
+    }
+
+    private async Task DisplayLeaveWarningMessage()
+    {
+        DisplayLeaveWarning = true;
+        await InvokeAsync(StateHasChanged);
+        await ScrollToElement(LeaveWarning);
+    }
+
+    private async Task Submit()
+    {
+        if (ChampSeason.HasChanged)
+        {
+            await ChampSeason.SaveChangesAsync();
+        }
+        NavigationManager.NavigateTo(ReturnUrl);
+    }
+
+    private async Task Close()
+    {
+        ChampSeason.ResetChangedState();
+        NavigationManager.NavigateTo(ReturnUrl);
+        await Task.CompletedTask;
+    }
+
+    private async Task OnResultConfigClick(ResultConfigViewModel config)
+    {
+        var parameters = new ModalParameters<EditResultConfigModal>()
+            .Add(x => x.Model, config.CopyModel())
+            .Add(x => x.OnSubmit, (configChampSeason, cancellationToken) => configChampSeason.SaveChangesAsync(cancellationToken));
+        var result = await ModalService.Show<EditResultConfigModal>("Edit result config", parameters).Result;
+        if (result.Confirmed && result.Data is ResultConfigModel model)
+        {
+            config.SetModel(model);
+        }
+    }
+
+    private async Task OnAddResultConfigClick()
+    {
+        var parameters = new ModalParameters<EditResultConfigModal>()
+            .Add(x => x.Model, CreateResultConfig())
+            .Add(x => x.OnSubmit, (x, c) => ChampSeason.AddResultConfig(x.GetModel(), c));
+        await ModalService.Show<EditResultConfigModal>("Add result config", parameters).Result;
+    }
+
+    private async Task OnDeleteResultConfigClick(ResultConfigViewModel config)
+    {
+        var parameters = new ModalParameters<ConfirmModal>()
+            .Add(x => x.Text, $"Really delete result config \"{config.Name}\"?")
+            .Add(x => x.ButtonTypes, ButtonTypes.YesNo);
+        var result = await ModalService.Show<ConfirmModal>("Delete Result Config", parameters).Result;
+        if (result.Confirmed)
+        {
+            await ChampSeason.DeleteResultConfig(config.GetModel());
+        }
+    }
+
+    private ResultConfigModel CreateResultConfig()
+    {
+        return new ResultConfigModel();
     }
 }

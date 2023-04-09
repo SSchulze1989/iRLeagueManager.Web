@@ -36,7 +36,7 @@
                     <ul class="list-group list-group-flush">
                         @foreach (var resultConfig in Vm.ResultConfigViewModels)
                         {
-                            <div class="list-group-item list-group-item-action d-flex justify-content-between" type="button" @onclick=@(() => OnResultConfigClick(resultConfig))>
+                            <li class="list-group-item list-group-item-action d-flex justify-content-between" type="button" @onclick=@(() => OnResultConfigClick(resultConfig))>
                                 <ResultConfigPreview ResultConfig="resultConfig" class="overflow-auto" />
                                 <div class="d-flex align-self-start">
                                     <button class="btn btn-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#config_@(resultConfig.ResultConfigId)_details"
@@ -48,13 +48,13 @@
                                         <span class="oi oi-trash" />
                                     </button>
                                 </div>
-                            </div>
+                            </li>
                         }
-                        <div class="list-group-item">
+                        <li class="list-group-item">
                             <button class="btn btn-outline-secondary" type="button" @onclick=OnAddResultConfigClick>
                                 Add Result Configuration
                             </button>
-                        </div>
+                        </li>
                     </ul>
                 </div>
             </div>

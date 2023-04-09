@@ -64,32 +64,31 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
 
     public async Task<StatusResult> Load(long championshipId, CancellationToken cancellationToken = default)
     {
-        //if (CurrentLeague is null)
-        //{
-        //    return LeagueNullResult();
-        //}
-        //if (CurrentSeason is null)
-        //{
-        //    return SeasonNullResult();
-        //}
+        if (CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+        if (CurrentSeason is null)
+        {
+            return SeasonNullResult();
+        }
 
-        //try
-        //{
-        //    Loading = true;
-        //    var result = await CurrentSeason.Championships()
-        //        .WithId(championshipId)
-        //        .Get(cancellationToken);
-        //    if (result.Success && result.Content is not null)
-        //    {
-        //        SetModel(result.Content);
-        //    }
-        //    return result.ToStatusResult();
-        //}
-        //finally
-        //{
-        //    Loading = false;
-        //}
-        return await Task.FromResult(StatusResult.SuccessResult());
+        try
+        {
+            Loading = true;
+            var result = await CurrentSeason.Championships()
+                .WithId(championshipId)
+                .Get(cancellationToken);
+            if (result.Success && result.Content is not null)
+            {
+                SetModel(result.Content);
+            }
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
     }
 
     public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken = default)

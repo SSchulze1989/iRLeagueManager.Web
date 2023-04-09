@@ -111,7 +111,7 @@ else
 
 @code {
     [CascadingParameter]
-    public IModalService ModalService { get; set; }
+    public IModalService ModalService { get; set; } = default!;
     [Parameter]
     public long ChampionshipId { get; set; }
 

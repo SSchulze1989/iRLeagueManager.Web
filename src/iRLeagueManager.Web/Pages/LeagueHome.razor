@@ -1,0 +1,28 @@
+﻿@page "/{LeagueName}"
+@page "/{LeagueName}/Seasons/{SeasonId:long}"
+@using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.ViewModels
+@inherits LeagueComponentBase
+
+<div class="container-xxl">
+    <div class="card mb-3">
+        <div class="card-body">
+            @if (string.IsNullOrEmpty(Shared.LeagueInfo?.Description))
+            {
+                <h3><DisplayLeague League=@Shared.LeagueInfo /></h3>
+                <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+                    <blockquote class="mt-3 ms-2">
+                        Too boring? Enter your league description <a href="@($"/{Shared.LeagueInfo?.Name}/Settings/League")">here</a>.
+                    </blockquote>
+                </AuthorizeView>
+            }
+            else
+            {
+                <DisplayMarkdown Text=@Shared.LeagueInfo?.Description />
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+}

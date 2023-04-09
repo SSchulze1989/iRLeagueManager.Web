@@ -1,0 +1,17 @@
+﻿@using Ganss.Xss;
+@using Markdig;
+@inject MarkdownPipeline Pipeline
+@inject HtmlSanitizer Sanitizer
+
+@((MarkupString)RenderBody())
+
+@code {
+    [Parameter, EditorRequired]
+    public string Text { get; set; } = string.Empty;
+
+    private string RenderBody()
+    {
+        var sanitized = Sanitizer.Sanitize(Text);
+        return Markdown.ToHtml(sanitized ?? string.Empty, Pipeline);
+    }
+}

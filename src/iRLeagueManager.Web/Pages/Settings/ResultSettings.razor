@@ -82,14 +82,16 @@
 
     private async Task OnChampionshipClick(ChampSeasonViewModel champSeason)
     {
-        var parameters = new ModalParameters<EditChampSeasonModal>()
-            .Add(x => x.Model, champSeason.CopyModel())
-            .Add(x => x.OnSubmit, new((x, cancellation) => x.SaveChangesAsync(cancellation)));
-        var result = await ModalService.Show<EditChampSeasonModal>("Edit Championship", parameters).Result;
-        if (result.Confirmed && result.Data is ChampSeasonModel model)
-        {
-            champSeason.SetModel(model);
-        }
+        NavigationManager.NavigateTo($"/{LeagueName}/Settings/Results/Championships/{champSeason.ChampionshipId}");
+        //var parameters = new ModalParameters<EditChampSeasonModal>()
+        //    .Add(x => x.Model, champSeason.CopyModel())
+        //    .Add(x => x.OnSubmit, new((x, cancellation) => x.SaveChangesAsync(cancellation)));
+        //var result = await ModalService.Show<EditChampSeasonModal>("Edit Championship", parameters).Result;
+        //if (result.Confirmed && result.Data is ChampSeasonModel model)
+        //{
+        //    champSeason.SetModel(model);
+        //}
+        await Task.CompletedTask;
     }
 
     private async Task OnDeleteChampionshipClick(ChampionshipViewModel championship)

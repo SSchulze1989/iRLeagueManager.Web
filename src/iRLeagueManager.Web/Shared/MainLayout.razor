@@ -15,6 +15,11 @@
     <Footer />
 </div>
 
+<BlazoredToasts 
+    Timeout=100
+    Position=Blazored.Toast.Configuration.ToastPosition.BottomRight
+    WarningClass="alert alert-warning"/>
+
 @code {
     [CascadingParameter]
     public RouteData? RouteData { get; set; }

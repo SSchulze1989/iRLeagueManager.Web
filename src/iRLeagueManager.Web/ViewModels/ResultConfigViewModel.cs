@@ -82,6 +82,34 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         Scorings = new(model.Scorings.Select(scoringModel => new ScoringViewModel(LoggerFactory, ApiService, scoringModel)));
         FiltersForPoints = new(model.FiltersForPoints.Select(filter => new ResultFilterViewModel(LoggerFactory, ApiService, filter)));
         FiltersForResult = new(model.FiltersForResult.Select(filter => new ResultFilterViewModel(LoggerFactory, ApiService, filter)));
+        ResetChangedState();
+    }
+
+    public async Task<StatusResult> Load(long resultConfigId, CancellationToken cancellationToken = default)
+    {
+        if (CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await CurrentLeague
+                .ResultConfigs()
+                .WithId(resultConfigId)
+                .Get(cancellationToken);
+            if (result.Success == false || result.Content is null)
+            {
+                return result.ToStatusResult();
+            }
+            SetModel(result.Content);
+            return await LoadAvailableResultConfigs(cancellationToken);
+        }
+        finally
+        {
+            Loading = false;
+        }
     }
 
     public async Task<StatusResult> LoadAvailableResultConfigs(CancellationToken cancellationToken)
@@ -130,7 +158,7 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         }
     }
 
-    public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken)
+    public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         if (ApiService.CurrentLeague is null)
         {

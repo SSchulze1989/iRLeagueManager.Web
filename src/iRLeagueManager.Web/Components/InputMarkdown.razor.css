@@ -1,0 +1,22 @@
+﻿.nav-tabs {
+    border-bottom: none;
+}
+
+.tab-content {
+    position: relative;
+}
+
+.tab-pane {
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.tab-pane:not(.active) {
+    display: block;
+    visibility: hidden;
+}
+
+.form-control {
+    border-top-left-radius: 0;
+}

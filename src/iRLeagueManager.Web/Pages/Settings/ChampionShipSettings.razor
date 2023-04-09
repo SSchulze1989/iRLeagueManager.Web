@@ -122,16 +122,25 @@ else
     public IModalService ModalService { get; set; } = default!;
     [Parameter]
     public long ChampionshipId { get; set; }
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string ReturnUrl { get; set; } = string.Empty;
 
     private bool DisplayLeaveWarning { get; set; } = false;
     private ElementReference LeaveWarning { get; set; }
     private StatusResultValidator? ResultValidator { get; set; }
 
-    private string ReturnUrl => $"/{LeagueName}/Settings/Results";
-
     protected override void OnInitialized()
     {
         RegisterLocationChangingHandler();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (string.IsNullOrWhiteSpace(ReturnUrl))
+        {
+            ReturnUrl = $"/{LeagueName}/Settings/Results";
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

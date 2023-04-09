@@ -49,6 +49,9 @@
         }
 
         window.scrollToElement = (element) => {
+            if (!element) {
+                return false;
+            }
             element.scrollIntoView(true);
             return true;
         }

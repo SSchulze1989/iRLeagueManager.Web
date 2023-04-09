@@ -7,17 +7,25 @@
 @inject ChampSeasonViewModel ChampSeason
 @inject IToastService ToastService
 
-<div class="input-group mt-2 mb-3">
-    <label class="input-group-text">Season</label>
-    <SeasonSelect />
-</div>
+<div class="d-flex justify-content-between align-items-center mt-2 mb-2">
+    <div class="ms-2 mt-1" style="font-size: 1.25em">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb" style="--bs-breadcrumb-divider: '>';">
+                <li class="breadcrumb-item"><a href=@($"/{LeagueName}")>@LeagueName</a></li>
+                <li class="breadcrumb-item"><a href=@($"/{LeagueName}/Settings")>Settings</a></li>
+                <li class="breadcrumb-item"><a href=@($"/{LeagueName}/Settings/Results")>Results</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@ChampSeason.ChampionshipName</li>
+            </ol>
+        </nav>
+    </div>
 
-<div class="d-flex justify-content-end mb-3 gap-3">
-    @if (ChampSeason.HasChanged)
-    {
-        <button class="btn btn-primary" @onclick=Submit>Submit</button>
-    }
-    <button class="btn btn-outline-secondary" @onclick=Close>Back</button>
+    <div class="d-flex justify-content-end mb-1 gap-3">
+        @if (ChampSeason.HasChanged)
+        {
+            <button class="btn btn-primary" @onclick=Submit>Submit</button>
+        }
+        <button class="btn btn-outline-secondary" @onclick=Close>Back</button>
+    </div>
 </div>
 
 <EditForm Model=ChampSeason>

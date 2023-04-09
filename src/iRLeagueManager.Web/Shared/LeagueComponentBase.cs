@@ -52,6 +52,8 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
     protected bool ParametersSet { get; set; } = false;
     protected bool HasRendered { get; set; } = false;
     protected EventViewModel? Event => EventList?.Selected;
+    private readonly CancellationTokenSource cancellationTokenSource = new();
+    protected CancellationToken CancellationToken => cancellationTokenSource.Token;
 
     private IDisposable? locationChangingHandler;
 
@@ -165,9 +167,15 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
 
     protected override void Dispose(bool disposing)
     {
-        Shared.StateChanged -= SharedStateChanged;
-        EventList.PropertyChanged -= OnEventListPropertyChanged;
-        locationChangingHandler?.Dispose();
+        if (disposing == false)
+        {
+            Shared.StateChanged -= SharedStateChanged;
+            EventList.PropertyChanged -= OnEventListPropertyChanged;
+            locationChangingHandler?.Dispose();
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource.Dispose();
+        }
+
         base.Dispose(disposing);
     }
 

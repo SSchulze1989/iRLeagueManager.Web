@@ -5,8 +5,8 @@
 @inherits LeagueComponentBase
 
 <div class="container-xxl">
-    <div class="card mb-3">
-        <div class="card-body">
+    <div class="d-flex justify-content-center">
+        <div>
             @if (string.IsNullOrEmpty(Shared.LeagueInfo?.Description))
             {
                 <h3><DisplayLeague League=@Shared.LeagueInfo /></h3>

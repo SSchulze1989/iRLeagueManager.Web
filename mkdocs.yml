@@ -10,10 +10,33 @@ nav:
       - 'General': settings/general.md
       - 'Users': settings/users.md
       - 'Championships': settings/championships.md
-theme: readthedocs
+
 markdown_extensions:
   - admonition
   - def_list
   - attr_list
   - pymdownx.tasklist:
       custom_checkbox: true
+
+theme:
+  name: material
+  features:
+    - navigation.path
+    - navigation.top
+  palette:
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+

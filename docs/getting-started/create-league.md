@@ -1,12 +1,12 @@
 # Create League
 
-## Create your own league
+### Create your own league
 
 !!! warning
     Creating your league is not possible through the UI yet.
     If you want to have a league created please write a request to [simon@irleaguemanager.net](mailto:simon@irleaguemanager.net)
 
-## First season and schedule
+### First season and schedule
 
 By default a new league already has a default season and schedule configured:
 > ![Screenshot](img/Screenshot 2023-04-03 153420.png)

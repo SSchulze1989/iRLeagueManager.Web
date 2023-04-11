@@ -131,6 +131,7 @@
   </ItemGroup>
 
   <ItemGroup>
+	<Content Include="..\..\mkdocs.yml" />
 	<Content Include="..\..\docs\**" LinkBase="docs" />
   </ItemGroup>
 

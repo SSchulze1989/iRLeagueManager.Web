@@ -1,0 +1,22 @@
+name: .NET
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    env:
+      BUILD_CONFIG: Release
+      NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with: 
+        fetch-depth: 0
+    - name: install mkdocs
+      run: pip install mkdocs-material
+    - name: deploy
+      run: mkdocs gh-deploy

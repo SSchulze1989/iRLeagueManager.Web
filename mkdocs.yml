@@ -1,0 +1,19 @@
+site_name: iRLeagueManager
+site_url: https://irleaguemanager.net
+nav:
+    - Home: index.md
+    - 'Getting Started':
+      - 'Create Account': getting-started/create-account.md
+      - 'Create League': getting-started/create-league.md
+      - 'Events & Results': getting-started/events-and-results.md
+    - 'Advanced Settings': 
+      - 'General': settings/general.md
+      - 'Users': settings/users.md
+      - 'Championships': settings/championships.md
+theme: readthedocs
+markdown_extensions:
+  - admonition
+  - def_list
+  - attr_list
+  - pymdownx.tasklist:
+      custom_checkbox: true

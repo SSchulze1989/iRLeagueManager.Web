@@ -131,6 +131,10 @@
   </ItemGroup>
 
   <ItemGroup>
+	<Content Include="..\..\docs\**" LinkBase="docs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
     <PackageReference Include="Blazored.Modal" Version="7.1.0" />
     <PackageReference Include="HtmlSanitizer" Version="8.0.645" />

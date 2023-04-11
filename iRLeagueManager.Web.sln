@@ -7,6 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iRLeagueManager.Web", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazored.Typeahead", "..\Typeahead\src\Blazored.Typeahead\Blazored.Typeahead.csproj", "{A9172DF7-1738-4828-AAEC-4757D4CBF55D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Projektmappenelemente", "Projektmappenelemente", "{AB1A554F-4BD3-431A-9222-9FBC9189BDC1}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\mkdocs_publish.yml = .github\workflows\mkdocs_publish.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

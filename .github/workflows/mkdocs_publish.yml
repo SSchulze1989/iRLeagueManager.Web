@@ -1,0 +1,18 @@
+name: .NET
+
+on:
+  push:
+    branches: [ main, feature/documentation ]
+
+jobs:
+  build:
+    env:
+      BUILD_CONFIG: Release
+      NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: deploy-mkdocs
+      run: mkdocs gh-deploy

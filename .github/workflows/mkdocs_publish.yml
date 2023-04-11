@@ -14,5 +14,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: deploy-mkdocs
+    - name: install mkdocs
+      run: pip install mkdocs
+    - name: deploy
       run: mkdocs gh-deploy

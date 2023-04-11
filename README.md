@@ -1,6 +1,4 @@
 # iRLeagueManager.Web
-https://irleaguemanager.net
-
 A powerful web based scoring tool for iRacing leagues that offers a fast and reliable league database, support for many race types and scoring configurations and a 
 built in stewarding system.
 

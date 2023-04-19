@@ -1,6 +1,6 @@
 # Getting started
 
-## Create an Account
+### Create an Account
 
 Before you can host your league in iRLeagueManager you need to set-up a personal user account.  
 

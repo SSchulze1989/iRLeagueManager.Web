@@ -12,6 +12,9 @@
                     <img src="logo/iRLM_Logo_17_darkbg.png" title="iRLeagueManager v@(VersionString)"/>
                 </figure>
             </div>
+            <div class="d-md-none">
+                <h4><DisplayLeague League=@Shared.LeagueInfo /></h4>
+            </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#headerNavbarContent" aria-controls="headerNavbarContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -118,6 +121,11 @@
                                 <label class="d-md-none d-lg-block">@GetFullUserName(context.User)</label>
                             </Authorized>
                         </AuthorizeView>
+                    </li>
+                    <li>
+                        <a class="btn btn-outline-light" type="button" title="Help / Documentation" href="https://sschulze1989.github.io/iRLeagueManager.Web/" target="_blank">
+                            <span class="oi oi-question-mark" />
+                        </a>
                     </li>
                 </ul>
             </div>

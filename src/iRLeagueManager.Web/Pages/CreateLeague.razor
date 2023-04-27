@@ -1,0 +1,187 @@
+﻿@page "/CreateLeague"
+@using System.Text.RegularExpressions;
+@using iRLeagueApiCore.Common.Models;
+@using iRLeagueManager.Web.Components;
+@inject LeaguesViewModel Vm
+
+<div class="container-xxl">    
+    <div class="card">
+        <div class="card-header">
+            <h5>Create new League</h5>
+        </div>
+        <div class="card-body">
+            <EditForm Model=@Model OnValidSubmit=Submit>
+                <div class="form-group mb-3">
+                    <label>Name</label>
+                    <InputText @bind-Value="SetLongName" class="form-control" />
+                    <label class="form-text">Full name to be displayed on pages</label>
+                    <ValidationMessage For="@(() => Model.NameFull)" />
+                </div>
+                <div class="form-group mb-3">
+                    <label>Strong Name</label>
+                    <InputText @bind-Value="SetShortName" class="form-control" placeholder="@GetShortNameFromFullName(Model.NameFull)"/>
+                    <label class="form-text">
+                        Pick a short and unique indentifiying name of the league. This will later be used as part of html routes and shareable links <br/>
+                        e.g: https://irleaguemanager.net/@Model.Name/results
+                    </label>
+                    <ValidationMessage For="@(() => Model.Name)" />
+                </div>
+                <div class="form-group d-flex flex-column mb-3">
+                    <label>Select result configuration template</label>
+                    <div class="btn-group btn-group-vertical">
+                        <button class="btn btn-outline-secondary @(TemplateSelect == TemplateType.Empty ? "active" : "")" 
+                                @onclick=@(() => TemplateSelect = TemplateType.Empty)
+                                type="button">
+                            <h6 class="text-decoration-underline">Empty</h6>
+                            <small>
+                                Empty league without any scoring configurations
+                            </small>
+                        </button>
+                        <button class="btn btn-outline-secondary @(TemplateSelect == TemplateType.SingleDriver ? "active" : "")"
+                                @onclick=@(() => TemplateSelect = TemplateType.SingleDriver)
+                                type="button"
+                                disabled>
+                            <h6 class="text-decoration-underline">Single Race - Driver Championship</h6>
+                            <small>
+                                Configuration for single header races with a standard driver championship based on points scored
+                            </small>
+                        </button>
+                        <button class="btn btn-outline-secondary @(TemplateSelect == TemplateType.SingleDriverTeam ? "active" : "")"
+                                @onclick=@(() => TemplateSelect = TemplateType.SingleDriverTeam)
+                                type="button" 
+                                disabled>
+                            <h6 class="text-decoration-underline">Single Race - Driver & Team Championship</h6>
+                            <small>
+                                Configuration for single header races with driver & team championship based on points scored
+                            </small>
+                        </button>
+                        <button class="btn btn-outline-secondary @(TemplateSelect == TemplateType.MultiDriver ? "active" : "")"
+                                @onclick=@(() => TemplateSelect = TemplateType.MultiDriver)
+                                type="button" 
+                                disabled>
+                            <h6 class="text-decoration-underline">Multi Race - Driver Championship</h6>
+                            <small>
+                                Configuration for multiple races per event with a driver championship based on points scored
+                            </small>
+                        </button>
+                    </div>
+                    <label class="form-text">Select a template for the result configuration based on your needs. You will always be able to change these setting later on.</label>
+                </div>
+                <button class="btn btn-primary w-100" type="submit" disabled="@Vm.Loading">
+                    @if (Vm.Loading == true)
+                    {
+                        <span class="spinner-border spinner-border-sm mr-1"></span>
+                    }
+                    Create
+                </button>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    private IModalService ModalService { get; set; } = default!;
+
+    private PostLeagueModel Model { get; set; } = new();
+
+    private enum TemplateType
+    {
+        Empty,
+        SingleDriver,
+        SingleDriverTeam,
+        MultiDriver,
+    }
+
+    private TemplateType TemplateSelect { get; set; } = TemplateType.Empty;
+
+    private string? setShortName;
+    private string? SetShortName 
+    {
+        get => setShortName; 
+        set
+        {
+            setShortName = value;
+            if (string.IsNullOrEmpty(value))
+            {
+                Model.Name = GetShortNameFromFullName(Model.NameFull);
+                return;
+            }
+            Model.Name = value;
+        }
+    }
+
+    private string SetLongName
+    {
+        get => Model.NameFull;
+        set 
+        {
+            Model.NameFull = value;
+            if (string.IsNullOrEmpty(SetShortName))
+            {
+                Model.Name = GetShortNameFromFullName(Model.NameFull);
+            }
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        BlazorParameterNullException.ThrowIfNull(this, ModalService);
+    }
+
+    private string GetShortNameFromFullName(string fullName)
+    {
+        return Regex.Replace(fullName, @"[^0-9a-zA-Z-_ ]+", "")
+            .Replace(' ', '-')
+            .RegexReplace("(-)\\1+", "$1")
+            .ToLower();
+    }
+
+    private async Task<StatusResult> ApplyTemplate(LeagueModel league, TemplateType template)
+    {
+        return template switch
+        {
+            TemplateType.Empty => await Task.FromResult(StatusResult.SuccessResult()),
+            TemplateType.SingleDriver => await ApplySingleDriverTemplate(league),
+            TemplateType.SingleDriverTeam => await ApplySingleDriverTeamTemplate(league),
+            TemplateType.MultiDriver => await ApplyMultiDriverTemplate(league),
+            _ => await Task.FromResult(StatusResult.SuccessResult())
+        };
+    }
+
+    private async Task<StatusResult> ApplySingleDriverTemplate(LeagueModel league)
+    {
+        return await Task.FromResult(StatusResult.SuccessResult());
+    }
+
+    private async Task<StatusResult> ApplySingleDriverTeamTemplate(LeagueModel league)
+    {
+        return await Task.FromResult(StatusResult.SuccessResult());
+    }
+
+    private async Task<StatusResult> ApplyMultiDriverTemplate(LeagueModel league)
+    {
+        return await Task.FromResult(StatusResult.SuccessResult());
+    }
+
+    private async Task Submit()
+    {
+        var leagueResult = await Vm.AddLeague(Model);
+        if (leagueResult.IsSuccess == false || leagueResult.Content is null)
+        {
+            await DisplayCreationErrorMessage();
+            return;
+        }
+        await ApplyTemplate(leagueResult.Content, TemplateSelect);
+    }
+
+    private async Task DisplayCreationErrorMessage(string? reason = null)
+    {
+        reason ??= "Unknown Error";
+        var message = $"League creation failed:\n{reason}";
+        var parameters = new ModalParameters<ConfirmModal>()
+            .Add(x => x.Text, message)
+            .Add(x => x.ButtonTypes, ButtonTypes.Ok);
+        await ModalService.Show<ConfirmModal>("Error", parameters).Result;
+    }
+}

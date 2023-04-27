@@ -1,5 +1,5 @@
 ﻿@using iRLeagueApiCore.Common.Models;
-<label class="@(MuteTextOnFallback && string.IsNullOrEmpty(League?.NameFull) ? "text-muted" : "")">@GetLeagueName()</label>
+<label class="@(MuteTextOnFallback && string.IsNullOrEmpty(League?.NameFull) ? "text-muted" : "")" title="@GetLeagueName()">@GetLeagueName()</label>
 
 @code {
     [Parameter]

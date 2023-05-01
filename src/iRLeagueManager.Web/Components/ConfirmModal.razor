@@ -1,5 +1,12 @@
 ﻿<div class="container justify-content-center preserve-format">
-    @Text
+    @if (AllowMarkup)
+    {
+        @((MarkupString)Text)
+    }
+    else
+    {
+        @Text
+    }
 </div>
 <div class="pt-2 pb-2">
     <div class="row">
@@ -37,6 +44,8 @@
     public string Text { get; set; } = string.Empty;
     [Parameter]
     public ButtonTypes ButtonTypes { get; set; }
+    [Parameter]
+    public bool AllowMarkup { get; set; } = false;
 
     private void OkClick()
     {

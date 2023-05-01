@@ -169,7 +169,7 @@
         var leagueResult = await Vm.AddLeague(Model);
         if (leagueResult.IsSuccess == false || leagueResult.Content is null)
         {
-            await DisplayCreationErrorMessage();
+            await DisplayCreationErrorMessage(leagueResult.Message);
             return;
         }
         await ApplyTemplate(leagueResult.Content, TemplateSelect);
@@ -178,10 +178,11 @@
     private async Task DisplayCreationErrorMessage(string? reason = null)
     {
         reason ??= "Unknown Error";
-        var message = $"League creation failed:\n{reason}";
+        var message = $"""League creation failed:<p style="color:red;">{reason}</p>""";
         var parameters = new ModalParameters<ConfirmModal>()
             .Add(x => x.Text, message)
-            .Add(x => x.ButtonTypes, ButtonTypes.Ok);
+            .Add(x => x.ButtonTypes, ButtonTypes.Ok)
+            .Add(x => x.AllowMarkup, true);
         await ModalService.Show<ConfirmModal>("Error", parameters).Result;
     }
 }

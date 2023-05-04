@@ -2,10 +2,8 @@
 @using System.Text.RegularExpressions
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.Components
-@inject IServiceProvider Provider
-@inject LeagueApiService ApiService
 @inject LeaguesViewModel Vm
-@inject ILogger<CreateLeague> Logger
+@inject NavigationManager NavigationManager
 
 <div class="container-xxl" style="max-width:790px">    
     <div class="card">
@@ -43,8 +41,8 @@
 </div>
 
 @code {
-        [CascadingParameter]
-        private IModalService ModalService { get; set; } = default!;
+    [CascadingParameter]
+    private IModalService ModalService { get; set; } = default!;
     private StatusResultValidator? ResultValidator { get; set; }
 
     private PostLeagueModel Model { get; set; } = new();
@@ -91,7 +89,6 @@
     protected override void OnParametersSet()
     {
         BlazorParameterNullException.ThrowIfNull(this, ModalService);
-        Logger.LogWarning("Parameters set!");
     }
 
     private string GetShortNameFromFullName(string fullName)
@@ -102,18 +99,18 @@
             .ToLower();
     }
 
-    private async Task<StatusResult> ApplyDefaultTemplate(LeagueModel model)
-    {
-        var league = Provider.GetRequiredService<LeagueViewModel>();
-        league.SetModel(model);
-        var newSeason = new PostSeasonModel()
-        {
-            SeasonName = "Season 1",
-            Finished = false,
-            HideComments = false,
-        };
-        return await league.AddSeason(newSeason);
-    }
+    //private async Task<StatusResult> ApplyDefaultTemplate(LeagueModel model)
+    //{
+    //    var league = Provider.GetRequiredService<LeagueViewModel>();
+    //    league.SetModel(model);
+    //    var newSeason = new PostSeasonModel()
+    //    {
+    //        SeasonName = "Season 1",
+    //        Finished = false,
+    //        HideComments = false,
+    //    };
+    //    return await league.AddSeason(newSeason);
+    //}
 
     private async Task Submit()
     {
@@ -123,5 +120,9 @@
             ResultValidator?.ValidateResult(leagueResult);
             return;
         }
+        var league = leagueResult.Content;
+
+        // forward to new league settings page
+        NavigationManager.NavigateTo($"{league.Name}/Settings/League", forceLoad: true);
     }
 }

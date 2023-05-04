@@ -1,16 +1,20 @@
 ﻿@page "/CreateLeague"
-@using System.Text.RegularExpressions;
-@using iRLeagueApiCore.Common.Models;
-@using iRLeagueManager.Web.Components;
+@using System.Text.RegularExpressions
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components
+@inject IServiceProvider Provider
+@inject LeagueApiService ApiService
 @inject LeaguesViewModel Vm
+@inject ILogger<CreateLeague> Logger
 
-<div class="container-xxl">    
+<div class="container-xxl" style="max-width:790px">    
     <div class="card">
         <div class="card-header">
             <h5>Create new League</h5>
         </div>
         <div class="card-body">
             <EditForm Model=@Model OnValidSubmit=Submit>
+                <StatusResultValidator @ref=ResultValidator />
                 <div class="form-group mb-3">
                     <label>Name</label>
                     <InputText @bind-Value="SetLongName" class="form-control" />
@@ -26,47 +30,6 @@
                     </label>
                     <ValidationMessage For="@(() => Model.Name)" />
                 </div>
-                <div class="form-group d-flex flex-column mb-3">
-                    <label>Select result configuration template</label>
-                    <div class="btn-group btn-group-vertical">
-                        <button class="btn btn-outline-secondary @(TemplateSelect == TemplateType.Empty ? "active" : "")" 
-                                @onclick=@(() => TemplateSelect = TemplateType.Empty)
-                                type="button">
-                            <h6 class="text-decoration-underline">Empty</h6>
-                            <small>
-                                Empty league without any scoring configurations
-                            </small>
-                        </button>
-                        <button class="btn btn-outline-secondary @(TemplateSelect == TemplateType.SingleDriver ? "active" : "")"
-                                @onclick=@(() => TemplateSelect = TemplateType.SingleDriver)
-                                type="button"
-                                disabled>
-                            <h6 class="text-decoration-underline">Single Race - Driver Championship</h6>
-                            <small>
-                                Configuration for single header races with a standard driver championship based on points scored
-                            </small>
-                        </button>
-                        <button class="btn btn-outline-secondary @(TemplateSelect == TemplateType.SingleDriverTeam ? "active" : "")"
-                                @onclick=@(() => TemplateSelect = TemplateType.SingleDriverTeam)
-                                type="button" 
-                                disabled>
-                            <h6 class="text-decoration-underline">Single Race - Driver & Team Championship</h6>
-                            <small>
-                                Configuration for single header races with driver & team championship based on points scored
-                            </small>
-                        </button>
-                        <button class="btn btn-outline-secondary @(TemplateSelect == TemplateType.MultiDriver ? "active" : "")"
-                                @onclick=@(() => TemplateSelect = TemplateType.MultiDriver)
-                                type="button" 
-                                disabled>
-                            <h6 class="text-decoration-underline">Multi Race - Driver Championship</h6>
-                            <small>
-                                Configuration for multiple races per event with a driver championship based on points scored
-                            </small>
-                        </button>
-                    </div>
-                    <label class="form-text">Select a template for the result configuration based on your needs. You will always be able to change these setting later on.</label>
-                </div>
                 <button class="btn btn-primary w-100" type="submit" disabled="@Vm.Loading">
                     @if (Vm.Loading == true)
                     {
@@ -80,8 +43,9 @@
 </div>
 
 @code {
-    [CascadingParameter]
-    private IModalService ModalService { get; set; } = default!;
+        [CascadingParameter]
+        private IModalService ModalService { get; set; } = default!;
+    private StatusResultValidator? ResultValidator { get; set; }
 
     private PostLeagueModel Model { get; set; } = new();
 
@@ -127,6 +91,7 @@
     protected override void OnParametersSet()
     {
         BlazorParameterNullException.ThrowIfNull(this, ModalService);
+        Logger.LogWarning("Parameters set!");
     }
 
     private string GetShortNameFromFullName(string fullName)
@@ -137,31 +102,17 @@
             .ToLower();
     }
 
-    private async Task<StatusResult> ApplyTemplate(LeagueModel league, TemplateType template)
+    private async Task<StatusResult> ApplyDefaultTemplate(LeagueModel model)
     {
-        return template switch
+        var league = Provider.GetRequiredService<LeagueViewModel>();
+        league.SetModel(model);
+        var newSeason = new PostSeasonModel()
         {
-            TemplateType.Empty => await Task.FromResult(StatusResult.SuccessResult()),
-            TemplateType.SingleDriver => await ApplySingleDriverTemplate(league),
-            TemplateType.SingleDriverTeam => await ApplySingleDriverTeamTemplate(league),
-            TemplateType.MultiDriver => await ApplyMultiDriverTemplate(league),
-            _ => await Task.FromResult(StatusResult.SuccessResult())
+            SeasonName = "Season 1",
+            Finished = false,
+            HideComments = false,
         };
-    }
-
-    private async Task<StatusResult> ApplySingleDriverTemplate(LeagueModel league)
-    {
-        return await Task.FromResult(StatusResult.SuccessResult());
-    }
-
-    private async Task<StatusResult> ApplySingleDriverTeamTemplate(LeagueModel league)
-    {
-        return await Task.FromResult(StatusResult.SuccessResult());
-    }
-
-    private async Task<StatusResult> ApplyMultiDriverTemplate(LeagueModel league)
-    {
-        return await Task.FromResult(StatusResult.SuccessResult());
+        return await league.AddSeason(newSeason);
     }
 
     private async Task Submit()
@@ -169,19 +120,8 @@
         var leagueResult = await Vm.AddLeague(Model);
         if (leagueResult.IsSuccess == false || leagueResult.Content is null)
         {
-            await DisplayCreationErrorMessage();
+            ResultValidator?.ValidateResult(leagueResult);
             return;
         }
-        await ApplyTemplate(leagueResult.Content, TemplateSelect);
-    }
-
-    private async Task DisplayCreationErrorMessage(string? reason = null)
-    {
-        reason ??= "Unknown Error";
-        var message = $"League creation failed:\n{reason}";
-        var parameters = new ModalParameters<ConfirmModal>()
-            .Add(x => x.Text, message)
-            .Add(x => x.ButtonTypes, ButtonTypes.Ok);
-        await ModalService.Show<ConfirmModal>("Error", parameters).Result;
     }
 }

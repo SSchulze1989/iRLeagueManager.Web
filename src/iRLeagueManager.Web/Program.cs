@@ -17,6 +17,9 @@ using Blazored.Toast;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.AddConfiguration(
+    builder.Configuration.GetSection("Logging"));
+
 // Add services to the container.
 builder.Services.AddScoped<ServerAuthenticationStateProvider>();
 builder.Services.AddRazorPages();
@@ -41,6 +44,7 @@ builder.Services.AddScoped(configure =>
     jsonOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     return jsonOptions;
 });
+builder.Services.AddScoped<HttpClientWrapperFactory>();
 builder.Services.AddScoped<LeagueApiClientFactory>();
 builder.Services.AddScoped<ClientLocalTimeProvider>();
 builder.Services.AddScoped<ITokenStore, AsyncTokenStore>();

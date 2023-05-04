@@ -12,12 +12,13 @@ internal sealed class LeagueApiClientFactory
     private readonly IHttpClientFactory httpClientFactory;
     private readonly ILocalStorageService localStorage;
     private readonly ITokenStore tokenStore;
+    private readonly HttpClientWrapperFactory clientWrapperFactory;
     private readonly JsonSerializerOptions jsonOptions;
 
     private readonly string baseAddress;
 
     public LeagueApiClientFactory(IConfiguration configuration, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory,
-        ILocalStorageService localStorage, ITokenStore tokenStore, JsonSerializerOptions jsonOptions)
+        ILocalStorageService localStorage, ITokenStore tokenStore, HttpClientWrapperFactory clientWrapperFactory, JsonSerializerOptions jsonOptions)
     {
         baseAddress = configuration["APIServer"] ?? string.Empty;
         this.loggerFactory = loggerFactory;
@@ -25,6 +26,7 @@ internal sealed class LeagueApiClientFactory
         this.httpClientFactory = httpClientFactory;
         this.localStorage = localStorage;
         this.tokenStore = tokenStore;
+        this.clientWrapperFactory = clientWrapperFactory;
         this.jsonOptions = jsonOptions;
     }
 
@@ -32,7 +34,7 @@ internal sealed class LeagueApiClientFactory
     {
         var httpClient = httpClientFactory.CreateClient();
         httpClient.BaseAddress = new Uri(baseAddress);
-        var client = new LeagueApiClient(loggerFactory.CreateLogger<LeagueApiClient>(), httpClient, tokenStore, jsonOptions);
+        var client = new LeagueApiClient(loggerFactory.CreateLogger<LeagueApiClient>(), httpClient, clientWrapperFactory, tokenStore);
 
         return client;
     }

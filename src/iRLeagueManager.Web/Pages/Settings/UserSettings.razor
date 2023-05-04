@@ -38,7 +38,7 @@
                             @foreach(var role in LeagueRoles.RolesAvailable)
                             {
                                 <th>
-                                    @{var disabled = user.IsImplicitRole(role);}
+                                    @{var disabled = user.IsImplicitRole(role) || role == LeagueRoles.Owner;}
                                     <input class="form-check-input @(disabled ? "disabled" : "")"
                                            type="checkbox" 
                                            checked="@(user.HasRole(role))" 

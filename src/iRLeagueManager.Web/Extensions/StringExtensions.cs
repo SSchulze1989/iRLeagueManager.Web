@@ -12,4 +12,9 @@ public static class StringExtensions
         }
         return Regex.Replace(input, "[0-9]+", match => match.Value.PadLeft(n, '0'));
     }
+
+    public static string RegexReplace(this string input, string pattern, string replacement)
+    {
+        return Regex.Replace(input, pattern, replacement);
+    }
 }

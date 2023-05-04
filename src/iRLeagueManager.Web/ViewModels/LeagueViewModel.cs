@@ -101,7 +101,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
         }
     }
 
-    public async Task<StatusResult> AddSeason(SeasonModel season, CancellationToken cancellationToken = default)
+    public async Task<StatusResult> AddSeason(PostSeasonModel season, CancellationToken cancellationToken = default)
     {
         if (ApiService.CurrentLeague is null)
         {

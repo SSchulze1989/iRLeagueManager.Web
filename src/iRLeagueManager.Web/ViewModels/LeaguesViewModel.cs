@@ -1,4 +1,6 @@
-﻿using iRLeagueManager.Web.Data;
+﻿using iRLeagueApiCore.Common.Models;
+using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Extensions;
 
 namespace iRLeagueManager.Web.ViewModels;
 
@@ -38,6 +40,22 @@ public sealed class LeaguesViewModel : LeagueViewModelBase<LeaguesViewModel>
                     leagueModels.Select(x => new LeagueViewModel(LoggerFactory, ApiService, x))
                 );
             }
+            Loading = false;
+        }
+    }
+
+    public async Task<StatusResult<LeagueModel>> AddLeague(PostLeagueModel model, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            Loading = true;
+            var result = await ApiService.Client
+                .Leagues()
+                .Post(model, cancellationToken);
+            return result.ToContentStatusResult();
+        }
+        finally
+        {
             Loading = false;
         }
     }

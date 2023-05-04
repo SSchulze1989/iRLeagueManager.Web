@@ -194,7 +194,9 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
         IEnumerable<string> roles = new[] { "Admin" };
         if (Shared.LeagueName != null)
         {
-            var leagueRoleNames = roleNames
+            var roleValues = roleNames.Select(x => LeagueRoles.GetRoleValue(x));
+            roleValues = roleValues.Concat(roleValues.SelectMany(LeagueRoles.ImplicitRoleOf)).Distinct();
+            var leagueRoleNames = roleValues
                 .Select(x => LeagueRoles.GetLeagueRoleName(Shared.LeagueName, x))
                 .NotNull();
             roles = roles.Concat(leagueRoleNames);

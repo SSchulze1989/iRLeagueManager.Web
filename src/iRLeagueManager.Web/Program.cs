@@ -45,7 +45,7 @@ builder.Services.AddScoped(configure =>
 
 builder.Services.AddLeagueApiClient(config => config
     .UseBaseAddress(builder.Configuration["APIServer"] ?? string.Empty)
-    .UseTokenStore<AsyncTokenStore>());
+    .UseTokenStore<BrowserProtectedStorageTokenStore>());
 
 builder.Services.AddScoped<ClientLocalTimeProvider>();
 builder.Services.AddScoped<SharedStateService>();

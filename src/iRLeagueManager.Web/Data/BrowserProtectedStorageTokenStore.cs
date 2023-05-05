@@ -4,9 +4,9 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace iRLeagueManager.Web.Data;
 
-internal sealed class AsyncTokenStore : ITokenStore
+internal sealed class BrowserProtectedStorageTokenStore : ITokenStore
 {
-    private readonly ILogger<AsyncTokenStore> logger;
+    private readonly ILogger<BrowserProtectedStorageTokenStore> logger;
     private readonly ProtectedLocalStorage localStore;
 
     private const string tokenKey = "idToken";
@@ -22,7 +22,7 @@ internal sealed class AsyncTokenStore : ITokenStore
     public DateTime IdTokenExpires { get; private set; }
     public DateTime AccessTokenExpires { get; private set; }
 
-    public AsyncTokenStore(ILogger<AsyncTokenStore> logger, ProtectedLocalStorage localStorage)
+    public BrowserProtectedStorageTokenStore(ILogger<BrowserProtectedStorageTokenStore> logger, ProtectedLocalStorage localStorage)
     {
         this.logger = logger;
         this.localStore = localStorage;
@@ -84,7 +84,8 @@ internal sealed class AsyncTokenStore : ITokenStore
         }
         catch (InvalidOperationException ex)
         {
-            logger.LogWarning("Could not read from local browser session: {Exception}", ex);
+            logger.LogWarning("Could not read from local browser session: {Exception}", ex.GetType().Name);
+            logger.LogDebug("Could not read from local browser session: {Exception}", ex);
             return string.Empty;
         }
     }

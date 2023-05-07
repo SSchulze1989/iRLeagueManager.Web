@@ -139,7 +139,7 @@
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
     <PackageReference Include="Blazored.Modal" Version="7.1.0" />
     <PackageReference Include="HtmlSanitizer" Version="8.0.645" />
-    <PackageReference Include="iRLeagueApiCore.Client" Version="0.6.3-dev.1" />
+    <PackageReference Include="iRLeagueApiCore.Client" Version="0.6.3-dev.4" />
     <PackageReference Include="iRLeagueApiCore.Common" Version="0.6.2" />
     <PackageReference Include="Markdig" Version="0.31.0" />
     <PackageReference Include="Blazored.Toast" Version="4.1.0" />

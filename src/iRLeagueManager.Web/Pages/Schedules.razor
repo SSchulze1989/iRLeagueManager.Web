@@ -9,6 +9,8 @@
 @inject SchedulesPageViewModel vm
 @inject JsonSerializerOptions jsonOptions
 
+<PageTitle>Schedules - @LeagueName</PageTitle>
+
 <div class="container-xxl">
     <div class="sticky-header">
         <LoadingHeader Loading=@Bind(vm, x => x.Loading)>

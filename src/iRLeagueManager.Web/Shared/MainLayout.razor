@@ -1,15 +1,32 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
 
 <PageTitle>iRLeagueManager.Web</PageTitle>
-<Header />
+<ErrorBoundary @ref=ErrorBoundary Context="Ex" MaximumErrorCount="5">
+    <ChildContent>
+        <Header />
 
-<div class="page"> 
-    <main>
-        <article class="content px-2 pb-4 mb-2">
-            @Body
-        </article>
-    </main>
-</div>
+        <div class="page"> 
+            <main>
+                <article class="content px-2 pb-4 mb-2">
+                    @Body
+                </article>
+            </main>
+        </div>
+    </ChildContent>
+    <ErrorContent>
+        @if (Ex is iRLeagueApiCore.Client.Http.ApiServiceUnavailableException)
+        {
+            <div class="bg-danger p-2 text-center">
+                <h4><span class="oi oi-warning"/> This service is currently unavailable. Please try again later!</h4>
+            </div>
+        }
+        else
+        {
+            throw Ex;
+        }
+    </ErrorContent>
+</ErrorBoundary>
 
 <div class="page-footer">
     <Footer />
@@ -24,6 +41,8 @@
     [CascadingParameter]
     public RouteData? RouteData { get; set; }
 
+    private ErrorBoundary? ErrorBoundary { get; set; }
+
     public string? LeagueName { get; set; }
     //public long? SeasonId { get; set; }
     //public long? EventId { get; set; }
@@ -31,5 +50,6 @@
     protected override void OnParametersSet()
     {
         LeagueName = (string?)RouteData?.RouteValues?.GetValueOrDefault("LeagueName");
+        ErrorBoundary?.Recover();
     }
 }

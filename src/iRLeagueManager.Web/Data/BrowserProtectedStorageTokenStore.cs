@@ -4,9 +4,9 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace iRLeagueManager.Web.Data;
 
-internal sealed class AsyncTokenStore : ITokenStore
+internal sealed class BrowserProtectedStorageTokenStore : ITokenStore
 {
-    private readonly ILogger<AsyncTokenStore> logger;
+    private readonly ILogger<BrowserProtectedStorageTokenStore> logger;
     private readonly ProtectedLocalStorage localStore;
 
     private const string tokenKey = "idToken";
@@ -22,7 +22,7 @@ internal sealed class AsyncTokenStore : ITokenStore
     public DateTime IdTokenExpires { get; private set; }
     public DateTime AccessTokenExpires { get; private set; }
 
-    public AsyncTokenStore(ILogger<AsyncTokenStore> logger, ProtectedLocalStorage localStorage)
+    public BrowserProtectedStorageTokenStore(ILogger<BrowserProtectedStorageTokenStore> logger, ProtectedLocalStorage localStorage)
     {
         this.logger = logger;
         this.localStore = localStorage;
@@ -57,36 +57,36 @@ internal sealed class AsyncTokenStore : ITokenStore
             var token = await localStore.GetAsync<string>(tokenKey);
             if (token.Success)
             {
-                if (IsLoggedIn == false)
-                {
-                    // set expiration date
-                    var handler = new JwtSecurityTokenHandler();
-                    var jsonToken = handler.ReadJwtToken(token.Value);
-                    if (jsonToken.Claims.Any(x => x.Type == "exp"))
-                    {
-                        var expSeconds = Convert.ToInt64(jsonToken.Claims.First(x => x.Type == "exp").Value);
-                        IdTokenExpires = new DateTime(1970, 1, 1).AddSeconds(expSeconds);
-                    }
-                }
-
-                // check if token is still valid
-                if (IdTokenExpires < DateTime.UtcNow.AddMinutes(5))
-                {
-                    await ClearTokensAsync();
-                    logger.LogInformation("Token read from token store has expired");
-                    return string.Empty;
-                }
-                IsLoggedIn = true;
-                return inMemoryIdToken = token.Value ?? string.Empty;
+                return await ValidateToken(token.Value);
             }
             IsLoggedIn = false;
             return string.Empty;
         }
         catch (InvalidOperationException ex)
         {
-            logger.LogWarning("Could not read from local browser session: {Exception}", ex);
+            logger.LogWarning("Could not read from local browser session: {Exception}", ex.GetType().Name);
+            logger.LogDebug("Could not read from local browser session: {Exception}", ex);
             return string.Empty;
         }
+    }
+
+    private async Task<string> ValidateToken(string? token)
+    {
+        if (IsLoggedIn == false)
+        {
+            // set expiration date
+            IdTokenExpires = ExtractExpirationDate(token);
+        }
+
+        // check if token is still valid
+        if (IdTokenExpires < DateTime.UtcNow.AddMinutes(5))
+        {
+            await ClearTokensAsync();
+            logger.LogInformation("Token read from token store has expired");
+            return string.Empty;
+        }
+        IsLoggedIn = true;
+        return inMemoryIdToken = token ?? string.Empty;
     }
 
     public async Task SetIdTokenAsync(string token)
@@ -126,5 +126,17 @@ internal sealed class AsyncTokenStore : ITokenStore
             TokenExpired?.Invoke(this, EventArgs.Empty);
         }
         return await Task.FromResult(inMemoryAccessToken);
+    }
+
+    private static DateTime ExtractExpirationDate(string? token)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jsonToken = handler.ReadJwtToken(token);
+        if (jsonToken.Claims.Any(x => x.Type == "exp"))
+        {
+            var expSeconds = Convert.ToInt64(jsonToken.Claims.First(x => x.Type == "exp").Value);
+            return new DateTime(1970, 1, 1).AddSeconds(expSeconds);
+        }
+        return DateTime.MinValue;
     }
 }

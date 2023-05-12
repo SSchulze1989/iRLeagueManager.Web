@@ -83,6 +83,7 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
             {
                 return postChampionshipResult.ToStatusResult();
             }
+            Championships.Add(new(LoggerFactory, ApiService, postChampionshipResult.Content));
             // Post a champ season for the new championship and the current season
             var postChampSeasonResult = await CurrentSeason.Championships()
                 .WithId(postChampionshipResult.Content.ChampionshipId)
@@ -95,7 +96,12 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
             var putChampSeasonResult = await CurrentLeague.ChampSeasons()
                 .WithId(postChampSeasonResult.Content.ChampSeasonId)
                 .Put(champSeason);
-            return putChampSeasonResult.ToStatusResult();
+            if (postChampSeasonResult.Success == false || putChampSeasonResult.Content is null)
+            {
+                return putChampSeasonResult.ToStatusResult();
+            }
+            CurrentChampSeasons.Add(new(LoggerFactory, ApiService, putChampSeasonResult.Content));
+            return StatusResult.SuccessResult();
         }
         finally 
         { 

@@ -26,6 +26,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
     private ObservableCollection<SeasonViewModel> seasons;
     public ObservableCollection<SeasonViewModel> Seasons { get => seasons; set => Set(ref seasons, value); }
 
+    public bool IsInitialized => model.IsInitialized;
     public bool EnableProtests { get => model.EnableProtests; set => SetP(model.EnableProtests, value => model.EnableProtests = value, value); }
     public TimeSpan ProtestCoolDownPeriod { get => model.ProtestCoolDownPeriod; set => SetP(model.ProtestCoolDownPeriod, value => model.ProtestCoolDownPeriod = value, value); }
     public int CoolDownHrs { get => (int)ProtestCoolDownPeriod.TotalHours; set => SetP((int)ProtestCoolDownPeriod.TotalHours, value => model.ProtestCoolDownPeriod = SetHours(model.ProtestCoolDownPeriod, value), value); }
@@ -208,6 +209,27 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
                 .WithId(LeagueId)
                 .Put(model, cancellationToken);
             var result = await request;
+            if (result.Success && result.Content is not null)
+            {
+                SetModel(result.Content);
+            }
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    public async Task<StatusResult> InitializeLeague(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            Loading = true;
+            var result = await ApiService.Client.Leagues()
+                .WithId(LeagueId)
+                .Initialize()
+                .Post(cancellationToken);
             if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);

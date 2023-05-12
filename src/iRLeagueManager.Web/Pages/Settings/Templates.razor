@@ -1,0 +1,127 @@
+﻿@page "/{LeagueName}/Settings/Templates"
+@using System.Net;
+@using iRLeagueApiCore.Common.Models;
+@inherits LeagueComponentBase
+@inject LeagueViewModel Vm
+@inject IServiceProvider Provider
+
+<h3>Templates</h3>
+@Status: @Message
+@foreach (var error in Errors)
+{
+    <div>
+        @error
+    </div>
+}
+
+@code {
+    private string Status { get; set; } = string.Empty;
+    private string Message { get; set; } = string.Empty;
+    private IEnumerable<object> Errors { get; set; } = Array.Empty<object>();
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string ReturnUrl { get; set; } = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        await Vm.LoadCurrent(CancellationToken);
+        var result = await ApplyDefaultTemplate(CancellationToken);
+        Status = result.Status;
+        Message = result.Message;
+        Errors = result.Errors;
+        await InvokeAsync(StateHasChanged);
+        if (result.IsSuccess == false)
+        {
+            return;
+        }
+        await Vm.InitializeLeague(CancellationToken);
+        if (string.IsNullOrEmpty(ReturnUrl) == false)
+        {
+            NavigateTo(WebUtility.UrlDecode(ReturnUrl));
+        }
+    }
+
+    private async Task<StatusResult> ApplyDefaultTemplate(CancellationToken cancellationToken = default)
+    {
+        StatusResult result;
+        if (LeagueName is null)
+        {
+            return TemplateFailure("League was null");
+        }
+
+        var newSeason = new PostSeasonModel()
+        {
+            SeasonName = "Season 1",
+            Finished = false,
+            HideComments = false,
+        };
+        result = await Vm.AddSeason(newSeason, cancellationToken);
+        if (result.IsSuccess == false)
+        {
+            return result;
+        }
+        var season = Vm.Seasons.FirstOrDefault();
+        if (season is null)
+        {
+            return TemplateFailure("Created season was null");
+        }
+        await ApiService.SetCurrentSeasonAsync(LeagueName, season.SeasonId);
+
+        var resultSettingsVm = Provider.GetRequiredService<ResultSettingsViewModel>();
+        var championship = new PutChampSeasonModel()
+        {
+            ChampionshipName = "Championship",
+            ChampionshipDisplayName = "Championship",
+            StandingConfig = new()
+            {
+                Name = "Championship",
+                ResultKind = iRLeagueApiCore.Common.Enums.ResultKind.Member,
+                WeeksCounted = 0,
+            },
+        };
+        result = await resultSettingsVm.AddChampionship(championship, cancellationToken);
+        if (result.IsSuccess == false)
+        {
+            return result;
+        }
+
+        var champSeason = resultSettingsVm.CurrentChampSeasons.FirstOrDefault();
+        if (champSeason is null)
+        {
+            return TemplateFailure("Created champseason could not be loaded");
+        }
+        var champSeasonVm = Provider.GetRequiredService<ChampSeasonViewModel>();
+        champSeasonVm.SetModel(champSeason.GetModel());
+        var resultConfig = new ResultConfigModel()
+        {
+            Name = "iRacing Points",
+            DisplayName = "iRacing Points",
+            Scorings = new[]
+            {
+                new ScoringModel()
+                {
+                    Name = "Race",   
+                }
+            },
+        };
+        result = await champSeasonVm.AddResultConfig(resultConfig, cancellationToken);
+        if (result.IsSuccess == false)
+        {
+            return result;
+        }
+
+        return StatusResult.SuccessResult();
+    }
+
+    private StatusResult TemplateFailure(string reason)
+    {
+        return StatusResult.FailedResult("Error", "Template failed", new[] { reason });
+    }
+
+}

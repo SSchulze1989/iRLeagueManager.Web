@@ -14,7 +14,7 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb" style="--bs-breadcrumb-divider: '>';">
                 <li class="breadcrumb-item"><a href=@($"/{LeagueName}")>@LeagueName</a></li>
-                <li class="breadcrumb-item"><a href=@($"/{LeagueName}/Settings")>Settings</a></li>
+                <li class="breadcrumb-item">Settings</li>
                 <li class="breadcrumb-item"><a href=@($"/{LeagueName}/Settings/Results")>Results</a></li>
                 <li class="breadcrumb-item active" aria-current="page">@ChampSeason.ChampionshipName</li>
             </ol>
@@ -24,7 +24,7 @@
     <div class="d-flex justify-content-end mb-1 gap-3">
         @if (ChampSeason.HasChanged)
         {
-            <button class="btn btn-primary" @onclick=Submit>Submit</button>
+            <button class="btn btn-primary" @onclick=Submit>Save</button>
         }
         <button class="btn btn-outline-secondary" @onclick=Close>Back</button>
     </div>
@@ -50,16 +50,20 @@
     </div>
     <div class="card mb-3">
         <div class="card-header">
-            Result Configurations / Event types
+            Point Systems
         </div>
         <ul class="list-group list-group-flush">
+            @{
+                var resultConfigCount = ChampSeason.ResultConfigViewModels.Count();
+                bool expandResultConfig = resultConfigCount <= 1;
+            }
             @foreach (var resultConfig in ChampSeason.ResultConfigViewModels)
             {
                 <div class="list-group-item list-group-item-action d-flex justify-content-between" type="button" @onclick=@(() => OnResultConfigClick(resultConfig))>
-                    <ResultConfigPreview ResultConfig="resultConfig" class="overflow-auto" />
+                    <ResultConfigPreview ResultConfig="resultConfig" class="overflow-auto" Collapsed="!expandResultConfig"/>
                     <div class="d-flex align-self-start">
-                        <button class="btn btn-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#config_@(resultConfig.ResultConfigId)_details"
-                            aria-expanded="true" @onclick:stopPropagation>
+                        <button class="btn btn-toggle @(expandResultConfig ? "" : "collapsed")" type="button" data-bs-toggle="collapse" data-bs-target="#config_@(resultConfig.ResultConfigId)_details"
+                            aria-expanded="@(expandResultConfig ? "true" : "false")" @onclick:stopPropagation>
                             <span class="oi oi-chevron-bottom btn-toggle-off" />
                             <span class="oi oi-chevron-top btn-toggle-on" />
                         </button>
@@ -90,7 +94,11 @@
                     <label class="form-control" data-bs-toggle="tooltip" title="Treat events with multiple race sessions as single events (if they have a combined result). This will affect the statistics for race-nr, wins, fastest laps etc.">Treat as single event</label>
                 </div>
                 <InputGroup Label="Count Weeks">
-                    <InputNumber class="form-control" @bind-Value=ChampSeason.StandingConfig.WeeksCounted data-bs-toggle="tooltip" title="Number of races counted per season. (used for Dropweeks)" />
+                    <InputNumber class="form-control" 
+                                 @bind-Value=ChampSeason.StandingConfig.WeeksCounted 
+                                 data-bs-toggle="tooltip" 
+                                 title="Number of races counted per season. (used for Dropweeks)" 
+                                 placeholder="all"/>
                 </InputGroup>
             }
         </div>
@@ -114,7 +122,7 @@ else
 <div class="d-flex justify-content-end gap-3">
     @if (ChampSeason.HasChanged)
     {
-        <button class="btn btn-primary" @onclick=Submit>Submit</button>
+        <button class="btn btn-primary" @onclick=Submit>Save</button>
     }
     <button class="btn btn-outline-secondary" @onclick=Close>Back</button>
 </div>
@@ -126,7 +134,7 @@ else
     public long ChampionshipId { get; set; }
     [Parameter]
     [SupplyParameterFromQuery]
-    public string ReturnUrl { get; set; } = string.Empty;
+    public string returnUrl { get; set; } = string.Empty;
 
     private bool DisplayLeaveWarning { get; set; } = false;
     private ElementReference LeaveWarning { get; set; }
@@ -139,9 +147,10 @@ else
 
     protected override void OnParametersSet()
     {
-        if (string.IsNullOrWhiteSpace(ReturnUrl))
+        base.OnParametersSet();
+        if (string.IsNullOrWhiteSpace(returnUrl))
         {
-            ReturnUrl = $"/{LeagueName}/Settings/Results";
+            returnUrl = $"/{LeagueName}/Settings/Results";
         }
     }
 
@@ -187,13 +196,12 @@ else
         {
             await ChampSeason.SaveChangesAsync();
         }
-        NavigationManager.NavigateTo(ReturnUrl);
     }
 
     private async Task Close()
     {
         ChampSeason.ResetChangedState();
-        NavigationManager.NavigateTo(ReturnUrl);
+        NavigationManager.NavigateTo(returnUrl);
         await Task.CompletedTask;
     }
 
@@ -202,7 +210,7 @@ else
         var parameters = new ModalParameters<EditResultConfigModal>()
             .Add(x => x.Model, config.CopyModel())
             .Add(x => x.OnSubmit, (configChampSeason, cancellationToken) => configChampSeason.SaveChangesAsync(cancellationToken));
-        var result = await ModalService.Show<EditResultConfigModal>("Edit result config", parameters).Result;
+        var result = await ModalService.Show<EditResultConfigModal>("Edit Point System", parameters).Result;
         if (result.Confirmed && result.Data is ResultConfigModel model)
         {
             config.SetModel(model);
@@ -214,15 +222,15 @@ else
         var parameters = new ModalParameters<EditResultConfigModal>()
             .Add(x => x.Model, CreateResultConfig())
             .Add(x => x.OnSubmit, (x, c) => ChampSeason.AddResultConfig(x.GetModel(), c));
-        await ModalService.Show<EditResultConfigModal>("Add result config", parameters).Result;
+        await ModalService.Show<EditResultConfigModal>("Add new Point System", parameters).Result;
     }
 
     private async Task OnDeleteResultConfigClick(ResultConfigViewModel config)
     {
         var parameters = new ModalParameters<ConfirmModal>()
-            .Add(x => x.Text, $"Really delete result config \"{config.Name}\"?")
+            .Add(x => x.Text, $"Really delete Point System \"{config.Name}\"?")
             .Add(x => x.ButtonTypes, ButtonTypes.YesNo);
-        var result = await ModalService.Show<ConfirmModal>("Delete Result Config", parameters).Result;
+        var result = await ModalService.Show<ConfirmModal>("Delete Point System", parameters).Result;
         if (result.Confirmed)
         {
             await ChampSeason.DeleteResultConfig(config.GetModel());

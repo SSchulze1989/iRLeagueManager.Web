@@ -88,6 +88,10 @@
         }
         await vm.LoadCurrent();
         await vm.LoadSeasons();
+        if (vm.IsInitialized == false)
+        {
+            await ShowApplyTemplatesModal();
+        }
     }
 
     private async Task AddSeasonClick()
@@ -176,5 +180,22 @@
     private string RenderDescriptionPreview(string markdown)
     {
         return Markdig.Markdown.ToHtml(markdown, MarkdownPipeline);
+    }
+
+    private async Task ShowApplyTemplatesModal()
+    {
+        var parameters = new ModalParameters<ConfirmModal>()
+            .Add(x => x.Text, "Welcome to your new league. To speed up your setup process you can select the basic settings from a template")
+            .Add(x => x.ButtonTypes, ButtonTypes.OkCancel)
+            .Add(x => x.OkButtonText, "Yes, select template")
+            .Add(x => x.CancelButtonText, "No, start with empty league");
+        var result = await ModalService.Show<ConfirmModal>("Select league template", parameters).Result;
+        if (result.Confirmed)
+        {
+            // forward to select template page
+            NavigateTo($"/{LeagueName}/Settings/Templates", returnUrl: GetReturnUrl());
+            return;
+        }
+        await vm.InitializeLeague(CancellationToken);
     }
 }

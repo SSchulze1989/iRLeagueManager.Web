@@ -99,19 +99,6 @@
             .ToLower();
     }
 
-    //private async Task<StatusResult> ApplyDefaultTemplate(LeagueModel model)
-    //{
-    //    var league = Provider.GetRequiredService<LeagueViewModel>();
-    //    league.SetModel(model);
-    //    var newSeason = new PostSeasonModel()
-    //    {
-    //        SeasonName = "Season 1",
-    //        Finished = false,
-    //        HideComments = false,
-    //    };
-    //    return await league.AddSeason(newSeason);
-    //}
-
     private async Task Submit()
     {
         var leagueResult = await Vm.AddLeague(Model);
@@ -123,6 +110,6 @@
         var league = leagueResult.Content;
 
         // forward to new league settings page
-        NavigationManager.NavigateTo($"{league.Name}/Settings/League", forceLoad: true);
+        NavigationManager.NavigateTo($"{league.Name}/Settings/League");
     }
 }

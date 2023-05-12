@@ -14,15 +14,15 @@
         {
             case ButtonTypes.Ok:
                 <div class="col d-flex justify-content-center">
-                    <button class="btn btn-primary" @onclick=OkClick>Ok</button>
+                    <button class="btn btn-primary" @onclick=OkClick>@OkButtonText</button>
                 </div>
                 break;
             case ButtonTypes.OkCancel:
                 <div class="col d-flex justify-content-center">
-                    <button class="btn btn-secondary" @onclick=OkClick>Ok</button>
+                    <button class="btn btn-secondary" @onclick=OkClick>@OkButtonText</button>
                 </div>
                 <div class="col d-flex justify-content-center">
-                    <button class="btn btn-primary" @onclick=CancelClick>Cancel</button>
+                    <button class="btn btn-primary" @onclick=CancelClick>@CancelButtonText</button>
                 </div>
                 break;
             case ButtonTypes.YesNo:
@@ -46,6 +46,10 @@
     public ButtonTypes ButtonTypes { get; set; }
     [Parameter]
     public bool AllowMarkup { get; set; } = false;
+    [Parameter]
+    public string OkButtonText { get; set; } = "Ok";
+    [Parameter]
+    public string CancelButtonText { get; set; } = "Cancel";
 
     private void OkClick()
     {

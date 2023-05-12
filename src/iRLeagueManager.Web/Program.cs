@@ -17,6 +17,9 @@ using Blazored.Toast;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.AddConfiguration(
+    builder.Configuration.GetSection("Logging"));
+
 // Add services to the container.
 builder.Services.AddScoped<ServerAuthenticationStateProvider>();
 builder.Services.AddRazorPages();
@@ -31,8 +34,6 @@ builder.Services.AddBlazoredToast();
 builder.Services.AddMvvm();
 builder.Services.AddLeagueApiService();
 
-var apiHttpClient = new HttpClient();
-apiHttpClient.BaseAddress = new Uri(builder.Configuration["APIServer"] ?? string.Empty);
 builder.Services.AddScoped(configure =>
 {
     var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
@@ -41,11 +42,12 @@ builder.Services.AddScoped(configure =>
     jsonOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     return jsonOptions;
 });
-builder.Services.AddScoped<LeagueApiClientFactory>();
+
+builder.Services.AddLeagueApiClient(config => config
+    .UseBaseAddress(builder.Configuration["APIServer"] ?? string.Empty)
+    .UseTokenStore<BrowserProtectedStorageTokenStore>());
+
 builder.Services.AddScoped<ClientLocalTimeProvider>();
-builder.Services.AddScoped<ITokenStore, AsyncTokenStore>();
-builder.Services.AddScoped<IAsyncTokenProvider>(x => x.GetRequiredService<ITokenStore>());
-builder.Services.AddScoped(sp => sp.GetRequiredService<LeagueApiClientFactory>().CreateClient());
 builder.Services.AddScoped<SharedStateService>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvicer>();
 builder.Services.AddTrackList();

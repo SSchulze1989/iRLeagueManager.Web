@@ -19,5 +19,5 @@ public sealed class StandingConfigurationViewModel : LeagueViewModelBase<Standin
 
     public bool UseCombinedResult { get => model.UseCombinedResult; set => SetP(model.UseCombinedResult, value => model.UseCombinedResult = value, value); }
 
-    public int WeeksCounted { get => model.WeeksCounted; set => SetP(model.WeeksCounted, value => model.WeeksCounted = value, value); }
+    public int? WeeksCounted { get => model.WeeksCounted <= 0 ? null : model.WeeksCounted; set => SetP(model.WeeksCounted, value => model.WeeksCounted = value, value > 0 ? value.Value : 0); }
 }

@@ -2,7 +2,7 @@
 
 namespace iRLeagueManager.Web.Data;
 
-public sealed class StatusResult
+public class StatusResult
 {
     public StatusResult(bool success, string status)
     {
@@ -48,4 +48,40 @@ public sealed class StatusResult
     {
         return new StatusResult(false, status, message, errors);
     }
+}
+
+public class StatusResult<T> : StatusResult
+{
+
+    public StatusResult(bool success, string status, T? content) : base(success, status)
+    {
+        Content = content;
+    }
+
+    public StatusResult(bool success, string status, T? content, string message) : base(success, status, message)
+    {
+        Content = content;
+    }
+
+    public StatusResult(bool success, string status, T? content, string message, IEnumerable<object> errors) : base(success, status, message, errors)
+    {
+        Content = content;
+    }
+
+    public static StatusResult<T> SuccessResult(T? content)
+    {
+        return new StatusResult<T>(true, "Success", content);
+    }
+
+    public static StatusResult<T> SuccessResult(T? content, string message)
+    {
+        return new StatusResult<T>(true, "Success", content, message);
+    }
+
+    public static StatusResult<T> FailedResult(string status, T? content, string message, IEnumerable<object> errors)
+    {
+        return new StatusResult<T>(false, status, content, message, errors);
+    }
+
+    public T? Content { get; init; }
 }

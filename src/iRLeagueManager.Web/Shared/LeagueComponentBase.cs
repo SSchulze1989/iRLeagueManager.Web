@@ -194,7 +194,9 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
         IEnumerable<string> roles = new[] { "Admin" };
         if (Shared.LeagueName != null)
         {
-            var leagueRoleNames = roleNames
+            var roleValues = roleNames.Select(x => LeagueRoles.GetRoleValue(x));
+            roleValues = roleValues.Concat(roleValues.SelectMany(LeagueRoles.ImplicitRoleOf)).Distinct();
+            var leagueRoleNames = roleValues
                 .Select(x => LeagueRoles.GetLeagueRoleName(Shared.LeagueName, x))
                 .NotNull();
             roles = roles.Concat(leagueRoleNames);
@@ -212,9 +214,20 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
         await JsRuntime.InvokeVoidAsync("scrollToElement", reference);
     }
 
-    protected void NavigateTo(string url, bool replace = false)
+    protected void NavigateTo(string url, bool replace = false, string? returnUrl = null)
     {
+        if (string.IsNullOrEmpty(returnUrl) == false)
+        {
+            var queryParameters = new Dictionary<string, object?> { { "returnUrl", returnUrl } };
+            url = NavigationManager.GetUriWithQueryParameters(url, queryParameters);
+        }
         NavigationManager.NavigateTo(url, replace: replace);
+    }
+
+    protected void NavigateToRelative(string relativeUrl, bool replace = false)
+    {
+        var absoluteUrl = NavigationManager.ToAbsoluteUri(relativeUrl).ToString();
+        NavigateTo(absoluteUrl, replace: replace);
     }
 
     protected void ForceNavigateTo(string url, bool fullReload = false)

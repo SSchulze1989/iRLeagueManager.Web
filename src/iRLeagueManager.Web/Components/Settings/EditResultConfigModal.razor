@@ -13,7 +13,7 @@
                     General Settings
                 </button>
             </h2>
-            <div class="accordion-collapse collapse show input-group-list input-group-list-flush" id="collapseGeneralSettings">
+            <div class="accordion-collapse collapse show input-group-list m-1" id="collapseGeneralSettings">
                 <InputGroup Label="Name" ValidationFor="() => Vm.Name">
                     <InputText class="form-control" id="input-name" placeholder="Name..." aria-label="input-name" @bind-Value=Vm.Name data-bs-toggle="tooltip" title="Identifying name of the result config" />
                 </InputGroup>
@@ -51,11 +51,11 @@
 
         <div class="accordion-item">
             <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="true" aria-controls="collapseFilters">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="true" aria-controls="collapseFilters">
                     Filters
                 </button>
             </h2>
-            <div class="accordion-collapse collapse show input-group-list input-group-list-flush" id="collapseFilters">
+            <div class="accordion-collapse collapse show input-group-list m-1" id="collapseFilters">
                 <InputGroup Label="Points Filter">
                     <button class="form-control" type="button" @onclick=PointsFilterClick data-bs-toggle="tooltip" title="Filter rows that can score points. Only rows that fulfill all filter requirements will be given points. Rows are still displayed in the output result set">
                         @if (Vm.FiltersForPoints.Count == 0)
@@ -89,7 +89,7 @@
                     Session Scorings
                 </button>
             </h2>
-            <div class="accordion-collapse collapse show m-1 mt-2" id="collapseSessionScorings">
+            <div class="accordion-collapse collapse show m-1" id="collapseSessionScorings">
                 @foreach(var scoring in @Bind(Vm, x => x.Scorings).Where(x => x.IsCombinedResult == false))
                 {
                     <div class="input-group-list mb-3">
@@ -109,11 +109,11 @@
 
         <div class="accordion-item">
             <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCombined" aria-expanded="true" aria-controls="collapseCombined">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCombined" aria-expanded="true" aria-controls="collapseCombined">
                     Combined Result
                 </button>
             </h2>
-            <div class="accordion-collapse collapse show input-group-list input-group-list-flush" id="collapseCombined">
+            <div class="accordion-collapse collapse show input-group-list m-1" id="collapseCombined">
                 <div class="input-group" disabled>
                     <div class="input-group-text">
                         <InputCheckbox class="form-check-input mt-0" @bind-Value=Vm.CalculateCombinedResult/>

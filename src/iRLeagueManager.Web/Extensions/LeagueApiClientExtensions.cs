@@ -30,6 +30,15 @@ internal static class LeagueApiClientExtensions
         }
         return StatusResult.FailedResult(clientActionResult.Status, clientActionResult.Message, clientActionResult.Errors);
     }
+
+    public static StatusResult<T> ToContentStatusResult<T>(this ClientActionResult<T> clientActionResult)
+    {
+        if (clientActionResult.Success)
+        {
+            return StatusResult<T>.SuccessResult(clientActionResult.Content, clientActionResult.Message);
+        }
+        return StatusResult<T>.FailedResult(clientActionResult.Status, clientActionResult.Content, clientActionResult.Message, clientActionResult.Errors);
+    }
 }
 
 public static class ExtensionMethods

@@ -10,15 +10,41 @@
         }
     </div>
 
-    <div class="collapse show mt-2" id="config_@(ResultConfig.ResultConfigId)_details">
+    <div class="collapse @(Collapsed ? "" : "show") mt-2 text-muted" id="config_@(ResultConfig.ResultConfigId)_details">
+        @{
+            var scoringsCount = ResultConfig.Scorings.Count();
+        }
         @foreach (var scoring in ResultConfig.Scorings)
         {
+            var pointRule = scoring.PointRule;
+            var finalSortOptions = pointRule.FinalSortOptions;
             <div class="mb-3">
-                <h6>@scoring.Name</h6>
-                <div class="ms-5">
-                    <small></small>
-                    <PointTable PointRule=scoring.PointRule />
-                    <small>Sort results by: @string.Join(" then ", scoring.PointRule.FinalSortOptions)</small>
+                @if (scoringsCount > 1)
+                {
+                    <h6 class="text-decoration-underline">@scoring.Name</h6>
+                }
+                <div class="ms-3">
+                    <small>
+                        @switch(scoring.PointRule.RuleType)
+                        {
+                            case PointRuleViewModel.PointRuleType.MaxPoints:
+                                <label>Max Points: max. points: @pointRule.MaxPoints / drop off: @pointRule.PointDropOff</label>
+                                break;
+                            case PointRuleViewModel.PointRuleType.PointList:
+                                @if (pointRule.PointsPerPlace.Any())
+                                {
+                                    <label>points per place: @string.Join(",", pointRule.PointsPerPlace)</label>
+                                }
+                                else
+                                {
+                                    <label>keep points</label>
+                                }
+                                break;
+                        }
+                        <br/>
+                    </small>
+                    @*<PointTable PointRule=scoring.PointRule />*@
+                    <small>Sort results by: @(finalSortOptions.Any() ? string.Join(" then ", finalSortOptions) : "Default")</small>
                 </div>
             </div>
         }

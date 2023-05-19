@@ -1,0 +1,51 @@
+﻿@typeparam TRow
+
+<th class="
+        table-header
+        @(Active ? "active" : "")
+        @(Direction == SortDirection.Ascending ? "sort-ascending" : "sort-descending")
+    "
+    @onclick=OnClick> 
+    @Text
+</th>
+
+@code {
+    [CascadingParameter]
+    public SortState<TRow> CascadingSortState { get; set; } = default!;
+    [Parameter]
+    public string Text { get; set; } = string.Empty;
+    [Parameter]
+    public Func<TRow, IComparable>? Sort { get; set; }
+    [Parameter]
+    public bool Default { get; set; } = false;
+    [Parameter]
+    public SortDirection Direction { get; set; } = SortDirection.Ascending;
+
+    private bool Active => CascadingSortState.SortFunc == Sort && HasAction;
+
+    private bool HasAction => Sort is not null;
+
+    protected override void OnInitialized()
+    {
+        if (Default)
+        {
+            OnClick();
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        BlazorParameterNullException.ThrowIfNull(this, CascadingSortState);
+    }
+
+    private void OnClick()
+    {
+        if (Active)
+        {
+            Direction = Direction == SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending;
+        }
+
+        CascadingSortState.Direction = Direction;
+        CascadingSortState.SortFunc = Sort;
+    }
+}

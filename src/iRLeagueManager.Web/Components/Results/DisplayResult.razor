@@ -12,92 +12,92 @@
             var resultRows = Result.ResultRows;
             var displayBonusPoints = resultRows.Any(x => x.BonusPoints != 0);
             var displayStartPos = resultRows.Any(x => x.StartPosition != 0);
+            var displayChange = displayStartPos;
             var displayQualyLap = resultRows.Any(x => x.QualifyingTime > TimeSpan.FromSeconds(1));
         }
-        <div class="card-body overflow-auto p-1">
-            <table class="table table-sm table-striped table-hover" style="font-size: 0.9rem; line-height: 1rem">
-                <thead>
-                    <tr>
-                        <th @onclick="() => SetOrderProperty(Result, row => row.FinalPosition)">Pos.</th>
-                        @if (isTeamResult == false)
-                        {
-                            @if (displayStartPos)
-                            {
-                                <th @onclick="() => SetOrderProperty(Result, row => row.StartPosition)">Start</th>
-                            }
-                            <th @onclick="() => SetOrderProperty(Result, row => row.Firstname)">Name</th>
-                        }
-                        <th @onclick="() => SetOrderProperty(Result, row => row.TeamName)">Team</th>
-                        @if (displayQualyLap)
-                        {
-                            <th @onclick="() => SetOrderProperty(Result, row => row.QualifyingTime)">Qualy Lap</th>
-                        }
-                        <th @onclick="() => SetOrderProperty(Result, row => row.FastestLapTime)">Fastest Lap</th>
-                        <th @onclick="() => SetOrderProperty(Result, row => row.AvgLapTime)">Avg. Lap</th>
-                        @if (isTeamResult == false)
-                        {
-                            <th @onclick="() => SetOrderProperty(Result, row => row.Interval)">Interval</th>
-                            <th @onclick="() => SetOrderProperty(Result, row => row.LeadLaps)">Laps Lead</th>
-                            <th @onclick="() => SetOrderProperty(Result, row => row.CompletedLaps)">Laps Compl.</th>
-                        }
-                        <th @onclick="() => SetOrderProperty(Result, row => row.RacePoints)">Race Pts.</th>
-                        @if (displayBonusPoints)
-                        {
-                            <th @onclick="() => SetOrderProperty(Result, row => row.BonusPoints)">Bonus Pts.</th>
-                        }
-                        <th @onclick="() => SetOrderProperty(Result, row => row.PenaltyPoints)">Penalty</th>
-                        <th @onclick="() => SetOrderProperty(Result, row => row.TotalPoints)">Total Pts.</th>
-                        @if (isTeamResult == false)
-                        {
-                            <th @onclick="() => SetOrderProperty(Result, row => row.OldIrating)">IR (@(EvenStrengthOfField(Result)))</th>
-                        }
-                        <th @onclick="() => SetOrderProperty(Result, row => row.Incidents)">Incs.</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach(var row in resultRows)
+        <div class="card-body overflow-auto p-1">        
+            <ResultTable Data=Result.ResultRows>
+                <HeaderTemplate>
+                    <ResultTableHeader Text="Pos." Sort=@(x => x.FinalPosition) Default=true/>
+                    @if (isTeamResult == false)
                     {
-                        <tr>
-                            <td><ValueChange Value=row.FinalPosition Change=row.FinalPositionChange /></td>
-                            @if (isTeamResult == false)
-                            {
-                                @if (displayStartPos)
-                                {
-                                    <td>@row.StartPosition</td>
-                                }
-                                <td>@row.Firstname @row.Lastname</td>
-                            }
-                            <td style="color:@row.TeamColor">@row.TeamName</td>
-                            @if (displayQualyLap)
-                            {
-                                <td class="@(IsFastestLap(resultRows, row, x => x.QualifyingTime) ? "fw-bold" : "")">@row.QualifyingTime.LapTimeString()</td>
-                            }
-                            <td class="@(IsFastestLap(resultRows, row, x => x.FastestLapTime) ? "fw-bold" : "")">@row.FastestLapTime.LapTimeString() @(row.FastLapNr != 0 ? $"({row.FastLapNr})" : "")</td>
-                            <td class="@(IsFastestLap(resultRows, row, x => x.AvgLapTime) ? "fw-bold" : "")">@row.AvgLapTime.LapTimeString()</td>
-                            @if (isTeamResult == false)
-                            {
-                                <td>+@(row.Interval.Laps == 0 ? row.Interval.Time.LapTimeString() : $"{row.Interval.Laps} Laps")</td>
-                                <td>@row.LeadLaps</td>
-                                <td>@row.CompletedLaps</td>
-                            }
-                            <td>@row.RacePoints</td>
-                            @if (displayBonusPoints)
-                            {
-                                <td>@row.BonusPoints</td>
-                            }
-                            <td style="@(@row.PenaltyPoints != 0 ? "color:red" : "")">
-                                @(row.PenaltyPoints != 0 ? $"-{row.PenaltyPoints}" : "")
-                            </td>
-                            <td>@row.TotalPoints</td>
-                            @if (isTeamResult == false)
-                            {
-                                <td>@row.OldIrating</td>
-                            }
-                            <td>@row.Incidents</td>
-                        </tr>
+                        @if (displayStartPos)
+                        {
+                            <ResultTableHeader Text="Start" Sort=@(x => x.StartPosition) />
+                        }
+                        <ResultTableHeader Text="Name" Sort="@(x => x.Firstname)" />
                     }
-                </tbody>
-            </table>
+                    <ResultTableHeader Text="Team" Sort=@(x => x.TeamName)/>
+                    @if (displayQualyLap)
+                    {
+                        <ResultTableHeader Text="Qualy Lap" Sort="@(x => x.QualifyingTime)" />
+                    }
+                    <ResultTableHeader Text="Fastest Lap" Sort="@(x => x.FastestLapTime)" />
+                    <ResultTableHeader Text="Avg. Lap" Sort="@(x => x.AvgLapTime)" />
+                    @if (isTeamResult == false)
+                    {
+                        <ResultTableHeader Text="Interval" Sort="@(x => x.Interval)" />
+                        <ResultTableHeader Text="Laps Lead" Sort="@(x => x.LeadLaps)" Direction="SortDirection.Descending" />
+                        <ResultTableHeader Text="Laps Compl." Sort="@(x => x.CompletedLaps)" Direction="SortDirection.Descending" />
+                    }
+                    <ResultTableHeader Text="Race Pts." Sort="@(x => x.RacePoints)" Direction="SortDirection.Descending" />
+                    @if (displayBonusPoints)
+                    {
+                        <ResultTableHeader Text="Bonus Pts." Sort="@(x => x.BonusPoints)" Direction="SortDirection.Descending" />
+                    }
+                    <ResultTableHeader Text="Penalty" Sort="@(x => x.PenaltyPoints)" />
+                    <ResultTableHeader Text="Total Pts." Sort="@(x => x.TotalPoints)" Direction="SortDirection.Descending" />
+                    @if (isTeamResult == false)
+                    {
+                        <ResultTableHeader Text="@($"IR ({EvenStrengthOfField(Result)})")" Sort="@(x => x.OldIrating)" Direction="SortDirection.Descending" />
+                    }
+                    <ResultTableHeader Text="Incs." Sort="@(x => x.Incidents)" />
+                </HeaderTemplate>
+                <RowTemplate Context=Row>
+                    <td>
+                        <ValueChange Value=Row.FinalPosition Change=@(displayChange ? Row.FinalPositionChange : 0)>
+                            <ValueTemplate Context=Value>
+                                @Value.
+                            </ValueTemplate>
+                        </ValueChange>
+                    </td>
+                    @if (isTeamResult == false)
+                    {
+                        @if (displayStartPos)
+                        {
+                            <td>@Row.StartPosition.</td>
+                        }
+                        <td>@Row.Firstname @Row.Lastname</td>
+                    }
+                    <td style="color:@(Row.TeamColor)">@(Row.TeamName)</td>
+                    @if (displayQualyLap)
+                    {
+                        <td class="@(IsFastestLap(resultRows, Row, x => x.QualifyingTime) ? "fw-bold" : "")">@Row.QualifyingTime.LapTimeString()</td>
+                    }
+                    <td class="@(IsFastestLap(resultRows, Row, x => x.FastestLapTime) ? "fw-bold" : "")">@Row.FastestLapTime.LapTimeString() @(Row.FastLapNr != 0 ? $"({Row.FastLapNr})" : "")</td>
+                    <td class="@(IsFastestLap(resultRows, Row, x => x.AvgLapTime) ? "fw-bold" : "")">@Row.AvgLapTime.LapTimeString()</td>
+                    @if (isTeamResult == false)
+                    {
+                        <td>+@(Row.Interval.Laps == 0 ? Row.Interval.Time.LapTimeString() : $"{Row.Interval.Laps} Laps")</td>
+                        <td>@Row.LeadLaps</td>
+                        <td>@Row.CompletedLaps</td>
+                    }
+                    <td>@Row.RacePoints</td>
+                    @if (displayBonusPoints)
+                    {
+                        <td>@Row.BonusPoints</td>
+                    }
+                    <td style="@(@Row.PenaltyPoints != 0 ? "color:red" : "")">
+                        @(Row.PenaltyPoints != 0 ? $"-{Row.PenaltyPoints}" : "")
+                    </td>
+                    <td>@Row.TotalPoints</td>
+                    @if (isTeamResult == false)
+                    {
+                        <td>@Row.OldIrating</td>
+                    }
+                    <td>@Row.Incidents</td>
+                </RowTemplate>
+            </ResultTable>
         </div>
     </div>
 </div>

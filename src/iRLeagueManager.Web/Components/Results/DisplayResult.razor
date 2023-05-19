@@ -118,11 +118,6 @@
         isTeamResult = Result?.ResultRows.Any(x => x.MemberId == null) ?? false;
     }
 
-    private void SetOrderProperty(SessionResultViewModel result, Expression<Func<ResultRowModel, IComparable>> selector, bool descending = false)
-    {
-        result.OrderByPropertySelector = selector;
-    }
-
     private bool IsFastestLap(IEnumerable<ResultRowModel> resultRows, ResultRowModel row, Func<ResultRowModel, TimeSpan> selector)
     {
         var rowValue = selector(row);

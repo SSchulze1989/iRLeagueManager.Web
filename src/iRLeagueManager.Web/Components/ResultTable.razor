@@ -1,0 +1,37 @@
+﻿@typeparam TRow
+@attribute [CascadingTypeParameter(nameof(TRow))]
+
+<table class="table table-sm table-striped table-hover" style="font-size: 0.9rem; line-height: 1rem">
+    <thead>
+        <tr>
+            <CascadingValue Value=@SortState>
+                @HeaderTemplate
+            </CascadingValue>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var rowData in GetOrderedData(Data, SortState))
+        {
+            <tr>
+                @RowTemplate(rowData)
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private static IEnumerable<TRow> GetOrderedData(IEnumerable<TRow> data, SortState<TRow> sortState)
+    {
+        if (sortState.SortFunc is null)
+        {
+            return data;
+        }
+
+        return sortState.Direction switch
+        {
+            SortDirection.Ascending => data.OrderBy(sortState.SortFunc),
+            SortDirection.Descending => data.OrderByDescending(sortState.SortFunc),
+            _ => data
+        };
+    }
+}

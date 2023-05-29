@@ -407,7 +407,7 @@ a, .btn-link {
     cursor: pointer;
     position: relative;
     filter:opacity(75%);
-    padding-right: 0.6em !important;
+    padding-right: 0.8em !important;
 }
 
     .table-header.active {
@@ -438,7 +438,7 @@ a, .btn-link {
         border-right: 0.3em solid transparent;
         border-bottom: 0.6em solid;
         position: absolute;
-        top: 0.5em;
+        bottom: 0.55em;
         margin-left: 0.15em;
     }
 

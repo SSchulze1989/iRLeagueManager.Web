@@ -1,23 +1,72 @@
 ﻿@page "/{LeagueName}/Settings/Templates"
 @using System.Net;
+@using iRLeagueApiCore.Common.Enums;
 @using iRLeagueApiCore.Common.Models;
 @inherits LeagueComponentBase
 @inject LeagueViewModel Vm
 @inject IServiceProvider Provider
+@layout SettingsLayout
 
-<h3>Templates</h3>
-@Status: @Message
-@foreach (var error in Errors)
-{
-    <div>
-        @error
+<PageTitle>Select Template - @LeagueName</PageTitle>
+
+<div class="card">
+    <div class="card-header">
+        Select Template
     </div>
+    <ol class="@listClass">
+        <li class="@listItemClass" type="button">
+            <div>
+                <h5>Standard: iRacing points</h5>
+                <p>
+                    Use points uploaded from iRacing results directly without calculating points on the server
+                </p>
+            </div>
+        </li>
+        <li class="@listItemClass" type="button">
+            <div>
+                <h5>Standard: custom points</h5>
+                <p>
+                    Use custom points settings for calculating points on the server
+                </p>
+            </div>
+        </li>
+        <li class="@listItemClass" type="button">
+            <div>
+                <h5>Driver + Teams: iRacing points</h5>
+                <p>
+                    Driver &amp; Team championships with points uploaded from iRacing
+                </p>
+            </div>
+        </li>
+        <li class="@listItemClass" type="button">
+            <div>
+                <h5>Driver + Teams: custom points</h5>
+                <p>
+                    Driver &amp; Team championships with custom points settings
+                </p>
+            </div>
+        </li>
+    </ol>
+</div>
+
+@if (string.IsNullOrEmpty(Status) == false)
+{
+    <label>@Status: @Message</label>
+    @foreach(var error in Errors)
+    {
+        <p>
+            @error
+        </p>
+    }
 }
 
 @code {
     private string Status { get; set; } = string.Empty;
     private string Message { get; set; } = string.Empty;
     private IEnumerable<object> Errors { get; set; } = Array.Empty<object>();
+
+    private const string listClass = "list-group list-group-flush list-group-numbered";
+    private const string listItemClass = "list-group-item list-group-item-action d-flex justify-content-start align-items-start gap-2";
 
     [Parameter]
     [SupplyParameterFromQuery]
@@ -31,37 +80,36 @@
             return;
         }
         await Vm.LoadCurrent(CancellationToken);
-        var result = await ApplyDefaultTemplate(CancellationToken);
-        Status = result.Status;
-        Message = result.Message;
-        Errors = result.Errors;
-        await InvokeAsync(StateHasChanged);
-        if (result.IsSuccess == false)
-        {
-            return;
-        }
-        await Vm.InitializeLeague(CancellationToken);
-        if (string.IsNullOrEmpty(ReturnUrl) == false)
-        {
-            NavigateTo(WebUtility.UrlDecode(ReturnUrl));
-        }
+        //var result = await ApplyDefaultTemplate(CancellationToken);
+        //Status = result.Status;
+        //Message = result.Message;
+        //Errors = result.Errors;
+        //await InvokeAsync(StateHasChanged);
+        //if (result.IsSuccess == false)
+        //{
+        //    return;
+        //}
+        //await Vm.InitializeLeague(CancellationToken);
+        //if (string.IsNullOrEmpty(ReturnUrl) == false)
+        //{
+        //    NavigateTo(WebUtility.UrlDecode(ReturnUrl));
+        //}
     }
 
-    private async Task<StatusResult> ApplyDefaultTemplate(CancellationToken cancellationToken = default)
+    private async Task<StatusResult> CreateFirstSeason(CancellationToken cancellationToken = default)
     {
-        StatusResult result;
         if (LeagueName is null)
         {
             return TemplateFailure("League was null");
         }
 
         var newSeason = new PostSeasonModel()
-        {
-            SeasonName = "Season 1",
-            Finished = false,
-            HideComments = false,
-        };
-        result = await Vm.AddSeason(newSeason, cancellationToken);
+            {
+                SeasonName = "Season 1",
+                Finished = false,
+                HideComments = false,
+            };
+        var result = await Vm.AddSeason(newSeason, cancellationToken);
         if (result.IsSuccess == false)
         {
             return result;
@@ -72,6 +120,16 @@
             return TemplateFailure("Created season was null");
         }
         await ApiService.SetCurrentSeasonAsync(LeagueName, season.SeasonId);
+        return result;
+    }
+
+    private async Task<StatusResult> ApplyDefaultTemplate(CancellationToken cancellationToken = default)
+    {
+        StatusResult result = await CreateFirstSeason(CancellationToken);
+        if (result.IsSuccess == false)
+        {
+            return result;
+        }
 
         var resultSettingsVm = Provider.GetRequiredService<ResultSettingsViewModel>();
         var championship = new PutChampSeasonModel()
@@ -107,6 +165,66 @@
                 new ScoringModel()
                 {
                     Name = "Race",   
+                }
+            },
+        };
+        result = await champSeasonVm.AddResultConfig(resultConfig, cancellationToken);
+        if (result.IsSuccess == false)
+        {
+            return result;
+        }
+
+        return StatusResult.SuccessResult();
+    }
+
+    private async Task<StatusResult> ApplyCustomPointsTemplate(CancellationToken cancellationToken = default)
+    {
+        StatusResult result = await CreateFirstSeason();
+        if (result.IsSuccess == false)
+        {
+            return result;
+        }
+
+        var resultSettingsVm = Provider.GetRequiredService<ResultSettingsViewModel>();
+        var championship = new PutChampSeasonModel()
+        {
+            ChampionshipName = "Championship",
+            ChampionshipDisplayName = "Championship",
+            StandingConfig = new()
+            {
+                Name = "Championship",
+                ResultKind = iRLeagueApiCore.Common.Enums.ResultKind.Member,
+                WeeksCounted = 0,
+            },
+        };
+        result = await resultSettingsVm.AddChampionship(championship, cancellationToken);
+        if (result.IsSuccess == false)
+        {
+            return result;
+        }
+
+        var champSeason = resultSettingsVm.CurrentChampSeasons.FirstOrDefault();
+        if (champSeason is null)
+        {
+            return TemplateFailure("Created champseason could not be loaded");
+        }
+        var champSeasonVm = Provider.GetRequiredService<ChampSeasonViewModel>();
+        champSeasonVm.SetModel(champSeason.GetModel());
+        var resultConfig = new ResultConfigModel()
+        {
+            Name = "Custom Points Template",
+            DisplayName = "Custom Points Template",
+            Scorings = new[]
+            {
+                new ScoringModel()
+                {
+                    Name = "Race",
+                    PointRule = new PointRuleModel()
+                    {
+                        PointsPerPlace = new[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 },
+                        PointsSortOptions = new[] { SortOptions.FinPosAsc },
+                        FinalSortOptions = new[] { SortOptions.TotalPtsAsc, SortOptions.PenPtsDesc },
+                    },
                 }
             },
         };

@@ -41,8 +41,12 @@
         window.enableTooltips = (defaultPlacement) => {
 
             document.querySelectorAll('[data-bs-toggle="tooltip"]')
-                .forEach(function (tooltip) {
-                    new bootstrap.Tooltip(tooltip, {delay: {"show": 500, "hide": 100}, placement: defaultPlacement, html: true});
+                .forEach(function (tooltipEl) {
+                    let tooltip = bootstrap.Tooltip.getInstance(tooltipEl);
+                    if (!tooltip)
+                    {
+                        new bootstrap.Tooltip(tooltipEl, {delay: {"show": 500, "hide": 100}, placement: defaultPlacement, html: true, trigger: 'hover'});
+                    }
                 });
         }
 

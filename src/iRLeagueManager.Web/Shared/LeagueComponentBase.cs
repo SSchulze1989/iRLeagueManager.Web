@@ -211,7 +211,12 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
 
     protected async Task ScrollToElement(ElementReference reference)
     {
-        await JsRuntime.InvokeVoidAsync("scrollToElement", reference);
+        await ScrollToElementId(reference.Id);
+    }
+
+    protected async Task EnableTooltips()
+    {
+        await JsRuntime.InvokeVoidAsync("enableTooltips", "right");
     }
 
     protected void NavigateTo(string url, bool replace = false, string? returnUrl = null)

@@ -1,55 +1,23 @@
 ﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
-using System.Linq.Expressions;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public sealed class SessionResultViewModel : LeagueViewModelBase<SessionResultViewModel>
+public sealed class SessionResultViewModel : LeagueViewModelBase<SessionResultViewModel, ResultModel>
 {
-    private ResultModel model;
-
     public SessionResultViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         this(loggerFactory, apiService, new ResultModel())
     {
     }
 
     public SessionResultViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, ResultModel model) :
-        base(loggerFactory, apiService)
+        base(loggerFactory, apiService, model)
     {
-        this.model = model;
-        orderByPropertySelector = x => x.FinalPosition;
     }
 
     public EventResultViewModel? EventResult { get; set; }
     public long SeasonId => model.SeasonId;
     public string SessionName => model.SessionName;
     public int? SessionNr => model.SessionNr;
-
-    private Expression<Func<ResultRowModel, IComparable>> orderByPropertySelector;
-    public Expression<Func<ResultRowModel, IComparable>> OrderByPropertySelector
-    {
-        get => orderByPropertySelector;
-        set
-        {
-            if (Set(ref orderByPropertySelector, value, new SamePropertyEqualityComparer<ResultRowModel>()))
-            {
-                OnPropertyChanged(nameof(ResultRows));
-                return;
-            }
-            OrderDescending = !OrderDescending;
-        }
-    }
-    public bool OrderDescending { get; private set; }
-
-    public IEnumerable<ResultRowModel> ResultRows
-    {
-        get
-        {
-            if (OrderDescending)
-            {
-                return model.ResultRows.OrderByDescending(OrderByPropertySelector.Compile());
-            }
-            return model.ResultRows.OrderBy(OrderByPropertySelector.Compile());
-        }
-    }
+    public IEnumerable<ResultRowModel> ResultRows => model.ResultRows;
 }

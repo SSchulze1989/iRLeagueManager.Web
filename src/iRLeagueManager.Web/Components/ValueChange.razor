@@ -1,5 +1,14 @@
 ﻿@preservewhitespace true
-<span class="d-inline-block pe-1" style="min-width: 1rem;">@Value</span>
+<span class="d-inline-block pe-1" style="min-width: 1em;">
+    @if (ValueTemplate is not null)
+    {
+        @ValueTemplate(Value)
+    }
+    else
+    {
+        @Value
+    }
+</span>
 <span class="d-inline-block pos-change @(ChangeClass(Change))">@Change</span>
 
 @code {
@@ -7,6 +16,8 @@
     public double Value { get; set; }
     [Parameter]
     public double Change { get; set; }
+    [Parameter]
+    public RenderFragment<double>? ValueTemplate { get; set; }
 
     private static string ChangeClass(double change)
     {

@@ -59,18 +59,27 @@
             }
             @foreach (var resultConfig in ChampSeason.ResultConfigViewModels)
             {
-                <div class="list-group-item list-group-item-action d-flex justify-content-between" type="button" @onclick=@(() => OnResultConfigClick(resultConfig))>
-                    <ResultConfigPreview ResultConfig="resultConfig" class="overflow-auto" Collapsed="!expandResultConfig"/>
-                    <div class="d-flex align-self-start">
-                        <button class="btn btn-toggle @(expandResultConfig ? "" : "collapsed")" type="button" data-bs-toggle="collapse" data-bs-target="#config_@(resultConfig.ResultConfigId)_details"
-                            aria-expanded="@(expandResultConfig ? "true" : "false")" @onclick:stopPropagation>
-                            <span class="oi oi-chevron-bottom btn-toggle-off" />
-                            <span class="oi oi-chevron-top btn-toggle-on" />
-                        </button>
-                        <button class="btn btn-outline-danger" type="button" @onclick=@(() =>OnDeleteResultConfigClick(resultConfig)) @onclick:stopPropagation>
-                            <span class="oi oi-trash" />
-                        </button>
-                    </div>
+                <div class="list-group-item list-group-item-action d-flex justify-content-between align-content-start px-2 gap-1" type="button" @onclick=@(() => OnResultConfigClick(resultConfig))>
+                    <button class="btn align-self-start m-0 p-0" @onclick=@(() => DefaultResultConfigClick(resultConfig)) @onclick:preventDefault @onclick:stopPropagation
+                            data-bs-toggle="tooltip" data-bs-placement="left" title="Default point system<br/>This will automatically set this point system as active on all events that you create">
+                        @if (resultConfig.ResultConfigId == ChampSeason.DefaultResultConfig?.ResultConfigId)
+                        {
+                            <span class="bi-star-fill" style="color: gold"/>
+                        }
+                        else
+                        {
+                            <span class="bi-star text-muted" />
+                        }
+                    </button>
+                    <ResultConfigPreview ResultConfig="resultConfig" class="flex-grow-1 overflow-auto" Collapsed="!expandResultConfig"/>
+                    <button class="btn btn-toggle align-self-start @(expandResultConfig ? "" : "collapsed")" type="button" data-bs-toggle="collapse" data-bs-target="#config_@(resultConfig.ResultConfigId)_details"
+                        aria-expanded="@(expandResultConfig ? "true" : "false")" @onclick:stopPropagation>
+                        <span class="oi oi-chevron-bottom btn-toggle-off" />
+                        <span class="oi oi-chevron-top btn-toggle-on" />
+                    </button>
+                    <button class="btn btn-outline-danger align-self-start" type="button" @onclick=@(() =>OnDeleteResultConfigClick(resultConfig)) @onclick:stopPropagation>
+                        <span class="oi oi-trash" />
+                    </button>
                 </div>
             }
             <div class="list-group-item">
@@ -157,6 +166,7 @@ else
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
+        await EnableTooltips();
         if (firstRender == false)
         {
             return;
@@ -235,6 +245,17 @@ else
         {
             await ChampSeason.DeleteResultConfig(config.GetModel());
         }
+    }
+
+    private void DefaultResultConfigClick(ResultConfigViewModel resultConfig)
+    {
+        var configInfo = ChampSeason.ResultConfigs.FirstOrDefault(x => x.ResultConfigId == resultConfig.ResultConfigId);
+        if (ChampSeason.DefaultResultConfig?.ResultConfigId != configInfo?.ResultConfigId)
+        {
+            ChampSeason.DefaultResultConfig = configInfo;
+            return;
+        }
+        ChampSeason.DefaultResultConfig = null;
     }
 
     private ResultConfigModel CreateResultConfig()

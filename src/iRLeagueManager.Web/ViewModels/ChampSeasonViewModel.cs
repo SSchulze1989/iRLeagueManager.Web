@@ -58,6 +58,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
     }
 
     public ICollection<ResultConfigInfoModel> ResultConfigs => model.ResultConfigs;
+    public ResultConfigInfoModel? DefaultResultConfig { get => model.DefaultResultConfig; set => SetP(model.DefaultResultConfig, value => model.DefaultResultConfig = value, value); }
 
     private ICollection<ResultConfigViewModel> resultConfigViewModels;
     public ICollection<ResultConfigViewModel> ResultConfigViewModels { get => resultConfigViewModels; set => Set(ref resultConfigViewModels, value); }

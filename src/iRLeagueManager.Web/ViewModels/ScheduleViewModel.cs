@@ -28,6 +28,9 @@ public sealed class ScheduleViewModel : LeagueViewModelBase<ScheduleViewModel>
     private ObservableCollection<EventViewModel> events;
     public ObservableCollection<EventViewModel> Events { get => events; set => Set(ref events, value); }
 
+    private IEnumerable<ResultConfigInfoModel> defaultResultConfigs = Array.Empty<ResultConfigInfoModel>();
+    public IEnumerable<ResultConfigInfoModel> DefaultResultConfigs { get => defaultResultConfigs; set => Set(ref defaultResultConfigs, value); }
+
     public async Task SetModel(ScheduleModel model)
     {
         this.model = model;
@@ -97,6 +100,42 @@ public sealed class ScheduleViewModel : LeagueViewModelBase<ScheduleViewModel>
                 await LoadEvents(cancellationToken);
             }
 
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    public async Task<StatusResult> LoadDefaultResultConfig(CancellationToken cancellationToken = default)
+    {
+        if (CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await CurrentLeague
+                .ResultConfigs()
+                .Get(cancellationToken);
+            if (result.Success && result.Content is not null)
+            {
+                DefaultResultConfigs = result.Content
+                    .Where(x => x.IsDefaultConfig)
+                    .Select(x => new ResultConfigInfoModel()
+                    {
+                        LeagueId = x.LeagueId,
+                        ChampionshipName = x.ChampionshipName,
+                        ChampSeasonId = x.ChampSeasonId,
+                        IsDefaultConfig = x.IsDefaultConfig,
+                        DisplayName = x.DisplayName,
+                        Name = x.Name,
+                        ResultConfigId = x.ResultConfigId,
+                    });
+            }
             return result.ToStatusResult();
         }
         finally

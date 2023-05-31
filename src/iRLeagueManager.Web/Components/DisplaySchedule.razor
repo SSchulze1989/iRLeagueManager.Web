@@ -192,7 +192,7 @@
                     Task<StatusResult>>(async (@event, cancellationToken) => await @event.SaveChangesAsync(cancellationToken)));
         var options = new ModalOptions()
         {
-            Size = ModalSize.Medium,
+            Size = ModalSize.Large,
             DisableBackgroundCancel = true,
         };
         var modal = ModalService.Show<EditEventModal>("Edit Event", parameters, options);
@@ -210,20 +210,27 @@
             return;
         }
         var parameters = new ModalParameters()
-            .Add(nameof(EditEventModal.EventModel), GetNewEvent())
+            .Add(nameof(EditEventModal.EventModel), await GetNewEvent())
             .Add(nameof(EditEventModal.OnSubmit),
                 new Func<EventViewModel, CancellationToken, 
                     Task<StatusResult>>(async (@event, cancellationToken) => await Schedule.AddEvent(@event)));
         var options = new ModalOptions()
         {
+            Size = ModalSize.Large,
             DisableBackgroundCancel = true,
         };
         var result = await ModalService.Show<EditEventModal>("Add Event", parameters, options).Result;
     }
 
-    private EventModel GetNewEvent()
+    private async Task<EventModel> GetNewEvent()
     {
-        var newEvent = new EventModel() { Date = DateTime.UtcNow };
+        await Schedule.LoadDefaultResultConfig();
+
+        var newEvent = new EventModel() 
+        { 
+            Date = DateTime.UtcNow,
+            ResultConfigs = Schedule.DefaultResultConfigs.ToArray(),
+        };
         var lastEvent = Schedule.Events.LastOrDefault()?.CopyModel();
         if (lastEvent == null)
         {
@@ -233,7 +240,6 @@
         newEvent.Date = lastEvent.Date;
         newEvent.Duration = lastEvent.Duration;
         newEvent.EventType = lastEvent.EventType;
-        newEvent.ResultConfigs = lastEvent.ResultConfigs;
         newEvent.Sessions = lastEvent.Sessions.Select(x => new SessionModel()
         {
             Duration = x.Duration,

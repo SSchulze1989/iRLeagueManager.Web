@@ -1,53 +1,30 @@
 ﻿@page "/{LeagueName}/Settings/Templates"
 @using System.Net;
+@using System.ComponentModel;
 @using iRLeagueApiCore.Common.Enums;
 @using iRLeagueApiCore.Common.Models;
+@using iRLeagueManager.Web.Components;
 @inherits LeagueComponentBase
 @inject LeagueViewModel Vm
 @inject IServiceProvider Provider
-@layout SettingsLayout
 
 <PageTitle>Select Template - @LeagueName</PageTitle>
 
-<div class="card">
-    <div class="card-header">
-        Select Template
-    </div>
-    <ol class="@listClass">
-        <li class="@listItemClass" type="button">
+<h3>Select Template</h3>
+
+<ol class="list-group list-group-numbered">
+    @foreach(var (template, (title, description)) in TemplatesAvailable)
+    {
+        <li class="list-group-item list-group-item-action d-flex justify-content-start align-items-start gap-2 @(Loading ? "disabled" : "")" type="button" @onclick=@(() => OnTemplateSelect(template))>
             <div>
-                <h5>Standard: iRacing points</h5>
+                <h5>@title</h5>
                 <p>
-                    Use points uploaded from iRacing results directly without calculating points on the server
+                    @((MarkupString)description)
                 </p>
             </div>
         </li>
-        <li class="@listItemClass" type="button">
-            <div>
-                <h5>Standard: custom points</h5>
-                <p>
-                    Use custom points settings for calculating points on the server
-                </p>
-            </div>
-        </li>
-        <li class="@listItemClass" type="button">
-            <div>
-                <h5>Driver + Teams: iRacing points</h5>
-                <p>
-                    Driver &amp; Team championships with points uploaded from iRacing
-                </p>
-            </div>
-        </li>
-        <li class="@listItemClass" type="button">
-            <div>
-                <h5>Driver + Teams: custom points</h5>
-                <p>
-                    Driver &amp; Team championships with custom points settings
-                </p>
-            </div>
-        </li>
-    </ol>
-</div>
+    }
+</ol>
 
 @if (string.IsNullOrEmpty(Status) == false)
 {
@@ -61,16 +38,39 @@
 }
 
 @code {
+    [CascadingParameter]
+    private IModalService ModalService { get; set; } = default!;
+
     private string Status { get; set; } = string.Empty;
     private string Message { get; set; } = string.Empty;
     private IEnumerable<object> Errors { get; set; } = Array.Empty<object>();
+    private bool Loading { get; set; } = false;
 
-    private const string listClass = "list-group list-group-flush list-group-numbered";
-    private const string listItemClass = "list-group-item list-group-item-action d-flex justify-content-start align-items-start gap-2";
+    private enum TemplateType
+    {
+        StandardIracing,
+        StandardCustom,
+        DriverTeamIracing,
+        DriverTeamCuston,
+    }
+
+    private Dictionary<TemplateType, (string title, string description)> TemplatesAvailable = new()
+    {
+        { TemplateType.StandardIracing, ("Standard: iRacing points", "Use points uploaded from iRacing results directly without calculating points on the server" )},
+        { TemplateType.StandardCustom, ("Standard: custom points", "Use custom points settings for calculating points on the server" )},
+        { TemplateType.DriverTeamIracing, ("Driver + Teams: iRacing points", "Driver &amp; Team championships with points uploaded from iRacing" )},
+        { TemplateType.DriverTeamCuston, ("Driver + Teams: custom points", "Driver &amp; Team championships with custom points settings" )},
+    };
 
     [Parameter]
     [SupplyParameterFromQuery]
     public string ReturnUrl { get; set; } = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, ModalService);
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -81,20 +81,51 @@
         }
         await Vm.LoadCurrent(CancellationToken);
         //var result = await ApplyDefaultTemplate(CancellationToken);
-        //Status = result.Status;
-        //Message = result.Message;
-        //Errors = result.Errors;
-        //await InvokeAsync(StateHasChanged);
-        //if (result.IsSuccess == false)
-        //{
-        //    return;
-        //}
-        //await Vm.InitializeLeague(CancellationToken);
-        //if (string.IsNullOrEmpty(ReturnUrl) == false)
-        //{
-        //    NavigateTo(WebUtility.UrlDecode(ReturnUrl));
-        //}
     }
+
+    private async Task OnTemplateSelect(TemplateType template)
+    {
+        var (title, description) = TemplatesAvailable[template];
+        Loading = true;
+        var parameters = new ModalParameters<ConfirmModal>()
+            .Add(x => x.Text, $"Apply template <b><u>{title}</u></b> to your league?<br/>You can only apply a template once but of course change all the applied settings later.")
+            .Add(x => x.AllowMarkup, true)
+            .Add(x => x.ButtonTypes, ButtonTypes.YesNo)
+            .Add(x => x.ButtonStyles, ButtonStyles.PrimarySecondaryOutline);
+        var result = await ModalService.Show<ConfirmModal>("Apply Template", parameters).Result;
+        if (result.Confirmed)
+        {
+            await SubmitTemplateSelection(template);
+        }
+        Loading = false;
+    }
+
+    private async Task SubmitTemplateSelection(TemplateType template)
+    {
+        var result = await ApplyTemplate(template);
+        Status = result.Status;
+        Message = result.Message;
+        Errors = result.Errors;
+        await InvokeAsync(StateHasChanged);
+        if (result.IsSuccess == false)
+        {
+            return;
+        }
+        await Vm.InitializeLeague(CancellationToken);
+        if (string.IsNullOrEmpty(ReturnUrl) == false)
+        {
+            NavigateTo(WebUtility.UrlDecode(ReturnUrl));
+        }
+    }
+
+    private async Task<StatusResult> ApplyTemplate(TemplateType template) => template switch
+    {
+        TemplateType.StandardIracing => await ApplyDefaultTemplate(CancellationToken),
+        TemplateType.StandardCustom => await ApplyCustomPointsTemplate(CancellationToken),
+        TemplateType.DriverTeamIracing => await ApplyDriverTeamIracingTemplate(CancellationToken),
+        TemplateType.DriverTeamCuston => await ApplyDriverTeamCustomTemplate(CancellationToken),
+        _ => TemplateFailure($"Unknown template: {template}")
+    };
 
     private async Task<StatusResult> CreateFirstSeason(CancellationToken cancellationToken = default)
     {
@@ -123,27 +154,32 @@
         return result;
     }
 
+    private async Task<StatusResult> CreateChampionship(ResultSettingsViewModel resultSettings, string name, CancellationToken cancellationToken = default)
+    {
+        var championship = new PutChampSeasonModel()
+        {
+            ChampionshipName = name,
+            ChampionshipDisplayName = name,
+            StandingConfig = new()
+            {
+                Name = name,
+                ResultKind = iRLeagueApiCore.Common.Enums.ResultKind.Member,
+                WeeksCounted = 0,
+            },
+        };
+        return await resultSettings.AddChampionship(championship, cancellationToken);
+    }
+
     private async Task<StatusResult> ApplyDefaultTemplate(CancellationToken cancellationToken = default)
     {
-        StatusResult result = await CreateFirstSeason(CancellationToken);
+        StatusResult result = await CreateFirstSeason(cancellationToken);
         if (result.IsSuccess == false)
         {
             return result;
         }
 
         var resultSettingsVm = Provider.GetRequiredService<ResultSettingsViewModel>();
-        var championship = new PutChampSeasonModel()
-        {
-            ChampionshipName = "Championship",
-            ChampionshipDisplayName = "Championship",
-            StandingConfig = new()
-            {
-                Name = "Championship",
-                ResultKind = iRLeagueApiCore.Common.Enums.ResultKind.Member,
-                WeeksCounted = 0,
-            },
-        };
-        result = await resultSettingsVm.AddChampionship(championship, cancellationToken);
+        result = await CreateChampionship(resultSettingsVm, "Championship", cancellationToken);
         if (result.IsSuccess == false)
         {
             return result;
@@ -154,6 +190,7 @@
         {
             return TemplateFailure("Created champseason could not be loaded");
         }
+
         var champSeasonVm = Provider.GetRequiredService<ChampSeasonViewModel>();
         champSeasonVm.SetModel(champSeason.GetModel());
         var resultConfig = new ResultConfigModel()
@@ -186,18 +223,7 @@
         }
 
         var resultSettingsVm = Provider.GetRequiredService<ResultSettingsViewModel>();
-        var championship = new PutChampSeasonModel()
-        {
-            ChampionshipName = "Championship",
-            ChampionshipDisplayName = "Championship",
-            StandingConfig = new()
-            {
-                Name = "Championship",
-                ResultKind = iRLeagueApiCore.Common.Enums.ResultKind.Member,
-                WeeksCounted = 0,
-            },
-        };
-        result = await resultSettingsVm.AddChampionship(championship, cancellationToken);
+        result = await CreateChampionship(resultSettingsVm, "Championship", cancellationToken);
         if (result.IsSuccess == false)
         {
             return result;
@@ -212,8 +238,8 @@
         champSeasonVm.SetModel(champSeason.GetModel());
         var resultConfig = new ResultConfigModel()
         {
-            Name = "Custom Points Template",
-            DisplayName = "Custom Points Template",
+            Name = "Custom Points",
+            DisplayName = "Custom Points",
             Scorings = new[]
             {
                 new ScoringModel()
@@ -235,6 +261,166 @@
         }
 
         return StatusResult.SuccessResult();
+    }
+
+    private async Task<StatusResult> ApplyDriverTeamIracingTemplate(CancellationToken cancellationToken = default)
+    {
+        const string driverChampionshipName = "Drivers";
+        const string teamChampionshipName = "Teams";
+
+        StatusResult result = await CreateFirstSeason(cancellationToken);
+        if (result.IsSuccess == false)
+        {
+            return result;
+        }
+
+        var resultSettingsVm = Provider.GetRequiredService<ResultSettingsViewModel>();
+        result = await CreateChampionship(resultSettingsVm, driverChampionshipName, cancellationToken);
+        if (result.IsSuccess == false)
+        {
+            return result;
+        }
+        result = await CreateChampionship(resultSettingsVm, teamChampionshipName, cancellationToken);
+        if (result.IsSuccess == false)
+        {
+            return result;
+        }
+
+        var champSeasonVm = Provider.GetRequiredService<ChampSeasonViewModel>();
+        var driverChampSeason = resultSettingsVm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipName == driverChampionshipName);
+        var teamChampSeason = resultSettingsVm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipName == teamChampionshipName);
+        if (driverChampSeason is null || teamChampSeason is null)
+        {
+            return TemplateFailure("Created champseason could not be loaded");
+        }
+        champSeasonVm.SetModel(driverChampSeason.GetModel());
+
+        var driverResultConfig = new ResultConfigModel()
+        {
+            Name = "iRacing Points",
+            DisplayName = "iRacing Points",
+            Scorings = new[]
+            {
+                new ScoringModel()
+                {
+                    Name = "Race",
+                }
+            },
+        };
+        result = await champSeasonVm.AddResultConfig(driverResultConfig, cancellationToken);
+        if (result.IsSuccess == false)
+        {
+            return result;
+        }
+
+        var driverResultConfigInfo = champSeasonVm.ResultConfigs.FirstOrDefault();
+        if (driverResultConfigInfo is null)
+        {
+            return TemplateFailure("Created result config could not be loaded");
+        }
+
+        champSeasonVm.SetModel(teamChampSeason.GetModel());
+        var teamResultConfig = new ResultConfigModel()
+        {
+            Name = "Sum of Driver points",
+            DisplayName = "Sum of Driver points",
+            SourceResultConfig = driverResultConfigInfo,
+            ResultKind = ResultKind.Team,
+            ResultsPerTeam = 2,
+            Scorings = new[]
+            {
+                new ScoringModel()
+                {
+                    Name = "Race",
+                }
+            },
+        };
+        result = await champSeasonVm.AddResultConfig(teamResultConfig, cancellationToken);
+
+        return result;
+    }
+
+    private async Task<StatusResult> ApplyDriverTeamCustomTemplate(CancellationToken cancellationToken = default)
+    {
+        const string driverChampionshipName = "Drivers";
+        const string teamChampionshipName = "Teams";
+
+        StatusResult result = await CreateFirstSeason(cancellationToken);
+        if (result.IsSuccess == false)
+        {
+            return result;
+        }
+
+        var resultSettingsVm = Provider.GetRequiredService<ResultSettingsViewModel>();
+        result = await CreateChampionship(resultSettingsVm, driverChampionshipName, cancellationToken);
+        if (result.IsSuccess == false)
+        {
+            return result;
+        }
+        result = await CreateChampionship(resultSettingsVm, teamChampionshipName, cancellationToken);
+        if (result.IsSuccess == false)
+        {
+            return result;
+        }
+
+        var champSeasonVm = Provider.GetRequiredService<ChampSeasonViewModel>();
+        var driverChampSeason = resultSettingsVm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipName == driverChampionshipName);
+        var teamChampSeason = resultSettingsVm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipName == teamChampionshipName);
+        if (driverChampSeason is null || teamChampSeason is null)
+        {
+            return TemplateFailure("Created champseason could not be loaded");
+        }
+        champSeasonVm.SetModel(driverChampSeason.GetModel());
+
+        var driverResultConfig = new ResultConfigModel()
+        {
+            Name = "Custom Points",
+            DisplayName = "Custom Points",
+            Scorings = new[]
+            {
+                new ScoringModel()
+                {
+                    Name = "Race",
+                    PointRule = new PointRuleModel()
+                    {
+                        PointsPerPlace = new[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 },
+                        PointsSortOptions = new[] { SortOptions.FinPosAsc },
+                        FinalSortOptions = new[] { SortOptions.TotalPtsAsc, SortOptions.PenPtsDesc },
+                    },
+                }
+            },
+        };
+        result = await champSeasonVm.AddResultConfig(driverResultConfig, cancellationToken);
+        if (result.IsSuccess == false)
+        {
+            return result;
+        }
+
+        var driverResultConfigInfo = champSeasonVm.ResultConfigs.FirstOrDefault();
+        if (driverResultConfigInfo is null)
+        {
+            return TemplateFailure("Created result config could not be loaded");
+        }
+
+        champSeasonVm.SetModel(teamChampSeason.GetModel());
+        var teamResultConfig = new ResultConfigModel()
+        {
+            Name = "Sum of Driver points",
+            DisplayName = "Sum of Driver points",
+            SourceResultConfig = driverResultConfigInfo,
+            ResultKind = ResultKind.Team,
+            ResultsPerTeam = 2,
+            Scorings = new[]
+            {
+                new ScoringModel()
+                {
+                    Name = "Race",
+                }
+            },
+        };
+        result = await champSeasonVm.AddResultConfig(teamResultConfig, cancellationToken);
+
+        return result;
     }
 
     private StatusResult TemplateFailure(string reason)

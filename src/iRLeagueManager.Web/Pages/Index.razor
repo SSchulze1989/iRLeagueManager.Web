@@ -30,7 +30,7 @@
             {
                 <tr>
                     <td>@Bind(league, x => x.LeagueId)</td>
-                    <td>
+                    <td class="pointer">
                         <NavLink class="nav-link" href="@($"./{@Bind(league, x => x.LeagueName)}")">
                             <DisplayLeague League=league.GetModel() />
                         </NavLink>

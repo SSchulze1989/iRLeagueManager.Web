@@ -14,23 +14,23 @@
         {
             case ButtonTypes.Ok:
                 <div class="col d-flex justify-content-center">
-                    <button class="btn btn-primary" @onclick=OkClick>@OkButtonText</button>
+                    <button class="btn @GetButtonStyleClass().primary" @onclick=OkClick>@OkButtonText</button>
                 </div>
                 break;
             case ButtonTypes.OkCancel:
                 <div class="col d-flex justify-content-center">
-                    <button class="btn btn-secondary" @onclick=OkClick>@OkButtonText</button>
+                    <button class="btn @GetButtonStyleClass().primary" @onclick=OkClick>@OkButtonText</button>
                 </div>
                 <div class="col d-flex justify-content-center">
-                    <button class="btn btn-primary" @onclick=CancelClick>@CancelButtonText</button>
+                    <button class="btn @GetButtonStyleClass().secondary" @onclick=CancelClick>@CancelButtonText</button>
                 </div>
                 break;
             case ButtonTypes.YesNo:
                 <div class="col d-flex justify-content-center">
-                    <button class="btn btn-outline-primary" @onclick=OkClick>Yes</button>
+                    <button class="btn @GetButtonStyleClass().primary" @onclick=OkClick>Yes</button>
                 </div>
                 <div class="col d-flex justify-content-center">
-                    <button class="btn btn-secondary" @onclick=CancelClick>No</button>
+                    <button class="btn @GetButtonStyleClass().secondary" @onclick=CancelClick>No</button>
                 </div>
                 break;
         }
@@ -43,7 +43,9 @@
     [Parameter]
     public string Text { get; set; } = string.Empty;
     [Parameter]
-    public ButtonTypes ButtonTypes { get; set; }
+    public ButtonTypes ButtonTypes { get; set; } = ButtonTypes.Ok;
+    [Parameter]
+    public ButtonStyles ButtonStyles { get; set; } = ButtonStyles.PrimarySecondary;
     [Parameter]
     public bool AllowMarkup { get; set; } = false;
     [Parameter]
@@ -60,4 +62,13 @@
     {
         ModalInstance.CancelAsync();
     }
+
+    private (string primary, string secondary) GetButtonStyleClass() => ButtonStyles switch
+    {
+        ButtonStyles.PrimarySecondary => ("btn-primary", "btn-secondary"),
+        ButtonStyles.PrimaryOutlineSecondary => ("btn-outline-primary", "btn-secondary"),
+        ButtonStyles.PrimarySecondaryOutline => ("btn-primary", "btn-outline-secondary"),
+        ButtonStyles.PrimaryOutlineSecondaryOutline => ("btn-outline-primary", "btn-outline-secondary"),
+        _ => ("btn-primary", "btn-secondary")
+    };
 }

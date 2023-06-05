@@ -3,19 +3,16 @@ using iRLeagueManager.Web.Data;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public sealed class EventResultViewModel : LeagueViewModelBase<EventResultViewModel>
+public sealed class EventResultViewModel : LeagueViewModelBase<EventResultViewModel, EventResultModel>
 {
-    private EventResultModel model;
-
     public EventResultViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         this(loggerFactory, apiService, new EventResultModel())
     {
     }
 
     public EventResultViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, EventResultModel model) :
-        base(loggerFactory, apiService)
+        base(loggerFactory, apiService, model)
     {
-        this.model = model;
         sessionResults = new ObservableCollection<SessionResultViewModel>(model.SessionResults.Select(x => new SessionResultViewModel(loggerFactory, ApiService, x) { EventResult = this }));
     }
 

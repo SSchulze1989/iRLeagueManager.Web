@@ -3,6 +3,7 @@
 <th class="
         table-header
         @(Active ? "active" : "")
+        @(HasAction ? "action" : "")
         @(Direction == SortDirection.Ascending ? "sort-ascending" : "sort-descending")
     "
     @onclick=OnClick> 
@@ -40,6 +41,11 @@
 
     private void OnClick()
     {
+        if (HasAction == false)
+        {
+            return;
+        }
+
         if (Active)
         {
             Direction = Direction == SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending;

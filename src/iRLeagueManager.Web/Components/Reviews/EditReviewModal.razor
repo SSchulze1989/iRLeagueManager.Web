@@ -92,7 +92,7 @@
     [Parameter]
     public Func<ReviewViewModel, CancellationToken, Task<StatusResult>>? OnSubmit { get; set; }
 
-    private StatusResultValidator ResultValidator { get; set; } = default!;
+    private StatusResultValidator? ResultValidator { get; set; }
 
     protected override void OnParametersSet()
     {
@@ -115,7 +115,7 @@
         if (OnSubmit != null)
         {
             var result = await OnSubmit.Invoke(Review, cts.Token);
-            ResultValidator.ValidateResult(result);
+            ResultValidator?.ValidateResult(result);
             success &= result.IsSuccess;
         }
         if (success && ModalInstance != null)

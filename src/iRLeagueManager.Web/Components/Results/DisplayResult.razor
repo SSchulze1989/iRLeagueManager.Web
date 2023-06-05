@@ -52,6 +52,7 @@
                         <ResultTableHeader Text="@($"IR ({EvenStrengthOfField(Result)})")" Sort="@(x => x.OldIrating)" Direction="SortDirection.Descending" />
                     }
                     <ResultTableHeader Text="Incs." Sort="@(x => x.Incidents)" />
+                    <th></th>
                 </HeaderTemplate>
                 <RowTemplate Context=Row>
                     <td>
@@ -96,6 +97,19 @@
                         <td>@Row.OldIrating</td>
                     }
                     <td>@Row.Incidents</td>
+                    <td>
+                        <div>
+                            @{
+                                var rowId = $"table-row-{Row.GetHashCode()}";
+                            }
+                            <div class="table-row-action" type="button" id="@rowId" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="bi bi-three-dots-vertical"/>
+                            </div>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" @onclick=@(() => OnRowOptionsClick(Row))>Add Penalty</a></li>
+                            </ul>
+                        </div>
+                    </td>
                 </RowTemplate>
             </ResultTable>
         </div>
@@ -105,6 +119,8 @@
 @code {
     [CascadingParameter]
     private EventListViewModel EventList { get; set; } = default!;
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues = true)]
     public IDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter, EditorRequired]
@@ -115,7 +131,10 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        isTeamResult = Result?.ResultRows.Any(x => x.MemberId == null) ?? false;
+        BlazorParameterNullException.ThrowIfNull(this, EventList);
+        BlazorParameterNullException.ThrowIfNull(this, ModalService);
+        BlazorParameterNullException.ThrowIfNull(this, Result);
+        isTeamResult = Result.ResultRows.Any(x => x.MemberId == null);
     }
 
     private bool IsFastestLap(IEnumerable<ResultRowModel> resultRows, ResultRowModel row, Func<ResultRowModel, TimeSpan> selector)
@@ -131,5 +150,16 @@
     private int EvenStrengthOfField(SessionResultViewModel result)
     {
         return result.EventResult?.StrengthOfField ?? 0;
+    }
+
+    private async Task OnRowOptionsClick(ResultRowModel row)
+    {
+        var parameters = new ModalParameters<EditAddPenaltyModal>()
+            .Add(x => x.Model, new())
+            .Add(x => x.AvailableSessions, Result.EventResult?.GetModel().SessionResults ?? Array.Empty<ResultModel>())
+            .Add(x => x.SelectedSession, Result.GetModel())
+            .Add(x => x.SelectedRow, row)
+            .Add(x => x.CanSelectSession, true);
+        var result = await ModalService.Show<EditAddPenaltyModal>("Add Penalty", parameters).Result;
     }
 }

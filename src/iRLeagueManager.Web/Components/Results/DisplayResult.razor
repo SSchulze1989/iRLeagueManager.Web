@@ -178,7 +178,11 @@
             return;
         }
         var parameters = new ModalParameters<ShowPenaltiesModal>()
-            .Add(x => x.Penalties, penalties.Content.Where(x => x.SessionNr == Result.SessionNr));
-        await ModalService.Show<ShowPenaltiesModal>("Penalties", parameters).Result;
+            .Add(x => x.Penalties, penalties.Content.Where(x => Result.SessionNr == 999 || x.SessionNr == Result.SessionNr));
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = false,
+        };
+        await ModalService.Show<ShowPenaltiesModal>("Penalties", parameters, options).Result;
     }
 }

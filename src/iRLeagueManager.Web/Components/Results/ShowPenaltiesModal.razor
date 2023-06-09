@@ -1,5 +1,6 @@
 ﻿@using iRLeagueApiCore.Common.Enums;
 @using iRLeagueApiCore.Common.Models;
+@inject SharedStateService Shared
 
 @{
     var showSessionName = Penalties
@@ -19,18 +20,39 @@
         }
         <div class="card-body">
             <div class="row mb-2">
-                <div class="col-4">
+                <div class="col-6">
+                    <h6 class="text-muted">Driver</h6>
                     @penalty.Firstname @penalty.Lastname
                 </div>
-                <div class="col-8">
+                <div class="col-3">
+                    @if (string.IsNullOrWhiteSpace(penalty.Lap) == false)
+                    {
+                        <h6 class="text-muted">Lap</h6>
+                        @penalty.Lap
+                    }
+                </div>
+                <div class="col-3">
+                    @if (string.IsNullOrWhiteSpace(penalty.Corner) == false)
+                    {
+                        <h6 class="text-muted">Corner</h6>
+                        @penalty.Corner
+                    }
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">
+                    <label style="color: @GetPenaltyColor(penalty)">@GetPenaltyValueString(penalty)</label>
+                </div>
+                <div class="col-6">
                     @penalty.Reason
                 </div>
             </div>
-            <div class="row">
-                <div class="col-4">
-                    <label style="color: @GetPenaltyColor(penalty)">@GetPenaltyValueString(penalty)</label>
-                </div>
-            </div>
+            @if (penalty.ReviewId != null)
+            {
+                <a class="btn position-absolute top-0 end-0 text-muted" href="@($"/{Shared.LeagueName}/Reviews/Events/{penalty.EventId}?reviewId={penalty.ReviewId}")">
+                    <span class="bi bi-clipboard2-data" />
+                </a>
+            }
         </div>
     </div>
 }

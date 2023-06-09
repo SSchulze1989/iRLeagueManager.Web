@@ -52,6 +52,8 @@ public class StatusResult
 
 public class StatusResult<T> : StatusResult
 {
+    public StatusResult(StatusResult statusResult) : this(statusResult.IsSuccess, statusResult.Status, default, statusResult.Message, statusResult.Errors) 
+    { }
 
     public StatusResult(bool success, string status, T? content) : base(success, status)
     {

@@ -5,8 +5,11 @@
 
 <div @attributes=AdditionalAttributes>
     <div class="card my-2" id="results-session-@Bind(Result, x => x.SessionName)">
-        <div class="card-header">
-            @Bind(Result, x => x.SessionName)
+        <div class="card-header d-flex justify-content-between">
+            <label>@Bind(Result, x => x.SessionName)</label>
+            <button class="btn p-0 m-0 text-danger" title="Show penalties" @onclick=ShowPenaltiesClick>
+                <span class="bi bi-exclamation-diamond" />
+            </button>
         </div>
         @{
             var resultRows = Result.ResultRows;
@@ -161,5 +164,21 @@
             .Add(x => x.SelectedRow, row)
             .Add(x => x.CanSelectSession, true);
         var result = await ModalService.Show<EditAddPenaltyModal>("Add Penalty", parameters).Result;
+    }
+
+    private async Task ShowPenaltiesClick()
+    {
+        if (Result.EventResult is null)
+        {
+            return;
+        }
+        var penalties = await Result.EventResult.GetPenalties();
+        if (penalties.IsSuccess == false || penalties.Content is null)
+        {
+            return;
+        }
+        var parameters = new ModalParameters<ShowPenaltiesModal>()
+            .Add(x => x.Penalties, penalties.Content.Where(x => x.SessionNr == Result.SessionNr));
+        await ModalService.Show<ShowPenaltiesModal>("Penalties", parameters).Result;
     }
 }

@@ -1,0 +1,69 @@
+﻿@using iRLeagueApiCore.Common.Enums;
+@using iRLeagueApiCore.Common.Models;
+
+@{
+    var showSessionName = Penalties
+        .Select(x => x.SessionNr)
+        .Distinct()
+        .Count() > 1;
+}
+
+@foreach(var penalty in Penalties)
+{
+    <div class="card mb-2">
+        @if(showSessionName)
+        {
+            <div class="card-header">
+                <label>@penalty.SessionName</label>
+            </div>
+        }
+        <div class="card-body">
+            <div class="row mb-2">
+                <div class="col-4">
+                    @penalty.Firstname @penalty.Lastname
+                </div>
+                <div class="col-8">
+                    @penalty.Reason
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <label style="color: @GetPenaltyColor(penalty)">@GetPenaltyValueString(penalty)</label>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public IEnumerable<PenaltyModel> Penalties { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, Penalties);
+    }
+
+    private string GetPenaltyTypeString(PenaltyType type) => type switch
+    {
+        PenaltyType.Points => "Points",
+        PenaltyType.Position => "Positions",
+        PenaltyType.Time => "Time",
+        _ => string.Empty,
+    };
+
+    private string GetPenaltyValueString(PenaltyModel penalty) => penalty.Type switch
+    {
+        PenaltyType.Points => $"- {penalty.Points} pt{(penalty.Points != 1 ? "s" : "")}",
+        PenaltyType.Position => $"+ {penalty.Positions.ToString()} position{(penalty.Positions != 1 ? "s" : "")}",
+        PenaltyType.Time => $"+ {penalty.Time.ToString()}",
+        _ => string.Empty,
+    };
+
+    private string GetPenaltyColor(PenaltyModel penalty) => penalty.Type switch
+    {
+        PenaltyType.Position or PenaltyType.Points => "red",
+        _ => "inherit",
+    };
+}

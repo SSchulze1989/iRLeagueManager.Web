@@ -1,5 +1,6 @@
 ﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Extensions;
 
 namespace iRLeagueManager.Web.ViewModels;
 
@@ -24,4 +25,26 @@ public sealed class EventResultViewModel : LeagueViewModelBase<EventResultViewMo
 
     private ObservableCollection<SessionResultViewModel> sessionResults;
     public ObservableCollection<SessionResultViewModel> SessionResults { get => sessionResults; set => Set(ref sessionResults, value); }
+
+    public async Task<StatusResult<IEnumerable<PenaltyModel>>> GetPenalties(CancellationToken cancellationToken = default)
+    {
+        if (CurrentLeague is null)
+        {
+            return new StatusResult<IEnumerable<PenaltyModel>>(LeagueNullResult());
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await CurrentLeague.Results()
+                .WithId(ResultId)
+                .Penalties()
+                .Get(cancellationToken);
+            return result.ToContentStatusResult();
+        }
+        finally 
+        { 
+            Loading = false; 
+        }
+    }
 }

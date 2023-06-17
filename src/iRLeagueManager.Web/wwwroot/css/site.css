@@ -404,7 +404,6 @@ a, .btn-link {
 }
 
 .table-header {
-    cursor: pointer;
     position: relative;
     filter:opacity(75%);
     padding-right: 0.8em !important;
@@ -414,11 +413,28 @@ a, .btn-link {
         filter: opacity(90%);
     }
 
-    .table-header:hover {
+    .table-header.action {
+        cursor: pointer;
+    }
+
+    .table-header.action:hover {
         filter: opacity(100%);
     }
 
-    .table-header.active.sort-ascending::after, .table-header.sort-ascending:hover::after {
+    .table-header.active.sort-ascending::after, .table-header.action.sort-ascending:hover::after {
+        content: " ";
+        width: 0;
+        height: 0;
+        border-left: 0.3em solid transparent;
+        border-right: 0.3em solid transparent;
+        border-bottom: 0.6em solid;
+        position: absolute;
+        bottom: 0.55em;
+        margin-left: 0.15em;
+    }
+
+    .table-header.active.sort-descending::after, .table-header.action.sort-descending:hover::after {
+            
         content: " ";
         width: 0;
         height: 0;
@@ -430,16 +446,19 @@ a, .btn-link {
         margin-left: 0.15em;
     }
 
-    .table-header.active.sort-descending::after, .table-header.sort-descending:hover::after {
-        content: " ";
-        width: 0;
-        height: 0;
-        border-left: 0.3em solid transparent;
-        border-right: 0.3em solid transparent;
-        border-bottom: 0.6em solid;
-        position: absolute;
-        bottom: 0.55em;
-        margin-left: 0.15em;
+.table-row-action {
+    filter: opacity(75%);
+    cursor: pointer;
+    visibility: hidden;
+}
+
+    tr:hover .table-row-action {
+        visibility: visible;
+    }
+
+    .table-row-action:hover {
+        visibility: visible;
+        filter: opacity(90%);
     }
 
 @media (min-width: 1600px) {

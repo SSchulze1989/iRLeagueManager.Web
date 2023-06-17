@@ -33,6 +33,7 @@ public class StatusResult
     public const string BadRequest = "Bad request";
     public const string Unauthorized = "Unauthorized";
     public const string ServerError = "Internal server Error";
+    public const string NotFound = "Not Found";
 
     public static StatusResult SuccessResult()
     {
@@ -52,6 +53,8 @@ public class StatusResult
 
 public class StatusResult<T> : StatusResult
 {
+    public StatusResult(StatusResult statusResult) : this(statusResult.IsSuccess, statusResult.Status, default, statusResult.Message, statusResult.Errors) 
+    { }
 
     public StatusResult(bool success, string status, T? content) : base(success, status)
     {

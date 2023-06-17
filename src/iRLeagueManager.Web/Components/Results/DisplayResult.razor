@@ -5,8 +5,11 @@
 
 <div @attributes=AdditionalAttributes>
     <div class="card my-2" id="results-session-@Bind(Result, x => x.SessionName)">
-        <div class="card-header">
-            @Bind(Result, x => x.SessionName)
+        <div class="card-header d-flex justify-content-between">
+            <label>@Bind(Result, x => x.SessionName)</label>
+            <button class="btn p-0 m-0 text-danger" title="Show penalties" @onclick=ShowPenaltiesClick>
+                <span class="bi bi-exclamation-diamond" />
+            </button>
         </div>
         @{
             var resultRows = Result.ResultRows;
@@ -52,6 +55,10 @@
                         <ResultTableHeader Text="@($"IR ({EvenStrengthOfField(Result)})")" Sort="@(x => x.OldIrating)" Direction="SortDirection.Descending" />
                     }
                     <ResultTableHeader Text="Incs." Sort="@(x => x.Incidents)" />
+                    @if (CanEdit)
+                    {
+                        <th></th>
+                    }
                 </HeaderTemplate>
                 <RowTemplate Context=Row>
                     <td>
@@ -96,6 +103,22 @@
                         <td>@Row.OldIrating</td>
                     }
                     <td>@Row.Incidents</td>
+                    @if (CanEdit)
+                    {
+                        <td>
+                            <div>
+                                @{
+                                    var rowId = $"table-row-{Row.GetHashCode()}";
+                                }
+                                <div class="table-row-action" type="button" id="@rowId" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="bi bi-three-dots-vertical"/>
+                                </div>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" @onclick=@(() => OnRowOptionsClick(Row))>Add Penalty</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    }
                 </RowTemplate>
             </ResultTable>
         </div>
@@ -105,17 +128,24 @@
 @code {
     [CascadingParameter]
     private EventListViewModel EventList { get; set; } = default!;
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues = true)]
     public IDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter, EditorRequired]
     public SessionResultViewModel Result { get; set; } = default!;
+    [Parameter]
+    public bool CanEdit { get; set; } = false;
 
     private bool isTeamResult = false;
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        isTeamResult = Result?.ResultRows.Any(x => x.MemberId == null) ?? false;
+        BlazorParameterNullException.ThrowIfNull(this, EventList);
+        BlazorParameterNullException.ThrowIfNull(this, ModalService);
+        BlazorParameterNullException.ThrowIfNull(this, Result);
+        isTeamResult = Result.ResultRows.Any(x => x.MemberId == null);
     }
 
     private bool IsFastestLap(IEnumerable<ResultRowModel> resultRows, ResultRowModel row, Func<ResultRowModel, TimeSpan> selector)
@@ -131,5 +161,38 @@
     private int EvenStrengthOfField(SessionResultViewModel result)
     {
         return result.EventResult?.StrengthOfField ?? 0;
+    }
+
+    private async Task OnRowOptionsClick(ResultRowModel row)
+    {
+        var parameters = new ModalParameters<EditAddPenaltyModal>()
+            .Add(x => x.Model, new())
+            .Add(x => x.AvailableSessions, Result.EventResult?.GetModel().SessionResults ?? Array.Empty<ResultModel>())
+            .Add(x => x.SelectedSession, Result.GetModel())
+            .Add(x => x.SelectedRow, row)
+            .Add(x => x.CanSelectSession, true)
+            .Add(x => x.OnSubmit, async (p, ct) => await p.SaveNew(ct));
+        var result = await ModalService.Show<EditAddPenaltyModal>("Add Penalty", parameters).Result;
+    }
+
+    private async Task ShowPenaltiesClick()
+    {
+        if (Result.EventResult is null)
+        {
+            return;
+        }
+        var penalties = await Result.EventResult.GetPenalties();
+        if (penalties.IsSuccess == false || penalties.Content is null)
+        {
+            return;
+        }
+        var parameters = new ModalParameters<ShowPenaltiesModal>()
+            .Add(x => x.Penalties, penalties.Content.Where(x => Result.SessionNr == 999 || x.SessionNr == Result.SessionNr))
+            .Add(x => x.CanEdit, CanEdit);
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = false,
+        };
+        await ModalService.Show<ShowPenaltiesModal>("Penalties", parameters, options).Result;
     }
 }

@@ -114,12 +114,16 @@ public sealed class ScheduleViewModel : LeagueViewModelBase<ScheduleViewModel>
         {
             return LeagueNullResult();
         }
+        if (CurrentSeason is null)
+        {
+            return SeasonNullResult();
+        }
 
         try
         {
             Loading = true;
-            var result = await CurrentLeague
-                .ResultConfigs()
+            var result = await CurrentSeason
+                .ResultsConfigs()
                 .Get(cancellationToken);
             if (result.Success && result.Content is not null)
             {

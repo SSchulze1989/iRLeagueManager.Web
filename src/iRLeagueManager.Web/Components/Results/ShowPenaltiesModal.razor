@@ -1,6 +1,8 @@
 ﻿@using iRLeagueApiCore.Common.Enums;
 @using iRLeagueApiCore.Common.Models;
+@inherits LeagueComponentBase
 @inject SharedStateService Shared
+@inject AddPenaltyViewModel Vm
 
 @{
     var showSessionName = Penalties
@@ -47,23 +49,39 @@
                     @penalty.Reason
                 </div>
             </div>
-            @if (penalty.ReviewId != null)
-            {
-                <a class="btn position-absolute top-0 end-0 text-muted" href="@($"/{Shared.LeagueName}/Reviews/Events/{penalty.EventId}?reviewId={penalty.ReviewId}")">
-                    <span class="bi bi-clipboard2-data" />
-                </a>
-            }
+            <div class="d-flex justify-content-end position-absolute top-0 end-0">
+                @if (penalty.ReviewId != null)
+                {
+                    <a class="btn text-muted" href="@($"/{Shared.LeagueName}/Reviews/Events/{penalty.EventId}?reviewId={penalty.ReviewId}")">
+                        <span class="bi bi-clipboard2-data" />
+                    </a>
+                }
+                @if (penalty.AddPenaltyId != null && CanEdit)
+                {
+                    <a class="btn text-muted" @onclick="@(() => EditAddPenaltyAsync(penalty))">
+                        <span class="bi bi-pencil-square" />
+                    </a>
+                    <a class="btn text-muted" @onclick="@(() => DeleteAddPenaltyAsync(penalty))">
+                        <span class="bi bi-trash" />
+                    </a>
+                }
+            </div>
         </div>
     </div>
 }
 
 @code {
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
     [Parameter]
     public IEnumerable<PenaltyModel> Penalties { get; set; } = default!;
+    [Parameter]
+    public bool CanEdit { get; set; } = false;
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, ModalService);
         BlazorParameterNullException.ThrowIfNull(this, Penalties);
     }
 
@@ -88,4 +106,32 @@
         PenaltyType.Position or PenaltyType.Points => "red",
         _ => "inherit",
     };
+
+    private async Task EditAddPenaltyAsync(PenaltyModel penalty)
+    {
+        var parameters = new ModalParameters<EditAddPenaltyModal>()
+            .Add(x => x.Model, penalty)
+            .Add(x => x.CanSelectSession, false)
+            .Add(x => x.CanSelectDriver, false)
+            .Add(x => x.OnSubmit, async (p, ct) => await p.SaveChanges(ct));
+        await ModalService.Show<EditAddPenaltyModal>("Edit penalty", parameters).Result;
+    }
+
+    private async Task DeleteAddPenaltyAsync(PenaltyModel penalty)
+    {
+        var parameters = new ModalParameters<ConfirmModal>()
+            .Add(x => x.Text, $"Really delete this penalty for {penalty.Firstname} {penalty.Lastname}?")
+            .Add(x => x.ButtonTypes, ButtonTypes.YesNo);
+        var confirmed = await ModalService.Show<ConfirmModal>("Delete penalty", parameters).Result;
+        if (confirmed.Confirmed == false)
+        {
+            return;
+        }
+        Vm.SetModel(penalty);
+        var result = await Vm.Delete();
+        if (result.IsSuccess)
+        {
+            Penalties = Penalties.Where(x => x != penalty);
+        }
+    }
 }

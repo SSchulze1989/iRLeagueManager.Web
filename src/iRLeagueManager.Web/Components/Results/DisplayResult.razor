@@ -55,7 +55,10 @@
                         <ResultTableHeader Text="@($"IR ({EvenStrengthOfField(Result)})")" Sort="@(x => x.OldIrating)" Direction="SortDirection.Descending" />
                     }
                     <ResultTableHeader Text="Incs." Sort="@(x => x.Incidents)" />
-                    <th></th>
+                    @if (CanEdit)
+                    {
+                        <th></th>
+                    }
                 </HeaderTemplate>
                 <RowTemplate Context=Row>
                     <td>
@@ -100,19 +103,22 @@
                         <td>@Row.OldIrating</td>
                     }
                     <td>@Row.Incidents</td>
-                    <td>
-                        <div>
-                            @{
-                                var rowId = $"table-row-{Row.GetHashCode()}";
-                            }
-                            <div class="table-row-action" type="button" id="@rowId" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span class="bi bi-three-dots-vertical"/>
+                    @if (CanEdit)
+                    {
+                        <td>
+                            <div>
+                                @{
+                                    var rowId = $"table-row-{Row.GetHashCode()}";
+                                }
+                                <div class="table-row-action" type="button" id="@rowId" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="bi bi-three-dots-vertical"/>
+                                </div>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" @onclick=@(() => OnRowOptionsClick(Row))>Add Penalty</a></li>
+                                </ul>
                             </div>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" @onclick=@(() => OnRowOptionsClick(Row))>Add Penalty</a></li>
-                            </ul>
-                        </div>
-                    </td>
+                        </td>
+                    }
                 </RowTemplate>
             </ResultTable>
         </div>
@@ -128,6 +134,8 @@
     public IDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter, EditorRequired]
     public SessionResultViewModel Result { get; set; } = default!;
+    [Parameter]
+    public bool CanEdit { get; set; } = false;
 
     private bool isTeamResult = false;
 
@@ -162,7 +170,8 @@
             .Add(x => x.AvailableSessions, Result.EventResult?.GetModel().SessionResults ?? Array.Empty<ResultModel>())
             .Add(x => x.SelectedSession, Result.GetModel())
             .Add(x => x.SelectedRow, row)
-            .Add(x => x.CanSelectSession, true);
+            .Add(x => x.CanSelectSession, true)
+            .Add(x => x.OnSubmit, async (p, ct) => await p.SaveNew(ct));
         var result = await ModalService.Show<EditAddPenaltyModal>("Add Penalty", parameters).Result;
     }
 
@@ -178,7 +187,8 @@
             return;
         }
         var parameters = new ModalParameters<ShowPenaltiesModal>()
-            .Add(x => x.Penalties, penalties.Content.Where(x => Result.SessionNr == 999 || x.SessionNr == Result.SessionNr));
+            .Add(x => x.Penalties, penalties.Content.Where(x => Result.SessionNr == 999 || x.SessionNr == Result.SessionNr))
+            .Add(x => x.CanEdit, CanEdit);
         var options = new ModalOptions()
         {
             DisableBackgroundCancel = false,

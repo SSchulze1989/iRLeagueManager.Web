@@ -33,6 +33,7 @@ public class StatusResult
     public const string BadRequest = "Bad request";
     public const string Unauthorized = "Unauthorized";
     public const string ServerError = "Internal server Error";
+    public const string NotFound = "Not Found";
 
     public static StatusResult SuccessResult()
     {

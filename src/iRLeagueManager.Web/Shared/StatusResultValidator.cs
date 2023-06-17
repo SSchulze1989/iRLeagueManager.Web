@@ -71,6 +71,10 @@ public sealed class StatusResultValidator : ComponentBase
             }
             ErrorMessage += $"\nError: {error}";
         }
+        if (result.Status == StatusResult.NotFound)
+        {
+            ErrorMessage += "\nError: Resource not found";
+        }
     }
 
     private void AddUnauthorizedValidationMessages(StatusResult result)

@@ -3,36 +3,47 @@
 @inherits EditModalBase<AddPenaltyViewModel, PenaltyModel>
 
 <EditForm Model=@Model>
+    <StatusResultValidator @ref="ResultValidator" />
     <div class="input-group-list">
-        <InputGroup Label="Session">
-            <InputSelect class="form-select" @bind-Value="SelectedSessionId" disabled="@(!CanSelectSession)">
-                @foreach (var session in AvailableSessions)
-                {
-                    <option value="@session.SessionResultId">@session.SessionName</option>
-                }
-            </InputSelect>
-        </InputGroup>
+        @if (AvailableSessions.Any())
+        {
+            <InputGroup Label="Session">
+                <InputSelect class="form-select" @bind-Value="SelectedSessionId" disabled="@(!CanSelectSession)">
+                    @foreach (var session in AvailableSessions)
+                    {
+                        <option value="@session.SessionResultId">@session.SessionName</option>
+                    }
+                </InputSelect>
+            </InputGroup>
+        }
         <InputGroup Label="Driver">
-            <BlazoredTypeahead @bind-Value=Vm.ResultRow
-                               class="form-control p-0"
-                               style="border-top-right-radius:0; border-top-left-radius:0;"
-                               EnableDropDown=true
-                               SearchMethod=SearchResultRow
-                               MinimumLength=1
-                               MaximumSuggestions=100
-                               DeleteItemsOnBackspace=false
-                               placeholder="Search driver by name...">
+            @if (CanSelectDriver)
+            {
+                <BlazoredTypeahead @bind-Value=Vm.ResultRow
+                    class="form-control p-0"
+                                   style="border-top-right-radius:0; border-top-left-radius:0;"
+                                   EnableDropDown=true
+                                   SearchMethod=SearchResultRow
+                                   MinimumLength=1
+                                   MaximumSuggestions=100
+                                   DeleteItemsOnBackspace=false
+                                   placeholder="Search driver by name...">
 
-                <SelectedTemplate Context=row>
-                    @(row?.FinalPosition). @row?.Firstname @row?.Lastname
-                </SelectedTemplate>
-                <ResultTemplate Context=row>
-                    @(row.FinalPosition). @row.Firstname @row.Lastname
-                </ResultTemplate>
-                <NotFoundTemplate Context=name>
-                    <span>Driver <b>@name</b> Not found!</span>
-                </NotFoundTemplate>
-            </BlazoredTypeahead>
+                    <SelectedTemplate Context=row>
+                        @(row?.FinalPosition). @row?.Firstname @row?.Lastname
+                    </SelectedTemplate>
+                    <ResultTemplate Context=row>
+                        @(row.FinalPosition). @row.Firstname @row.Lastname
+                    </ResultTemplate>
+                    <NotFoundTemplate Context=name>
+                        <span>Driver <b>@name</b> Not found!</span>
+                    </NotFoundTemplate>
+                </BlazoredTypeahead>
+            }
+            else
+            {
+                <label class="form-select disabled">@Vm.Firstname @Vm.Lastname</label>
+            }
         </InputGroup>
         <InputGroup Label="Reason">
             <InputText class="form-control" @bind-Value="Vm.Reason" />
@@ -54,7 +65,7 @@
                 break;
             case PenaltyType.Position:
                 <InputGroup Label="Positions">
-                    <InputNumber class="form-control" @bind-Value="Vm.Points" />
+                    <InputNumber class="form-control" @bind-Value="Vm.Positions" />
                 </InputGroup>
                 break;
             case PenaltyType.Time:
@@ -65,7 +76,9 @@
                 break;
         }
     </div>
-    <CancelSubmitButtons OnSubmit=Submit OnCancel=Cancel />
+    <ValidationSummary />
+    <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+    <CancelSubmitButtons OnSubmit=Submit OnCancel=Cancel ModelState="Vm"/>
 </EditForm>
 
 @code {
@@ -73,7 +86,7 @@
     /// List of available Sessions (must at least contain SelectedSession)
     /// </summary>
     [Parameter]
-    public IEnumerable<ResultModel> AvailableSessions { get; set; } = default!;
+    public IEnumerable<ResultModel> AvailableSessions { get; set; } = Array.Empty<ResultModel>();
     /// <summary>
     /// Selected session when opening the modal (may be changed by user if CanSelectSession = True)
     /// </summary>
@@ -89,6 +102,8 @@
     /// </summary>
     [Parameter]
     public bool CanSelectSession { get; set; } = false;
+    [Parameter]
+    public bool CanSelectDriver { get; set; } = true;
 
     private long SelectedSessionId
     {
@@ -99,7 +114,6 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        BlazorParameterNullException.ThrowIfNull(this, AvailableSessions);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

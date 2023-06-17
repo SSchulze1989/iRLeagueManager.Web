@@ -18,6 +18,9 @@ public sealed class AddPenaltyViewModel : LeagueViewModelBase<AddPenaltyViewMode
     }
 
     public long AddPenaltyId => model.AddPenaltyId ?? 0;
+    public long MeberId => model.MemberId;
+    public string Firstname => model.Firstname;
+    public string Lastname => model.Lastname;
 
     private ResultModel? sessionResult;
     public ResultModel? SessionResult { get => sessionResult; set => sessionResult = value; }
@@ -89,6 +92,28 @@ public sealed class AddPenaltyViewModel : LeagueViewModelBase<AddPenaltyViewMode
             {
                 SetModel(result.Content);
             }
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    public async Task<StatusResult> Delete(CancellationToken cancellationToken = default)
+    {
+        if (CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await CurrentLeague
+                .Penalties()
+                .WithId(AddPenaltyId)
+                .Delete(cancellationToken);
             return result.ToStatusResult();
         }
         finally

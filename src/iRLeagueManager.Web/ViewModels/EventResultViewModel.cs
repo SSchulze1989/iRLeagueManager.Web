@@ -36,9 +36,14 @@ public sealed class EventResultViewModel : LeagueViewModelBase<EventResultViewMo
         try
         {
             Loading = true;
-            var result = await CurrentLeague.Results()
-                .WithId(ResultId)
-                .Penalties()
+            // FIXME: Add missing endpoint
+            //var result = await CurrentLeague.Results()
+            //    .WithId(ResultId)
+            //    .Penalties()
+            //    .Get(cancellationToken);
+            var route = $"Results/{ResultId}/Penalties";
+            var result = await CurrentLeague
+                .CustomEndpoint<IEnumerable<PenaltyModel>>(route)
                 .Get(cancellationToken);
             return result.ToContentStatusResult();
         }

@@ -61,7 +61,14 @@
     {
         @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
         {
-            <DisplayResult class="px-0 mb-2 mx-0" Result=result/>
+            <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
+                <Authorized>
+                    <DisplayResult class="px-0 mb-2 mx-0" Result="result" CanEdit="true"/>
+                </Authorized>
+                <NotAuthorized>
+                    <DisplayResult class="px-0 mb-2 mx-0" Result="result" />
+                </NotAuthorized>
+            </AuthorizeView>
         }
     }
     <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>

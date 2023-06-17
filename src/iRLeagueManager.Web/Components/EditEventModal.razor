@@ -135,7 +135,7 @@
 
     private IList<TrackGroupModel> TrackList { get; set; } = Array.Empty<TrackGroupModel>();
 
-    private StatusResultValidator ResultValidator { get; set; } = default!;
+    private StatusResultValidator? ResultValidator { get; set; }
 
     private TrackGroupModel? selectedTrack;
     private TrackGroupModel? SelectedTrack
@@ -216,7 +216,7 @@
         if (OnSubmit != null)
         {
             var result = await OnSubmit.Invoke(Event, cts.Token);
-            ResultValidator.ValidateResult(result);
+            ResultValidator?.ValidateResult(result);
             success &= result.IsSuccess;
         }
         if (success)

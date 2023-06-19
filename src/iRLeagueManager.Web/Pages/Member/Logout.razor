@@ -10,6 +10,6 @@
     {
         await apiService.Client.LogOut();
         var returnUrl = navigationManager.QueryString("returnUrl") ?? "";
-        navigationManager.NavigateTo(returnUrl);
+        navigationManager.NavigateTo(returnUrl, forceLoad:true);
     }
 }

@@ -5,39 +5,47 @@
 @inject LeaguesViewModel Vm
 @inject NavigationManager NavigationManager
 
-<div class="container-xxl" style="max-width:790px">    
-    <div class="card">
-        <div class="card-header">
-            <h5>Create new League</h5>
-        </div>
-        <div class="card-body">
-            <EditForm Model=@Model OnValidSubmit=Submit>
-                <StatusResultValidator @ref=ResultValidator />
-                <div class="form-group mb-3">
-                    <label>Name</label>
-                    <InputText @bind-Value="SetLongName" class="form-control" />
-                    <label class="form-text">Full name to be displayed on pages</label>
-                    <ValidationMessage For="@(() => Model.NameFull)" />
+<div class="container-xxl" style="max-width:790px">
+    <AuthorizeView Context="AuthorizeContext">
+        <Authorized>
+            <div class="card">
+                <div class="card-header">
+                    <h5>Create new League</h5>
                 </div>
-                <div class="form-group mb-3">
-                    <label>Strong Name</label>
-                    <InputText @bind-Value="SetShortName" class="form-control" placeholder="@GetShortNameFromFullName(Model.NameFull)"/>
-                    <label class="form-text">
-                        Pick a short and unique indentifiying name of the league. This will later be used as part of html routes and shareable links <br/>
-                        e.g: https://irleaguemanager.net/@Model.Name/results
-                    </label>
-                    <ValidationMessage For="@(() => Model.Name)" />
+                <div class="card-body">
+                    <EditForm Model=@Model OnValidSubmit=Submit>
+                        <StatusResultValidator @ref=ResultValidator />
+                        <div class="form-group mb-3">
+                            <label>Name</label>
+                            <InputText @bind-Value="SetLongName" class="form-control" />
+                            <label class="form-text">Full name to be displayed on pages</label>
+                            <ValidationMessage For="@(() => Model.NameFull)" />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label>Strong Name</label>
+                            <InputText @bind-Value="SetShortName" class="form-control" placeholder="@GetShortNameFromFullName(Model.NameFull)"/>
+                            <label class="form-text">
+                                Pick a short and unique indentifiying name of the league. This will later be used as part of html routes and shareable links <br/>
+                                e.g: https://irleaguemanager.net/@Model.Name/results
+                            </label>
+                            <ValidationMessage For="@(() => Model.Name)" />
+                        </div>
+                        <button class="btn btn-primary w-100" type="submit" disabled="@Vm.Loading">
+                            @if (Vm.Loading == true)
+                            {
+                                <span class="spinner-border spinner-border-sm mr-1"></span>
+                            }
+                            Create
+                        </button>
+                    </EditForm>
                 </div>
-                <button class="btn btn-primary w-100" type="submit" disabled="@Vm.Loading">
-                    @if (Vm.Loading == true)
-                    {
-                        <span class="spinner-border spinner-border-sm mr-1"></span>
-                    }
-                    Create
-                </button>
-            </EditForm>
-        </div>
-    </div>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            <p>You need to be logged in to create a new league</p>
+            <p>Either <a href="/member/login?returnUrl=CreateLeague">log-in</a> or <a href="/member/Register">create account</a>.</p>
+        </NotAuthorized>
+    </AuthorizeView>
 </div>
 
 @code {

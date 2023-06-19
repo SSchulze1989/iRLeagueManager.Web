@@ -14,6 +14,15 @@
 <PageTitle>Settings - @LeagueName</PageTitle>
 
 <div @attributes=AdditionalAttributes>
+    @if (vm.LeaguePublic != LeaguePublicSetting.PublicListed)
+    {
+        <div class="alert alert-warning alert-dismissible fade show d-flex justify-content-between align-items-center gap-2" role="alert">
+            <label>Your league is still hidden. Others can access your league if they have the link but it will not be listed</label>
+            <button class="btn btn-secondary" @onclick="MakePublicListed">Make public</button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="card my-2 pb-0">
         <div class="card-header">
             General
@@ -197,5 +206,11 @@
             return;
         }
         await vm.InitializeLeague(CancellationToken);
+    }
+
+    private async Task MakePublicListed()
+    {
+        vm.LeaguePublic = LeaguePublicSetting.PublicListed;
+        await vm.SaveChangesAsync(CancellationToken);
     }
 }

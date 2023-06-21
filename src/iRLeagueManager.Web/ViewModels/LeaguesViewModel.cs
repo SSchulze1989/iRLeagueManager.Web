@@ -29,10 +29,20 @@ public sealed class LeaguesViewModel : LeagueViewModelBase<LeaguesViewModel>
     {
         if (firstRender)
         {
-            Loading = true;
             Status = string.Empty;
-            var result = await ApiService.Client.Leagues().Get();
+            var result = await LoadLeagues();
             Status = result.Status;
+        }
+    }
+
+    public async Task<StatusResult> LoadLeagues(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            Loading = true;
+            var result = await ApiService.Client
+                .Leagues()
+                .Get(cancellationToken);
             if (result.Success && result.Content is not null)
             {
                 var leagueModels = result.Content;
@@ -40,6 +50,10 @@ public sealed class LeaguesViewModel : LeagueViewModelBase<LeaguesViewModel>
                     leagueModels.Select(x => new LeagueViewModel(LoggerFactory, ApiService, x))
                 );
             }
+            return result.ToStatusResult();
+        }
+        finally
+        {
             Loading = false;
         }
     }

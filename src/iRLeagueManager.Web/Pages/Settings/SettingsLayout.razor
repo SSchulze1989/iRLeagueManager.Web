@@ -34,7 +34,14 @@
             </Authorized>
         </AuthorizeView>
     </div>
-    @Body
+    <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
+        <Authorized>
+            @Body
+        </Authorized>
+        <NotAuthorized>
+            You are not allowed here ...
+        </NotAuthorized>
+    </AuthorizeView>
 </div>
 
 @code {

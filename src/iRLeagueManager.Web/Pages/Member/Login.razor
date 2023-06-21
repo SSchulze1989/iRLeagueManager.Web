@@ -46,9 +46,9 @@
             <div>
                 <small>Not a member yet?</small>
             </div>
-            @*<button class="btn btn-secondary" @onclick=@(() => NavigationManager.NavigateTo("/member/register"))>
+            <button class="btn btn-secondary" @onclick=@(() => NavigationManager.NavigateTo("/member/register"))>
                 Sign Up
-            </button>*@
+            </button>
         </div>
     </div>
 </div>
@@ -113,7 +113,7 @@
                     return;
                 }
                 var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";
-                NavigationManager.NavigateTo(returnUrl);
+                NavigationManager.NavigateTo(returnUrl, forceLoad: true);
             }
             finally
             {

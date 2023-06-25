@@ -162,10 +162,16 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
                     .Championships()
                     .WithId(champSeason.ChampionshipId)
                     .Post(new(), cancellationToken);
-                if (activateChampSeasonResult.Success == false)
+                if (activateChampSeasonResult.Success == false || activateChampSeasonResult.Content is null)
                 {
                     return activateChampSeasonResult.ToStatusResult();
                 }
+                var putChampSeason = activateChampSeasonResult.Content;
+                putChampSeason.DefaultResultConfig = putChampSeason.ResultConfigs.FirstOrDefault(x => x.Name == champSeason.DefaultResultConfig?.Name);
+                var setDefaultResultConfig = await CurrentLeague
+                    .ChampSeasons()
+                    .WithId(activateChampSeasonResult.Content.ChampSeasonId)
+                    .Put(putChampSeason, cancellationToken);
             }
             return StatusResult.SuccessResult();
         }

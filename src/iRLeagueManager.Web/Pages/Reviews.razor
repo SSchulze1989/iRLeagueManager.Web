@@ -161,12 +161,12 @@
     }
     private long SelectedReviewId { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         NavigationManager.LocationChanged += OnLocationChanged;
         SelectedTabIndex = NavigationManager.QueryParameter<int>(tabIndexParam);
         SelectedReviewId = NavigationManager.QueryParameter<long>(reviewIdParam);
-        await Task.FromResult(true);
+        base.OnInitialized();
     }
 
     protected override async Task OnParametersSetAsync()
@@ -185,6 +185,7 @@
         await ReviewsVm.LoadUsers();
         SelectedTabIndex = NavigationManager.QueryParameter<int>(tabIndexParam);
         SelectedReviewId = NavigationManager.QueryParameter<long>(reviewIdParam);
+        StateHasChanged();
     }
 
     protected override async Task OnEventChangedAsync(EventViewModel? @event)
@@ -193,10 +194,22 @@
         {
             var navUrl = $"/{LeagueName}/Reviews/Events/{@event.EventId}?{NavigationManager.QueryString()}";
             navUrl = NavigationManager.GetUriWithQueryParameters(navUrl, GetQueryParameters());
-            bool replace = NavigationManager.Uri.Contains($"/Events/") == false || NavigationManager.Uri.Contains(navUrl);
+            bool replace = ReplaceNavigation(navUrl);
             NavigationManager.NavigateTo(navUrl, replace: replace);
             await ReviewsVm.LoadFromEventAsync(@event.EventId);
         }
+    }
+
+    private bool ReplaceNavigation(string navUrl)
+    {
+        if (NavigationManager.Uri.Contains("/Events/") == false)
+        {
+            return true;
+        }
+
+        var urlWithoutParameters = navUrl.Split('?').First();
+        var isCurrentUrlContained = NavigationManager.Uri.Contains(urlWithoutParameters);
+        return isCurrentUrlContained;
     }
 
     private IReadOnlyDictionary<string, object?> GetQueryParameters()
@@ -212,6 +225,7 @@
     {
         SelectedTabIndex = NavigationManager.QueryParameter<int>(tabIndexParam);
         SelectedReviewId = NavigationManager.QueryParameter<long>(reviewIdParam);
+        StateHasChanged();
     }
 
     private async Task SetCurrentUserId()

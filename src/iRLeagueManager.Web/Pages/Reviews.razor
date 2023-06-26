@@ -82,7 +82,10 @@
                 <Authorized>
                     @foreach(var protest in @Bind(ReviewsVm, x => x.Protests))
                     {
-                        <ProtestCard class="px-0 mb-2 mx-0" Protest=protest OnDeleteClick=@(() => OnProtestDeleteClick(protest)) />
+                        <ProtestCard class="px-0 mb-2 mx-0" 
+                            Protest=protest 
+                            OnCreateReviewClick="@(() => OnCreateReviewFromProtestClick(protest))"
+                            OnDeleteClick=@(() => OnProtestDeleteClick(protest)) />
                     }
                 </Authorized>
                 <NotAuthorized>
@@ -289,14 +292,34 @@
         }
     }
 
+    private async Task OnCreateReviewFromProtestClick(ProtestViewModel protest)
+    {
+        var review = new ReviewModel()
+            {
+                SessionId = protest.SessionId,
+                OnLap = protest.OnLap,
+                Corner = protest.Corner,
+                InvolvedMembers = protest.InvolvedMembers.ToList(),
+                FullDescription = protest.FullDescription,
+            };
+        if (review.InvolvedMembers.Any(x => x.MemberId == protest.Author.MemberId))
+        {
+            review.InvolvedMembers.Add(protest.Author);
+        }
+        await OpenAddReviewModal(review);
+    }
+
     private async Task OnAddClick()
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(EditReviewModal.Model), new ReviewModel())
-            .Add(nameof(EditReviewModal.EventMembers), ReviewsVm.EventMembers)
-            .Add(nameof(EditReviewModal.OnSubmit),
-                new Func<ReviewViewModel, CancellationToken, 
-                    Task<StatusResult>>(async (review, cancellationToken) => await review.AddToSessionAsync(review.SessionId.GetValueOrDefault(), cancellationToken)));
+        await OpenAddReviewModal(new());
+    }
+
+    private async Task OpenAddReviewModal(ReviewModel review)
+    {
+        var parameters = new ModalParameters<EditReviewModal>()
+            .Add(x => x.Model, review)
+            .Add(x => x.EventMembers, ReviewsVm.EventMembers)
+            .Add(x => x.OnSubmit, async (reviewVm, ct) => await reviewVm.AddToSessionAsync(reviewVm.SessionId.GetValueOrDefault(), ct));
         var options = new ModalOptions()
         {
             Size = ModalSize.Medium,

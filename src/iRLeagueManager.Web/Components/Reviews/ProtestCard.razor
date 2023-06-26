@@ -16,7 +16,13 @@
                     <span>&nbsp;&nbsp;By: @Protest.Author.FirstName @Protest.Author.LastName</span>
                 }
             </div>
-            <div>
+            <div class="d-flex justify-content-end gap-md-2 gap-1">
+                @if (OnCreateReviewClick.HasDelegate)
+                {
+                    <button class="btn btn-outline-secondary" @onclick=OnCreateReviewClick title="Add as Review">
+                        <span class="bi bi-journal-plus"></span>
+                    </button>
+                }
                 @if (OnDeleteClick.HasDelegate)
                 {
                     <button class="btn btn-outline-danger" @onclick=OnDeleteClick>
@@ -55,6 +61,8 @@
 
     [Parameter]
     public EventCallback<MouseEventArgs> OnDeleteClick { get; set; }
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnCreateReviewClick { get; set; }
 
     protected override void OnParametersSet()
     {

@@ -295,14 +295,14 @@
     private async Task OnCreateReviewFromProtestClick(ProtestViewModel protest)
     {
         var review = new ReviewModel()
-            {
-                SessionId = protest.SessionId,
-                OnLap = protest.OnLap,
-                Corner = protest.Corner,
-                InvolvedMembers = protest.InvolvedMembers.ToList(),
-                FullDescription = protest.FullDescription,
-            };
-        if (review.InvolvedMembers.Any(x => x.MemberId == protest.Author.MemberId))
+        {
+            SessionId = protest.SessionId,
+            OnLap = protest.OnLap,
+            Corner = protest.Corner,
+            InvolvedMembers = protest.InvolvedMembers.ToList(),
+            FullDescription = protest.FullDescription,
+        };
+        if (review.InvolvedMembers.Any(x => x.MemberId == protest.Author.MemberId) == false)
         {
             review.InvolvedMembers.Add(protest.Author);
         }

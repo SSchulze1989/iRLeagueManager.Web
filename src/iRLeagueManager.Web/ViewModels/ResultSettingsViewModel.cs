@@ -2,6 +2,7 @@
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 using System;
+using System.ComponentModel.Design;
 
 namespace iRLeagueManager.Web.ViewModels;
 
@@ -87,20 +88,36 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
             // Post a champ season for the new championship and the current season
             var postChampSeasonResult = await CurrentSeason.Championships()
                 .WithId(postChampionshipResult.Content.ChampionshipId)
-                .Post(champSeason);
+                .Post(champSeason, cancellationToken);
             if (postChampSeasonResult.Success == false || postChampSeasonResult.Content is null)
             {
                 return postChampionshipResult.ToStatusResult();
             }
+            // Create empty result config
+            var resultConfigTemplate = new PostResultConfigModel()
+            {
+                Name = "Default Points",
+                ResultKind = iRLeagueApiCore.Common.Enums.ResultKind.Member,
+            };
+            var postResultConfigResult = await CurrentLeague
+                .ChampSeasons()
+                .WithId(postChampSeasonResult.Content.ChampSeasonId)
+                .ResultConfigs()
+                .Post(resultConfigTemplate, cancellationToken);
+            if (postResultConfigResult.Success == false || postResultConfigResult.Content is null)
+            {
+                return postResultConfigResult.ToStatusResult();
+            }
+            champSeason.ResultConfigs = new[] { new ResultConfigInfoModel() { ResultConfigId = postResultConfigResult.Content.ResultConfigId } };
+            champSeason.DefaultResultConfig = new() { ResultConfigId = postResultConfigResult.Content.ResultConfigId };
             // Update the champseason with data from model
             var putChampSeasonResult = await CurrentLeague.ChampSeasons()
                 .WithId(postChampSeasonResult.Content.ChampSeasonId)
-                .Put(champSeason);
-            if (postChampSeasonResult.Success == false || putChampSeasonResult.Content is null)
+                .Put(champSeason, cancellationToken);
+            if (putChampSeasonResult.Success == false || putChampSeasonResult.Content is null)
             {
                 return putChampSeasonResult.ToStatusResult();
             }
-            CurrentChampSeasons.Add(new(LoggerFactory, ApiService, putChampSeasonResult.Content));
             return StatusResult.SuccessResult();
         }
         finally 

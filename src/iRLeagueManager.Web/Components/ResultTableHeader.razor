@@ -4,7 +4,7 @@
         table-header
         @(Active ? "active" : "")
         @(HasAction ? "action" : "")
-        @(Direction == SortDirection.Ascending ? "sort-ascending" : "sort-descending")
+        @(CurrentDirection == SortDirection.Ascending ? "sort-ascending" : "sort-descending")
     "
     @onclick=OnClick> 
     @Text
@@ -22,12 +22,15 @@
     [Parameter]
     public SortDirection Direction { get; set; } = SortDirection.Ascending;
 
+    private SortDirection CurrentDirection { get; set; }
+
     private bool Active => CascadingSortState.SortFunc == Sort && HasAction;
 
     private bool HasAction => Sort is not null;
 
     protected override void OnInitialized()
     {
+        CurrentDirection = Direction;
         if (Default)
         {
             OnClick();
@@ -48,10 +51,10 @@
 
         if (Active)
         {
-            Direction = Direction == SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending;
+            CurrentDirection = CurrentDirection == SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending;
         }
 
-        CascadingSortState.Direction = Direction;
+        CascadingSortState.Direction = CurrentDirection;
         CascadingSortState.SortFunc = Sort;
     }
 }

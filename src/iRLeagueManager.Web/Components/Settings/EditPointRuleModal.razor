@@ -68,7 +68,9 @@
                 break;
         }
         <InputGroup Label="Bonus Points">
-            <InputText class="form-control" @bind-Value=PointRule.BonusPointsString />
+            <label class="form-control" @onclick=EditBonusClick>
+                @((MarkupString)string.Join("<br/>", PointRule.BonusPointConfigs.Select(x => x.ToString().Replace(" ", "&nbsp;"))))
+            </label>
         </InputGroup>
     </div>
     <CancelSubmitButtons SubmitText="Ok" CancelText="Cancel" OnSubmit=Submit OnCancel=Cancel />
@@ -77,6 +79,8 @@
 @code {
     [CascadingParameter]
     public BlazoredModalInstance ModalInstance { get; set; } = default!;
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
 
     [Parameter]
     public PointRuleModel Model { get; set; } = default!;
@@ -99,6 +103,7 @@
 
     protected override void OnParametersSet()
     {
+        BlazorParameterNullException.ThrowIfNull(this, ModalService);
         _ = ModalInstance ?? throw BlazorParameterNullException.New(this, ModalInstance);
         _ = Model ?? throw BlazorParameterNullException.New(this, Model);
     }
@@ -122,6 +127,17 @@
         {
             await ScrollDummy.FocusAsync();
             await NewNumberInput.Element.Value.FocusAsync();
+        }
+    }
+
+    private async Task EditBonusClick()
+    {
+        var parameters = new ModalParameters<EditBonusPointsModal>()
+            .Add(x => x.BonusPoints, PointRule.BonusPointConfigs);
+        var result = await ModalService.Show<EditBonusPointsModal>("Bonus points", parameters).Result;
+        if (result.Confirmed && result.Data is IEnumerable<BonusPointConfig> bonusPoints)
+        {
+            PointRule.BonusPointConfigs = bonusPoints;
         }
     }
 

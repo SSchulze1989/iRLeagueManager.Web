@@ -35,7 +35,18 @@ public sealed class PointRuleViewModel : LeagueViewModelBase<PointRuleViewModel,
     public int MaxPoints { get => model.MaxPoints; set => SetP(model.MaxPoints, value => model.MaxPoints = value, value); }
     public int PointDropOff { get => model.PointDropOff; set => SetP(model.PointDropOff, value => model.PointDropOff = value, value); }
     public IList<int> PointsPerPlace { get => model.PointsPerPlace; set => SetP(model.PointsPerPlace, value => model.PointsPerPlace = value, value); }
-    public IDictionary<string, int> BonusPoints { get => model.BonusPoints; set => SetP(model.BonusPoints, value => model.BonusPoints = value, value); }
+    public IDictionary<string, int> BonusPoints
+    {
+        get => model.BonusPoints;
+        set
+        {
+            if (SetP(model.BonusPoints, value => model.BonusPoints = value, value))
+            {
+                OnPropertyChanged(nameof(BonusPointsString));
+                OnPropertyChanged(nameof(BonusPointConfigs));
+            }
+        }
+    }
     public ICollection<SortOptions> PointsSortOptions { get => model.PointsSortOptions; set => SetP(model.PointsSortOptions, value => model.PointsSortOptions = value, value); }
     public ICollection<SortOptions> FinalSortOptions { get => model.FinalSortOptions; set => SetP(model.FinalSortOptions, value => model.FinalSortOptions = value, value); }
     public string BonusPointsString
@@ -59,6 +70,11 @@ public sealed class PointRuleViewModel : LeagueViewModelBase<PointRuleViewModel,
             }
             BonusPoints = points;
         }
+    }
+    public IEnumerable<BonusPointConfig> BonusPointConfigs
+    {
+        get => BonusPoints.Select(x => new BonusPointConfig(x.Key, x.Value));
+        set => BonusPoints = value.ToDictionary(k => $"{k.OptionId}{(k.Position != 0 ? k.Position : "")}", v => v.Points);
     }
 
     public enum PointRuleType

@@ -18,6 +18,12 @@ public class BonusPointOption
         new('p', "Position", true),
         new('q', "Qualy Position", true),
         new('f', "Fastest Lap", false),
+        new('a', "Fastest average lap", false),
         new('c', "Cleanest Driver", false),
+        new('n', "No incidents", false),
+        new('g', "Gained most Pos.", false),
+        new('d', "Lost most Pos.", false),
+        new('l', "Lead one lap", false),
+        new('m', "Lead most laps", false),
     };
 }

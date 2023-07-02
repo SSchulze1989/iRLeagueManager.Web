@@ -69,7 +69,7 @@
         }
         <InputGroup Label="Bonus Points">
             <label class="form-control" @onclick=EditBonusClick>
-                @((MarkupString)string.Join(", ", PointRule.BonusPointConfigs.Select(x => x.ToString().Replace(" ", "&nbsp;"))))
+                @((MarkupString)string.Join("<br/>", PointRule.BonusPointConfigs.Select(x => x.ToString().Replace(" ", "&nbsp;"))))
             </label>
         </InputGroup>
     </div>

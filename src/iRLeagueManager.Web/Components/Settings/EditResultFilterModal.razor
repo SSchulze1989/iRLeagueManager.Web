@@ -3,7 +3,7 @@
 @inherits MvvmComponentBase
 @inject ResultFiltersViewModel vm
 
-@foreach(var filter in vm.Filters)
+@foreach(var filter in vm)
 {
     <EditForm Model=filter>
         <div class="input-group-list mb-3">
@@ -64,6 +64,10 @@
                     <InputSelect class="form-select" id="input-type-select" aria-label="input-type-select" @bind-Value=filter.Comparator>
                         @foreach (var compType in Enum.GetValues<ComparatorType>())
                         {
+                            if (AllowForEach == false && compType == ComparatorType.ForEach)
+                            {
+                                continue;
+                            }
                             <option value=@compType>@compType.ToString()</option>
                         }
                     </InputSelect>
@@ -126,6 +130,9 @@
 
     [Parameter]
     public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+
+    [Parameter]
+    public bool AllowForEach { get; set; } = false;
 
     private static IEnumerable<string> ColumnNames { get; } = new[]
     {

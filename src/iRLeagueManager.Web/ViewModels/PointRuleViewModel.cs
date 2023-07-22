@@ -77,6 +77,8 @@ public sealed class PointRuleViewModel : LeagueViewModelBase<PointRuleViewModel,
         set => BonusPoints = value.ToDictionary(k => $"{k.OptionId}{(k.Position != 0 ? k.Position : "")}", v => v.Points);
     }
 
+    public ICollection<AutoPenaltyConfiguration> AutoPenalties { get => model.AutoPenalties; set => SetP(model.AutoPenalties, value => model.AutoPenalties = value, value); }
+
     public enum PointRuleType
     {
         MaxPoints = 0,

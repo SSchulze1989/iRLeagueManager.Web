@@ -35,6 +35,11 @@
         <PointTable class="overflow-auto" PointRule=pointRule/>
     </button>
 </InputGroup>
+<InputGroup Label="Auto Penalties">
+    <label class="form-control text-muted" @onclick=EditAutoPenaltiesClick>
+        Configure
+    </label>
+</InputGroup>
 <InputGroup Label="Sort Final">
     <button class="form-control" type="button" @onclick=@(() => EditFinalSortOptionsClick(Scoring.PointRule)) data-bs-toggle="tooltip" title="Sort for final order displayed on results page and to define final positions">
         @{
@@ -116,6 +121,18 @@
         if (result.Confirmed && result.Data is IList<SortOptions> sortOptions)
         {
             pointRule.FinalSortOptions = sortOptions;
+        }
+    }
+
+    private async Task EditAutoPenaltiesClick()
+    {
+        var autoPenalties = Scoring.PointRule.AutoPenalties;
+        var parameters = new ModalParameters<EditAutoPenaltiesModal>()
+            .Add(x => x.Model, autoPenalties);
+        var result = await ModalService.Show<EditAutoPenaltiesModal>("Automatic Penalties", parameters).Result;
+        if (result.Confirmed && result.Data is IEnumerable<AutoPenaltyConfiguration> model)
+        {
+            Scoring.PointRule.AutoPenalties = model.ToList();
         }
     }
 }

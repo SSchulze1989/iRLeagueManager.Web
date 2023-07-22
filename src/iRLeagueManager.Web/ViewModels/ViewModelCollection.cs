@@ -10,15 +10,13 @@ public abstract class ViewModelCollection<TViewModel, TModel, TSelf> : LeagueVie
     where TModel : class, new()
     where TSelf : ViewModelCollection<TViewModel, TModel, TSelf>
 {
-    private ObservableCollection<TViewModel> values;
+    private ObservableCollection<TViewModel> values = default!;
 
     public event NotifyCollectionChangedEventHandler? CollectionChanged;
 
     public ViewModelCollection(ILoggerFactory loggerFactory, LeagueApiService apiService) 
         : base(loggerFactory, apiService, Enumerable.Empty<TModel>())
     {
-        values = new();
-        SetModel(model);
     }
 
     /// <summary>
@@ -31,7 +29,10 @@ public abstract class ViewModelCollection<TViewModel, TModel, TSelf> : LeagueVie
     public override void SetModel(IEnumerable<TModel> modelCollection)
     {
         ArgumentNullException.ThrowIfNull(modelCollection);
-        values.CollectionChanged -= CollectionChanged;
+        if (values is not null)
+        {
+            values.CollectionChanged -= CollectionChanged;
+        }
         values = new(modelCollection.Select(CreateInstance));
         values.CollectionChanged += CollectionChanged;
     }

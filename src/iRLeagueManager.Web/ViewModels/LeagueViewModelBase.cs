@@ -4,11 +4,11 @@ using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Shared;
 using MvvmBlazor.ViewModel;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public class LeagueViewModelBase<T> : ViewModelBase, IModelState
+public abstract class LeagueViewModelBase<T> : ViewModelBase, IModelState
+    where T : LeagueViewModelBase<T>
 {
     public LeagueViewModelBase(ILoggerFactory loggerFactory, LeagueApiService apiService)
     {
@@ -67,26 +67,6 @@ public class LeagueViewModelBase<T> : ViewModelBase, IModelState
         return false;
     }
 
-    //protected bool Set<TModel, TProperty>(TModel model, Expression<Func<TModel, TProperty>> property, TProperty value, [CallerMemberName] string ? propertyName = null)
-    //{
-    //    ArgumentNullException.ThrowIfNull(model);
-    //    ArgumentNullException.ThrowIfNull(property);
-
-    //    var propertyValue = property.Compile().Invoke(model);
-    //    if (!EqualityComparer<TProperty>.Default.Equals(propertyValue, value))
-    //    {
-    //        var propertyExpression = property.Body as MemberExpression
-    //            ?? throw new ArgumentException("Argument must be a member Expression", nameof(property));
-    //        var propertyInfo = propertyExpression.Member as PropertyInfo
-    //            ?? throw new ArgumentException("Expression must target a Property", nameof(property));
-    //        propertyInfo.SetValue(model, value);
-    //        HasChanged = true;
-    //        OnPropertyChanged(propertyName);
-    //        return true;
-    //    }
-    //    return false;
-    //}
-
     protected static StatusResult LeagueNullResult() =>
         StatusResult.FailedResult("League Null", $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentLeague)} was null", Array.Empty<object>());
 
@@ -94,7 +74,9 @@ public class LeagueViewModelBase<T> : ViewModelBase, IModelState
         StatusResult.FailedResult("Season Null", $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentSeason)} was null", Array.Empty<object>());
 }
 
-public class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelBase<TViewModel> where TModel : class where TViewModel : class
+public abstract class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelBase<TViewModel>
+    where TViewModel : LeagueViewModelBase<TViewModel, TModel>
+    where TModel : class 
 {
     protected TModel model = default!;
 

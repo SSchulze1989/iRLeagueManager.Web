@@ -14,39 +14,46 @@
 
 <PageTitle>Settings - @LeagueName</PageTitle>
 
-<div class="input-group mt-2 mb-3">
-    <label class="input-group-text">Season</label>
-    <SeasonSelect SeasonChanged=OnSeasonSelectChanged />
-</div>
-<div class="card my-2 pb-0">
-    <div class="card-header">
-        Championships
-    </div>
-    <div class="list-group list-group-flush">
-        @foreach ((var championship, var index) in @Bind(vm, x => x.Championships).OrderByDescending(x => x.IsActive).Select((x, i) => (x, i)))
-        {
-            var champSeason = vm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipId == championship.ChampionshipId);
-            var disabled = champSeason == null;
-            <div class="list-group-item @(disabled ? "" : "list-group-item-action") d-flex justify-content-between align-items-start" type="button" @onclick=@(async () => { if (champSeason is not null) await OnChampionshipClick(champSeason); })>
-                <ChampionshipPreview Championship=championship ChampSeason=champSeason class="flex-fill"/>
-                <div>
-                    <label class="switch" @onclick:stopPropagation>
-                        <input type="checkbox" checked="@championship.IsActive" @onclick=@(() => ToggleChampionshipActive(championship)) @onclick:stopPropagation @onclick:preventDefault/>
-                        <span class="slider round"></span>
-                    </label>
-                    <button class="btn btn-outline-danger" @onclick=@(() => OnDeleteChampionshipClick(championship)) @onclick:stopPropagation="true">
-                        <span class="oi oi-trash" />
+<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
+    <Authorized>
+        <div class="input-group mt-2 mb-3">
+            <label class="input-group-text">Season</label>
+            <SeasonSelect SeasonChanged=OnSeasonSelectChanged />
+        </div>
+        <div class="card my-2 pb-0">
+            <div class="card-header">
+                Championships
+            </div>
+            <div class="list-group list-group-flush">
+                @foreach ((var championship, var index) in @Bind(vm, x => x.Championships).OrderByDescending(x => x.IsActive).Select((x, i) => (x, i)))
+                {
+                    var champSeason = vm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipId == championship.ChampionshipId);
+                    var disabled = champSeason == null;
+                    <div class="list-group-item @(disabled ? "" : "list-group-item-action") d-flex justify-content-between align-items-start" type="button" @onclick=@(async () => { if (champSeason is not null) await OnChampionshipClick(champSeason); })>
+                        <ChampionshipPreview Championship=championship ChampSeason=champSeason class="flex-fill" />
+                        <div>
+                            <label class="switch" @onclick:stopPropagation>
+                                <input type="checkbox" checked="@championship.IsActive" @onclick=@(() => ToggleChampionshipActive(championship)) @onclick:stopPropagation @onclick:preventDefault />
+                                <span class="slider round"></span>
+                            </label>
+                            <button class="btn btn-outline-danger" @onclick=@(() => OnDeleteChampionshipClick(championship)) @onclick:stopPropagation="true">
+                                <span class="oi oi-trash" />
+                            </button>
+                        </div>
+                    </div>
+                }
+                <div class="list-group-item">
+                    <button class="btn btn-outline-secondary" type="button" @onclick=OnAddChampionshipClick>
+                        Create new Championship
                     </button>
                 </div>
             </div>
-        }
-        <div class="list-group-item">
-            <button class="btn btn-outline-secondary" type="button" @onclick=OnAddChampionshipClick>
-                Create new Championship
-            </button>
         </div>
-    </div>
-</div>
+    </Authorized>
+    <NotAuthorized>
+        You are not allowed here ...
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     [CascadingParameter]

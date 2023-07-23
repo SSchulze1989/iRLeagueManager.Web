@@ -13,25 +13,32 @@
 
 <PageTitle>Settings - @LeagueName</PageTitle>
 
-<div @attributes=AdditionalAttributes>
-    <div class="card my-2 pb-0">
-        <div class="card-header">
-            Teams
-        </div>
-        <div class="list-group list-group-flush">
-            @foreach(var team in @Bind(vm, x => x.Teams).OrderBy(x => x.Name))
-            {
-                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button" @onclick=@(() => OnTeamClick(team))>
-                    <TeamPreview Team=team />
-                    <button class="btn btn-outline-danger" @onclick=@(() => OnDeleteTeamClick(team)) @onclick:stopPropagation="true">
-                        <span class="oi oi-trash"/>
-                    </button>
+<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
+    <Authorized>
+        <div @attributes=AdditionalAttributes>
+            <div class="card my-2 pb-0">
+                <div class="card-header">
+                    Teams
                 </div>
-            }
+                <div class="list-group list-group-flush">
+                    @foreach (var team in @Bind(vm, x => x.Teams).OrderBy(x => x.Name))
+                    {
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button" @onclick=@(() => OnTeamClick(team))>
+                            <TeamPreview Team=team />
+                            <button class="btn btn-outline-danger" @onclick=@(() => OnDeleteTeamClick(team)) @onclick:stopPropagation="true">
+                                <span class="oi oi-trash" />
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+            <button class="btn btn-outline-secondary" @onclick=OnAddTeamClick>Add Team</button>
         </div>
-    </div>
-    <button class="btn btn-outline-secondary" @onclick=OnAddTeamClick>Add Team</button>
-</div>
+    </Authorized>
+    <NotAuthorized>
+        You are not allowed here ...
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     [CascadingParameter]

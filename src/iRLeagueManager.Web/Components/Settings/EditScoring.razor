@@ -36,9 +36,18 @@
     </button>
 </InputGroup>
 <InputGroup Label="Auto Penalties">
-    <label class="form-control text-muted" @onclick=EditAutoPenaltiesClick>
-        Configure
-    </label>
+    <button class="form-control" type="button" @onclick=EditAutoPenaltiesClick>
+        @if(Scoring.PointRule.AutoPenalties.Any() == false)
+        {
+            <div class="text-muted">Configure</div>
+        }
+        else
+        {
+            <div class="w-100 text-start">
+                @string.Join(", ", Scoring.PointRule.AutoPenalties.Select(x => x.Description))
+            </div>
+        }
+    </button>
 </InputGroup>
 <InputGroup Label="Sort Final">
     <button class="form-control" type="button" @onclick=@(() => EditFinalSortOptionsClick(Scoring.PointRule)) data-bs-toggle="tooltip" title="Sort for final order displayed on results page and to define final positions">
@@ -68,14 +77,17 @@
 @code {
     [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
+    [CascadingParameter]
+    public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
 
     [Parameter]
     public ScoringViewModel Scoring { get; set; } = default!;
 
     protected override void OnParametersSet()
     {
-        _ = ModalService ?? throw BlazorParameterNullException.New(this, ModalService);
-        _ = Scoring ?? throw BlazorParameterNullException.New(this, Scoring);
+        BlazorParameterNullException.ThrowIfNull(this, ModalService);
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers);
+        BlazorParameterNullException.ThrowIfNull(this, Scoring);
     }
 
     private async Task EditPointsClick()
@@ -126,9 +138,10 @@
 
     private async Task EditAutoPenaltiesClick()
     {
-        var autoPenalties = Scoring.PointRule.AutoPenalties;
+        var autoPenalties = Scoring.PointRule.CopyModel().AutoPenalties;
         var parameters = new ModalParameters<EditAutoPenaltiesModal>()
-            .Add(x => x.Model, autoPenalties);
+            .Add(x => x.Model, autoPenalties)
+            .Add(x => x.LeagueMembers, LeagueMembers);
         var result = await ModalService.Show<EditAutoPenaltiesModal>("Automatic Penalties", parameters).Result;
         if (result.Confirmed && result.Data is IEnumerable<AutoPenaltyConfiguration> model)
         {

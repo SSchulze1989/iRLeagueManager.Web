@@ -18,100 +18,107 @@
                     <span class="oi oi-trash"/>
                 </button>
             </InputGroup>
-            <InputGroup Label="Action">
-                <InputSelect class="form-select" id="input-action-select" aria-label="input-action-select" @bind-Value=filter.Action>
-                    <option value="@MatchedValueAction.Keep">Keep</option>
-                    <option value="@MatchedValueAction.Remove">Remove</option>
-                </InputSelect>
-            </InputGroup>
-            @if (filter.FilterType == FilterType.Member)
+            @if (Actions.Count() > 1)
             {
-                <InputGroup Label="Members">
-                    <BlazoredTypeahead @bind-Values=filter.FilterValues
-                                       class="form-control p-0"
-                                       style="border-top-right-radius:0; border-top-left-radius:0;"
-                                       EnableDropDown=true
-                                       SearchMethod=SearchMembers
-                                       ConvertMethod="@(item => item.MemberId.ToString())"
-                                       MinimumLength=1
-                                       MaximumSuggestions=100
-                                       DeleteItemsOnBackspace=false
-                                       placeholder="Search driver by name...">
-
-                        <SelectedTemplate Context=memberId>
-                            @{var member = LeagueMembers.FirstOrDefault(x => x.MemberId.ToString() == memberId); }
-                            @if (member is null)
-                            {
-                                @memberId
-                            }
-                            else
-                            {
-                                @member.FirstName @member.LastName
-                            }
-                        </SelectedTemplate>
-                        <ResultTemplate Context=member>
-                                @member.FirstName @member.LastName (@member.IRacingId)
-                        </ResultTemplate>
-                        <NotFoundTemplate Context=name>
-                            <span>Driver <b>@name</b> Not found!</span>
-                        </NotFoundTemplate>
-                    </BlazoredTypeahead>
-                </InputGroup>
-            }
-            else if (filter.FilterType == FilterType.ColumnProperty)
-            {
-                <InputGroup Label="Type">
-                    <InputSelect class="form-select" id="input-type-select" aria-label="input-type-select" @bind-Value=filter.Comparator>
-                        @foreach (var compType in Enum.GetValues<ComparatorType>())
+                <InputGroup Label="Action">
+                    <InputSelect class="form-select" id="input-action-select" aria-label="input-action-select" @bind-Value=filter.Action>
+                        @foreach(var action in Actions)
                         {
-                            if (AllowForEach == false && compType == ComparatorType.ForEach)
-                            {
-                                continue;
-                            }
-                            <option value=@compType>@compType.ToString()</option>
+                            <option value="@action">@action.ToString()</option>
                         }
                     </InputSelect>
                 </InputGroup>
-                <InputGroup Label="@(@Bind(filter, x => x.Comparator) == ComparatorType.InList ? "Values" : "Value")">
-                    @{
-                        var propertyType = GetColumnPropertyType(filter.ColumnPropertyName);
-                    }
-                    @if (propertyType is null)
-                    {
-                        <label class="form-control disabled" type="text" />
-                    }
-                    else if (filter.Comparator == ComparatorType.InList)
-                    {
-                        <BlazoredTypeahead
-                            @bind-Values=filter.FilterValues
-                            SearchMethod=@(str => Task.FromResult((IEnumerable<string>)Array.Empty<string>()))
-                            AddItemOnEmptyResultMethod=@(str => Task.FromResult(str))
-                            DeleteItemsOnBackspace=false
-                            class="form-control">
-                            <SelectedTemplate Context=value>
-                                @value
+            }
+            @switch (filter.FilterType)
+            {
+                case FilterType.Member:
+                    <InputGroup Label="Members">
+                        <BlazoredTypeahead @bind-Values=filter.FilterValues
+                                           class="form-control p-0"
+                                           style="border-top-right-radius:0; border-top-left-radius:0;"
+                               EnableDropDown=true
+                               SearchMethod=SearchMembers
+                               ConvertMethod="@(item => item.MemberId.ToString())"
+                               MinimumLength=1
+                               MaximumSuggestions=100
+                               DeleteItemsOnBackspace=false
+                                           placeholder="Search driver by name...">
+
+                            <SelectedTemplate Context=memberId>
+                                @{
+                                    var member = LeagueMembers.FirstOrDefault(x => x.MemberId.ToString() == memberId);
+                                }
+                                @if (member is null)
+                                {
+                                    @memberId
+                                }
+                                else
+                                {
+                                    @member.FirstName @member.LastName
+                                }
                             </SelectedTemplate>
-                            <ResultTemplate Context=value>
-                                @value
+                            <ResultTemplate Context=member>
+                                @member.FirstName @member.LastName (@member.IRacingId)
                             </ResultTemplate>
-                            <NotFoundTemplate Context=value>
-                                @value
+                            <NotFoundTemplate Context=name>
+                                <span>Driver <b>@name</b> Not found!</span>
                             </NotFoundTemplate>
                         </BlazoredTypeahead>
-                    }
-                    else if (propertyType == typeof(string))
-                    {
-                        <InputText class="form-control" @bind-Value=filter.Value />
-                    }
-                    else if (propertyType == typeof(double) || propertyType == typeof(double?) || propertyType == typeof(int) || propertyType == typeof(int?))
-                    {
-                        <input type="number" class="form-control" value=@filter.Value @onchange=@((ChangeEventArgs args) => filter.Value = args.Value?.ToString() ?? string.Empty) />
-                    }
-                    else
-                    {
-                        <label class="form-control">Not supported</label>
-                    }
-                </InputGroup>
+                    </InputGroup>
+                    break;
+                case FilterType.ColumnProperty:
+                    <InputGroup Label="Type">
+                        <InputSelect class="form-select" id="input-type-select" aria-label="input-type-select" @bind-Value=filter.Comparator>
+                            @foreach (var compType in Enum.GetValues<ComparatorType>())
+                            {
+                                if (AllowForEach == false && compType == ComparatorType.ForEach)
+                                {
+                                    continue;
+                                }
+                                <option value=@compType>@compType.ToString()</option>
+                            }
+                        </InputSelect>
+                    </InputGroup>
+                    <InputGroup Label="@(@Bind(filter, x => x.Comparator) == ComparatorType.InList ? "Values" : "Value")">
+                        @{
+                            var propertyType = GetColumnPropertyType(filter.ColumnPropertyName);
+                        }
+                        @if (propertyType is null)
+                        {
+                            <label class="form-control disabled" type="text" />
+                        }
+                        else if (filter.Comparator == ComparatorType.InList)
+                        {
+                            <BlazoredTypeahead @bind-Values=filter.FilterValues
+                               SearchMethod=@(str => Task.FromResult((IEnumerable<string>)Array.Empty<string>()))
+                               AddItemOnEmptyResultMethod=@(str => Task.FromResult(str))
+                               DeleteItemsOnBackspace=false
+                                               class="form-control">
+                                <SelectedTemplate Context=value>
+                                    @value
+                                </SelectedTemplate>
+                                <ResultTemplate Context=value>
+                                    @value
+                                </ResultTemplate>
+                                <NotFoundTemplate Context=value>
+                                    @value
+                                </NotFoundTemplate>
+                            </BlazoredTypeahead>
+                        }
+                        else if (propertyType == typeof(string))
+                        {
+                            <InputText class="form-control" @bind-Value=filter.Value />
+                        }
+                        else if (propertyType == typeof(double) || propertyType == typeof(double?) || propertyType == typeof(int) || propertyType == typeof(int?))
+                        {
+                            <input type="number" class="form-control" value=@filter.Value @onchange=@((ChangeEventArgs args) => filter.Value = args.Value?.ToString() ?? string.Empty) />
+                        }
+                        else
+                        {
+                            <label class="form-control">Not supported</label>
+                        }
+                    </InputGroup>
+                    break;
             }
         </div>
     </EditForm>
@@ -134,7 +141,7 @@
     [Parameter]
     public bool AllowForEach { get; set; } = false;
 
-    private static IEnumerable<string> ColumnNames { get; } = new[]
+    public static string[] DefaultColumnNames { get; } = new[]
     {
         nameof(ResultRowModel.Car),
         nameof(ResultRowModel.CarClass),
@@ -147,8 +154,21 @@
         nameof(ResultRowModel.NewIrating),
         nameof(ResultRowModel.OldSafetyRating),
         nameof(ResultRowModel.NewSafetyRating),
+        nameof(ResultRowModel.Incidents),
         "Member",
     };
+
+    public static MatchedValueAction[] DefaultActions { get; } = new[]
+    {
+        MatchedValueAction.Keep,
+        MatchedValueAction.Remove,
+    };
+
+    [Parameter]
+    public IEnumerable<string> ColumnNames { get; set; } = DefaultColumnNames;
+
+    [Parameter]
+    public IEnumerable<MatchedValueAction> Actions { get; set; } = DefaultActions;
 
     private async Task<IEnumerable<MemberModel>> SearchMembers(string searchString)
     {

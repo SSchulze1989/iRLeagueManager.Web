@@ -4,6 +4,7 @@
 @using iRLeagueManager.Web.ViewModels
 @inject IJSRuntime JsRuntime
 
+<CascadingValue Value="@Bind(Vm, x => x.LeagueMembers).AsEnumerable()">
 <EditForm Model=Vm OnValidSubmit=Submit>
     <StatusResultValidator @ref=ResultValidator />
     <div class="accordion mb-3" id="resultConfigSections">
@@ -137,6 +138,7 @@
     <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
     <CancelSubmitButtons ModelState=Vm SubmitText="Save" OnCancel=Cancel/>
 </EditForm>
+</CascadingValue>
 
 @code {
     protected override async Task OnAfterRenderAsync(bool firstRender)

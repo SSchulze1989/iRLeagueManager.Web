@@ -29,6 +29,13 @@ public abstract class ViewModelCollection<TViewModel, TModel, TSelf> : LeagueVie
     public override void SetModel(IEnumerable<TModel> modelCollection)
     {
         ArgumentNullException.ThrowIfNull(modelCollection);
+
+        if (modelCollection == model)
+        {
+            return;
+        }
+
+        base.SetModel(modelCollection);
         if (values is not null)
         {
             values.CollectionChanged -= CollectionChanged;

@@ -7,11 +7,17 @@
     <EditForm Model="autoPenalty">
         <div class="input-group-list mb-3">
             <InputGroup Label="Description">
-                <InputText class="form-control" @bind-Value=autoPenalty.Description />
+                <InputText class="form-control" @bind-Value="autoPenalty.Description"/>
+                <button class="btn btn-outline-danger" @onclick=@(() => Vm.Remove(autoPenalty)) tabindex="-1">
+                    <span class="oi oi-trash" />
+                </button>
             </InputGroup>
             <InputGroup Label="Conditions">
-                <label class="form-control text-muted">
-                    Conditions
+                <label class="form-control text-muted" @onclick=@(() => OnConditionsClick(autoPenalty))>
+                    @foreach(var condition in autoPenalty.Conditions)
+                    {
+                        <PreviewResultFilter Condition="@MapToResultFilterModel(condition)" LeagueMembers="LeagueMembers"/>
+                    }
                 </label>
             </InputGroup>
             <InputGroup Label="Type">
@@ -53,5 +59,51 @@
 <CancelSubmitButtons SubmitText="Ok" CancelText="Cancel" OnSubmit=Submit OnCancel=Cancel ModelState="Vm" />
 
 @code {
+    [Parameter, EditorRequired]
+    public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
 
+    private string Text { get; set; } = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, ModalService);
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers);
+    }
+
+    private static ResultFilterModel MapToResultFilterModel(FilterConditionModel condition) => new ResultFilterModel()
+    {
+        Action = condition.Action,
+        ColumnPropertyName = condition.ColumnPropertyName,
+        Comparator = condition.Comparator,
+        FilterType = condition.FilterType,
+        FilterValues = condition.FilterValues,
+    };
+
+    private static FilterConditionModel MapToFilterConditionModel(ResultFilterModel filter) => new FilterConditionModel()
+    {
+        Action = filter.Action,
+        ColumnPropertyName = filter.ColumnPropertyName,
+        Comparator = filter.Comparator,
+        FilterType = filter.FilterType,
+        FilterValues = filter.FilterValues,
+    };
+
+    private async Task OnConditionsClick(AutoPenaltyConfigViewModel autoPenalty)
+    {
+        var conditions = autoPenalty.CopyModel().Conditions
+            .Select(MapToResultFilterModel);
+        var parameters = new ModalParameters<EditResultFilterModal>()
+            .Add(x => x.Model, conditions)
+            .Add(x => x.LeagueMembers, LeagueMembers)
+            .Add(x => x.AllowForEach, true)
+            .Add(x => x.Actions, new[] { MatchedValueAction.Keep });
+        var result = await ModalService.Show<EditResultFilterModal>("Penalty Conditions", parameters).Result;
+        if (result.Confirmed && result.Data is IEnumerable<ResultFilterModel> model)
+        {
+            autoPenalty.Conditions = model
+                .Select(MapToFilterConditionModel)
+                .ToList();
+        }
+    }
 }

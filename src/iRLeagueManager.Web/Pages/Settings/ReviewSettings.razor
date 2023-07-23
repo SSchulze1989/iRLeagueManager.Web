@@ -9,42 +9,49 @@
 
 <PageTitle>Settings - @LeagueName</PageTitle>
 
-<div @attributes=AdditionalAttributes>
-    <div class="card my-2 pb-0">
-        <div class="card-header">
-            Vote Categories
-        </div>
-        <div class="list-group list-group-flush">
-            @foreach(var voteCategory in Vm.VoteCategories)
-            {
-                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button" @onclick=@(() => OnVoteCategoryClick(voteCategory))>
-                    <div class="w-75">
-                        <div class="row">
-                            <div class="col">
-                                <h5>Text</h5>
-                            </div>
-                            <div class="col">
-                                <h5>Penalty</h5>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                @voteCategory.Text
-                            </div>
-                            <div class="col">
-                                @voteCategory.DefaultPenalty
-                            </div>
-                        </div>
-                    </div>
-                    <button class="btn btn-outline-danger" @onclick=@(() => OnDeleteVoteCategoryClick(voteCategory)) @onclick:stopPropagation>
-                        <span class="oi oi-trash"/>
-                    </button>
+<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
+    <Authorized>
+        <div @attributes=AdditionalAttributes>
+            <div class="card my-2 pb-0">
+                <div class="card-header">
+                    Vote Categories
                 </div>
-            }
+                <div class="list-group list-group-flush">
+                    @foreach (var voteCategory in Vm.VoteCategories)
+                    {
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button" @onclick=@(() => OnVoteCategoryClick(voteCategory))>
+                            <div class="w-75">
+                                <div class="row">
+                                    <div class="col">
+                                        <h5>Text</h5>
+                                    </div>
+                                    <div class="col">
+                                        <h5>Penalty</h5>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        @voteCategory.Text
+                                    </div>
+                                    <div class="col">
+                                        @voteCategory.DefaultPenalty
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline-danger" @onclick=@(() => OnDeleteVoteCategoryClick(voteCategory)) @onclick:stopPropagation>
+                                <span class="oi oi-trash" />
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+            <button class="btn btn-outline-secondary" @onclick=OnAddVoteCategoryClick>Add Vote Category</button>
         </div>
-    </div>
-    <button class="btn btn-outline-secondary" @onclick=OnAddVoteCategoryClick>Add Vote Category</button>
-</div>
+    </Authorized>
+    <NotAuthorized>
+        You are not allowed here ...
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     [CascadingParameter]

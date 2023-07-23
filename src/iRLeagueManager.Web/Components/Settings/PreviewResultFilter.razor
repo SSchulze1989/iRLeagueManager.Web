@@ -1,0 +1,51 @@
+﻿@using iRLeagueApiCore.Common.Enums;
+@using iRLeagueApiCore.Common.Models;
+<div class="row">
+    <div class="col-2">
+        @Condition.ColumnPropertyName:
+    </div>
+    @switch (Condition.FilterType)
+    {
+        case FilterType.ColumnProperty:
+            <div class="col-2">
+                @Condition.Comparator
+            </div>
+            <div class="col-4">
+                @string.Join(", ", Condition.FilterValues)
+            </div>
+            break;
+        case FilterType.Member:
+            <div class="col-6">
+                @string.Join(", ", Condition.FilterValues.Select(GetMemberName))
+            </div>
+            break;
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ResultFilterModel Condition { get; set; } = default!;
+
+    [Parameter]
+    public IEnumerable<MemberModel> LeagueMembers { get; set; } = Enumerable.Empty<MemberModel>();
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, Condition);
+    }
+
+    private string GetMemberName(string id)
+    {
+        if (long.TryParse(id, out long idValue) == false)
+        {
+            return id;
+        }
+        var member = LeagueMembers.FirstOrDefault(x => x.MemberId == idValue);
+        if (member is null)
+        {
+            return id;
+        }
+        return $"{member.FirstName} {member.LastName}";
+    }
+}

@@ -8,40 +8,29 @@
 <div class="container-xl">
     <div class="sticky-header">
         <LoadingHeader><h3>Settings</h3></LoadingHeader>
-        <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
-            <Authorized>
-                <ul class="nav nav-tabs">
-                    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin)>
-                        <Authorized Context=AdminContext>
-                            <li class="nav-item">
-                                <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/League")>League</NavLink>
-                            </li>
-                            <li class="nav-item">
-                                <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Users")>Users</NavLink>
-                            </li>
-                        </Authorized>
-                    </AuthorizeView>
+        <ul class="nav nav-tabs">
+            <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin)>
+                <Authorized Context=AdminContext>
                     <li class="nav-item">
-                        <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Results")>Results</NavLink>
+                        <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/League")>League</NavLink>
                     </li>
                     <li class="nav-item">
-                        <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Teams")>Teams</NavLink>
+                        <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Users")>Users</NavLink>
                     </li>
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Reviews")>Reviews</NavLink>
-                    </li>
-                </ul>
-            </Authorized>
-        </AuthorizeView>
+                </Authorized>
+            </AuthorizeView>
+            <li class="nav-item">
+                <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Results")>Results</NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Teams")>Teams</NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Reviews")>Reviews</NavLink>
+            </li>
+        </ul>
     </div>
-    <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
-        <Authorized>
-            @Body
-        </Authorized>
-        <NotAuthorized>
-            You are not allowed here ...
-        </NotAuthorized>
-    </AuthorizeView>
+    @Body
 </div>
 
 @code {

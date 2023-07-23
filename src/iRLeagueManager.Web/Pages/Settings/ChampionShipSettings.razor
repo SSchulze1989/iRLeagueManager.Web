@@ -6,114 +6,122 @@
 @layout SettingsLayout
 @inject ChampSeasonViewModel ChampSeason
 @inject IToastService ToastService
+@attribute [Authorize]
 
 <PageTitle>Settings - @LeagueName</PageTitle>
 
-<div class="d-flex justify-content-between align-items-center mt-2 mb-2">
-    <div class="ms-2 mt-1" style="font-size: 1.25em">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb" style="--bs-breadcrumb-divider: '>';">
-                <li class="breadcrumb-item"><a href=@($"/{LeagueName}")>@LeagueName</a></li>
-                <li class="breadcrumb-item">Settings</li>
-                <li class="breadcrumb-item"><a href=@($"/{LeagueName}/Settings/Results")>Results</a></li>
-                <li class="breadcrumb-item active" aria-current="page">@ChampSeason.ChampionshipName</li>
-            </ol>
-        </nav>
-    </div>
-
-    <div class="d-flex justify-content-end mb-1 gap-3">
-        @if (ChampSeason.HasChanged)
-        {
-            <button class="btn btn-primary" @onclick=Submit>Save</button>
-        }
-        <button class="btn btn-outline-secondary" @onclick=Close>Back</button>
-    </div>
-</div>
-
-<EditForm Model=ChampSeason>
-    <StatusResultValidator @ref=ResultValidator />
-    @{
-        var accordionId = $"champseason-{ChampSeason.ChampSeasonId}-accordion";
-    }
-    <div class="card mb-3">
-        <label class="card-header">
-            Championship
-        </label>
-        <div class="input-group-list input-group-list-flush">
-            <InputGroup Label="Name">
-                <InputText class="form-control" @bind-Value=ChampSeason.ChampionshipName placeholder="Enter championship name ..." data-bs-toggle="tooltip" title="Name to identify the championship" />
-            </InputGroup>
-            <InputGroup Label="Display Name">
-                <InputText class="form-control" @bind-Value=ChampSeason.ChampionshipDisplayName placeholder="@ChampSeason.ChampionshipName" data-bs-toggle="tooltip" title="Name of the championship to be shown displayed on results and standings" />
-            </InputGroup>
-        </div>
-    </div>
-    <div class="card mb-3">
-        <div class="card-header">
-            Point Systems
-        </div>
-        <ul class="list-group list-group-flush">
-            @{
-                var resultConfigCount = ChampSeason.ResultConfigViewModels.Count();
-                bool expandResultConfig = resultConfigCount <= 1;
-            }
-            @foreach (var resultConfig in ChampSeason.ResultConfigViewModels)
-            {
-                <div class="list-group-item list-group-item-action d-flex justify-content-between align-content-start px-2 gap-1" type="button" @onclick=@(() => OnResultConfigClick(resultConfig))>
-                    <button class="btn align-self-start m-0 p-0" @onclick=@(() => DefaultResultConfigClick(resultConfig)) @onclick:preventDefault @onclick:stopPropagation
-                            data-bs-toggle="tooltip" data-bs-placement="left" title="Default point system<br/>This will automatically set this point system as active on all events that you create">
-                        @if (resultConfig.ResultConfigId == ChampSeason.DefaultResultConfig?.ResultConfigId)
-                        {
-                            <span class="bi-star-fill" style="color: gold"/>
-                        }
-                        else
-                        {
-                            <span class="bi-star text-muted" />
-                        }
-                    </button>
-                    <ResultConfigPreview ResultConfig="resultConfig" class="flex-grow-1 overflow-auto" Collapsed="!expandResultConfig"/>
-                    <button class="btn btn-toggle align-self-start @(expandResultConfig ? "" : "collapsed")" type="button" data-bs-toggle="collapse" data-bs-target="#config_@(resultConfig.ResultConfigId)_details"
-                        aria-expanded="@(expandResultConfig ? "true" : "false")" @onclick:stopPropagation>
-                        <span class="oi oi-chevron-bottom btn-toggle-off" />
-                        <span class="oi oi-chevron-top btn-toggle-on" />
-                    </button>
-                    <button class="btn btn-outline-danger align-self-start" type="button" @onclick=@(() =>OnDeleteResultConfigClick(resultConfig)) @onclick:stopPropagation>
-                        <span class="oi oi-trash" />
-                    </button>
-                </div>
-            }
-            <div class="list-group-item">
-                <button class="btn btn-outline-secondary" type="button" @onclick=OnAddResultConfigClick>
-                    Add Result Configuration
-                </button>
+<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
+    <Authorized>
+        <div class="d-flex justify-content-between align-items-center mt-2 mb-2">
+            <div class="ms-2 mt-1" style="font-size: 1.25em">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb" style="--bs-breadcrumb-divider: '>';">
+                        <li class="breadcrumb-item"><a href=@($"/{LeagueName}")>@LeagueName</a></li>
+                        <li class="breadcrumb-item">Settings</li>
+                        <li class="breadcrumb-item"><a href=@($"/{LeagueName}/Settings/Results")>Results</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">@ChampSeason.ChampionshipName</li>
+                    </ol>
+                </nav>
             </div>
-        </ul>
-    </div>
-    <div class="card mb-3">
-        <label class="card-header">
-            Standings
-        </label>
-        <div class="input-group-list input-group-list-flush">
-            @if (ChampSeason.StandingConfig is not null)
-            {
-                <div class="input-group">
-                    <div class="input-group-text">
-                        <InputCheckbox class="form-check-input mt-0" @bind-Value=ChampSeason.StandingConfig.UseCombinedResult />
-                    </div>
-                    <label class="form-control" data-bs-toggle="tooltip" title="Treat events with multiple race sessions as single events (if they have a combined result). This will affect the statistics for race-nr, wins, fastest laps etc.">Treat as single event</label>
-                </div>
-                <InputGroup Label="Count Weeks">
-                    <InputNumber class="form-control" 
-                                 @bind-Value=ChampSeason.StandingConfig.WeeksCounted 
-                                 data-bs-toggle="tooltip" 
-                                 title="Number of races counted per season. (used for Dropweeks)" 
-                                 placeholder="all"/>
-                </InputGroup>
-            }
+
+            <div class="d-flex justify-content-end mb-1 gap-3">
+                @if (ChampSeason.HasChanged)
+                {
+                    <button class="btn btn-primary" @onclick=Submit>Save</button>
+                }
+                <button class="btn btn-outline-secondary" @onclick=Close>Back</button>
+            </div>
         </div>
-    </div>
-    <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
-</EditForm>
+
+        <EditForm Model=ChampSeason>
+            <StatusResultValidator @ref=ResultValidator />
+            @{
+                var accordionId = $"champseason-{ChampSeason.ChampSeasonId}-accordion";
+            }
+            <div class="card mb-3">
+                <label class="card-header">
+                    Championship
+                </label>
+                <div class="input-group-list input-group-list-flush">
+                    <InputGroup Label="Name">
+                        <InputText class="form-control" @bind-Value=ChampSeason.ChampionshipName placeholder="Enter championship name ..." data-bs-toggle="tooltip" title="Name to identify the championship" />
+                    </InputGroup>
+                    <InputGroup Label="Display Name">
+                        <InputText class="form-control" @bind-Value=ChampSeason.ChampionshipDisplayName placeholder="@ChampSeason.ChampionshipName" data-bs-toggle="tooltip" title="Name of the championship to be shown displayed on results and standings" />
+                    </InputGroup>
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="card-header">
+                    Point Systems
+                </div>
+                <ul class="list-group list-group-flush">
+                    @{
+                        var resultConfigCount = ChampSeason.ResultConfigViewModels.Count();
+                        bool expandResultConfig = resultConfigCount <= 1;
+                    }
+                    @foreach (var resultConfig in ChampSeason.ResultConfigViewModels)
+                    {
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-content-start px-2 gap-1" type="button" @onclick=@(() => OnResultConfigClick(resultConfig))>
+                            <button class="btn align-self-start m-0 p-0" @onclick=@(() => DefaultResultConfigClick(resultConfig)) @onclick:preventDefault @onclick:stopPropagation
+                                    data-bs-toggle="tooltip" data-bs-placement="left" title="Default point system<br/>This will automatically set this point system as active on all events that you create">
+                                @if (resultConfig.ResultConfigId == ChampSeason.DefaultResultConfig?.ResultConfigId)
+                                {
+                                    <span class="bi-star-fill" style="color: gold"/>
+                                }
+                                else
+                                {
+                                    <span class="bi-star text-muted" />
+                                }
+                            </button>
+                            <ResultConfigPreview ResultConfig="resultConfig" class="flex-grow-1 overflow-auto" Collapsed="!expandResultConfig"/>
+                            <button class="btn btn-toggle align-self-start @(expandResultConfig ? "" : "collapsed")" type="button" data-bs-toggle="collapse" data-bs-target="#config_@(resultConfig.ResultConfigId)_details"
+                                aria-expanded="@(expandResultConfig ? "true" : "false")" @onclick:stopPropagation>
+                                <span class="oi oi-chevron-bottom btn-toggle-off" />
+                                <span class="oi oi-chevron-top btn-toggle-on" />
+                            </button>
+                            <button class="btn btn-outline-danger align-self-start" type="button" @onclick=@(() =>OnDeleteResultConfigClick(resultConfig)) @onclick:stopPropagation>
+                                <span class="oi oi-trash" />
+                            </button>
+                        </div>
+                    }
+                    <div class="list-group-item">
+                        <button class="btn btn-outline-secondary" type="button" @onclick=OnAddResultConfigClick>
+                            Add Result Configuration
+                        </button>
+                    </div>
+                </ul>
+            </div>
+            <div class="card mb-3">
+                <label class="card-header">
+                    Standings
+                </label>
+                <div class="input-group-list input-group-list-flush">
+                    @if (ChampSeason.StandingConfig is not null)
+                    {
+                        <div class="input-group">
+                            <div class="input-group-text">
+                                <InputCheckbox class="form-check-input mt-0" @bind-Value=ChampSeason.StandingConfig.UseCombinedResult />
+                            </div>
+                            <label class="form-control" data-bs-toggle="tooltip" title="Treat events with multiple race sessions as single events (if they have a combined result). This will affect the statistics for race-nr, wins, fastest laps etc.">Treat as single event</label>
+                        </div>
+                        <InputGroup Label="Count Weeks">
+                            <InputNumber class="form-control" 
+                                         @bind-Value=ChampSeason.StandingConfig.WeeksCounted 
+                                         data-bs-toggle="tooltip" 
+                                         title="Number of races counted per season. (used for Dropweeks)" 
+                                         placeholder="all"/>
+                        </InputGroup>
+                    }
+                </div>
+            </div>
+            <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+        </EditForm>
+    </Authorized>
+    <NotAuthorized>
+        You are not allowed here ...
+    </NotAuthorized>
+</AuthorizeView>
 
 @if (DisplayLeaveWarning)
 {

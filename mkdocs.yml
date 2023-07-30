@@ -15,8 +15,20 @@ markdown_extensions:
   - admonition
   - def_list
   - attr_list
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
   - pymdownx.tasklist:
       custom_checkbox: true
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true 
+
 
 theme:
   name: material

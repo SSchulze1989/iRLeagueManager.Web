@@ -15,7 +15,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
+      <meta name="generator" content="mkdocs-1.5.1, mkdocs-material-9.1.21">
     
     
       
@@ -401,8 +401,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#championships-explained" class="md-nav__link">
-    Championships Explained
+  <a href="#irlm-results-explained" class="md-nav__link">
+    IRLM Results Explained
   </a>
   
 </li>
@@ -415,15 +415,55 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#result-configuration" class="md-nav__link">
-    Result Configuration
+  <a href="#point-systems" class="md-nav__link">
+    Point Systems
+  </a>
+  
+    <nav class="md-nav" aria-label="Point Systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general" class="md-nav__link">
+    General
+  </a>
+  
+    <nav class="md-nav" aria-label="General">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#point-system-type" class="md-nav__link">
+    Point System Type
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#source" class="md-nav__link">
+    Source
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scorings" class="md-nav__link">
+    Scorings
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#standing-configuration" class="md-nav__link">
-    Standing Configuration
+  <a href="#configure-point-systems-and-events" class="md-nav__link">
+    Configure Point Systems and Events
   </a>
   
 </li>
@@ -470,8 +510,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#championships-explained" class="md-nav__link">
-    Championships Explained
+  <a href="#irlm-results-explained" class="md-nav__link">
+    IRLM Results Explained
   </a>
   
 </li>
@@ -484,15 +524,55 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#result-configuration" class="md-nav__link">
-    Result Configuration
+  <a href="#point-systems" class="md-nav__link">
+    Point Systems
+  </a>
+  
+    <nav class="md-nav" aria-label="Point Systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general" class="md-nav__link">
+    General
+  </a>
+  
+    <nav class="md-nav" aria-label="General">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#point-system-type" class="md-nav__link">
+    Point System Type
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#source" class="md-nav__link">
+    Source
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scorings" class="md-nav__link">
+    Scorings
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#standing-configuration" class="md-nav__link">
-    Standing Configuration
+  <a href="#configure-point-systems-and-events" class="md-nav__link">
+    Configure Point Systems and Events
   </a>
   
 </li>
@@ -513,10 +593,185 @@
 
 
 <h1 id="championships">Championships</h1>
-<h2 id="championships-explained">Championships Explained</h2>
+<h2 id="irlm-results-explained">IRLM Results Explained</h2>
+<p>IRLeagueManager uses a top-down approach for configuring your leagues result and standings tables.
+The idea is to give you as the league admin maximum flexibility without constraining you to certain scoring or session types.</p>
+<p>The system can be divided into the following categories:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#championships-seasons">Championship</a></td>
+<td>Top category for points and standings for a season</td>
+</tr>
+<tr>
+<td><a href="#point-systems">Point Systems</a></td>
+<td>How points are scored for a single event</td>
+</tr>
+<tr>
+<td><a href="#scorings">Scorings</a></td>
+<td>How points are scored for a single session</td>
+</tr>
+</tbody>
+</table>
+<p>The championship at the top holds the configuration for the whole season and can be made up out of one or more point systems.
+Each point system requires at leas one scoring (or more in case of heat races) to calculate the points out of the events subsessions.</p>
 <h2 id="championships-seasons">Championships &amp; Seasons</h2>
-<h2 id="result-configuration">Result Configuration</h2>
-<h2 id="standing-configuration">Standing Configuration</h2>
+<p>Each championship will have its own section of results and standings tables. You can choose to run multiple championships in parallel during the season (e.g: Drivers &amp; Teams or Pro &amp; Am)</p>
+<p>Championships support the following configurations</p>
+<ul>
+<li><strong>Name</strong><br />
+  Name to identify the championship (only seen by admins)</li>
+<li><strong>Display Name</strong><br />
+  Name to show on top of the results and standings tables</li>
+<li><strong>Point Systems</strong><br />
+  List of point systems that can be used for individual events</li>
+<li><strong>Standings</strong><br />
+  Options how to calculate final standings</li>
+</ul>
+<p>Each season you create can enable one or more championship and settings can be changed individually for each season without affecting other seasons.</p>
+<h2 id="point-systems">Point Systems</h2>
+<p>The point system is at the core of defining your championships behaviour. A point system can be viewed as a rule how to create a scored from a single event.
+Each point system allows you to specify filters to exclude entries from either gaining points or the result table completely and you can select to create a combined result when having multiple scorings.</p>
+<details class="example">
+<summary>Here are some quick examples how to use Point System and Scorings</summary>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Single Race Event</label><label for="__tabbed_1_2">Multi Header Event</label><label for="__tabbed_1_3">Multi Header with Combined Result</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p><pre class="mermaid"><code>graph LR
+    subgraph Event
+        direction TB
+        ses1[Qualy]
+        ses2[Practice]
+        ses3[Race]
+    end
+    subgraph Point[Point System]
+        ses3 --&gt; scor1[Scoring]
+    end
+    subgraph Result[Results]
+        ses1 --&gt; res2[Qualy Result]
+        ses2 --&gt; res3[Practice Result]
+        scor1 --&gt; res1[Race Result]
+    end</code></pre>
+<img alt="Screenshot" src="../img/Screenshot%202023-07-30%20131948.png" style="width: 100%; max-width: 550px;" /></p>
+</div>
+<div class="tabbed-block">
+<p><pre class="mermaid"><code>graph LR
+    subgraph Event
+        direction TB
+        ses1[Qualy]
+        ses2[Practice]
+        ses3[Session1]
+        ses4[Session2]
+    end
+    subgraph Point[Point System]
+        ses3 --&gt; scor1[Scoring1]
+        ses4 --&gt; scor2[Scoring2]
+    end
+    subgraph Result[Results]
+        ses1 --&gt; res3[Qualy Result]
+        ses2 --&gt; res4[Practice Result]
+        scor1 --&gt; res1[Race1 Result]
+        scor2 --&gt; res2[Race2 Result]
+    end</code></pre>
+<img alt="Screenshot" src="../img/Screenshot%202023-07-30%20133316.png" style="width: 100%; max-width: 550px;" /></p>
+</div>
+<div class="tabbed-block">
+<p><pre class="mermaid"><code>graph LR
+    subgraph Event
+        ses1[Qualy]
+        ses2[Practice]
+        ses3[Session1]
+        ses4[Session2]
+    end
+    subgraph Point[Point System]
+        ses3 --&gt; scor1[Scoring1]
+        ses4 --&gt; scor2[Scoring2]
+        comb[Combined Scoring]
+    end
+    subgraph Result[Results]
+        ses1 --&gt; res4[Qualy Result]
+        ses2 --&gt; res5[Practice Result]
+        scor1 --&gt; res2[Race1 Result]
+        scor2 --&gt; res3[Race2 Result]
+        res2 --&gt; res1[Combined Result]
+        res3 --&gt; res1[Combined Result]
+        comb --&gt; res1[Combined Result]
+    end</code></pre>
+<img alt="Screenshot" src="../img/Screenshot%202023-07-30%20133810.png" style="width: 100%; max-width: 550px;" /></p>
+</div>
+</div>
+</div>
+</details>
+<h3 id="general">General</h3>
+<p>The general settings define the name of the Point System, the type and optional another point system as source for the result calculation.</p>
+<h4 id="point-system-type">Point System Type</h4>
+<p><img alt="Screenshot" src="../img/Screenshot%202023-07-30%20135521.png" /></p>
+<p>Chose between <strong>Member</strong> and <strong>Team</strong>:
+- Member: Score each driver individually
+- Team:   Add points of drivers in the same team together</p>
+<p>If you select <strong>Team</strong> you will also be allowed to specify the maximum number of drivers scored for each race.</p>
+<h4 id="source">Source</h4>
+<p><img alt="Screenshot" src="../img/Screenshot%202023-07-30%20135703.png" /></p>
+<p>The <strong>Source</strong> option lets you optionally specify another Point System as the base for the current one. In this case the results, and all calculated points and penalties, will not be taken from the <strong>Raw</strong> uploaded result but instead the calculated one from the <strong>Source</strong>
+This setting is most commonly used with Driver &amp; Team championships where on the <strong>Driver</strong> championship you would calculate the points from the raw result and in the <strong>Team</strong> championship you will specify <strong>Driver</strong> as the source and reuse the already calculated points.</p>
+<details class="tip" open="open">
+<summary>Using <strong>Source</strong> Option</summary>
+<pre class="mermaid"><code>    graph LR
+        subgraph Event
+            ses1[Race]
+        end
+        subgraph champ1[Championship1]
+            subgraph point1["Point System1
+                source: Raw"]
+                ses1 --&gt; scor1[Scoring]
+            end
+            subgraph result1[Results]
+                scor1 --&gt; res1[Result1]
+            end
+        end
+        subgraph champ2[Championship2]
+            subgraph point2["Point System2
+                source: Point System1"]
+                res1 --&gt; scor2[Scoring]
+            end
+            subgraph result2[Results]
+                scor2 --&gt; res2[Result2]
+            end
+        end</code></pre>
+</details>
+<div class="admonition danger limitations">
+<p class="admonition-title">Danger</p>
+<ol>
+<li>The <strong>Point System</strong> and <strong>Source</strong> must be part of different championships.</li>
+<li>There must not be a circular reference between <strong>Point Systems</strong> e.g: System1-&gt;System2-&gt;System3-System1. This will fail to calculate results.</li>
+</ol>
+</div>
+<h2 id="scorings">Scorings</h2>
+<p>Scorings finally define how points, bonuses and penalties are arwarded for each of the Event sessions, for any race session in the event you will need an accompanying scoring to produce a scored result.</p>
+<p>On the scoring you will find the following options</p>
+<ul>
+<li><strong>Sort First</strong><br />
+  Define the order of entries before points are applied (default is the original order of the result)</li>
+<li><strong>Points</strong><br />
+  Apply points based on the position/order in the result<br />
+  Configure bonus points for special conditions</li>
+<li><strong>Auto Penalties</strong><br />
+  Automatically apply penalties under special conditions (e.g: penalty points for x amount of incidents)</li>
+<li><strong>Sort Final</strong><br />
+  Define the final order of results as they are displayed on the results page</li>
+</ul>
+<h2 id="configure-point-systems-and-events">Configure Point Systems and Events</h2>
+<p>On the same <strong>Championship</strong> you can run multiple <strong>Point Systems</strong> for different event types.</p>
+<p>If you have Heat, Sprint or Endurance type <strong>Events</strong> in the same season you can define different ways to score points for each Event individually.
+This is done by explicitly telling which <strong>Point System</strong> will be used by an <strong>Event</strong> when the result is calculated.</p>
+<p>You can find this configuration if at the bottom where you edit the <strong>Event</strong> on the <strong>Schedule</strong> tab</p>
+<p><img alt="Screenshot" src="../img/Screenshot%202023-07-30%20145936.png" /></p>
 
 
 

@@ -118,7 +118,7 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
             {
                 return putChampSeasonResult.ToStatusResult();
             }
-            return StatusResult.SuccessResult();
+            return await LoadFromCurrentSeasonAsync(cancellationToken);
         }
         finally 
         { 

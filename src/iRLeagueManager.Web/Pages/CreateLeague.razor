@@ -114,7 +114,7 @@
         var league = leagueResult.Content;
 
         // forward to new league settings page
-        NavigationManager.NavigateTo($"{league.Name}/Settings/League");
+        NavigationManager.NavigateTo($"{league.Name}/Settings/League", forceLoad:true);
     }
 
     private static PostLeagueModel CreateLeagueModel() => new()

@@ -111,7 +111,7 @@
             FileLoading = true;
             ParsedResult = null;
             var browserFile = e.File;
-            using var stream = browserFile.OpenReadStream();
+            using var stream = browserFile.OpenReadStream(maxAllowedSize: 10240000);
             ParsedResult = await JsonSerializer.DeserializeAsync<ParseSimSessionResult>(stream);
             ParsingFailed = false;
         }

@@ -37,12 +37,9 @@
                     }
                     <ResultTableHeader Text="Fastest Lap" Sort="@(x => x.FastestLapTime)" />
                     <ResultTableHeader Text="Avg. Lap" Sort="@(x => x.AvgLapTime)" />
-                    @if (isTeamResult == false)
-                    {
-                        <ResultTableHeader Text="Interval" Sort="@(x => x.Interval)" />
-                        <ResultTableHeader Text="Laps Lead" Sort="@(x => x.LeadLaps)" Direction="SortDirection.Descending" />
-                        <ResultTableHeader Text="Laps Compl." Sort="@(x => x.CompletedLaps)" Direction="SortDirection.Descending" />
-                    }
+                    <ResultTableHeader Text="Interval" Sort="@(x => x.Interval)" />
+                    <ResultTableHeader Text="Laps Lead" Sort="@(x => x.LeadLaps)" Direction="SortDirection.Descending" />
+                    <ResultTableHeader Text="Laps Compl." Sort="@(x => x.CompletedLaps)" Direction="SortDirection.Descending" />
                     <ResultTableHeader Text="Race Pts." Sort="@(x => x.RacePoints)" Direction="SortDirection.Descending" />
                     @if (displayBonusPoints)
                     {
@@ -83,12 +80,9 @@
                     }
                     <td class="@(IsFastestLap(resultRows, Row, x => x.FastestLapTime) ? "fw-bold" : "")">@Row.FastestLapTime.LapTimeString() @(Row.FastLapNr != 0 ? $"({Row.FastLapNr})" : "")</td>
                     <td class="@(IsFastestLap(resultRows, Row, x => x.AvgLapTime) ? "fw-bold" : "")">@Row.AvgLapTime.LapTimeString()</td>
-                    @if (isTeamResult == false)
-                    {
-                        <td>+@(Row.Interval.Laps == 0 ? Row.Interval.Time.LapTimeString() : $"{Row.Interval.Laps} Laps")</td>
-                        <td>@Row.LeadLaps</td>
-                        <td>@Row.CompletedLaps</td>
-                    }
+                    <td>+@(Row.Interval.Laps == 0 ? Row.Interval.Time.LapTimeString() : $"{Row.Interval.Laps} Laps")</td>
+                    <td>@Row.LeadLaps</td>
+                    <td>@Row.CompletedLaps</td>
                     <td>@Row.RacePoints</td>
                     @if (displayBonusPoints)
                     {

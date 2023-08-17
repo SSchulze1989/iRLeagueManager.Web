@@ -37,7 +37,7 @@ public sealed class ResultFilterViewModel : LeagueViewModelBase<ResultFilterView
     public string Value 
     { 
         get => ConvertFromValue(model.FilterValues.FirstOrDefault() ?? string.Empty, ColumnPropertyName); 
-        set => SetP(model.FilterValues.FirstOrDefault() ?? string.Empty, value => model.FilterValues = new[] { ConvertToValue(value, ColumnPropertyName) }.ToList(), value); }
+        set => SetP(model.FilterValues.FirstOrDefault() ?? string.Empty, value => model.FilterValues = new[] { value }.ToList(), ConvertToValue(value, ColumnPropertyName)); }
     public MatchedValueAction Action { get => model.Action; set => SetP(model.Action, value => model.Action = value, value); }
 
     public override void SetModel(ResultFilterModel model)
@@ -56,15 +56,29 @@ public sealed class ResultFilterViewModel : LeagueViewModelBase<ResultFilterView
         };
     }
 
-    private static string ConvertFromValue(string filterValue, string? columnProperty) => columnProperty switch
+    private static string ConvertFromValue(string filterValue, string? columnProperty)
     {
-        nameof(ResultRowModel.CompletedPct) => ((double)Convert.ChangeType(filterValue, typeof(double), CultureInfo.InvariantCulture) * 100).ToString(),
-        _ => filterValue
-    };
+        if (string.IsNullOrWhiteSpace(filterValue))
+        {
+            return filterValue;
+        }
+        return columnProperty switch
+        {
+            nameof(ResultRowModel.CompletedPct) => ((double)Convert.ChangeType(filterValue, typeof(double), CultureInfo.InvariantCulture) * 100).ToString(CultureInfo.InvariantCulture),
+            _ => filterValue
+        };
+    }
 
-    private static string ConvertToValue(string value, string? columnProperty) => columnProperty switch
+    private static string ConvertToValue(string value, string? columnProperty)
     {
-        nameof(ResultRowModel.CompletedPct) => ((double)Convert.ChangeType(value, typeof(double), CultureInfo.InvariantCulture) / 100).ToString(),
-        _ => value
-    };
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return value;
+        }
+        return columnProperty switch
+        {
+            nameof(ResultRowModel.CompletedPct) => ((double)Convert.ChangeType(value, typeof(double), CultureInfo.InvariantCulture) / 100).ToString(CultureInfo.InvariantCulture),
+            _ => value
+        };
+    }
 }

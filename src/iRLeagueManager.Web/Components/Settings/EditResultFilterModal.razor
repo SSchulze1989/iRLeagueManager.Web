@@ -146,6 +146,7 @@
                         }
                         else if (propertyType == typeof(double) || propertyType == typeof(double?) || propertyType == typeof(int) || propertyType == typeof(int?))
                         {
+
                             <input type="number" class="form-control" value=@filter.Value @onchange=@((ChangeEventArgs args) => filter.Value = args.Value?.ToString() ?? string.Empty) />
                         }
                         else

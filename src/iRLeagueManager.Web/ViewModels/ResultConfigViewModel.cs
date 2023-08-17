@@ -21,6 +21,7 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         filtersForResult ??= new();
         availableResultConfigs ??= new();
         leagueMembers ??= new();
+        teams ??= new();
     }
 
     public long LeagueId => model.LeagueId;
@@ -75,6 +76,9 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
 
     private ObservableCollection<MemberModel> leagueMembers;
     public ObservableCollection<MemberModel> LeagueMembers { get => leagueMembers; set => Set(ref leagueMembers, value); }
+
+    private ObservableCollection<TeamModel> teams;
+    public ObservableCollection<TeamModel> Teams { get => teams; set => Set(ref teams, value); }
 
     public override void SetModel(ResultConfigModel model)
     {
@@ -134,7 +138,7 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         return result.ToStatusResult();
     }
 
-    public async Task<StatusResult> LoadLeagueMembers(CancellationToken cancellationToken = default)
+    public async Task<StatusResult> LoadLeagueMembersAndTeams(CancellationToken cancellationToken = default)
     {
         if (CurrentLeague is null)
         {
@@ -144,13 +148,21 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         try
         {
             Loading = true;
-            var result = await CurrentLeague.Members()
+            var membersResult = await CurrentLeague.Members()
                 .Get(cancellationToken);
-            if (result.Success && result.Content is not null)
+            if (membersResult.Success == false || membersResult.Content is null)
             {
-                LeagueMembers = new(result.Content);
+                return membersResult.ToStatusResult();
             }
-            return result.ToStatusResult();
+            LeagueMembers = new(membersResult.Content);
+            var teamsResult = await CurrentLeague.Teams()
+                .Get(cancellationToken);
+            if (teamsResult.Success == false || teamsResult.Content is null)
+            {
+                return teamsResult.ToStatusResult();
+            }
+            Teams = new(teamsResult.Content);
+            return StatusResult.SuccessResult();
         }
         finally
         {

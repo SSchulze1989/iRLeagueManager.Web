@@ -66,6 +66,41 @@
                         </BlazoredTypeahead>
                     </InputGroup>
                     break;
+                case FilterType.Team:
+                    <InputGroup Label="Teams">
+                        <BlazoredTypeahead @bind-Values=filter.FilterValues
+                                           class="form-control p-0"
+                                           style="border-top-right-radius:0; border-top-left-radius:0;"
+                               EnableDropDown=true
+                               SearchMethod=SearchTeams
+                               ConvertMethod="@(item => item.TeamId.ToString())"
+                               MinimumLength=1
+                               MaximumSuggestions=100
+                               DeleteItemsOnBackspace=false
+                                           placeholder="Search driver by name...">
+
+                            <SelectedTemplate Context=teamId>
+                                @{
+                                    var team = Teams.FirstOrDefault(x => x.TeamId.ToString() == teamId);
+                                }
+                                @if (team is null)
+                                {
+                                    @teamId
+                                }
+                                else
+                                {
+                                    @team.Name
+                                }
+                            </SelectedTemplate>
+                            <ResultTemplate Context=team>
+                                @team.Name@(team.IRacingTeamId != null ? $" ({@team.IRacingTeamId})" : "")
+                            </ResultTemplate>
+                            <NotFoundTemplate Context=name>
+                                <span>Team <b>@name</b> Not found!</span>
+                            </NotFoundTemplate>
+                        </BlazoredTypeahead>
+                    </InputGroup>
+                    break;
                 case FilterType.ColumnProperty:
                     <InputGroup Label="Type">
                         <InputSelect class="form-select" id="input-type-select" aria-label="input-type-select" @bind-Value=filter.Comparator>
@@ -111,6 +146,7 @@
                         }
                         else if (propertyType == typeof(double) || propertyType == typeof(double?) || propertyType == typeof(int) || propertyType == typeof(int?))
                         {
+
                             <input type="number" class="form-control" value=@filter.Value @onchange=@((ChangeEventArgs args) => filter.Value = args.Value?.ToString() ?? string.Empty) />
                         }
                         else
@@ -137,6 +173,8 @@
 
     [Parameter]
     public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [Parameter]
+    public IEnumerable<TeamModel> Teams { get; set; } = default!;
 
     [Parameter]
     public bool AllowForEach { get; set; } = false;
@@ -156,6 +194,7 @@
         nameof(ResultRowModel.NewSafetyRating),
         nameof(ResultRowModel.Incidents),
         "Member",
+        "Team",
     };
 
     public static MatchedValueAction[] DefaultActions { get; } = new[]
@@ -170,6 +209,25 @@
     [Parameter]
     public IEnumerable<MatchedValueAction> Actions { get; set; } = DefaultActions;
 
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, ModalInstance);
+        BlazorParameterNullException.ThrowIfNull(this, Model);
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers);
+        BlazorParameterNullException.ThrowIfNull(this, Teams);
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        vm.SetModel(Model);
+    }
+
     private async Task<IEnumerable<MemberModel>> SearchMembers(string searchString)
     {
         if (string.IsNullOrEmpty(searchString))
@@ -178,10 +236,24 @@
         }
 
         var terms = searchString.ToLower().Split(',', ' ', ';')
-        .Where(x => string.IsNullOrWhiteSpace(x) == false)
+            .Where(x => string.IsNullOrWhiteSpace(x) == false)
             .ToArray();
         return await Task.FromResult(LeagueMembers
             .Where(x => MatchMemberSearchTerms(x, terms)));
+    }
+
+    private async Task<IEnumerable<TeamModel>> SearchTeams(string searchstring)
+    {
+        if (string.IsNullOrWhiteSpace(searchstring))
+        {
+            return await Task.FromResult(Teams);
+        }
+
+        var terms = searchstring.ToLower().Split(',', ' ', ';')
+            .Where(x => string.IsNullOrWhiteSpace(x) == false)
+            .ToArray();
+        return await Task.FromResult(Teams.
+            Where(x => MatchTeamSearchTerms(x, terms)));
     }
 
     private bool MatchMemberSearchTerms(MemberModel member, params string[] terms)
@@ -194,20 +266,14 @@
             );
     }
 
-    protected override void OnParametersSet()
+    private bool MatchTeamSearchTerms(TeamModel team, params string[] terms)
     {
-        BlazorParameterNullException.ThrowIfNull(this, ModalInstance);
-        BlazorParameterNullException.ThrowIfNull(this, Model);
-        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers);
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender == false)
-        {
-            return;
-        }
-        vm.SetModel(Model);
+        var searchName = team.Name;
+        var iracingId = team.IRacingTeamId.GetValueOrDefault().ToString();
+        return terms
+            .Any(x => searchName.Contains(x, StringComparison.OrdinalIgnoreCase) ||
+                      iracingId.Contains(x)
+            );
     }
 
     private async Task Submit()

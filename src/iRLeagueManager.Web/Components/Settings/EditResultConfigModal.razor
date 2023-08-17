@@ -149,14 +149,15 @@
             return;
         }
         await Vm.LoadAvailableResultConfigs(Cts.Token);
-        await Vm.LoadLeagueMembers(Cts.Token);
+        await Vm.LoadLeagueMembersAndTeams(Cts.Token);
     }
 
     private async Task PointsFilterClick()
     {
         var parameters = new ModalParameters<EditResultFilterModal>()
             .Add(x => x.Model, Vm.GetModel().FiltersForPoints)
-            .Add(x => x.LeagueMembers, Vm.LeagueMembers);
+            .Add(x => x.LeagueMembers, Vm.LeagueMembers)
+            .Add(x => x.Teams, Vm.Teams);
         var options = new ModalOptions()
         {
             DisableBackgroundCancel = true,
@@ -173,7 +174,8 @@
     {
         var parameters = new ModalParameters<EditResultFilterModal>()
             .Add(x => x.Model, Vm.GetModel().FiltersForResult)
-            .Add(x => x.LeagueMembers, Vm.LeagueMembers);
+            .Add(x => x.LeagueMembers, Vm.LeagueMembers)
+            .Add(x => x.Teams, Vm.Teams);
         var options = new ModalOptions()
         {
             DisableBackgroundCancel = true,

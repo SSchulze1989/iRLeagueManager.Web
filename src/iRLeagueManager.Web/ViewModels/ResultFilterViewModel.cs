@@ -47,6 +47,7 @@ public sealed class ResultFilterViewModel : LeagueViewModelBase<ResultFilterView
         FilterType = ColumnPropertyName switch
         {
             "Member" => FilterType.Member,
+            "Team" => FilterType.Team,
             _ => FilterType.ColumnProperty,
         };
     }

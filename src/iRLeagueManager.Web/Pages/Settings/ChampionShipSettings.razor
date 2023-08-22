@@ -266,8 +266,8 @@ else
         ChampSeason.DefaultResultConfig = null;
     }
 
-    private ResultConfigModel CreateResultConfig()
+    private ResultConfigModel CreateResultConfig() => new ResultConfigModel()
     {
-        return new ResultConfigModel();
-    }
+        ChampSeasonId = ChampSeason.ChampSeasonId,
+    };
 }

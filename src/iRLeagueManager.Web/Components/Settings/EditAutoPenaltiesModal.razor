@@ -61,6 +61,8 @@
 @code {
     [Parameter, EditorRequired]
     public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public IEnumerable<TeamModel> Teams { get; set; } = default!;
 
     private string Text { get; set; } = string.Empty;
 
@@ -69,6 +71,7 @@
         base.OnParametersSet();
         BlazorParameterNullException.ThrowIfNull(this, ModalService);
         BlazorParameterNullException.ThrowIfNull(this, LeagueMembers);
+        BlazorParameterNullException.ThrowIfNull(this, Teams);
     }
 
     private static ResultFilterModel MapToResultFilterModel(FilterConditionModel condition) => new ResultFilterModel()
@@ -96,6 +99,7 @@
         var parameters = new ModalParameters<EditResultFilterModal>()
             .Add(x => x.Model, conditions)
             .Add(x => x.LeagueMembers, LeagueMembers)
+            .Add(x => x.Teams, Teams)
             .Add(x => x.AllowForEach, true)
             .Add(x => x.Actions, new[] { MatchedValueAction.Keep });
         var result = await ModalService.Show<EditResultFilterModal>("Penalty Conditions", parameters).Result;

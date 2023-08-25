@@ -79,6 +79,8 @@
     public IModalService ModalService { get; set; } = default!;
     [CascadingParameter]
     public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [CascadingParameter]
+    public IEnumerable<TeamModel> Teams { get; set; } = default!;
 
     [Parameter]
     public ScoringViewModel Scoring { get; set; } = default!;
@@ -141,7 +143,8 @@
         var autoPenalties = Scoring.PointRule.CopyModel().AutoPenalties;
         var parameters = new ModalParameters<EditAutoPenaltiesModal>()
             .Add(x => x.Model, autoPenalties)
-            .Add(x => x.LeagueMembers, LeagueMembers);
+            .Add(x => x.LeagueMembers, LeagueMembers)
+            .Add(x => x.Teams, Teams);
         var result = await ModalService.Show<EditAutoPenaltiesModal>("Automatic Penalties", parameters).Result;
         if (result.Confirmed && result.Data is IEnumerable<AutoPenaltyConfiguration> model)
         {

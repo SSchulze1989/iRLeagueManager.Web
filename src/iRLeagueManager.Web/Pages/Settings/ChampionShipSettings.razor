@@ -5,6 +5,7 @@
 @inherits LeagueComponentBase
 @layout SettingsLayout
 @inject ChampSeasonViewModel ChampSeason
+@inject LeagueApiService ApiService;
 @inject IToastService ToastService
 @attribute [Authorize]
 
@@ -48,6 +49,18 @@
                     </InputGroup>
                     <InputGroup Label="Display Name">
                         <InputText class="form-control" @bind-Value=ChampSeason.ChampionshipDisplayName placeholder="@ChampSeason.ChampionshipName" data-bs-toggle="tooltip" title="Name of the championship to be shown displayed on results and standings" />
+                    </InputGroup>
+                    <InputGroup Label="Filters">
+                        <button class="form-control" type="button" @onclick=FiltersClick data-bs-toggle="tooltip" title="Filter rows that can score points. Only rows that fulfill all filter requirements will be given points. Rows are still displayed in the output result set">
+                            @if (ChampSeason.Filters.Count == 0)
+                            {
+                                <span class="text-secondary"><em>Configure</em></span>
+                            }
+                            else
+                            {
+                                <span class="text-secondary">@ChampSeason.Filters.Count filters applied</span>
+                            }
+                        </button>
                     </InputGroup>
                 </div>
             </div>
@@ -221,6 +234,25 @@ else
         ChampSeason.ResetChangedState();
         NavigationManager.NavigateTo(returnUrl);
         await Task.CompletedTask;
+    }
+
+    private async Task FiltersClick()
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return;
+        }
+        var members = (await ApiService.CurrentLeague.Members().Get()).Content!;
+        var teams = (await ApiService.CurrentLeague.Teams().Get()).Content!;
+        var parameters = new ModalParameters<EditResultFilterModal>()
+            .Add(x => x.Model, ChampSeason.CopyModel().Filters)
+            .Add(x => x.LeagueMembers, members)
+            .Add(x => x.Teams, teams);
+        var result = await ModalService.Show<EditResultFilterModal>("Championship Filter", parameters).Result;
+        if (result.Confirmed && result.Data is IEnumerable<ResultFilterModel> model)
+        {
+            ChampSeason.Filters = model.ToList();
+        }
     }
 
     private async Task OnResultConfigClick(ResultConfigViewModel config)

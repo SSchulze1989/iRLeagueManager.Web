@@ -24,10 +24,12 @@
 
 @code {
     [Parameter, EditorRequired]
-    public ResultFilterModel Condition { get; set; } = default!;
+    public ResultFilterModel Filter { get; set; } = default!;
 
     [Parameter]
     public IEnumerable<MemberModel> LeagueMembers { get; set; } = Enumerable.Empty<MemberModel>();
+
+    private FilterConditionModel Condition => Filter.Condition;
 
     protected override void OnParametersSet()
     {

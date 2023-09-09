@@ -16,7 +16,7 @@
                 <label class="form-control text-muted" @onclick=@(() => OnConditionsClick(autoPenalty))>
                     @foreach(var condition in autoPenalty.Conditions)
                     {
-                        <PreviewResultFilter Condition="@MapToResultFilterModel(condition)" LeagueMembers="LeagueMembers"/>
+                        <PreviewResultFilter Filter="@MapToResultFilterModel(condition)" LeagueMembers="LeagueMembers"/>
                     }
                 </label>
             </InputGroup>
@@ -76,20 +76,7 @@
 
     private static ResultFilterModel MapToResultFilterModel(FilterConditionModel condition) => new ResultFilterModel()
     {
-        Action = condition.Action,
-        ColumnPropertyName = condition.ColumnPropertyName,
-        Comparator = condition.Comparator,
-        FilterType = condition.FilterType,
-        FilterValues = condition.FilterValues,
-    };
-
-    private static FilterConditionModel MapToFilterConditionModel(ResultFilterModel filter) => new FilterConditionModel()
-    {
-        Action = filter.Action,
-        ColumnPropertyName = filter.ColumnPropertyName,
-        Comparator = filter.Comparator,
-        FilterType = filter.FilterType,
-        FilterValues = filter.FilterValues,
+        Condition = condition,
     };
 
     private async Task OnConditionsClick(AutoPenaltyConfigViewModel autoPenalty)
@@ -106,7 +93,7 @@
         if (result.Confirmed && result.Data is IEnumerable<ResultFilterModel> model)
         {
             autoPenalty.Conditions = model
-                .Select(MapToFilterConditionModel)
+                .Select(x => x.Condition)
                 .ToList();
         }
     }

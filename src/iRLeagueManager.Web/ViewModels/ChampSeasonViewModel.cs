@@ -24,6 +24,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
     public string ChampionshipName { get => model.ChampionshipName; set => SetP(model.ChampionshipName, value => model.ChampionshipName = value, value); }
     public string ChampionshipDisplayName { get => model.ChampionshipDisplayName; set => SetP(model.ChampionshipDisplayName, value => model.ChampionshipDisplayName = value, value); }
     public string SeasonName => model.SeasonName;
+    public ICollection<ResultFilterModel> Filters { get => model.Filters; set => SetP(model.Filters, value => model.Filters = value, value); }
 
     private StandingConfigurationViewModel? standingConfig;
     public StandingConfigurationViewModel? StandingConfig 

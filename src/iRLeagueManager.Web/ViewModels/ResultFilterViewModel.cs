@@ -21,24 +21,24 @@ public sealed class ResultFilterViewModel : LeagueViewModelBase<ResultFilterView
     public long ResultsFilterId => model.FilterOptionId;
     public string ColumnPropertyName 
     { 
-        get => model.ColumnPropertyName;
+        get => model.Condition.ColumnPropertyName;
         set 
         {
-            if (SetP(model.ColumnPropertyName, value => model.ColumnPropertyName = value, value))
+            if (SetP(model.Condition.ColumnPropertyName, value => model.Condition.ColumnPropertyName = value, value))
             {
                 UpdateFilterType();
             }
         }
         
     }
-    public ComparatorType Comparator { get => model.Comparator; set => SetP(model.Comparator, value => model.Comparator = value, value); }
-    public FilterType FilterType { get => model.FilterType; private set => SetP(model.FilterType, value => model.FilterType = value, value); }
-    public IList<string> FilterValues { get => (IList<string>)model.FilterValues; set => SetP(model.FilterValues, value => model.FilterValues = value, value); }
+    public ComparatorType Comparator { get => model.Condition.Comparator; set => SetP(model.Condition.Comparator, value => model.Condition.Comparator = value, value); }
+    public FilterType FilterType { get => model.Condition.FilterType; private set => SetP(model.Condition.FilterType, value => model.Condition.FilterType = value, value); }
+    public IList<string> FilterValues { get => (IList<string>)model.Condition.FilterValues; set => SetP(model.Condition.FilterValues, value => model.Condition.FilterValues = value, value); }
     public string Value 
     { 
-        get => ConvertFromValue(model.FilterValues.FirstOrDefault() ?? string.Empty, ColumnPropertyName); 
-        set => SetP(model.FilterValues.FirstOrDefault() ?? string.Empty, value => model.FilterValues = new[] { value }.ToList(), ConvertToValue(value, ColumnPropertyName)); }
-    public MatchedValueAction Action { get => model.Action; set => SetP(model.Action, value => model.Action = value, value); }
+        get => ConvertFromValue(model.Condition.FilterValues.FirstOrDefault() ?? string.Empty, ColumnPropertyName); 
+        set => SetP(model.Condition.FilterValues.FirstOrDefault() ?? string.Empty, value => model.Condition.FilterValues = new[] { value }.ToList(), ConvertToValue(value, ColumnPropertyName)); }
+    public MatchedValueAction Action { get => model.Condition.Action; set => SetP(model.Condition.Action, value => model.Condition.Action = value, value); }
 
     public override void SetModel(ResultFilterModel model)
     {

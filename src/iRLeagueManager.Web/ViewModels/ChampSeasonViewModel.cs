@@ -1,4 +1,5 @@
-﻿using iRLeagueApiCore.Common.Models;
+﻿using iRLeagueApiCore.Common.Enums;
+using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 using iRLeagueManager.Web.Shared;
@@ -24,6 +25,8 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
     public string ChampionshipName { get => model.ChampionshipName; set => SetP(model.ChampionshipName, value => model.ChampionshipName = value, value); }
     public string ChampionshipDisplayName { get => model.ChampionshipDisplayName; set => SetP(model.ChampionshipDisplayName, value => model.ChampionshipDisplayName = value, value); }
     public string SeasonName => model.SeasonName;
+    public ResultKind ResultKind { get => model.ResultKind; set => SetP(model.ResultKind, value => model.ResultKind = value, value); }
+    public ICollection<ResultFilterModel> Filters { get => model.Filters; set => SetP(model.Filters, value => model.Filters = value, value); }
 
     private StandingConfigurationViewModel? standingConfig;
     public StandingConfigurationViewModel? StandingConfig 

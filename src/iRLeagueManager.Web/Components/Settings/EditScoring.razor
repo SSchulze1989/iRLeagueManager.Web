@@ -89,13 +89,16 @@
     {
         BlazorParameterNullException.ThrowIfNull(this, ModalService);
         BlazorParameterNullException.ThrowIfNull(this, LeagueMembers);
+        BlazorParameterNullException.ThrowIfNull(this, Teams);
         BlazorParameterNullException.ThrowIfNull(this, Scoring);
     }
 
     private async Task EditPointsClick()
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(EditPointRuleModal.Model), Scoring.PointRule.CopyModel());
+        var parameters = new ModalParameters<EditPointRuleModal>()
+            .Add(x => x.Model, Scoring.PointRule.CopyModel())
+            .Add(x => x.LeagueMembers, LeagueMembers)
+            .Add(x => x.Teams, Teams);
         var options = new ModalOptions()
         {
             DisableBackgroundCancel = true,

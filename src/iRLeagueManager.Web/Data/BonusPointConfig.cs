@@ -1,4 +1,6 @@
-﻿namespace iRLeagueManager.Web.Data;
+﻿using iRLeagueApiCore.Common.Models;
+
+namespace iRLeagueManager.Web.Data;
 
 public class BonusPointConfig
 {
@@ -10,26 +12,21 @@ public class BonusPointConfig
     }
     public int Position { get; set; }
     public int Points { get; set; }
+    public ICollection<FilterConditionModel> Conditions { get; set; } = new List<FilterConditionModel>();
 
     public BonusPointConfig()
     {
         Option = BonusPointOption.Available.First();
     }
 
-    public BonusPointConfig(BonusPointOption option, int position, int points)
-    {
-        Option = option;
-        Position = position;
-        Points = points;
-    }
-
-    public BonusPointConfig(BonusPointType type, int position, int points)
+    public BonusPointConfig(BonusPointType type, int position, int points, IEnumerable<FilterConditionModel> conditions)
     {
         var bonusOption = BonusPointOption.Available.FirstOrDefault(x => x.Type == type)
-            ?? throw new ArgumentException(nameof(type));
+            ?? throw new ArgumentException(null, nameof(type));
         Option = bonusOption;
         Position = position;
         Points = points;
+        Conditions = conditions.ToList();
     }
 
     public override string ToString()

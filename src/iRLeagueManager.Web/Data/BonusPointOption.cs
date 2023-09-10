@@ -25,5 +25,6 @@ public class BonusPointOption
         new(BonusPointType.MostPositionsLost, "Lost most Pos.", false),
         new(BonusPointType.LeadOneLap, "Lead one lap", false),
         new(BonusPointType.LeadMostLaps, "Lead most laps", false),
+        new(BonusPointType.Custom, "Custom", false),
     };
 }

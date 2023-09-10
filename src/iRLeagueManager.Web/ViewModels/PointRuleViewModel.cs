@@ -50,8 +50,8 @@ public sealed class PointRuleViewModel : LeagueViewModelBase<PointRuleViewModel,
     public ICollection<SortOptions> FinalSortOptions { get => model.FinalSortOptions; set => SetP(model.FinalSortOptions, value => model.FinalSortOptions = value, value); }
     public IEnumerable<BonusPointConfig> BonusPointConfigs
     {
-        get => BonusPoints.Select(x => new BonusPointConfig(x.Type, (int)x.Value, (int)x.Points));
-        set => BonusPoints = value.Select(x => new BonusPointModel() { Type = x.OptionId, Value = x.Position, Points = x.Points }).ToList();
+        get => BonusPoints.Select(x => new BonusPointConfig(x.Type, (int)x.Value, (int)x.Points, x.Conditions));
+        set => BonusPoints = value.Select(x => new BonusPointModel() { Type = x.OptionId, Value = x.Position, Points = x.Points, Conditions = x.Conditions }).ToList();
     }
 
     public ICollection<AutoPenaltyConfiguration> AutoPenalties { get => model.AutoPenalties; set => SetP(model.AutoPenalties, value => model.AutoPenalties = value, value); }

@@ -84,6 +84,10 @@
 
     [Parameter]
     public PointRuleModel Model { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public IEnumerable<TeamModel> Teams { get; set; } = default!;
 
     InputNumber<int?> NewNumberInput { get; set; } = default!;
     ElementReference ScrollDummy { get; set; }
@@ -103,9 +107,11 @@
 
     protected override void OnParametersSet()
     {
+        BlazorParameterNullException.ThrowIfNull(this, ModalInstance);
         BlazorParameterNullException.ThrowIfNull(this, ModalService);
-        _ = ModalInstance ?? throw BlazorParameterNullException.New(this, ModalInstance);
-        _ = Model ?? throw BlazorParameterNullException.New(this, Model);
+        BlazorParameterNullException.ThrowIfNull(this, Model);
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers);
+        BlazorParameterNullException.ThrowIfNull(this, Teams);
     }
 
     protected override void OnAfterRender(bool firstRender)
@@ -133,7 +139,9 @@
     private async Task EditBonusClick()
     {
         var parameters = new ModalParameters<EditBonusPointsModal>()
-            .Add(x => x.BonusPoints, PointRule.BonusPointConfigs);
+            .Add(x => x.BonusPoints, PointRule.BonusPointConfigs)
+            .Add(x => x.LeagueMembers, LeagueMembers)
+            .Add(x => x.Teams, Teams);
         var result = await ModalService.Show<EditBonusPointsModal>("Bonus points", parameters).Result;
         if (result.Confirmed && result.Data is IEnumerable<BonusPointConfig> bonusPoints)
         {

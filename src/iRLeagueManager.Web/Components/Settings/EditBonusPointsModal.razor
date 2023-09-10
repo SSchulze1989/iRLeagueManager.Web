@@ -59,6 +59,20 @@
 
     private List<BonusPointConfig> BonusPointConfigs { get; set; } = default!;
 
+    private string[] FilterColumnsAvailable = new[]
+    {
+        nameof(ResultRowModel.CompletedLaps),
+        nameof(ResultRowModel.CompletedPct),
+        nameof(ResultRowModel.FinalPosition),
+        nameof(ResultRowModel.FinalPositionChange),
+        nameof(ResultRowModel.FinishPosition),
+        nameof(ResultRowModel.PositionChange),
+        nameof(ResultRowModel.Incidents),
+        nameof(ResultRowModel.Interval),
+        nameof(ResultRowModel.LeadLaps),
+        nameof(ResultRowModel.StartPosition),
+    };
+
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
@@ -104,7 +118,8 @@
             .Add(x => x.LeagueMembers, LeagueMembers)
             .Add(x => x.Teams, Teams)
             .Add(x => x.AllowForEach, true)
-            .Add(x => x.Actions, new[] { MatchedValueAction.Keep });
+            .Add(x => x.Actions, new[] { MatchedValueAction.Keep })
+            .Add(x => x.ColumnNames, FilterColumnsAvailable);
         var result = await ModalService.Show<EditResultFilterModal>("Bonus Conditions", parameters).Result;
         if (result.Confirmed && result.Data is IEnumerable<ResultFilterModel> model)
         {

@@ -30,7 +30,6 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
     public string ChampionshipName => model.ChampionshipName;
     public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
     public string DisplayName { get => model.DisplayName; set => SetP(model.DisplayName, value => model.DisplayName = value, value); }
-    public ResultKind ResultKind { get => model.ResultKind; set => SetP(model.ResultKind, value => model.ResultKind = value, value); }
     public int ResultsPerTeam { get => model.ResultsPerTeam; set => SetP(model.ResultsPerTeam, value => model.ResultsPerTeam = value, value); }
     public ResultConfigInfoModel? SourceResultConfig { get => model.SourceResultConfig; set => SetP(model.SourceResultConfig, value => model.SourceResultConfig = value, value); }
     public long SourceResultConfigId

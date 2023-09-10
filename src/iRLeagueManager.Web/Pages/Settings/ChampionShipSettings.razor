@@ -1,4 +1,5 @@
 ﻿@page "/{LeagueName}/Settings/Results/Championships/{ChampionshipId:long}"
+@using iRLeagueApiCore.Common.Enums;
 @using iRLeagueApiCore.Common.Models;
 @using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.Components.Settings
@@ -48,6 +49,12 @@
                     </InputGroup>
                     <InputGroup Label="Display Name">
                         <InputText class="form-control" @bind-Value=ChampSeason.ChampionshipDisplayName placeholder="@ChampSeason.ChampionshipName" data-bs-toggle="tooltip" title="Name of the championship to be shown displayed on results and standings" />
+                    </InputGroup>
+                    <InputGroup Label="Type">
+                        <InputSelect class="form-select" id="input-type" placeholder="Type..." aria-label="input-type" @bind-Value=ChampSeason.ResultKind data-bs-toggle="tooltip" title="Type of the race that will be scored: select from Member or Team race">
+                            <option value=@ResultKind.Member>Member</option>
+                            <option value=@ResultKind.Team>Team</option>
+                        </InputSelect>
                     </InputGroup>
                     <InputGroup Label="Filters">
                         <button class="form-control" type="button" @onclick=FiltersClick data-bs-toggle="tooltip" title="Filter rows that can score points. Only rows that fulfill all filter requirements will be given points. Rows are still displayed in the output result set">
@@ -258,6 +265,7 @@ else
     {
         var parameters = new ModalParameters<EditResultConfigModal>()
             .Add(x => x.Model, config.CopyModel())
+            .Add(x => x.ResultKind, ChampSeason.ResultKind)
             .Add(x => x.OnSubmit, (configChampSeason, cancellationToken) => configChampSeason.SaveChangesAsync(cancellationToken));
         var result = await ModalService.Show<EditResultConfigModal>("Edit Point System", parameters).Result;
         if (result.Confirmed && result.Data is ResultConfigModel model)
@@ -270,6 +278,7 @@ else
     {
         var parameters = new ModalParameters<EditResultConfigModal>()
             .Add(x => x.Model, CreateResultConfig())
+            .Add(x => x.ResultKind, ChampSeason.ResultKind)
             .Add(x => x.OnSubmit, (x, c) => ChampSeason.AddResultConfig(x.GetModel(), c));
         await ModalService.Show<EditResultConfigModal>("Add new Point System", parameters).Result;
     }

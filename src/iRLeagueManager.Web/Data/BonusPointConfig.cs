@@ -1,45 +1,32 @@
-﻿namespace iRLeagueManager.Web.Data;
+﻿using iRLeagueApiCore.Common.Models;
+
+namespace iRLeagueManager.Web.Data;
 
 public class BonusPointConfig
 {
     public BonusPointOption Option { get; set; }
-    public char OptionId
+    public BonusPointType OptionId
     {
-        get => Option.Id;
-        set => Option = BonusPointOption.Available.FirstOrDefault(x => x.Id == value) ?? BonusPointOption.Available.First();
+        get => Option.Type;
+        set => Option = BonusPointOption.Available.FirstOrDefault(x => x.Type == value) ?? BonusPointOption.Available.First();
     }
     public int Position { get; set; }
     public int Points { get; set; }
+    public ICollection<FilterConditionModel> Conditions { get; set; } = new List<FilterConditionModel>();
 
     public BonusPointConfig()
     {
         Option = BonusPointOption.Available.First();
     }
 
-    public BonusPointConfig(BonusPointOption option, int position, int points)
+    public BonusPointConfig(BonusPointType type, int position, int points, IEnumerable<FilterConditionModel> conditions)
     {
-        Option = option;
+        var bonusOption = BonusPointOption.Available.FirstOrDefault(x => x.Type == type)
+            ?? throw new ArgumentException(null, nameof(type));
+        Option = bonusOption;
         Position = position;
         Points = points;
-    }
-
-    public BonusPointConfig(string bonusKey, int points)
-    {
-        if (string.IsNullOrEmpty(bonusKey))
-        {
-            throw new ArgumentException(nameof(bonusKey));
-        }
-        var bonusKeyId = bonusKey[0];
-        int bonusKeyValue = 0;
-        if (bonusKey.Length > 1 && int.TryParse(bonusKey[1..], out bonusKeyValue) == false)
-        {
-            throw new ArgumentException(nameof(bonusKey));
-        }
-        var bonusOption = BonusPointOption.Available.FirstOrDefault(x => x.Id == bonusKeyId)
-            ?? throw new ArgumentException(nameof(bonusKey));
-        Option = bonusOption;
-        Position = bonusKeyValue;
-        Points = points;
+        Conditions = conditions.ToList();
     }
 
     public override string ToString()

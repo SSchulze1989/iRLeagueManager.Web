@@ -1,4 +1,7 @@
-﻿@foreach(var bonus in BonusPointConfigs)
+﻿@using iRLeagueApiCore.Common.Enums;
+@using iRLeagueApiCore.Common.Models;
+
+@foreach(var bonus in BonusPointConfigs)
 {
     <EditForm Model="bonus">
         <div class="input-group-list mb-3">
@@ -6,14 +9,25 @@
                 <InputSelect class="form-select" @bind-Value=bonus.OptionId>
                     @foreach(var option in BonusPointOption.Available)
                     {
-                        <option value=@option.Id>@option.Description</option>
+                        <option value=@option.Type>@option.Description</option>
                     }
                 </InputSelect>
                 <button class="btn btn-outline-danger" @onclick=@(() => Remove(bonus))>
                     <span class="oi oi-trash"/>
                 </button>
             </InputGroup>
-            @if (bonus.Option?.HasPosition == true)
+            @if (bonus.Option?.Type == BonusPointType.Custom)
+            {
+                <InputGroup Label="Conditions">
+                    <label class="form-control text-muted" @onclick=@(() => OnConditionsClick(bonus))>
+                        @foreach (var condition in bonus.Conditions)
+                        {
+                            <PreviewResultFilter Filter="@MapToResultFilterModel(condition)" LeagueMembers="LeagueMembers" />
+                        }
+                    </label>
+                </InputGroup>
+            }
+            else if (bonus.Option?.HasPosition == true)
             {
                 <InputGroup Label="Position">
                     <InputNumber class="form-control" @bind-Value=bonus.Position />
@@ -33,17 +47,40 @@
 @code {
     [CascadingParameter]
     public BlazoredModalInstance ModalInstance { get; set; } = default!;
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
 
     [Parameter]
     public IEnumerable<BonusPointConfig> BonusPoints { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public IEnumerable<TeamModel> Teams { get; set; } = default!;
 
     private List<BonusPointConfig> BonusPointConfigs { get; set; } = default!;
+
+    private string[] FilterColumnsAvailable = new[]
+    {
+        nameof(ResultRowModel.CompletedLaps),
+        nameof(ResultRowModel.CompletedPct),
+        nameof(ResultRowModel.FinalPosition),
+        nameof(ResultRowModel.FinalPositionChange),
+        nameof(ResultRowModel.FinishPosition),
+        nameof(ResultRowModel.PositionChange),
+        nameof(ResultRowModel.Incidents),
+        nameof(ResultRowModel.Interval),
+        nameof(ResultRowModel.LeadLaps),
+        nameof(ResultRowModel.StartPosition),
+    };
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
         BlazorParameterNullException.ThrowIfNull(this, ModalInstance);
+        BlazorParameterNullException.ThrowIfNull(this, ModalService);
         BlazorParameterNullException.ThrowIfNull(this, BonusPoints);
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers);
+        BlazorParameterNullException.ThrowIfNull(this, Teams);
         BonusPointConfigs ??= BonusPoints.ToList();
     }
 
@@ -65,5 +102,30 @@
     private async Task Cancel()
     {
         await ModalInstance.CancelAsync();
+    }
+
+    private static ResultFilterModel MapToResultFilterModel(FilterConditionModel condition) => new ResultFilterModel()
+    {
+        Condition = condition,
+    };
+
+    private async Task OnConditionsClick(BonusPointConfig bonusPointConfig)
+    {
+        var conditions = bonusPointConfig.Conditions
+            .Select(MapToResultFilterModel);
+        var parameters = new ModalParameters<EditResultFilterModal>()
+            .Add(x => x.Model, conditions)
+            .Add(x => x.LeagueMembers, LeagueMembers)
+            .Add(x => x.Teams, Teams)
+            .Add(x => x.AllowForEach, true)
+            .Add(x => x.Actions, new[] { MatchedValueAction.Keep })
+            .Add(x => x.ColumnNames, FilterColumnsAvailable);
+        var result = await ModalService.Show<EditResultFilterModal>("Bonus Conditions", parameters).Result;
+        if (result.Confirmed && result.Data is IEnumerable<ResultFilterModel> model)
+        {
+            bonusPointConfig.Conditions = model
+                .Select(x => x.Condition)
+                .ToList();
+        }
     }
 }

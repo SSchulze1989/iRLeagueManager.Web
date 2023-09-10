@@ -162,16 +162,17 @@
         return result;
     }
 
-    private async Task<StatusResult> CreateChampionship(ResultSettingsViewModel resultSettings, string name, CancellationToken cancellationToken = default)
+    private async Task<StatusResult> CreateChampionship(ResultSettingsViewModel resultSettings, string name, ResultKind resultKind, CancellationToken cancellationToken = default)
     {
         var championship = new PutChampSeasonModel()
         {
             ChampionshipName = name,
             ChampionshipDisplayName = name,
+            ResultKind = resultKind,
             StandingConfig = new()
             {
                 Name = name,
-                ResultKind = iRLeagueApiCore.Common.Enums.ResultKind.Member,
+                ResultKind = resultKind,
                 WeeksCounted = 0,
             },
         };
@@ -187,7 +188,7 @@
         }
 
         var resultSettingsVm = Provider.GetRequiredService<ResultSettingsViewModel>();
-        result = await CreateChampionship(resultSettingsVm, "Championship", cancellationToken);
+        result = await CreateChampionship(resultSettingsVm, "Championship", ResultKind.Member, cancellationToken);
         if (result.IsSuccess == false)
         {
             return result;
@@ -231,7 +232,7 @@
         }
 
         var resultSettingsVm = Provider.GetRequiredService<ResultSettingsViewModel>();
-        result = await CreateChampionship(resultSettingsVm, "Championship", cancellationToken);
+        result = await CreateChampionship(resultSettingsVm, "Championship", ResultKind.Member, cancellationToken);
         if (result.IsSuccess == false)
         {
             return result;
@@ -283,12 +284,12 @@
         }
 
         var resultSettingsVm = Provider.GetRequiredService<ResultSettingsViewModel>();
-        result = await CreateChampionship(resultSettingsVm, driverChampionshipName, cancellationToken);
+        result = await CreateChampionship(resultSettingsVm, driverChampionshipName, ResultKind.Member, cancellationToken);
         if (result.IsSuccess == false)
         {
             return result;
         }
-        result = await CreateChampionship(resultSettingsVm, teamChampionshipName, cancellationToken);
+        result = await CreateChampionship(resultSettingsVm, teamChampionshipName, ResultKind.Team, cancellationToken);
         if (result.IsSuccess == false)
         {
             return result;
@@ -333,7 +334,6 @@
             Name = "Sum of Driver points",
             DisplayName = "Sum of Driver points",
             SourceResultConfig = driverResultConfigInfo,
-            ResultKind = ResultKind.Team,
             ResultsPerTeam = 2,
             Scorings = new[]
             {
@@ -360,12 +360,12 @@
         }
 
         var resultSettingsVm = Provider.GetRequiredService<ResultSettingsViewModel>();
-        result = await CreateChampionship(resultSettingsVm, driverChampionshipName, cancellationToken);
+        result = await CreateChampionship(resultSettingsVm, driverChampionshipName, ResultKind.Member, cancellationToken);
         if (result.IsSuccess == false)
         {
             return result;
         }
-        result = await CreateChampionship(resultSettingsVm, teamChampionshipName, cancellationToken);
+        result = await CreateChampionship(resultSettingsVm, teamChampionshipName, ResultKind.Team, cancellationToken);
         if (result.IsSuccess == false)
         {
             return result;
@@ -416,7 +416,6 @@
             Name = "Sum of Driver points",
             DisplayName = "Sum of Driver points",
             SourceResultConfig = driverResultConfigInfo,
-            ResultKind = ResultKind.Team,
             ResultsPerTeam = 2,
             Scorings = new[]
             {

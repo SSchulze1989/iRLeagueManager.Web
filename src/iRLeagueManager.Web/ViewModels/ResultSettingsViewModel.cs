@@ -97,7 +97,6 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
             var resultConfigTemplate = new PostResultConfigModel()
             {
                 Name = "Default Points",
-                ResultKind = iRLeagueApiCore.Common.Enums.ResultKind.Member,
             };
             var postResultConfigResult = await CurrentLeague
                 .ChampSeasons()

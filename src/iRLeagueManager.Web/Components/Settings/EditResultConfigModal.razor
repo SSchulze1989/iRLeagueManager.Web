@@ -19,12 +19,6 @@
                 <InputGroup Label="Name" ValidationFor="() => Vm.Name">
                     <InputText class="form-control" id="input-name" placeholder="Name..." aria-label="input-name" @bind-Value=Vm.Name data-bs-toggle="tooltip" title="Identifying name of the result config" />
                 </InputGroup>
-                <InputGroup Label="Type">
-                    <InputSelect class="form-select" id="input-type" placeholder="Type..." aria-label="input-type" @bind-Value=Vm.ResultKind data-bs-toggle="tooltip" title="Type of the race that will be scored: select from Member or Team race">
-                        <option value=@ResultKind.Member>Member</option>
-                        <option value=@ResultKind.Team>Team</option>
-                    </InputSelect>
-                </InputGroup>
                 <InputGroup Label="Source">
                     <InputSelect class="form-select" id="input-source" placeholder="Source..." aria-label="input-source" @bind-Value=Vm.SourceResultConfigId data-bs-toggle="tooltip" 
                         title="<div class='text-start'>Data source for the results: 
@@ -42,7 +36,7 @@
                         }
                     </InputSelect>
                 </InputGroup>
-                @if (Vm.ResultKind == ResultKind.Team)
+                @if (ResultKind == ResultKind.Team)
                 {
                     <InputGroup Label="Results per Team">
                         <InputNumber class="form-control" id="input-results-per-team" aria-label="input-results-per-team" @bind-Value=Vm.ResultsPerTeam data-bs-toggle="tooltip" title="Number of member results that are counted in a team race. E.g: 2 will take the top 2 results from all team members in this race" />
@@ -143,6 +137,9 @@
 </CascadingValue>
 
 @code {
+    [Parameter]
+    public ResultKind ResultKind { get; set; } = ResultKind.Member;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);

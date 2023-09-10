@@ -35,46 +35,23 @@ public sealed class PointRuleViewModel : LeagueViewModelBase<PointRuleViewModel,
     public int MaxPoints { get => model.MaxPoints; set => SetP(model.MaxPoints, value => model.MaxPoints = value, value); }
     public int PointDropOff { get => model.PointDropOff; set => SetP(model.PointDropOff, value => model.PointDropOff = value, value); }
     public IList<int> PointsPerPlace { get => model.PointsPerPlace; set => SetP(model.PointsPerPlace, value => model.PointsPerPlace = value, value); }
-    public IDictionary<string, int> BonusPoints
+    public ICollection<BonusPointModel> BonusPoints
     {
         get => model.BonusPoints;
         set
         {
             if (SetP(model.BonusPoints, value => model.BonusPoints = value, value))
             {
-                OnPropertyChanged(nameof(BonusPointsString));
                 OnPropertyChanged(nameof(BonusPointConfigs));
             }
         }
     }
     public ICollection<SortOptions> PointsSortOptions { get => model.PointsSortOptions; set => SetP(model.PointsSortOptions, value => model.PointsSortOptions = value, value); }
     public ICollection<SortOptions> FinalSortOptions { get => model.FinalSortOptions; set => SetP(model.FinalSortOptions, value => model.FinalSortOptions = value, value); }
-    public string BonusPointsString
-    {
-        get => string.Join(';', BonusPoints.Select(x => string.Join(':', x.Key, x.Value)));
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                BonusPoints.Clear();
-                return;
-            }
-            var points = new Dictionary<string, int>();
-            var bonus = value.Split(';');
-            foreach (var pair in bonus)
-            {
-                var parts = pair.Split(':');
-                var key = parts[0];
-                var keyValue = parts.Length <= 1 ? 0 : int.TryParse(parts[1], out int res) ? res : 0;
-                points.Add(key, keyValue);
-            }
-            BonusPoints = points;
-        }
-    }
     public IEnumerable<BonusPointConfig> BonusPointConfigs
     {
-        get => BonusPoints.Select(x => new BonusPointConfig(x.Key, x.Value));
-        set => BonusPoints = value.ToDictionary(k => $"{k.OptionId}{(k.Position != 0 ? k.Position : "")}", v => v.Points);
+        get => BonusPoints.Select(x => new BonusPointConfig(x.Type, (int)x.Value, (int)x.Points));
+        set => BonusPoints = value.Select(x => new BonusPointModel() { Type = x.OptionId, Value = x.Position, Points = x.Points }).ToList();
     }
 
     public ICollection<AutoPenaltyConfiguration> AutoPenalties { get => model.AutoPenalties; set => SetP(model.AutoPenalties, value => model.AutoPenalties = value, value); }

@@ -3,10 +3,10 @@
 public class BonusPointConfig
 {
     public BonusPointOption Option { get; set; }
-    public char OptionId
+    public BonusPointType OptionId
     {
-        get => Option.Id;
-        set => Option = BonusPointOption.Available.FirstOrDefault(x => x.Id == value) ?? BonusPointOption.Available.First();
+        get => Option.Type;
+        set => Option = BonusPointOption.Available.FirstOrDefault(x => x.Type == value) ?? BonusPointOption.Available.First();
     }
     public int Position { get; set; }
     public int Points { get; set; }
@@ -23,22 +23,12 @@ public class BonusPointConfig
         Points = points;
     }
 
-    public BonusPointConfig(string bonusKey, int points)
+    public BonusPointConfig(BonusPointType type, int position, int points)
     {
-        if (string.IsNullOrEmpty(bonusKey))
-        {
-            throw new ArgumentException(nameof(bonusKey));
-        }
-        var bonusKeyId = bonusKey[0];
-        int bonusKeyValue = 0;
-        if (bonusKey.Length > 1 && int.TryParse(bonusKey[1..], out bonusKeyValue) == false)
-        {
-            throw new ArgumentException(nameof(bonusKey));
-        }
-        var bonusOption = BonusPointOption.Available.FirstOrDefault(x => x.Id == bonusKeyId)
-            ?? throw new ArgumentException(nameof(bonusKey));
+        var bonusOption = BonusPointOption.Available.FirstOrDefault(x => x.Type == type)
+            ?? throw new ArgumentException(nameof(type));
         Option = bonusOption;
-        Position = bonusKeyValue;
+        Position = position;
         Points = points;
     }
 

@@ -6,7 +6,7 @@
                 <InputSelect class="form-select" @bind-Value=bonus.OptionId>
                     @foreach(var option in BonusPointOption.Available)
                     {
-                        <option value=@option.Id>@option.Description</option>
+                        <option value=@option.Type>@option.Description</option>
                     }
                 </InputSelect>
                 <button class="btn btn-outline-danger" @onclick=@(() => Remove(bonus))>

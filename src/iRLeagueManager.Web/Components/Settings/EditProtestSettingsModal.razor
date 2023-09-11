@@ -25,7 +25,15 @@
                 <InputNumber class="form-control" @bind-Value=Vm.ProtestsClosedMinutes />
                 <span class="input-group-text">Min</span>
             </InputGroup>
-            <InputGroup Label="Public">
+            <InputGroup Label="Enable live reviews">
+                <InputSelect class="form-select" @bind-Value=Vm.ProtestFormAccess multiple="true">
+                    <option value="@ProtestFormAccess.Public">Public</option>
+                    <option value="@ProtestFormAccess.LeagueMembers">Registered league members</option>
+                    <option value="@ProtestFormAccess.Participants">Participants in race</option>
+                    <option value="@ProtestFormAccess.Password">Password protected</option>
+                </InputSelect>
+            </InputGroup>
+            <InputGroup Label="Show Protests public">
                 <InputSelect class="form-select" @bind-Value=Vm.ProtestPublic>
                     <option value="@ProtestPublicSetting.Hidden">Hide Protests</option>
                     <option value="@ProtestPublicSetting.WithoutProtester">Show Protests without Protester</option>

@@ -35,7 +35,9 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
     public int ProtestsClosedHrs { get => (int)model.ProtestsClosedAfter.TotalHours; set => SetP((int)model.ProtestsClosedAfter.TotalHours, value => model.ProtestsClosedAfter = SetHours(model.ProtestsClosedAfter, value), value); }
     public int ProtestsClosedMinutes { get => model.ProtestsClosedAfter.Minutes; set => SetP(model.ProtestsClosedAfter.Minutes, value => model.ProtestsClosedAfter = SetMinutes(model.ProtestsClosedAfter, value), value); }
     public ProtestPublicSetting ProtestPublic { get => model.ProtestsPublic; set => SetP(model.ProtestsPublic, value => model.ProtestsPublic = value, value); }
+    public ProtestFormAccess ProtestFormAccess { get => model.ProtestFormAccess; set => SetP(model.ProtestFormAccess, value => model.ProtestFormAccess = value, value); }
     public LeaguePublicSetting LeaguePublic { get => model.LeaguePublic; set => SetP(model.LeaguePublic, value => model.LeaguePublic = value, value); }
+    public bool EnableLiveReviews { get => model.EnableLiveReviews; set => SetP(model.EnableLiveReviews, value => model.EnableLiveReviews = value, value); }
 
     private TimeSpan SetHours(TimeSpan time, int hours)
     {

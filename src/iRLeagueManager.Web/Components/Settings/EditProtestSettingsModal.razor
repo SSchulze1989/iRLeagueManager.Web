@@ -26,13 +26,39 @@
                 <span class="input-group-text">Min</span>
             </InputGroup>
             <InputGroup Label="Enable live reviews">
-                <InputSelect class="form-select" @bind-Value=Vm.ProtestFormAccess multiple="true">
-                    <option value="@ProtestFormAccess.Public">Public</option>
-                    <option value="@ProtestFormAccess.LeagueMembers">Registered league members</option>
-                    <option value="@ProtestFormAccess.Participants">Participants in race</option>
-                    <option value="@ProtestFormAccess.Password">Password protected</option>
-                </InputSelect>
+                <div class="form-control">
+                    <div class="form-check">
+                        <InputCheckbox @bind-Value="ProtestFormAccessPublic" class="form-check-input" disabled/>
+                        <label class="form-check-label">Public</label>
+                    </div>
+                    <div class="form-check">
+                        <InputCheckbox @bind-Value="ProtestFormAccessLeagueMembers" class="form-check-input"/>
+                        <label class="form-check-label">Registered league members</label>
+                    </div>
+                    <div class="form-check">
+                        <InputCheckbox @bind-Value="ProtestFormAccessParticipants" class="form-check-input" />
+                        <label class="form-check-label">Participants in race</label>
+                    </div>
+                    <div class="form-check">
+                        <InputCheckbox @bind-Value="ProtestFormAccessPassword" class="form-check-input" />
+                        <label class="form-check-label">Password protected</label>
+                    </div>
+                </div>
             </InputGroup>
+            @if (ProtestFormAccessPassword)
+            {
+                <InputGroup Label="Password">
+                    @if (ShowPassword)
+                    {
+                        <InputText @bind-Value="Vm.ProtestAccessPassword" type="text" class="form-control" />
+                    }
+                    else
+                    {
+                        <InputText @bind-Value="Vm.ProtestAccessPassword" type="password" class="form-control" />
+                    }
+                    <button class="btn btn-outline-secondary" type="button" @onclick=@(() => ShowPassword = !ShowPassword)><span class="bi @(ShowPassword ? "bi-eye" : "bi-eye-slash")" /></button>
+                </InputGroup>
+            }
             <InputGroup Label="Show Protests public">
                 <InputSelect class="form-select" @bind-Value=Vm.ProtestPublic>
                     <option value="@ProtestPublicSetting.Hidden">Hide Protests</option>
@@ -46,5 +72,44 @@
 </EditForm>
 
 @code {
+    private bool ProtestFormAccessPublic 
+    { 
+        get => GetFlag(~Vm.ProtestFormAccess, ProtestFormAccess.Participants | ProtestFormAccess.Password | ProtestFormAccess.LeagueMembers); 
+        set => Vm.ProtestFormAccess = SetFlag(Vm.ProtestFormAccess, ProtestFormAccess.Public, value); 
+    }
 
+    private bool ProtestFormAccessPassword 
+    { 
+        get => GetFlag(Vm.ProtestFormAccess, ProtestFormAccess.Password); 
+        set => Vm.ProtestFormAccess = SetFlag(Vm.ProtestFormAccess, ProtestFormAccess.Password, value); 
+    }
+
+    private bool ProtestFormAccessParticipants 
+    { 
+        get => GetFlag(Vm.ProtestFormAccess, ProtestFormAccess.Participants); 
+        set => Vm.ProtestFormAccess = SetFlag(Vm.ProtestFormAccess, ProtestFormAccess.Participants, value);
+    }
+
+    private bool ProtestFormAccessLeagueMembers
+    {
+        get => GetFlag(Vm.ProtestFormAccess, ProtestFormAccess.LeagueMembers);
+        set => Vm.ProtestFormAccess = SetFlag(Vm.ProtestFormAccess, ProtestFormAccess.LeagueMembers, value);
+    }
+
+    private bool GetFlag(ProtestFormAccess flags, ProtestFormAccess access)
+    {
+        var hasFlags = flags.HasFlag(access);
+        return hasFlags;
+    }
+
+    private bool ShowPassword { get; set; } = false;
+
+    private ProtestFormAccess SetFlag(ProtestFormAccess flags, ProtestFormAccess access, bool value)
+    {
+        if (value)
+        {
+            return flags | access;
+        }
+        return flags & ~access;
+    }
 }

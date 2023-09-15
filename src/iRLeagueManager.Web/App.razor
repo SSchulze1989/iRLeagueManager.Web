@@ -6,6 +6,10 @@
 @inject SharedStateService SharedState
 @inject IJSRuntime JsRuntime
 
+<MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
 <CascadingValue Value="EventList">
 <CascadingValue Value="SharedState">
 <CascadingBlazoredModal DisableBackgroundCancel="true" Size="ModalSize.Large">
@@ -52,5 +56,25 @@
                 // this throws when jsinterop is not yet available
             }
         }
+    }
+
+    private bool _isDarkMode = true;
+    private MudThemeProvider? _mudThemeProvider;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _isDarkMode = await _mudThemeProvider!.GetSystemPreference();
+            await _mudThemeProvider.WatchSystemPreference(OnSystemPreferenceChanged);
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnSystemPreferenceChanged(bool newValue)
+    {
+        _isDarkMode = newValue;
+        StateHasChanged();
+        await Task.CompletedTask;
     }
 }

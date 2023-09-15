@@ -44,7 +44,6 @@
                 {
                     <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CalendarViewDay" Href="@GetLeagueLink($"results/events/{resultEvent.EventId}")">
                         @resultEvent.Name: @resultEvent.Date.ToShortDateString()
-                        <MudText Typo="Typo.caption" Style="overflow: hidden; text-overflow: ellipsis">@resultEvent.TrackName</MudText>
                     </MudNavLink>
                 }
             </MudNavGroup>
@@ -55,7 +54,6 @@
         }
         <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CalendarMonth" Href=@GetLeagueLink("schedules")>Schedule</MudNavLink>
         <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CalendarMonth" Href=@GetLeagueLink("reviews")>Reviews</MudNavLink>
-        @Counter
     }
 </MudNavMenu>
 
@@ -64,7 +62,6 @@
     private bool SeasonExpanded { get; set; } = false;
     private bool SettingsRouteMatched => NavigationManager.Uri.Contains($"{Shared.LeagueName}/settings", StringComparison.OrdinalIgnoreCase);
     private MenuSection SectionSelected { get; set; } = MenuSection.None;
-    private int Counter { get; set; } = 0;
 
     private enum MenuSection
     {

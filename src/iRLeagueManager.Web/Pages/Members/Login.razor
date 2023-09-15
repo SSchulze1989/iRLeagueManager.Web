@@ -1,11 +1,10 @@
-﻿@page "/member/login"
+﻿@page "/members/login"
 @using System.ComponentModel.DataAnnotations
 @using iRLeagueApiCore.Client
 @using iRLeagueApiCore.Client.Http
 @using iRLeagueApiCore.Common.Responses;
 @using iRLeagueManager.Web.Extensions
 @inject IConfiguration configuration
-@inject ITokenStore tokenStore
 @inject ILeagueApiClient ApiClient
 @inject NavigationManager NavigationManager
 @attribute [AllowAnonymous]
@@ -62,6 +61,9 @@
         public string Password { get; set; } = string.Empty;
     }
 
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthTask { get; set; } = default!;
+
     private bool loading;
     public bool Loading { get => loading; set { loading = value; InvokeAsync(StateHasChanged); } }
 
@@ -71,27 +73,16 @@
 
     public User model = new User();
 
-    protected override void OnInitialized()
+    protected override async Task OnParametersSetAsync()
     {
-    }
+        BlazorParameterNullException.ThrowIfNull(this, AuthTask);
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (string.IsNullOrEmpty(await tokenStore.GetAccessTokenAsync()) == false)
+        var authState = await AuthTask;
+        if (authState.User.Identity?.IsAuthenticated == true)
         {
             var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";
             NavigationManager.NavigateTo(returnUrl);
         }
-
-#if DEBUG
-    //if (firstRender && configuration["DefaultUser"] != null)
-    //{
-    //model.Username = configuration["DefaultUser"];
-    //model.Password = configuration["DefaultPassword"];
-    //await OnValidSubmit();
-    //return;
-    //}
-#endif
     }
 
     public async Task OnValidSubmit()

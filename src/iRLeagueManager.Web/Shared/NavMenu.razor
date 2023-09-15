@@ -1,180 +1,157 @@
-﻿@using System.Net
-@using System.Security.Claims
-@inject LeagueApiService apiService
-@inject NavigationManager navigationManager
+﻿@using System.ComponentModel;
+@using iRLeagueApiCore.Client.Http;
+@using iRLeagueApiCore.Common.Models;
+@inherits LeagueComponentBase
+@inject LeaguesViewModel Vm
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">iRLeagueManager v@(VersionString)</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
-
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <nav class="nav flex-column">
-        <div class="nav-item">
-            <NavLink class="nav-link" href="leagues">
-                <span class="oi oi-list" aria-hidden="true"></span> Leagues
-            </NavLink>
-        </div>
-        <AuthorizeView>
+<MudNavMenu>
+    <MudNavGroup Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.House" Href=@GetLeagueLink("") Title="@DisplayLeague.GetLeagueName(Shared.LeagueInfo, "Select League")">
+        @foreach(var league in Vm.Leagues)
+        {
+            <MudNavLink Icon="@Icons.Material.Filled.Person" OnClick="@(() => ForceNavigateTo($"/{league.LeagueName}", fullReload: true))" Style="cursor: pointer"><DisplayLeague League="league.GetModel()"/></MudNavLink>
+        }
+    </MudNavGroup>
+    @if (Shared.LeagueInfo is not null)
+    {
+        <MudNavGroup Title="@Shared.SeasonName" Expanded="@SeasonExpanded">
+            @foreach(var season in Shared.SeasonList)
+            {
+                <MudNavLink OnClick="@(() => OnSeasonChanged(season))">@season.SeasonName</MudNavLink>
+            }
+        </MudNavGroup>
+        <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
             <Authorized>
-                <div class="nav-item @(seasonSelectDisabled)">
-                    <select @bind="SeasonSelect" class="form-select no-radius" @onclick:stopPropagation>
-                        @foreach (var season in SharedState.SeasonList)
-                        {
-                            <option value="@season.SeasonId" class="nav-option">@season.SeasonName</option>
-                        }
-                    </select>
-                </div>
-                <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Settings")">
-                        <span class="oi oi-cog" aria-hidden="true"></span> Settings
-                    </NavLink>
-                </div>
-                <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Schedules/Season/{SharedState.SeasonId}")">
-                        <span class="oi oi-calendar" aria-hidden="true"></span> Schedules
-                    </NavLink>
-                </div>
-                <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Results")">
-                        <span class="oi oi-clipboard" aria-hidden="true"></span> Results
-                    </NavLink>
-                </div>
-                <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Standings")">
-                        <span class="oi oi-clipboard" aria-hidden="true"></span> Standings
-                    </NavLink>
-                </div>
-                <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Reviews")">
-                        <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Reviews
-                    </NavLink>
-                </div>
-
-                <div class="nav-item">
-                    <a class="nav-link" href="@($"./member/logout?returnUrl={GetCurrentUrl()}")">
-                        <span class="oi oi-account-logout" aria-hidden="true"></span> Logout
-                    </a>
-                </div>
-            </Authorized>
-            <NotAuthorized>
-                <div class="nav-item @(seasonSelectDisabled)">
-                    <select @bind="SeasonSelect" class="form-select no-radius px-0" @onclick:stopPropagation>
-                        @foreach (var season in SharedState.SeasonList)
-                        {
-                            <option value="@season.SeasonId" class="nav-option">@season.SeasonName</option>
-                        }
-                    </select>
-                </div>
-                <div class="nav-item disabled">
-                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Settings")">
-                        <span class="oi oi-cog" aria-hidden="true"></span> Settings
-                    </NavLink>
-                </div>
-                <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Schedules/Season/{SharedState.SeasonId}")">
-                        <span class="oi oi-calendar" aria-hidden="true"></span> Schedules
-                    </NavLink>
-                </div>
-                <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Results")">
-                        <span class="oi oi-clipboard" aria-hidden="true"></span> Results
-                    </NavLink>
-                </div>
-                <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Standings")">
-                        <span class="oi oi-clipboard" aria-hidden="true"></span> Standings
-                    </NavLink>
-                </div>
-                <div class="nav-item @(navItemsDisabled)">
-                    <NavLink class="nav-link" href="@($"./{SharedState.LeagueName}/Reviews")">
-                        <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Reviews
-                    </NavLink>
-                </div>
-                <div class="nav-item">
-                    <NavLink class="nav-link" href="@($"./member/login?returnUrl={GetReturnUrl()}")">
-                        <span class="oi oi-account-login" aria-hidden="true"></span> Login
-                    </NavLink>
-                </div>
-            </NotAuthorized>
-        </AuthorizeView>
-        <AuthorizeView>
-            <Authorized>
-                <div class="container mb-3">
-                    User: @context.User.Identity?.Name;<br />
-                    @{
-                        var userRoles = @context.User.Claims
-                            .Where(x => x.Type == ClaimTypes.Role)
-                            .Select(x => x.Value);
-                    }
-                    Roles: @string.Join(", ", userRoles)
-                </div>
+                @if (SectionSelected == MenuSection.Settings)
+                {
+                    <MudNavGroup Title="Settings" Icon="@Icons.Material.Filled.Settings" Expanded="true">
+                        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AdminPanelSettings" Href="@GetLeagueLink("settings/league")">League</MudNavLink>
+                        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Person" Href="@GetLeagueLink("settings/users")">Users</MudNavLink>
+                        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Calculate" Href="@GetLeagueLink("settings/results")">Results</MudNavLink>
+                        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Groups" Href="@GetLeagueLink("settings/teams")">Teams</MudNavLink>
+                        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.LocalPolice" Href="@GetLeagueLink("settings/reviews")">Reviews</MudNavLink>
+                    </MudNavGroup>   
+                }
+                else
+                {
+                    <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Settings" Href="@GetLeagueLink("settings")">Settings</MudNavLink>
+                }
             </Authorized>
         </AuthorizeView>
-    </nav>
-</div>
+        @if (SectionSelected == MenuSection.Results)
+        {
+            <MudNavGroup Title="Results" Icon="@Icons.Material.Filled.TableChart" Expanded=true>
+                @foreach(var resultEvent in EventList.EventList)
+                {
+                    <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CalendarViewDay" Href="@GetLeagueLink($"results/events/{resultEvent.EventId}")">
+                        @resultEvent.Name: @resultEvent.Date.ToShortDateString()
+                        <MudText Typo="Typo.caption" Style="overflow: hidden; text-overflow: ellipsis">@resultEvent.TrackName</MudText>
+                    </MudNavLink>
+                }
+            </MudNavGroup>
+        }
+        else
+        {
+            <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.TableChart" Href=@GetLeagueLink("results")>Results</MudNavLink>
+        }
+        <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CalendarMonth" Href=@GetLeagueLink("schedules")>Schedule</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CalendarMonth" Href=@GetLeagueLink("reviews")>Reviews</MudNavLink>
+        @Counter
+    }
+</MudNavMenu>
 
-@code {
-    [CascadingParameter]
-    public SharedStateService SharedState { get; set; } = default!;
-    [CascadingParameter]
-    public RouteData? RouteData { get; set; }
+@code
+{
+    private bool SeasonExpanded { get; set; } = false;
+    private bool SettingsRouteMatched => NavigationManager.Uri.Contains($"{Shared.LeagueName}/settings", StringComparison.OrdinalIgnoreCase);
+    private MenuSection SectionSelected { get; set; } = MenuSection.None;
+    private int Counter { get; set; } = 0;
 
-    private static string VersionString { get; } = $"{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.Major}.{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.Minor}.{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.Build}";
-
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : "nav-menu";
-
-    private bool leagueSelected => string.IsNullOrEmpty(SharedState.LeagueName) == false;
-    private bool seasonSelected => leagueSelected && string.IsNullOrEmpty(SharedState.SeasonName) == false && SharedState.SeasonId != 0;
-    private string seasonSelectDisabled => leagueSelected == false ? "disabled" : "";
-    private string navItemsDisabled => seasonSelected == false ? "disabled": "";
-
-    private long SeasonSelect
+    private enum MenuSection
     {
-        get => SharedState.SeasonId;
-        set => _ = OnSeasonSelectChanged(value);
+        None = 0,
+        Settings,
+        Results,
+        Reviews,
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        SharedState.StateChanged += (sender, e) => InvokeAsync(StateHasChanged);
-
-    }
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
-
-    private async Task OnSeasonSelectChanged(long value)
-    {
-        if (SharedState.LeagueName is null)
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
         {
             return;
         }
-        await apiService.SetCurrentSeasonAsync(SharedState.LeagueName, value);
-        navigationManager.NavigateTo($"./{SharedState.LeagueName}/Seasons/{value}");
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private string GetCurrentUrl()
-    {
-        return WebUtility.UrlEncode(new Uri(navigationManager.Uri).PathAndQuery);
-    }
-
-    private string GetReturnUrl()
-    {
-        var returnUrl = navigationManager.QueryParameter<string>("returnUrl");
-        if (string.IsNullOrEmpty(returnUrl))
+        if (Vm.Leagues.Count > 0)
         {
-            return GetCurrentUrl();
+            return;
         }
-        return WebUtility.UrlEncode(returnUrl);
+        try
+        {
+            await Vm.OnAfterRenderAsync(firstRender);
+        }
+        catch (ApiServiceUnavailableException)
+        {
+        }
+    }
+
+    protected override void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        var newSection = GetSectionFromLocation(e.Location);
+        if (SectionSelected != newSection)
+        {
+            SectionSelected = newSection;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private MenuSection GetSectionFromLocation(string location)
+    {
+        if (location.Contains("settings", StringComparison.OrdinalIgnoreCase))
+        {
+            return MenuSection.Settings;
+        }
+        if (location.Contains("results", StringComparison.OrdinalIgnoreCase))
+        {
+            return MenuSection.Results;
+        }
+        if (location.Contains("reviews", StringComparison.OrdinalIgnoreCase))
+        {
+            return MenuSection.Reviews;
+        }
+        return MenuSection.None;
+    }
+
+    private string GetLeagueLink(string href)
+    {
+        return $"./{Shared.LeagueName}/{href}";
+    }
+
+    private async Task OnSeasonChanged(SeasonModel? season)
+    {
+        if (Shared.LeagueName == null || season is null)
+        {
+            return;
+        }
+        await ApiService.SetCurrentSeasonAsync(Shared.LeagueName, season.SeasonId);
+
+        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Results"))
+        {
+            ForceNavigateTo($"{Shared.LeagueName}/Results");
+        }
+        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Schedules"))
+        {
+            ForceNavigateTo($"{Shared.LeagueName}/Schedules");
+        }
+        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Standings"))
+        {
+            ForceNavigateTo($"{Shared.LeagueName}/Standings");
+        }
+        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Reviews"))
+        {
+            ForceNavigateTo($"{Shared.LeagueName}/Reviews");
+        }
+        SeasonExpanded = false;
+
+        await InvokeAsync(StateHasChanged);
     }
 }

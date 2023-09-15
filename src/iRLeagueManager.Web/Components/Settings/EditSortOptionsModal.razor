@@ -17,8 +17,8 @@
                     }
                 </InputSelect>
                 <InputSelect class="form-select" style="max-width: 5.5rem" @bind-Value=option.SortDirection>
-                    <option value=@SortDirection.Ascending><span class="oi oi-arrow-down">Asc.</span></option>
-                    <option value=@SortDirection.Descending><span class="oi oi-arrow-up">Desc.</span></option>
+                    <option value=@ViewModels.SortDirection.Ascending><span class="oi oi-arrow-down">Asc.</span></option>
+                    <option value=@ViewModels.SortDirection.Descending><span class="oi oi-arrow-up">Desc.</span></option>
                 </InputSelect>
                 <button class="btn btn-outline-danger" type="button" @onclick=@(() => Vm.RemoveOption(option))>
                     <span class="oi oi-x"/>
@@ -39,8 +39,8 @@
             <InputSelect @bind-Value=NewSortDirection
                          class="form-select"
                          style="max-width: 5.5rem">
-                <option value=@SortDirection.Ascending><span class="oi oi-arrow-down">Asc.</span></option>
-                <option value=@SortDirection.Descending><span class="oi oi-arrow-up">Desc.</span></option>
+                <option value=@ViewModels.SortDirection.Ascending><span class="oi oi-arrow-down">Asc.</span></option>
+                <option value=@ViewModels.SortDirection.Descending><span class="oi oi-arrow-up">Desc.</span></option>
             </InputSelect>
             <div class="input-group-text" type="button">
                 <span class="oi oi-x invisible"/>
@@ -109,7 +109,7 @@
         Vm.SetModel(Model);
     }
 
-    private async Task SetNewValue(SortValue? value, SortDirection direction)
+    private async Task SetNewValue(SortValue? value, ViewModels.SortDirection direction)
     {
         if (value.HasValue)
         {

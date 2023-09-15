@@ -11,17 +11,10 @@ using System.Net;
 
 namespace iRLeagueManager.Web.Shared;
 
-public abstract partial class LeagueComponentBase : MvvmComponentBase
+public abstract partial class LeagueComponentBase : UtilityComponentBase
 {
     [Inject]
-    public SharedStateService Shared { get; set; } = default!;
-    [Inject]
     public LeagueApiService ApiService { get; set; } = default!;
-    [Inject]
-    public NavigationManager NavigationManager { get; set; } = default!;
-
-    [Inject]
-    protected IJSRuntime JsRuntime { get; set; } = default!;
 
     private EventListViewModel eventList = default!;
 
@@ -52,15 +45,6 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
     protected bool ParametersSet { get; set; } = false;
     protected bool HasRendered { get; set; } = false;
     protected EventViewModel? Event => EventList?.Selected;
-    private readonly CancellationTokenSource cancellationTokenSource = new();
-    protected CancellationToken CancellationToken => cancellationTokenSource.Token;
-
-    private IDisposable? locationChangingHandler;
-
-    protected virtual void SharedStateChanged(object? sender, EventArgs e)
-    {
-        InvokeAsync(StateHasChanged);
-    }
 
     protected virtual void RedirectUrl()
     {
@@ -161,8 +145,6 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
 
     protected override void OnInitialized()
     {
-        Shared.StateChanged += SharedStateChanged;
-        NavigationManager.LocationChanged += OnLocationChanged;
         base.OnInitialized();
     }
 
@@ -170,12 +152,7 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
     {
         if (disposing == false)
         {
-            Shared.StateChanged -= SharedStateChanged;
             EventList.PropertyChanged -= OnEventListPropertyChanged;
-            locationChangingHandler?.Dispose();
-            cancellationTokenSource.Cancel();
-            cancellationTokenSource.Dispose();
-            NavigationManager.LocationChanged -= OnLocationChanged;
         }
 
         base.Dispose(disposing);
@@ -193,110 +170,6 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
 
     protected string GetRoleString(params string[] roleNames)
     {
-        IEnumerable<string> roles = new[] { "Admin" };
-        if (Shared.LeagueName != null)
-        {
-            var roleValues = roleNames.Select(x => LeagueRoles.GetRoleValue(x));
-            roleValues = roleValues.Concat(roleValues.SelectMany(LeagueRoles.ImplicitRoleOf)).Distinct();
-            var leagueRoleNames = roleValues
-                .Select(x => LeagueRoles.GetLeagueRoleName(Shared.LeagueName, x))
-                .NotNull();
-            roles = roles.Concat(leagueRoleNames);
-        }
-        return string.Join(',', roles);
-    }
-
-    protected async Task ScrollToElementId(string id)
-    {
-        await JsRuntime.InvokeVoidAsync("scrollToElementId", id);
-    }
-
-    protected async Task ScrollToElement(ElementReference reference)
-    {
-        await ScrollToElementId(reference.Id);
-    }
-
-    protected async Task EnableTooltips()
-    {
-        await JsRuntime.InvokeVoidAsync("enableTooltips", "right");
-    }
-
-    protected void NavigateTo(string url, bool replace = false, string? returnUrl = null)
-    {
-        if (string.IsNullOrEmpty(returnUrl) == false)
-        {
-            var queryParameters = new Dictionary<string, object?> { { "returnUrl", returnUrl } };
-            url = NavigationManager.GetUriWithQueryParameters(url, queryParameters);
-        }
-        NavigationManager.NavigateTo(url, replace: replace);
-    }
-
-    protected void NavigateToRelative(string relativeUrl, bool replace = false)
-    {
-        var absoluteUrl = NavigationManager.ToAbsoluteUri(relativeUrl).ToString();
-        NavigateTo(absoluteUrl, replace: replace);
-    }
-
-    protected void ForceNavigateTo(string url, bool fullReload = false)
-    {
-        if (fullReload)
-        {
-            NavigationManager.NavigateTo(url, forceLoad: true);
-            return;
-        }
-
-        NavigationManager.NavigateTo("/");
-        NavigationManager.NavigateTo(url);
-    }
-
-    /// <summary>
-    /// Activate tracking for location changing.
-    /// Override <see cref="OnLocationChanging(LocationChangingContext)"/> to perform an action when the location changes
-    /// </summary>
-    protected void RegisterLocationChangingHandler()
-    {
-        locationChangingHandler = NavigationManager.RegisterLocationChangingHandler(OnLocationChanging);
-    }
-
-    /// <summary>
-    /// Perform action when location is changing (e.g. cancel location on certain conditions)
-    /// Requires call to <see cref="RegisterLocationChangingHandler()"/> once to initialize location change tracking
-    /// </summary>
-    /// <param name="context"></param>
-    /// <returns></returns>
-    protected virtual async ValueTask OnLocationChanging(LocationChangingContext context)
-    {
-        await Task.CompletedTask;
-    }
-
-    /// <summary>
-    /// Perform action after location has changed
-    /// </summary>
-    /// <param name="e"></param>
-    protected virtual void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-    }
-
-    /// <summary>
-    /// Get the current url as HTML encoded
-    /// </summary>
-    /// <returns></returns>
-    protected string GetCurrentUrlEncoded()
-    {
-        return WebUtility.UrlEncode(new Uri(NavigationManager.Uri).PathAndQuery);
-    }
-
-    /// <summary>
-    /// Get the url from returnUrl= parameter. If returnUrl is not set -> return the current url as HTML encoded instead
-    /// </summary>
-    /// <returns></returns>
-    protected string GetReturnUrl()
-    {
-        var returnUrl = NavigationManager.QueryParameter<string>("returnUrl");
-        if (string.IsNullOrEmpty(returnUrl))
-        {
-            return GetCurrentUrlEncoded();
-        }
-        return WebUtility.UrlEncode(returnUrl);
+        return GetRoleString(Shared.LeagueName, roleNames);
     }
 }

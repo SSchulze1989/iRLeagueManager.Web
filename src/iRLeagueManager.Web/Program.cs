@@ -14,6 +14,7 @@ using System.Text.Json.Serialization;
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using Blazored.Toast;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +61,8 @@ builder.Services.AddAuthorization(config =>
 
 builder.Services.AddLocalization();
 builder.Services.AddMarkdown();
+
+builder.Services.AddMudServices();
 
 var app = builder.Build();
 

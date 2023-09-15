@@ -11,14 +11,19 @@
 
     private string GetLeagueName()
     {
-        if (League is null)
+        return GetLeagueName(League, Fallback);   
+    }
+
+    public static string GetLeagueName(LeagueModel? league, string fallback = "")
+    {
+        if (league is null)
         {
-            return Fallback;
+            return fallback;
         }
-        if (string.IsNullOrEmpty(League.NameFull))
+        if (string.IsNullOrEmpty(league.NameFull))
         {
-            return League.Name;
+            return league.Name;
         }
-        return League.NameFull;
+        return league.NameFull;
     }
 }

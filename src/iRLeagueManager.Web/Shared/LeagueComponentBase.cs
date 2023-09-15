@@ -162,6 +162,7 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
     protected override void OnInitialized()
     {
         Shared.StateChanged += SharedStateChanged;
+        NavigationManager.LocationChanged += OnLocationChanged;
         base.OnInitialized();
     }
 
@@ -174,6 +175,7 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
             locationChangingHandler?.Dispose();
             cancellationTokenSource.Cancel();
             cancellationTokenSource.Dispose();
+            NavigationManager.LocationChanged -= OnLocationChanged;
         }
 
         base.Dispose(disposing);
@@ -265,6 +267,14 @@ public abstract partial class LeagueComponentBase : MvvmComponentBase
     protected virtual async ValueTask OnLocationChanging(LocationChangingContext context)
     {
         await Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Perform action after location has changed
+    /// </summary>
+    /// <param name="e"></param>
+    protected virtual void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
     }
 
     /// <summary>

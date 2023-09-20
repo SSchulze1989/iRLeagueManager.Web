@@ -37,7 +37,7 @@ public sealed class SortOptionViewModel : MvvmBlazor.ViewModel.ViewModelBase
         }
     }
 
-    private (SortValue sortValue, SortDirection direction) GetSortValue(SortOptions value)
+    private static (SortValue sortValue, SortDirection direction) GetSortValue(SortOptions value)
     {
         return value switch
         {
@@ -73,11 +73,29 @@ public sealed class SortOptionViewModel : MvvmBlazor.ViewModel.ViewModelBase
             SortOptions.TotalPtsWoBonusDesc => (SortValue.TotalPtsNoBonus, SortDirection.Descending),
             SortOptions.TotalPtsWoPenaltyAsc => (SortValue.TotalPtsNoPenalty, SortDirection.Ascending),
             SortOptions.TotalPtsWoPenaltyDesc => (SortValue.TotalPtsNoPenalty, SortDirection.Descending),
+            SortOptions.LastRaceOrderAsc => (SortValue.LastRaceOrder, SortDirection.Ascending),
+            SortOptions.LastRaceOrderDesc => (SortValue.LastRaceOrder, SortDirection.Descending),
+            SortOptions.WinsAsc => (SortValue.Wins, SortDirection.Ascending),
+            SortOptions.WinsDesc => (SortValue.Wins, SortDirection.Descending),
+            SortOptions.Top3Asc => (SortValue.Top3, SortDirection.Ascending),
+            SortOptions.Top3Desc => (SortValue.Top3, SortDirection.Descending),
+            SortOptions.Top5Asc => (SortValue.Top5, SortDirection.Ascending),
+            SortOptions.Top5Desc => (SortValue.Top5, SortDirection.Descending),
+            SortOptions.Top10Asc => (SortValue.Top10, SortDirection.Ascending),
+            SortOptions.Top10Desc => (SortValue.Top10, SortDirection.Descending),
+            SortOptions.RacesAsc => (SortValue.Races, SortDirection.Ascending),
+            SortOptions.RacesDesc => (SortValue.Races, SortDirection.Descending),
+            SortOptions.RacesCountedAsc => (SortValue.RacesCounted, SortDirection.Ascending),
+            SortOptions.RacesCountedDesc => (SortValue.RacesCounted, SortDirection.Descending),
+            SortOptions.RacesScoredAsc => (SortValue.RacesScored, SortDirection.Ascending),
+            SortOptions.RacesScoredDesc => (SortValue.RacesScored, SortDirection.Descending),
+            SortOptions.RacesInPointsAsc => (SortValue.RacesInPoints, SortDirection.Ascending),
+            SortOptions.RacesInPointsDesc => (SortValue.RacesInPoints, SortDirection.Descending),
             _ => (SortValue.TotalPts, SortDirection.Descending),
         };
     }
 
-    private SortOptions GetSortOptions(SortValue sortValue, SortDirection direction)
+    private static SortOptions GetSortOptions(SortValue sortValue, SortDirection direction)
     {
         return (sortValue, direction) switch
         {
@@ -113,6 +131,22 @@ public sealed class SortOptionViewModel : MvvmBlazor.ViewModel.ViewModelBase
             (SortValue.TotalPtsNoBonus, SortDirection.Descending) => SortOptions.TotalPtsWoBonusDesc,
             (SortValue.TotalPtsNoPenalty, SortDirection.Ascending) => SortOptions.TotalPtsWoPenaltyAsc,
             (SortValue.TotalPtsNoPenalty, SortDirection.Descending) => SortOptions.TotalPtsWoPenaltyDesc,
+            (SortValue.Wins, SortDirection.Ascending) => SortOptions.WinsAsc,
+            (SortValue.Wins, SortDirection.Descending) => SortOptions.WinsDesc,
+            (SortValue.Top3, SortDirection.Ascending) => SortOptions.Top3Asc,
+            (SortValue.Top3, SortDirection.Descending) => SortOptions.Top3Desc,
+            (SortValue.Top5, SortDirection.Ascending) => SortOptions.Top5Asc,
+            (SortValue.Top5, SortDirection.Descending) => SortOptions.Top5Desc,
+            (SortValue.Top10, SortDirection.Ascending) => SortOptions.Top10Asc,
+            (SortValue.Top10, SortDirection.Descending) => SortOptions.Top10Desc,
+            (SortValue.Races, SortDirection.Ascending) => SortOptions.RacesAsc,
+            (SortValue.Races, SortDirection.Descending) => SortOptions.RacesDesc,
+            (SortValue.RacesCounted, SortDirection.Ascending) => SortOptions.RacesCountedAsc,
+            (SortValue.RacesCounted, SortDirection.Descending) => SortOptions.RacesCountedDesc,
+            (SortValue.RacesScored, SortDirection.Ascending) => SortOptions.RacesScoredAsc,
+            (SortValue.RacesScored, SortDirection.Descending) => SortOptions.RacesScoredDesc,
+            (SortValue.RacesInPoints, SortDirection.Ascending) => SortOptions.RacesInPointsAsc,
+            (SortValue.RacesInPoints, SortDirection.Descending) => SortOptions.RacesInPointsDesc,
             _ => SortOptions.TotalPtsDesc,
         };
     }

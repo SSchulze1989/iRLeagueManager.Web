@@ -27,9 +27,11 @@ public sealed class SortOptionsViewModel : LeagueViewModelBase<SortOptionsViewMo
 
     public void AddOption(SortValue value, SortDirection direction)
     {
-        var option = new SortOptionViewModel(new());
-        option.SortValue = value;
-        option.SortDirection = direction;
+        var option = new SortOptionViewModel(new())
+        {
+            SortValue = value,
+            SortDirection = direction
+        };
         Options.Add(option);
     }
 
@@ -62,6 +64,15 @@ public enum SortValue
     FastLap,
     QualLap,
     FinalPos,
+    LastRaceOrder,
+    Wins,
+    Top3,
+    Top5,
+    Top10,
+    Races,
+    RacesCounted,
+    RacesScored,
+    RacesInPoints,
 }
 
 public enum SortDirection

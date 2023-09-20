@@ -124,6 +124,32 @@
                             </div>
                             <label class="form-control" data-bs-toggle="tooltip" title="Treat events with multiple race sessions as single events (if they have a combined result). This will affect the statistics for race-nr, wins, fastest laps etc.">Treat as single event</label>
                         </div>
+                        <InputGroup Label="Sort Final">
+                            <button class="form-control" type="button" @onclick=@(() => EditSortOptionsClick(ChampSeason.StandingConfig)) data-bs-toggle="tooltip" title="Sort for final order displayed on results page and to define final positions">
+                                @{
+                                    var sortOptions = ChampSeason.StandingConfig.SortOptions;
+                                }
+                                @if (sortOptions.Any())
+                                {
+                                    <div class="d-flex justify-content-start overflow-scroll">
+                                        @foreach ((var option, var priority) in sortOptions.Select((x, i) => (x, i + 1)))
+                                        {
+                                            <div class="d-inline-block me-3 mb-2">
+                                                <span>
+                                                    @(
+                                                        priority
+                                                        ).@option.ToString()
+                                                </span>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-muted">Default</div>
+                                }
+                            </button>
+                        </InputGroup>
                         <InputGroup Label="Count Weeks">
                             <InputNumber class="form-control" 
                                          @bind-Value=ChampSeason.StandingConfig.WeeksCounted 
@@ -304,6 +330,32 @@ else
             return;
         }
         ChampSeason.DefaultResultConfig = null;
+    }
+
+    private async Task EditSortOptionsClick(StandingConfigurationViewModel standingConfig)
+    {
+        var parameters = new ModalParameters<EditSortOptionsModal>()
+            .Add(x => x.Model, standingConfig.SortOptions.ToList())
+            .Add(x => x.AvailableSortValues, new[]
+            {
+                SortValue.TotalPts,
+                SortValue.PenPts,
+                SortValue.Incs,
+                SortValue.Wins,
+                SortValue.Top3,
+                SortValue.Top5,
+                SortValue.Top10,
+                SortValue.LastRaceOrder,
+                SortValue.Races,
+                SortValue.RacesCounted,
+                SortValue.RacesScored,
+                SortValue.RacesInPoints,
+            });
+        var result = await ModalService.Show<EditSortOptionsModal>("Edit Standing Sorting", parameters).Result;
+        if (result.Confirmed && result.Data is IList<SortOptions> model)
+        {
+            standingConfig.SortOptions = model.ToList();
+        }
     }
 
     private ResultConfigModel CreateResultConfig() => new ResultConfigModel()

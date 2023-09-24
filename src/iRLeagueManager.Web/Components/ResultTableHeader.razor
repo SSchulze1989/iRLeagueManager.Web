@@ -1,13 +1,16 @@
 ﻿@typeparam TRow
 
-<th class="
-        table-header
-        @(Active ? "active" : "")
+<th class="table-header
+        pa-1
+        @(Active ? "active" : "" )
         @(HasAction ? "action" : "")
         @(CurrentDirection == ViewModels.SortDirection.Ascending ? "sort-ascending" : "sort-descending")
     "
-    @onclick=OnClick> 
-    @Text
+    @onclick=@OnClick>
+    <MudStack Row="true" AlignItems="AlignItems.Center" Class="pa-0">
+        @Text
+        <MudIcon Icon="@(CurrentDirection == ViewModels.SortDirection.Ascending ? Icons.Material.Filled.KeyboardArrowUp : Icons.Material.Filled.KeyboardArrowDown)" Class="table-header-adorner"/>
+    </MudStack>
 </th>
 
 @code {

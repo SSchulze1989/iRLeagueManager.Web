@@ -1,10 +1,8 @@
 ﻿@using System.ComponentModel
 
-<div @attributes=@AdditionalAttributes>
-    <div class="d-flex flex-nowrap gap-2">
-        @ChildContent
-        <div class="spinner-border" style="height:1.5rem; width:1.5rem; @(Loading == false ? "visibility:hidden" : "")" role="status" />
-    </div>
+<div>
+    @ChildContent
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@(Loading ? "" : "invisible" + " my-0")" />
 </div>
 
 @code {

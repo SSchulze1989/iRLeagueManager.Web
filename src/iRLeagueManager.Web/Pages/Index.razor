@@ -11,14 +11,14 @@
 
 <PageTitle>Leagues</PageTitle>
 
-<div class="container-xxl">
-    <div class="sticky-header">
-        <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
-            <h3>Leagues</h3>
-        </LoadingHeader>
-    </div>
+<MudPaper Elevation="2" Class="mb-2 pa-2">
+    <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+        <MudText Typo="Typo.h5">Leagues</MudText>
+    </LoadingHeader>
+</MudPaper>
 
-    <table class="table table-striped table-hover">
+<MudPaper Elevation="1">
+    <MudSimpleTable Dense="true">
         <thead>
             <tr>
                 <th>Id</th>
@@ -38,8 +38,8 @@
                 </tr>
             }
         </tbody>
-    </table>
-</div>
+    </MudSimpleTable>
+</MudPaper>
 
 @code {
     protected override Task OnAfterRenderAsync(bool firstRender)

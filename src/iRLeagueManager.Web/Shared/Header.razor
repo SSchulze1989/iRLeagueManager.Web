@@ -1,7 +1,7 @@
 ﻿@using System.Security.Claims;
 @inherits UtilityComponentBase
 
-<MudAppBar Elevation="0">
+<MudAppBar Elevation="0" Color="Color.Primary">
     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
                    OnClick="@((e) => DrawerToggle())" />
 
@@ -24,7 +24,7 @@
 </MudAppBar>
 <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
     <MudDrawerHeader>
-        <MudText Typo="Typo.h6">MudBlazor.Template</MudText>
+        <MudText Typo="Typo.h6">iRLeagueManager</MudText>
     </MudDrawerHeader>
     <NavMenu />
 </MudDrawer>

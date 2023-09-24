@@ -1,7 +1,7 @@
 ﻿@typeparam TRow
 @attribute [CascadingTypeParameter(nameof(TRow))]
 
-<table class="table table-sm table-striped table-hover" style="font-size: 0.9rem; line-height: 1rem">
+<MudSimpleTable Dense="true" Hover="true" Striped="true" Bordered="true">
     <thead>
         <tr>
             <CascadingValue Value=@SortState>
@@ -17,7 +17,7 @@
             </tr>
         }
     </tbody>
-</table>
+</MudSimpleTable>
 
 @code {
     private static IEnumerable<TRow> GetOrderedData(IEnumerable<TRow> data, SortState<TRow> sortState)

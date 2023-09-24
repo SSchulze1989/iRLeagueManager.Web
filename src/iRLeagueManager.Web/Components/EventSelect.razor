@@ -5,22 +5,18 @@
 @using System.ComponentModel
 @using iRLeagueManager.Web.ViewModels
 @using System.Linq
+@inherits MudComponentBase
 
-<div @attributes=AdditionalAttributes class=@CssClass >
-    <label class="input-group-text">Select Event</label>
-    <select @bind=SelectedIndex class="form-select">
-        @foreach((var @event, var index) in Events.Select((x, i) => (x, i)))
-        {
-            <option value="@(index)">@((index + 1).ToString("00")). @(@event.Date.ToString("dd.MM.yy")): @(@event.TrackName)@(@event.ConfigName == "-" ? "" : $" - {@event.ConfigName}")</option>
-        }
-    </select>
-    <button class="btn btn-outline-secondary" type="button" @onclick=EventMovePrevious disabled="@(SelectedIndex == 0)"><span class="oi oi-chevron-left"></span></button>
-    <button class="btn btn-outline-secondary" type="button" @onclick=EventMoveNext disabled="@(SelectedIndex == Events.Count-1)"><span class="oi oi-chevron-right"></span></button>
-</div>
+<MudSelect ToStringFunc="@GetEventText" Label="Event" Class="flex-grow-1" @bind-Value="EventList.Selected" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
+    @foreach(var @event in EventList.EventList)
+    {
+        <MudSelectItem Value="@(@event)">@GetEventText(@event)</MudSelectItem>
+    }
+</MudSelect>
+<MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" OnClick=EventMovePrevious Variant="Variant.Filled"/>
+<MudIconButton Icon="@Icons.Material.Filled.ChevronRight" OnClick=EventMoveNext Variant="Variant.Filled" />
 
 @code {
-    [Parameter(CaptureUnmatchedValues=true)]
-    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
     [CascadingParameter]
     public LeagueApiService ApiService { get; set; } = default!;
 
@@ -62,20 +58,6 @@
 
     [Parameter]
     public EventCallback<EventViewModel?> SelectedChanged { get; set; }
-
-    private const string BaseClass = "input-group";
-    private string CssClass
-    {
-        get
-        {
-            if (AdditionalAttributes == null || AdditionalAttributes.TryGetValue("class", out var @class) == false)
-            {
-                return BaseClass;
-            }
-            var classAttributeValue = Convert.ToString(@class, CultureInfo.InvariantCulture);
-            return $"{BaseClass} {classAttributeValue}";
-        }
-    }
 
     private int selectedIndex = 0;
     public int SelectedIndex
@@ -149,6 +131,16 @@
         {
             SelectedIndex--;
         }
+    }
+
+    private string? GetEventText(EventViewModel? @event)
+    {
+        if (@event is null)
+        {
+            return null;
+        }
+        var index = EventList.EventList.IndexOf(@event);
+        return $"{(index + 1).ToString("00")}. {@event.Date.ToString("dd.MM.yy")}: {@event.TrackName}" + (@event.ConfigName != "-" ? $" - {@event.ConfigName}" : "");
     }
 
     public void Dispose()

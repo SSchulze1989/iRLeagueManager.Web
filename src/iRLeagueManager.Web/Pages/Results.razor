@@ -15,76 +15,105 @@
 
 <PageTitle>Results - @LeagueName</PageTitle>
 
-<div class="container-xxl">
-    <div class="sticky-header">
-        <div class="d-flex align-items-bottom gap-2">
-            <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
-                <h3>Results</h3>
-            </LoadingHeader>
-            <EventSelect class="mb-2" />
-        </div>
-        @if (@Bind(vm, x => x.Results)?.Count == 0)
+<MudPaper Elevation="1" Class="sticky pa-0 mb-2">
+    <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+        <MudStack Class="mb-2 mt-2">
+            <MudText Typo="Typo.h5" Class="ma-2 ml-6">Results</MudText>
+            <MudToolBar Class="gap-2">
+                <EventSelect Label="Results"/>
+                <MudSpacer/>
+                <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+                    <Authorized>
+                        @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
+                        {
+                            <MudButton OnClick=TriggerCalculation 
+                                       Variant="Variant.Filled">
+                                Calculate
+                            </MudButton>
+                            @if (vm.Results.Count > 0)
+                            {
+                                <MudIconButton Variant="Variant.Filled"
+                                               Icon="@Icons.Material.Filled.Delete" 
+                                               Color="@Color.Error" OnClick=DeleteResultsClick/>
+                            }
+                        }
+                    </Authorized>
+                </AuthorizeView>
+            </MudToolBar>
+        </MudStack>
+    </LoadingHeader>
+</MudPaper>
+
+
+@if (@Bind(vm, x => x.Results)?.Count == 0)
+{
+    <MudPaper Elevation="1">
+        <MudText Typo="Typo.caption">No Results</MudText>
+    </MudPaper>
+}
+else
+{
+    @if (vm.Results.Count > 1)
+    {
+        <MudTabs @bind-ActivePanelIndex="@SelectedTabIndex" Elevation="1">
+            @foreach ((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x, i)))
+            {
+                <MudTabPanel Text="@eventResult.Name">
+                    <MudStack Class="gap-2 pt-2">
+                        @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
+                        {
+                            <MudPaper Elevation="2">
+                                <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
+                                    <Authorized>
+                                        <DisplayResult Result="result" CanEdit="true" />
+                                    </Authorized>
+                                    <NotAuthorized>
+                                        <DisplayResult Result="result" />
+                                    </NotAuthorized>
+                                </AuthorizeView>
+                            </MudPaper>
+                        }
+                    </MudStack>
+                </MudTabPanel>
+            }
+        </MudTabs>
+    }
+    else
+    {
+        var eventResult = vm.Results.First();
+        <MudStack Class="gap-2 pa-2">
+            @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
+            {
+                <MudPaper Elevation="4">
+                    <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
+                        <Authorized>
+                            <DisplayResult Result="result" CanEdit="true" />
+                        </Authorized>
+                        <NotAuthorized>
+                            <DisplayResult Result="result" />
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </MudPaper>
+            }
+        </MudStack>
+    }
+}
+
+<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+    <Authorized>
+        @if (SharedState.SeasonFinished == false)
         {
-            <div class="card-body">
-                <p class="results-scoring"><em>No Results</em></p>
+            <div>
+                <button class="btn btn-outline-secondary" @onclick=UploadButtonClick>Upload Result</button>
             </div>
         }
-        <div class="d-flex">
-            <ul class="nav nav-tabs flex-fill">
-                @foreach((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x,i)))
-                {
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href="@GetTabLink(i)">@Bind(eventResult, x => x.Name)</NavLink>
-                    </li>
-                }
-            </ul>
-            <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
-                <Authorized>
-                    @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
-                    {
-                        <button class="btn btn-outline-secondary ms-2" @onclick=TriggerCalculation>
-                            Calculate
-                        </button>
-                        @if (vm.Results.Count > 0)
-                        {
-                            <button class="btn btn-outline-danger ms-2" @onclick=DeleteResultsClick>
-                                <span class="oi oi-trash" />
-                            </button>
-                        }
-                    }
-                </Authorized>
-            </AuthorizeView>
-        </div>
-    </div>
-
-    @if (@Bind(vm, x => x.SelectedEvent) != null && @Bind(vm, x => x.SelectedEventResult) != null)
-    {
-        @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
-        {
-            <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
-                <Authorized>
-                    <DisplayResult class="px-0 mb-2 mx-0" Result="result" CanEdit="true"/>
-                </Authorized>
-                <NotAuthorized>
-                    <DisplayResult class="px-0 mb-2 mx-0" Result="result" />
-                </NotAuthorized>
-            </AuthorizeView>
-        }
-    }
-    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
-        <Authorized>
-            @if (SharedState.SeasonFinished == false)
-            {
-                <div>
-                    <button class="btn btn-outline-secondary" @onclick=UploadButtonClick>Upload Result</button>
-                </div>
-            }
-        </Authorized>
-    </AuthorizeView>
-</div>
+    </Authorized>
+</AuthorizeView>
 
 @code {
     private const string resultTabParam = "resultTab";
+
+    private int SelectedTabIndex { get => vm.SelectedResultIndex; set => SetSelectedResultIndex(value); }
 
     [CascadingParameter]
     public SharedStateService SharedState { get; set; } = default!;
@@ -94,7 +123,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        NavigationManager.LocationChanged += OnLocationChanged;
         await Task.FromResult(true);
     }
 
@@ -115,7 +143,7 @@
         }
     }
 
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    protected override void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         vm.SelectedResultIndex = NavigationManager.QueryParameter<int>(resultTabParam);
     }
@@ -130,6 +158,7 @@
 
     private void SetSelectedResultIndex(int index)
     {
+        vm.SelectedResultIndex = index;
         NavigationManager.NavigateTo(GetTabLink(index), replace: true);
     }
 
@@ -175,14 +204,5 @@
         {
             await vm.DeleteEventResults();   
         }
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing == false)
-        {
-            NavigationManager.LocationChanged -= OnLocationChanged;
-        }
-        base.Dispose(disposing);
     }
 }

@@ -6,7 +6,7 @@
 @inject SharedStateService SharedState
 @inject IJSRuntime JsRuntime
 
-<MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" />
+<MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" Theme="TestTheme"/>
 <MudDialogProvider />
 <MudSnackbarProvider />
 
@@ -38,6 +38,23 @@
 </CascadingValue>
 
 @code {
+    MudTheme TestTheme = new()
+    {
+        Palette = new PaletteLight()
+        {
+            AppbarBackground = "#34495e",
+        },
+        PaletteDark = new PaletteDark()
+        {
+            Background = "#262629",
+            BackgroundGrey = "#323235",
+            DrawerBackground = "#323235",
+            Surface = "#323235",
+            AppbarBackground = Colors.Blue.Darken1,
+            TableStriped = "#464650",
+            TableHover = "#262629",
+        }
+    };
 
     private TimeSpan? userTime { get; set; }
 

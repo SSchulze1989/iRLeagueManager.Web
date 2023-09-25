@@ -81,7 +81,7 @@ else
     else
     {
         var eventResult = vm.Results.First();
-        <MudStack Class="gap-2 pa-2">
+        <MudStack Class="gap-2">
             @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
             {
                 <MudPaper Elevation="4">

@@ -54,7 +54,7 @@
             <ResultTableHeader Text="Incs." Sort="@(x => x.Incidents)" />
             @if (CanEdit)
             {
-                <th></th>
+                <th style="width: 1em"></th>
             }
         </HeaderTemplate>
         <RowTemplate Context=Row>
@@ -101,8 +101,8 @@
             <td class="px-1 py-1">@Row.Incidents</td>
             @if (CanEdit)
             {
-                <td class="px-2 py-0">
-                    <MudMenu Icon="@Icons.Material.Filled.Menu" Dense="true" Size="Size.Small">
+                <td class="pa-0">
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true" Size="Size.Small">
                         <MudMenuItem OnClick="() => OnRowOptionsClick(Row)">Add Penalty</MudMenuItem>
                     </MudMenu>
                 </td>
@@ -164,7 +164,7 @@
             {x => x.OnSubmit, async (p, ct) => await p.SaveNew(ct)},
             {x => x.IsTeamResult, isTeamResult},
         };
-            
+
         var result = await DialogService.Show<EditAddPenaltyModal>("Add Penalty", parameters).Result;
     }
 
@@ -182,15 +182,18 @@
             }
             return penalties.Content.Where(x => Result.SessionNr == 999 || x.SessionNr == Result.SessionNr);
         }
-
-        var parameters = new ModalParameters<ShowPenaltiesModal>()
-            .Add(x => x.GetPenalties, GetPenalties)
-            .Add(x => x.CanEdit, CanEdit)
-            .Add(x => x.IsTeamResult, isTeamResult);
-        var options = new ModalOptions()
+        var parameters = new DialogParameters<ShowPenaltiesModal>()
         {
-            DisableBackgroundCancel = false,
+            {x => x.Penalties, penalties.Content.Where(x => Result.SessionNr == 999 || x.SessionNr == Result.SessionNr)},
+            {x => x.CanEdit, CanEdit},
+            {x => x.IsTeamResult, isTeamResult},
         };
-        var result = await ModalService.Show<ShowPenaltiesModal>("Bonuses / Penalties", parameters, options).Result;
+        var options = new DialogOptions()
+        {
+            DisableBackdropClick = false,
+            Position = DialogPosition.Center,
+            FullWidth = true,
+        };
+        await DialogService.Show<ShowPenaltiesModal>("Penalties", parameters, options).Result;
     }
 }

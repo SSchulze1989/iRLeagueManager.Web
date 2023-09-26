@@ -7,6 +7,7 @@
         @(CurrentDirection == ViewModels.SortDirection.Ascending ? "sort-ascending" : "sort-descending")
         @Class
     "
+    width="@Width"
     @onclick=@OnClick>
     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="pa-0">
         @if (ChildContent is not null)
@@ -43,6 +44,8 @@
     public Breakpoint Breakpoint { get; set; } = Breakpoint.None;
     [Parameter]
     public string Class { get; set; } = string.Empty;
+    [Parameter]
+    public string Width { get; set; } = string.Empty;
 
     private ViewModels.SortDirection CurrentDirection { get; set; }
 

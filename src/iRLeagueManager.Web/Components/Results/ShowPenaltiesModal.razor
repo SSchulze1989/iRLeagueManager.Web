@@ -1,86 +1,78 @@
 ﻿@using iRLeagueApiCore.Common.Enums;
 @using iRLeagueApiCore.Common.Models;
+@inherits UtilityComponentBase
 @inject SharedStateService Shared
 @inject AddPenaltyViewModel Vm
+@inject IDialogService DialogService
 
-@{
-    var showSessionName = penalties
-        .Select(x => x.SessionNr)
-        .Distinct()
-        .Count() > 1;
-}
-
-@foreach(var penalty in penalties)
-{
-    <div class="card mb-2">
-        @if(showSessionName)
-        {
-            <div class="card-header">
-                <label>@penalty.SessionName</label>
-            </div>
-        }
-        <div class="card-body">
-            <div class="row mb-2">
-                <div class="col-6">
-                    <h6 class="text-muted">Driver</h6>
-                    @if (IsTeamResult)
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="2">
+            @foreach(var penalty in Penalties)
+            {
+                <MudCard Elevation="5">
+                    @if (ShowSessionName)
                     {
-                        @penalty.Team?.Name
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">@penalty.SessionName</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
                     }
-                    else
-                    {
-                        @:@penalty.Member?.FirstName @penalty.Member?.LastName
-                    }
-                </div>
-                <div class="col-3">
-                    @if (string.IsNullOrWhiteSpace(penalty.Lap) == false)
-                    {
-                        <h6 class="text-muted">Lap</h6>
-                        @penalty.Lap
-                    }
-                </div>
-                <div class="col-3">
-                    @if (string.IsNullOrWhiteSpace(penalty.Corner) == false)
-                    {
-                        <h6 class="text-muted">Corner</h6>
-                        @penalty.Corner
-                    }
-                </div>
-            </div>
-            <div class="row mb-2">
-                <div class="col-6">
-                    <label style="color: @GetPenaltyColor(penalty)">@((MarkupString)GetPenaltyValue(penalty))</label>
-                </div>
-                <div class="col-6">
-                    @penalty.Reason
-                </div>
-            </div>
-            <div class="d-flex justify-content-end position-absolute top-0 end-0">
-                @if (penalty.ReviewId != null)
-                {
-                    <a class="btn text-muted" href="@($"/{Shared.LeagueName}/Reviews/Events/{penalty.EventId}?reviewId={penalty.ReviewId}")">
-                        <span class="bi bi-clipboard2-data" />
-                    </a>
-                }
-                @if (penalty.AddPenaltyId != null && CanEdit)
-                {
-                    <a class="btn text-muted" @onclick="@(() => EditAddPenaltyAsync(penalty))">
-                        <span class="bi bi-pencil-square" />
-                    </a>
-                    <a class="btn text-muted" @onclick="@(() => DeleteAddPenaltyAsync(penalty))">
-                        <span class="bi bi-trash" />
-                    </a>
-                }
-            </div>
-        </div>
-    </div>
-}
+                    <MudCardContent>
+                        <MudGrid>
+                            <MudItem xs="6">
+                                <MudText Typo="Typo.caption">Driver</MudText>
+                                <MudText>@penalty.Firstname @penalty.Lastname</MudText>
+                            </MudItem>
+                            <MudItem xs="3">
+                                @if (string.IsNullOrWhiteSpace(penalty.Lap) == false)
+                                {
+                                    <MudText Typo="Typo.caption">Lap</MudText>
+                                    <MudText>@penalty.Lap</MudText>
+                                }
+                            </MudItem>
+                            <MudItem xs="3">
+                                @if (string.IsNullOrWhiteSpace(penalty.Corner) == false)
+                                {
+                                    <MudText Typo="Typo.caption">Corner</MudText>
+                                    <MudText>@penalty.Corner</MudText>
+                                }
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudText Style="@($"color: {GetPenaltyColor(penalty)}")">@GetPenaltyValueString(penalty)</MudText>
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudText>@penalty.Reason</MudText>
+                            </MudItem>
+                        </MudGrid>
+                        <MudCardActions>
+                            @if (penalty.ReviewId != null)
+                            {
+                                <MudTooltip Text="Open Review">
+                                    <MudIconButton OnClick="@(() => NavigateTo($"/{Shared.LeagueName}/Reviews/Events/{penalty.EventId}?reviewId={penalty.ReviewId}"))" 
+                                        Icon="@Icons.Material.Filled.Reviews"
+                                        Size="Size.Small" />
+                                </MudTooltip>
+                            }
+                            @if (penalty.AddPenaltyId != null && CanEdit)
+                            {
+                                <MudTooltip Text="Edit">
+                                    <MudIconButton OnClick="@(() => EditAddPenaltyAsync(penalty))" Icon="@Icons.Material.Filled.Edit" Size="Size.Small"/>
+                                </MudTooltip>
+                                <MudTooltip Text="Delete">
+                                    <MudIconButton OnClick="@(() => DeleteAddPenaltyAsync(penalty))" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" />
+                                </MudTooltip>
+                            }
+                        </MudCardActions>
+                    </MudCardContent>
+                </MudCard>
+            }
+        </MudStack>
+    </DialogContent>
+</MudDialog>
 
 @code {
-    [CascadingParameter]
-    public BlazoredModalInstance ModalInstance { get; set; } = default!;
-    [CascadingParameter]
-    public IModalService ModalService { get; set; } = default!;
     [Parameter]
     public bool CanEdit { get; set; } = false;
     [Parameter]
@@ -88,14 +80,15 @@
     [Parameter]
     public Func<Task<IEnumerable<PenaltyModel>>> GetPenalties { get; set; } = default!;
 
-    private IEnumerable<PenaltyModel> penalties = Array.Empty<PenaltyModel>();
+    private bool ShowSessionName => Penalties
+        .Select(x => x.SessionNr)
+        .Distinct()
+        .Count() > 1;
 
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        BlazorParameterNullException.ThrowIfNull(this, ModalInstance);
-        BlazorParameterNullException.ThrowIfNull(this, ModalService);
-        BlazorParameterNullException.ThrowIfNull(this, GetPenalties);
+        BlazorParameterNullException.ThrowIfNull(this, Penalties);
         await RefreshPenalties();
     }
 
@@ -127,27 +120,25 @@
 
     private async Task EditAddPenaltyAsync(PenaltyModel penalty)
     {
-        var parameters = new ModalParameters<EditAddPenaltyModal>()
-            .Add(x => x.Model, penalty)
-            .Add(x => x.CanSelectSession, false)
-            .Add(x => x.CanSelectDriver, false)
-            .Add(x => x.OnSubmit, async (p, ct) => await p.SaveChanges(ct));
-        await ModalService.Show<EditAddPenaltyModal>("Edit penalty", parameters).Result;
-        await RefreshPenalties();
+        var parameters = new DialogParameters<EditAddPenaltyModal>()
+        {
+            {x => x.Model, penalty},
+            {x => x.CanSelectSession, false},
+            {x => x.CanSelectDriver, false},
+            {x => x.OnSubmit, async (p, ct) => await p.SaveChanges(ct)},
+        };
+        await DialogService.Show<EditAddPenaltyModal>("Edit penalty", parameters).Result;
     }
 
     private async Task DeleteAddPenaltyAsync(PenaltyModel penalty)
     {
-        var text = IsTeamResult switch
+        var parameters = new DialogParameters<MudConfirmModal>()
         {
-            true => $"Really delete this penalty for {penalty.Team?.Name}?",
-            false => $"Really delete this penalty for {penalty.Member?.FirstName} {penalty.Member?.LastName}?",
+            {x => x.Text, $"Really delete this penalty for {penalty.Firstname} {penalty.Lastname}?"},
+            {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var parameters = new ModalParameters<ConfirmModal>()
-            .Add(x => x.Text, text)
-            .Add(x => x.ButtonTypes, ButtonTypes.YesNo);
-        var confirmed = await ModalService.Show<ConfirmModal>("Delete penalty", parameters).Result;
-        if (confirmed.Confirmed == false)
+        var confirmed = await DialogService.Show<MudConfirmModal>("Delete penalty", parameters).Result;
+        if (confirmed.Canceled)
         {
             return;
         }

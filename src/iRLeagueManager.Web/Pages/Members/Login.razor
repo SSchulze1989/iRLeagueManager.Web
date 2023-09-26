@@ -29,8 +29,8 @@
                     {
                         <MudLink Href="./member/resend-confirmation"><p>Resend confirmation Email</p></MudLink>
                     }
-                    <MudButton Disabled="@(loading)" Color="Color.Primary" Variant="Variant.Filled" ButtonType="ButtonType.Submit" FullWidth="true">
-                        @if (loading)
+                    <MudButton Disabled="@(Loading)" Color="Color.Primary" Variant="Variant.Filled" ButtonType="ButtonType.Submit" FullWidth="true">
+                        @if (Loading)
                         {
                             <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" Class="me-2"/>
                         }
@@ -62,8 +62,7 @@
     [CascadingParameter]
     private Task<AuthenticationState> AuthTask { get; set; } = default!;
 
-    private bool loading;
-    public bool Loading { get => loading; set { loading = value; InvokeAsync(StateHasChanged); } }
+    private bool Loading { get; set; }
 
     private bool ResendConfirmation { get; set; } = false;
 
@@ -94,7 +93,6 @@
             try 
             {
                 Loading = true;
-                await Task.Delay(1000);
                 ResendConfirmation = false;
                 var result = await ApiClient.LogIn(model.Username, model.Password);
                 if (result.Success == false)

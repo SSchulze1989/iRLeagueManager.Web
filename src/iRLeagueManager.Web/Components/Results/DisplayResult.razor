@@ -25,17 +25,18 @@
             {
                 @if (displayStartPos)
                 {
-                    <ResultTableHeader Text="Start" Sort=@(x => x.StartPosition) />
+                        <ResultTableHeader Text="Start" Sort=@(x => x.StartPosition) />
                 }
                 <ResultTableHeader Text="Name" Sort="@(x => x.Firstname)" />
             }
             <ResultTableHeader Text="Team" Sort=@(x => x.TeamName)/>
             @if (displayQualyLap)
             {
-                <ResultTableHeader Text="Qualy Lap" Sort="@(x => x.QualifyingTime)" />
+                <ResultTableHeader Text="Qualy Lap" Sort="@(x => x.QualifyingTime == TimeSpan.Zero ? TimeSpan.MaxValue : x.QualifyingTime)" />
+            
             }
-            <ResultTableHeader Text="Fastest Lap" Sort="@(x => x.FastestLapTime)" />
-            <ResultTableHeader Text="Avg. Lap" Sort="@(x => x.AvgLapTime)" />
+            <ResultTableHeader Text="Fastest Lap" Sort="@(x => x.FastestLapTime == TimeSpan.Zero ? TimeSpan.MaxValue : x.FastestLapTime)" />
+            <ResultTableHeader Text="Avg. Lap" Sort="@(x => x.AvgLapTime == TimeSpan.Zero ? TimeSpan.MaxValue : x.AvgLapTime)" />
             <ResultTableHeader Text="Interval" Sort="@(x => x.Interval)" />
             <ResultTableHeader Text="Laps Lead" Sort="@(x => x.LeadLaps)" Direction="ViewModels.SortDirection.Descending" />
             <ResultTableHeader Text="Laps Compl." Sort="@(x => x.CompletedLaps)" Direction="ViewModels.SortDirection.Descending" />
@@ -44,7 +45,7 @@
             {
                 <ResultTableHeader Text="Bonus Pts." Sort="@(x => x.BonusPoints)" Direction="ViewModels.SortDirection.Descending" />
             }
-            <ResultTableHeader Text="Penalty" Sort="@(x => x.PenaltyPoints)" />
+            <ResultTableHeader Text="Penalty" TextShort="Pen." Breakpoint="Breakpoint.Xl" Sort="@(x => x.PenaltyPoints)" />
             <ResultTableHeader Text="Total Pts." Sort="@(x => x.TotalPoints)" Direction="ViewModels.SortDirection.Descending" />
             @if (isTeamResult == false)
             {
@@ -57,7 +58,7 @@
             }
         </HeaderTemplate>
         <RowTemplate Context=Row>
-            <td class="pa-1">
+            <td class="px-2 py-2">
                 <ValueChange Value=Row.FinalPosition Change=@(displayChange ? Row.FinalPositionChange : 0)>
                     <ValueTemplate Context=Value>
                         @Value.
@@ -68,37 +69,39 @@
             {
                 @if (displayStartPos)
                 {
-                    <td class="pa-1">@Row.StartPosition.</td>
+                    <td class="px-1 py-2">@Row.StartPosition.</td>
                 }
-                <td class="pa-1" style="white-space: nowrap">@Row.Firstname @Row.Lastname</td>
+                <td class="px-1 py-1" style="white-space: nowrap">@Row.Firstname @Row.Lastname</td>
             }
-            <td class="pa-1" style="color: @(Row.TeamColor); white-space: nowrap">@(Row.TeamName)</td>
+            <td class="px-1 py-1" style="color: @(Row.TeamColor); white-space: nowrap">@(Row.TeamName)</td>
             @if (displayQualyLap)
             {
-                <td class="pa-1 @(IsFastestLap(resultRows, Row, x => x.QualifyingTime) ? "fw-bold" : "")">@Row.QualifyingTime.LapTimeString()</td>
+                <td class="px-1 py-1 @(IsFastestLap(resultRows, Row, x => x.QualifyingTime) ? "fw-bold" : "")">@Row.QualifyingTime.LapTimeString()</td>   
             }
-            <td class="pa-1 @(IsFastestLap(resultRows, Row, x => x.FastestLapTime) ? "fw-bold" : "")">@Row.FastestLapTime.LapTimeString() @(Row.FastLapNr != 0 ? $"({Row.FastLapNr})" : "")</td>
-            <td class="pa-1 @(IsFastestLap(resultRows, Row, x => x.AvgLapTime) ? "fw-bold" : "")">@Row.AvgLapTime.LapTimeString()</td>
-            <td class="pa-1">+@(Row.Interval.Laps == 0 ? Row.Interval.Time.LapTimeString() : $"{Row.Interval.Laps} Laps")</td>
-            <td class="pa-1">@Row.LeadLaps</td>
-            <td class="pa-1">@Row.CompletedLaps</td>
-            <td class="pa-1">@Row.RacePoints</td>
+            <td class="px-1 py-1 @(IsFastestLap(resultRows, Row, x => x.FastestLapTime) ? "fw-bold" : "")">@Row.FastestLapTime.LapTimeString() @(Row.FastLapNr != 0 ? $"({Row.FastLapNr})" : "")</td>
+            <td class="px-1 py-1 @(IsFastestLap(resultRows, Row, x => x.AvgLapTime) ? "fw-bold" : "")">@Row.AvgLapTime.LapTimeString()</td>
+            <td class="px-1 py-1">+@(Row.Interval.Laps == 0 ? Row.Interval.Time.LapTimeString() : $"{Row.Interval.Laps} Laps")</td>
+            <td class="px-1 py-1">@Row.LeadLaps</td>
+            <td class="px-1 py-1">@Row.CompletedLaps</td>
+            <td class="px-1 py-1">@Row.RacePoints</td>
             @if (displayBonusPoints)
             {
-                <td class="pa-1">@Row.BonusPoints</td>
+                <td class="px-1 py-1">@Row.BonusPoints</td>
             }
-            <td class="pa-1" style="@(@Row.PenaltyPoints != 0 ? "color:red" : "")">
+            <td class="px-1 py-1" style="@(@Row.PenaltyPoints != 0 ? "color:red" : "")">
                 @(Row.PenaltyPoints != 0 ? $"-{Row.PenaltyPoints}" : "")
             </td>
-            <td class="pa-1">@Row.TotalPoints</td>
+            <td class="px-1 py-1">@Row.TotalPoints</td>
             @if (isTeamResult == false)
             {
-                <td class="pa-1">@Row.OldIrating</td>
+                
+                    <td class="px-1 py-1">@Row.OldIrating</td>
+                
             }
-            <td class="pa-1">@Row.Incidents</td>
+            <td class="px-1 py-1">@Row.Incidents</td>
             @if (CanEdit)
             {
-                <td class="pa-1">
+                <td class="px-2 py-0">
                     <MudMenu Icon="@Icons.Material.Filled.Menu" Dense="true" Size="Size.Small">
                         <MudMenuItem OnClick="() => OnRowOptionsClick(Row)">Add Penalty</MudMenuItem>
                     </MudMenu>

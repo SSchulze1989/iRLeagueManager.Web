@@ -15,11 +15,11 @@
 
 <PageTitle>Results - @LeagueName</PageTitle>
 
-<MudPaper Elevation="1" Class="sticky pa-0 mb-2">
+<MudPaper Elevation="1" Class="sticky pa-0 mb-2" Square="true">
     <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
         <MudStack Class="mb-2 mt-2">
             <MudText Typo="Typo.h5" Class="ma-2 ml-6">Results</MudText>
-            <MudToolBar Class="gap-2">
+            <MudToolBar Class="gap-2" Dense="true">
                 <EventSelect Label="Results"/>
                 <MudSpacer/>
                 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
@@ -27,14 +27,18 @@
                         @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
                         {
                             <MudButton OnClick=TriggerCalculation 
-                                       Variant="Variant.Filled">
+                                       Variant="Variant.Text">
                                 Calculate
                             </MudButton>
                             @if (vm.Results.Count > 0)
                             {
-                                <MudIconButton Variant="Variant.Filled"
-                                               Icon="@Icons.Material.Filled.Delete" 
-                                               Color="@Color.Error" OnClick=DeleteResultsClick/>
+                                <MudTooltip Text="Delete Results"
+                                            Delay="0.5"
+                                            Arrow="true">
+                                    <MudIconButton Variant="Variant.Text"
+                                                   Icon="@Icons.Material.Filled.Delete" 
+                                                   Color="@Color.Error" OnClick=DeleteResultsClick/>
+                                </MudTooltip>
                             }
                         }
                     </Authorized>
@@ -47,8 +51,8 @@
 
 @if (@Bind(vm, x => x.Results)?.Count == 0)
 {
-    <MudPaper Elevation="1">
-        <MudText Typo="Typo.caption">No Results</MudText>
+    <MudPaper Elevation="1" Square="true">
+        <MudText Typo="Typo.h5" Class="ma-2 ml-6">No Results</MudText>
     </MudPaper>
 }
 else
@@ -62,7 +66,7 @@ else
                     <MudStack Class="gap-2 pt-2">
                         @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
                         {
-                            <MudPaper Elevation="2">
+                            <MudPaper Elevation="2" Square="true">
                                 <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
                                     <Authorized>
                                         <DisplayResult Result="result" CanEdit="true" />
@@ -84,7 +88,7 @@ else
         <MudStack Class="gap-2">
             @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
             {
-                <MudPaper Elevation="4">
+                <MudPaper Elevation="2" Square="true">
                     <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
                         <Authorized>
                             <DisplayResult Result="result" CanEdit="true" />
@@ -103,9 +107,7 @@ else
     <Authorized>
         @if (SharedState.SeasonFinished == false)
         {
-            <div>
-                <button class="btn btn-outline-secondary" @onclick=UploadButtonClick>Upload Result</button>
-            </div>
+            <MudButton Color="Color.Primary" OnClick=UploadButtonClick Class="mt-2">Upload Result</MudButton>
         }
     </Authorized>
 </AuthorizeView>

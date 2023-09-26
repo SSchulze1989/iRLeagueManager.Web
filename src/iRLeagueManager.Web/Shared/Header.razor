@@ -6,6 +6,8 @@
                    OnClick="@((e) => DrawerToggle())" />
 
     <MudSpacer />
+    <MudText Typo="Typo.h4">@Shared.LeagueInfo?.NameFull</MudText>
+    <MudSpacer />
     <AuthorizeView>
         <Authorized Context="auth">
             <MudMenu Icon="@Icons.Material.Filled.Person" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">

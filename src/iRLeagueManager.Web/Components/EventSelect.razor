@@ -7,14 +7,22 @@
 @using System.Linq
 @inherits MudComponentBase
 
-<MudSelect ToStringFunc="@GetEventText" Label="Event" Class="flex-grow-1" @bind-Value="EventList.Selected" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
+<MudSelect 
+    ToStringFunc="@GetEventText" 
+    Label="Event" Class="flex-grow-1" 
+    @bind-Value="EventList.Selected" 
+    Variant="Variant.Filled" 
+    AnchorOrigin="Origin.BottomLeft" 
+    TransformOrigin="Origin.TopLeft"
+    Margin="Margin.Dense"
+>
     @foreach(var @event in EventList.EventList)
     {
         <MudSelectItem Value="@(@event)">@GetEventText(@event)</MudSelectItem>
     }
 </MudSelect>
-<MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" OnClick=EventMovePrevious Variant="Variant.Filled"/>
-<MudIconButton Icon="@Icons.Material.Filled.ChevronRight" OnClick=EventMoveNext Variant="Variant.Filled" />
+<MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" OnClick=EventMovePrevious Variant="Variant.Text" />
+<MudIconButton Icon="@Icons.Material.Filled.ChevronRight" OnClick=EventMoveNext Variant="Variant.Text" />
 
 @code {
     [CascadingParameter]

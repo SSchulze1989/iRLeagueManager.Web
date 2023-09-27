@@ -58,7 +58,7 @@ public abstract partial class LeagueComponentBase : UtilityComponentBase
         }
         if (HasRendered)
         {
-            if (EventId != Event?.EventId)
+            if (EventId != Event?.EventId && EventId != null)
             {
                 EventList.Selected = EventList.EventList.FirstOrDefault(x => x.EventId == EventId);
             }

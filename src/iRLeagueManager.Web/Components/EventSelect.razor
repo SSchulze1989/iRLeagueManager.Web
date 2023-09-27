@@ -28,39 +28,19 @@
     [CascadingParameter]
     public LeagueApiService ApiService { get; set; } = default!;
 
-    private EventListViewModel eventList = default!;
+    private EventListViewModel? eventListPrivate;
     [CascadingParameter]
-    public EventListViewModel EventList 
-    {
-        get => eventList;
-        set
-        {
-            if (eventList != null)
-            {
-                eventList.EventList.CollectionChanged -= OnEventsCollectionChanged;
-                eventList.PropertyChanged -= OnEventListPropertyChanged;
-            }
-            eventList = value;
-            if (eventList != null)
-            {
-                eventList.EventList.CollectionChanged += OnEventsCollectionChanged;
-                eventList.PropertyChanged += OnEventListPropertyChanged;
-            }
-        }
-    }
+    public EventListViewModel EventList { get; set; } = default!;
 
     private ObservableCollection<EventViewModel> Events => EventList.EventList;
 
     private EventViewModel? Selected 
     { 
-        get => eventList?.Selected;
+        get => EventList.Selected;
         set
         {
-            if (eventList != null && value != eventList.Selected)
-            {
-                eventList.Selected = value;
-                _ = SelectedChanged.InvokeAsync(value);
-            }
+            EventList.Selected = value;
+            _ = SelectedChanged.InvokeAsync(value);
         }
     }
 
@@ -83,6 +63,17 @@
 
     protected override void OnParametersSet()
     {
+        if (eventListPrivate != null)
+        {
+            eventListPrivate.EventList.CollectionChanged -= OnEventsCollectionChanged;
+            eventListPrivate.PropertyChanged -= OnEventListPropertyChanged;
+        }
+
+        BlazorParameterNullException.ThrowIfNull(this, EventList);
+        eventListPrivate = EventList;
+        EventList.EventList.CollectionChanged += OnEventsCollectionChanged;
+        EventList.PropertyChanged += OnEventListPropertyChanged;
+        
         if (Selected != null && Events.IndexOf(Selected) != selectedIndex)
         {
             SelectedIndex = Events.IndexOf(Selected);
@@ -153,10 +144,10 @@
 
     public void Dispose()
     {
-        if (eventList != null)
+        if (eventListPrivate != null)
         {
-            eventList.EventList.CollectionChanged -= OnEventsCollectionChanged;
-            eventList.PropertyChanged -= OnEventListPropertyChanged;
+            eventListPrivate.EventList.CollectionChanged -= OnEventsCollectionChanged;
+            eventListPrivate.PropertyChanged -= OnEventListPropertyChanged;
         }
     }
 }

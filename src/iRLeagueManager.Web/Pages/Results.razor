@@ -15,12 +15,12 @@
 
 <PageTitle>Results - @LeagueName</PageTitle>
 
-<MudPaper Elevation="2" Class="sticky pa-0 mb-2" >
+<MudPaper Elevation="2" Class="pa-0 mb-2" >
     <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
         <MudStack>
             <MudText Typo="Typo.h6" Class="mx-6 mt-4">Results</MudText>
             <MudToolBar Class="gap-2 mb-2" Dense="true">
-                <EventSelect Label="Results"/>
+                <EventSelect/>
                 <MudSpacer/>
                 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
                     <Authorized>

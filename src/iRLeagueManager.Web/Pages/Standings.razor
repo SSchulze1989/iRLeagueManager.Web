@@ -16,36 +16,44 @@
 
 <PageTitle>Standings - @LeagueName</PageTitle>
 
-<div class="container-xxl">
-    <div class="sticky-header">
-        <div class="d-flex align-items-bottom gap-2">
-            <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
-                <h3>Standings</h3>
-            </LoadingHeader>
-            <EventSelect class="mb-2" />
-        </div>
+<MudPaper Elevation="2" Class="pa-0 mb-2">
+    <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+        <MudStack>
+            <MudText Typo="Typo.h6" Class="mx-6 mt-4">Standings</MudText>
+            <MudToolBar Class="gap-2 mb-2" Dense="true">
+                <EventSelect/>
+            </MudToolBar>
+        </MudStack>
+    </LoadingHeader>
+</MudPaper>
 
-        @if (@Bind(vm, x => x.Standings)?.Count == 0)
-        {
-            <div class="card-body">
-                <p class="results-scoring"><em>No Standings</em></p>
-            </div>
-        }
-        <ul class="nav nav-tabs">
-        @foreach((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x,i)))
-        {
-            <li class="nav-item">
-                <NavLink class="nav-link" href="@GetTabLink(i)">@standing.Name</NavLink>
-            </li>
-        }
-        </ul>
-    </div>
-
-    @if (@Bind(vm, x => x.SelectedStanding) != null)
+@if (@Bind(vm, x => x.Standings).Count == 0)
+{
+    <MudPaper Elevation="1">
+        <MudText Typo="Typo.h5" Class="ma-2 ml-6">No Standings</MudText>
+    </MudPaper>
+}
+else
+{
+    @if (vm.Standings.Count > 1)
     {
-        <DisplayStanding class="px-0 mb-2 mx-0" Standing=@Bind(vm, x => x.SelectedStanding)/>
+        <MudTabs @bind-ActivePanelIndex="@vm.SelectedStandingIndex" Elevation="2">
+            @foreach ((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x, i)))
+            {
+                <MudTabPanel Text="@standing.Name">
+                    <MudPaper Elevation="4" Class="mt-2">
+                        <DisplayStanding class="px-0 mb-2 mx-0" Standing="standing" />
+                    </MudPaper>
+                </MudTabPanel>
+            }
+        </MudTabs>
     }
-</div>
+    else
+    {
+        var standing = vm.Standings.First();
+        <DisplayStanding class="px-0 mb-2 mx-0" Standing="standing" />
+    }
+}
 
 @code {
     private const string standingTabParam = "standingTab";

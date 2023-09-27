@@ -4,88 +4,89 @@
 @using System.ComponentModel.DataAnnotations;
 @using iRLeagueApiCore.Client.Endpoints;
 
-<div class="container-sm" style="max-width: 790px;">
+<MudContainer MaxWidth="MaxWidth.Small">
     @if (Success)
     {
-        <div>
-            <p>Thank you for your registration!</p>
-            <p>
+        <MudPaper Class="pa-4">
+            <MudText Class="mb-2">Thank you for your registration!</MudText>
+            <MudText>
                 An email with a confirmation link has been send to the given email address. Please make sure to check your spam folder if you cannot find any mail from us.<br/>
                 Please click the link in the email to finish up your registration and activate your account.
-            </p>
-        </div>
+            </MudText>
+        </MudPaper>
     }
     else
     {
-        <div class="card">
-            <div class="card-header">
-                <label>Register new User</label>
-            </div>
-            <div class="card-body">
-                <EditForm Model="Model" OnValidSubmit=Submit>
+        <EditForm Model="Model" OnValidSubmit=Submit>
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Register new User</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
                     <DataAnnotationsValidator />
                     <StatusResultValidator @ref=ResultValidator />
-                    <div class="form-group mb-3">
-                        <label>Username</label>
-                        <InputText @bind-Value="Model.Username" class="form-control" />
-                        <ValidationMessage For="@(() => Model.Username)" />
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-sm form-group">
-                            <label>Firstname</label>
-                            <InputText @bind-Value="Model.Firstname" class="form-control" />
-                            <ValidationMessage For="@(() => Model.Firstname)" />
-                        </div>
-                        <div class="col-sm form-group">
-                            <label>Lastname</label>
-                            <InputText @bind-Value="Model.Lastname" class="form-control" />
-                            <ValidationMessage For="@(() => Model.Lastname)" />
-                        </div>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label>Email</label>
-                        <InputText @bind-Value="Model.Email" type="email" class="form-control" />
-                        <ValidationMessage For="@(() => Model.Email)" />
-                    </div>
-                    <div class="form-group mb-3">
-                        <label>Password</label>
-                        <InputText @bind-Value="Model.Password" type="password" class="form-control" />
-                        <ValidationMessage For="@(() => Model.Password)" />
-                    </div>
-                    <div class="form-group mb-3">
-                        <label>Password</label>
-                        <InputText @bind-Value="Model.PasswordConfirm" type="password" class="form-control" />
-                        <ValidationMessage For="@(() => Model.PasswordConfirm)" />
-                    </div>
-                    <div class="form-check mb-3">
-                        <InputCheckbox @bind-Value="Model.PrivacyPolicyAgreeed" class="form-check-input" type="checkbox" id="privacy-policy-agreed" />
-                        <label class="form-check-label" for="privacy-policy-agreed">
-                            I have read and understood the <a href="/privacy" target="_blank">privacy policy</a>.
-                        </label>
-                        <ValidationMessage For="@(() => Model.PrivacyPolicyAgreeed)" />
-                    </div>
-                    <div class="form-check mb-3">
-                        <InputCheckbox @bind-Value="Model.TermsConditionsAgreed" class="form-check-input" type="checkbox" id="terms-and-conditions-agreed" />
-                        <label class="form-check-label" for="terms-and-conditions-agreed">
-                            I have read and accept the <a href="/terms" target="_blank">terms and conditions</a>.
-                        </label>
-                        <ValidationMessage For="@(() => Model.TermsConditionsAgreed)" />
-                    </div>
-                    <div class="d-flex justify-content-evenly">
-                        <button class="btn btn-primary" type="submit" disabled="@Loading">
-                            @if (Loading)
-                            {
-                                <span class="spinner-border spinner-border-sm mr-1"></span>
-                            }
-                            Submit
-                        </button>
-                        <button class="btn btn-outline-secondary" type="reset">Clear</button>
-                    </div>
-                </EditForm>
-            </div>
-        </div>
+                    <MudStack Spacing="2">
+                        <MudTextField Label="Username" @bind-Value="@Model.Username" For="@(() => Model.Username)" Variant="Variant.Outlined" />
+                        <MudTextField Label="Firstname" @bind-Value="@Model.Firstname" For="@(() => Model.Firstname)" Variant="Variant.Outlined" />
+                        <MudTextField Label="Lastname" @bind-Value="@Model.Lastname" For="@(() => Model.Lastname)" Variant="Variant.Outlined" />
+                        <MudTextField Label="Email" 
+                            @bind-Value="@Model.Email" 
+                            For="@(() => Model.Email)" 
+                            InputType="InputType.Email" 
+                            Variant="Variant.Outlined"
+                            Adornment="Adornment.End"
+                            AdornmentIcon="@Icons.Material.Filled.AlternateEmail" />
+                        <MudTextField Label="Password" 
+                            @bind-Value="@Model.Password" 
+                            For="@(() => Model.Password)"
+                            InputType="PasswordType" 
+                            Adornment="Adornment.End"
+                            AdornmentIcon="@PasswordIcon"
+                            OnAdornmentClick="ToggleShowPassword"
+                            Variant="Variant.Outlined" />
+                        <MudTextField Label="Confirm Password"
+                            @bind-Value="@Model.PasswordConfirm"
+                            For="@(() => Model.PasswordConfirm)"
+                            InputType="PasswordType"
+                            Variant="Variant.Outlined" />
+                        <MudDivider Class="my-2"/>
+                        <MudStack Row="true" AlignItems="AlignItems.Center">
+                            <MudCheckBox @bind-Checked="Model.PrivacyPolicyAgreeed" 
+                                Label="I have read and understood the" 
+                                Color="Color.Primary" 
+                                Dense="true" 
+                                LabelPosition="LabelPosition.End"
+                                For="@(() => Model.PrivacyPolicyAgreeed)"/>
+                            <MudLink Href="privacy" target="_blank">privacy policy</MudLink>
+                        </MudStack>
+                        <MudStack Row="true" AlignItems="AlignItems.Center">
+                            <MudCheckBox @bind-Checked="Model.TermsConditionsAgreed" 
+                                Label="I have read and accept the" 
+                                Color="Color.Primary" Dense="true" 
+                                LabelPosition=" LabelPosition.End" 
+                                For="@(() => Model.TermsConditionsAgreed)"/>
+                            <MudLink Href="terms" target="_blank">terms and conditions</MudLink>
+                        </MudStack>
+                    </MudStack>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Disabled="@Loading">
+                        @if (Loading)
+                        {
+                            <MudProgressCircular Size="Size.Small" Class="me-2" Indeterminate="true" />
+                        }
+                        Submit
+                    </MudButton>
+                    <MudButton ButtonType="ButtonType.Reset" Color="Color.Secondary">
+                        Clear
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </EditForm>
     }
-</div>
+</MudContainer>
 
 @code {
     private StatusResultValidator? ResultValidator { get; set; }
@@ -93,6 +94,10 @@
     private bool Loading { get; set; } = false;
 
     private bool Success { get; set; } = false;
+
+    private bool showPassword = false;
+    private InputType PasswordType => showPassword ? InputType.Text : InputType.Password;
+    private string PasswordIcon => showPassword ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
 
     private class RegisterModel : iRLeagueApiCore.Common.Models.Users.RegisterModel
     {
@@ -142,5 +147,11 @@
         {
             Loading = false;
         }
+    }
+
+    private void ToggleShowPassword()
+    {
+        showPassword = !showPassword;
+        InvokeAsync(StateHasChanged);
     }
 }

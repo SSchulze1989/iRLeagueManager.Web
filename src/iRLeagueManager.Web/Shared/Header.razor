@@ -17,6 +17,7 @@
         </Authorized>
         <NotAuthorized>
             <MudMenu Icon="@Icons.Material.Filled.Person" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                <MudMenuItem Href="members/register">Sign Up</MudMenuItem>
                 <MudMenuItem Href="@($"members/login?returnUrl={GetReturnUrl()}")">Login</MudMenuItem>
             </MudMenu>
         </NotAuthorized>

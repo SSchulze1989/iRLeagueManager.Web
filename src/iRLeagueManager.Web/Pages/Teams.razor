@@ -14,7 +14,7 @@
 
 <MudContainer MaxWidth="MaxWidth.Medium">
     <MudStack Spacing="2">
-        <MudPaper Elevation="1" Square="true">
+        <MudPaper Elevation="1">
             <MudToolBar>
                 <MudText Typo="Typo.h6">Teams</MudText>
                 <MudSpacer/>
@@ -33,7 +33,7 @@
         </MudPaper>
         @foreach(var team in Bind(vm, x => x.Teams).Where(x => x.Name.Contains(FilterTeams ?? string.Empty, StringComparison.OrdinalIgnoreCase)).OrderBy(x => x.Name))
         {
-            <MudCard Square=true>
+            <MudCard>
                 <MudCardHeader Style="@($"color: {team.TeamColor}")">
                     <CardHeaderContent>
                         <MudText Typo="Typo.h6" Style="">@team.Name</MudText>

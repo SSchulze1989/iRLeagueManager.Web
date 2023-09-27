@@ -6,7 +6,7 @@
     </div>
     <h6>Team Members</h6>
     <div class="d-flex">
-    @foreach(var member in Team.Members)
+    @foreach(var member in Team.MemberList)
     {
         <div class="badge bg-secondary me-1 mb-1">@member.FirstName @member.LastName</div>
     }

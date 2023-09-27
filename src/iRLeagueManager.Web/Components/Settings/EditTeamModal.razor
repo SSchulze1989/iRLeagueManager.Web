@@ -1,81 +1,43 @@
-﻿@inherits MvvmComponentBase
-@using iRLeagueApiCore.Common.Enums
+﻿@using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
-@inject TeamViewModel vm
+@inherits EditMudModalBase<TeamViewModel, TeamModel>
 
-<EditForm Model=vm OnValidSubmit=Submit>
+<EditForm Model=Vm OnValidSubmit=Submit>
     <StatusResultValidator @ref=ResultValidator />
-    <div class="input-group-list mb-3">
-        <InputGroup Label="Name">
-            <InputText class="form-control" @bind-Value=vm.Name/>
-        </InputGroup>
-        <InputGroup Label="Color">
-            <InputText class="form-control" @bind-Value=vm.TeamColor />
-        </InputGroup>
-    </div>
-    <div>
-        <div class="row g-0">
-            <div class="input-group-text" style="border-bottom-left-radius:0; border-bottom-right-radius:0; border-bottom: none">
-                <label>Team Members</label>
-            </div>
-        </div>
-        <div>
-            <BlazoredTypeahead
-                @bind-Values=vm.Members
-                class="form-control p-0"
-                style="border-top-right-radius:0; border-top-left-radius:0;"
-                EnableDropDown=true  
-                SearchMethod=SearchMembers 
-                MinimumLength=1
-                MaximumSuggestions=100
-                DeleteItemsOnBackspace=false
-                placeholder="Search driver by name...">
-
-                <SelectedTemplate Context=member>
-                    @member.FirstName @member.LastName
-                </SelectedTemplate>
-                <ResultTemplate Context=member>
-                    @member.FirstName @member.LastName
-                </ResultTemplate>
-                <NotFoundTemplate Context=name>
-                    <span>Driver <b>@name</b> Not found!</span>
-                </NotFoundTemplate>
-            </BlazoredTypeahead>
-        </div>
-    </div>
-    <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
-    <CancelSubmitButtons ModelState=vm SubmitText="Save" OnCancel=Cancel/>
+    <MudDialog>
+        <DialogContent>
+            <MudStack Spacing="2">
+                <MudTextField Label="Name" @bind-Value="Vm.Name" For="@(() => Vm.Name)" Variant="Variant.Filled"/>
+                <MudColorPicker Label="Color" @bind-Text="Vm.TeamColor" style="@($"color: {Vm.TeamColor}")" ColorPickerMode="ColorPickerMode.HEX" Variant="Variant.Filled" />
+                <MultiSelectAutoComplete
+                    Label="Members"
+                    @bind-Values=Vm.Members
+                    SearchFunc="SearchMembers"
+                    ToStrinFunc="@(member => member is null ? string.Empty : $"{member.FirstName} {member.LastName}")"
+                    Variant="Variant.Filled" />
+                <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+            </MudStack>
+        </DialogContent>
+        <DialogActions>
+            <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+            <MudButton Color="Color.Primary" OnClick="Submit">Submit</MudButton>
+        </DialogActions>
+    </MudDialog>
 </EditForm>
 
 @code {
-    [CascadingParameter]
-    public BlazoredModalInstance ModalInstance { get; set; } = default!;
-    [CascadingParameter]
-    public IModalService ModalService { get; set; } = default!;
-
-    [Parameter]
-    public TeamModel Model { get; set; } = default!;
     [Parameter]
     public IEnumerable<MemberInfoModel> LeagueMembers { get; set; } = default!;
 
-    [Parameter]
-    public Func<TeamViewModel, CancellationToken, Task<StatusResult>>? OnSubmit { get; set; }
-
-    private CancellationTokenSource cts = new();
-
-    private StatusResultValidator? ResultValidator { get; set; }
-
     protected override void OnParametersSet()
     {
-        _ = ModalInstance ?? throw BlazorParameterNullException.New(this, ModalInstance);
-        _ = ModalService ?? throw BlazorParameterNullException.New(this, ModalService);
         _ = Model ?? throw BlazorParameterNullException.New(this, Model);
         _ = LeagueMembers ?? throw BlazorParameterNullException.New(this, LeagueMembers);
 
-        if (EqualityComparer<TeamModel>.Default.Equals(Model, vm.GetModel()) == false)
+        if (EqualityComparer<TeamModel>.Default.Equals(Model, Vm.GetModel()) == false)
         {
-            vm.SetModel(Model);
+            Vm.SetModel(Model);
         }
     }
 
@@ -97,39 +59,5 @@
     {
         var searchName = member.FirstName + member.LastName;
         return terms.Any(x => searchName.Contains(x, StringComparison.OrdinalIgnoreCase));
-    }
-
-    private async Task Submit()
-    {
-        var success = true;
-        if (OnSubmit is not null)
-        {
-            var status = await OnSubmit(vm, cts.Token);
-            success &= status.IsSuccess;
-            ResultValidator?.ValidateResult(status);
-        }
-        if (success)
-        {
-            var result = ModalResult.Ok(vm.GetModel());
-            await ModalInstance.CloseAsync(result);
-        }
-    }
-
-    private async Task Cancel()
-    {
-        if (ModalInstance != null)
-        {
-            await ModalInstance.CancelAsync();   
-        }
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing == false)
-        {
-            cts.Cancel();
-            cts.Dispose();
-        }
-        base.Dispose(disposing);
     }
 }

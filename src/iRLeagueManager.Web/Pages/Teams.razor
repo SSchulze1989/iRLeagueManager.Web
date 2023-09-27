@@ -12,28 +12,30 @@
 
 <PageTitle>Settings - @LeagueName</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Medium">
+<MudContainer MaxWidth="MaxWidth.Large">
     <MudStack Spacing="2">
-        <MudPaper Elevation="1">
-            <MudToolBar>
-                <MudText Typo="Typo.h6">Teams</MudText>
-                <MudSpacer/>
-                <MudSpacer/>
-                <MudSpacer/>
-                <MudTextField
-                    Label="Search Team"
-                    Margin="Margin.Dense"
-                    @bind-Value="FilterTeams"
-                    Adornment="Adornment.End"
-                    AdornmentIcon="@Icons.Material.Filled.Search"
-                    Variant="Variant.Outlined"
-                    Immediate="true"
-                    Clearable="true"/>
-            </MudToolBar>
+        <MudPaper Elevation="2">
+            <LoadingHeader Loading="vm.Loading">
+                <MudToolBar>
+                    <MudText Typo="Typo.h6">Teams</MudText>
+                    <MudSpacer/>
+                    <MudSpacer/>
+                    <MudSpacer/>
+                    <MudTextField
+                        Label="Search Team"
+                        Margin="Margin.Dense"
+                        @bind-Value="TeamFilter"
+                        Adornment="Adornment.End"
+                        AdornmentIcon="@Icons.Material.Filled.Search"
+                        Variant="Variant.Outlined"
+                        Immediate="true"
+                        Clearable="true"/>
+                </MudToolBar>
+            </LoadingHeader>
         </MudPaper>
-        @foreach(var team in Bind(vm, x => x.Teams).Where(x => x.Name.Contains(FilterTeams ?? string.Empty, StringComparison.OrdinalIgnoreCase)).OrderBy(x => x.Name))
+        @foreach(var team in Bind(vm, x => x.Teams).Where(FilterTeams).OrderBy(x => x.Name))
         {
-            <MudCard>
+            <MudCard Elevation="4">
                 <MudCardHeader Style="@($"color: {team.TeamColor}")">
                     <CardHeaderContent>
                         <MudText Typo="Typo.h6" Style="">@team.Name</MudText>
@@ -64,6 +66,10 @@
                 </MudCardContent>
             </MudCard>
         }
+        @if (vm.Teams.Any(FilterTeams) == false && TeamFilter is not null)
+        {
+            <MudText Align="Align.Center">No teams found ...</MudText>
+        }
         <MudButton StartIcon="@Icons.Material.Filled.GroupAdd" OnClick="OnAddTeamClick" Color="Color.Tertiary">Add Team</MudButton>
     </MudStack>
 </MudContainer>
@@ -72,15 +78,15 @@
     [Parameter(CaptureUnmatchedValues = true)] 
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private string? filterTeams;
-    private string? FilterTeams 
+    private string? teamFilter;
+    private string? TeamFilter 
     {
-        get => filterTeams;
+        get => teamFilter;
         set  
         {
-            if (filterTeams != value)
+            if (teamFilter != value)
             {
-                filterTeams = value;
+                teamFilter = value;
                 InvokeAsync(StateHasChanged);
             }
         }
@@ -141,6 +147,11 @@
         {
             await vm.DeleteTeam(team.GetModel());   
         }
+    }
+
+    private bool FilterTeams(TeamViewModel team)
+    {
+        return team.Name.Contains(TeamFilter ?? string.Empty, StringComparison.OrdinalIgnoreCase);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

@@ -11,32 +11,30 @@
 
 <PageTitle>Schedules - @LeagueName</PageTitle>
 
-<div class="container-xxl">
-    <div class="sticky-header">
-        <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
-            <h3>Schedules</h3>
-        </LoadingHeader>
-    </div>
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudStack Spacing="2">
+        <MudPaper Elevation="2">
+            <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+                <MudText Typo="Typo.h6" Class="mx-6 my-4">Schedule</MudText>
+            </LoadingHeader>
+        </MudPaper>
 
-    <AuthorizeView Roles=@(GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer))>
-        <Authorized>
-            <div>
+        <AuthorizeView Roles=@(GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer))>
+            <Authorized>
                 @foreach(var schedule in @Bind(vm, x => x.Schedules))
                 {
-                    <DisplaySchedule class="px-0 mb-2 mx-0" Schedule=schedule ReadOnly=SharedState.SeasonFinished/>
+                    <DisplaySchedule Schedule="schedule" ReadOnly=SharedState.SeasonFinished DisplayHeader="@(vm.Schedules.Count > 1)"/>
                 }
-            </div>
-        </Authorized>
-        <NotAuthorized>
-            <div>
+            </Authorized>
+            <NotAuthorized>
                 @foreach(var schedule in @Bind(vm, x => x.Schedules))
                 {
-                    <DisplaySchedule class="px-0 mb-2 mx-0" Schedule=schedule ReadOnly=true/>
+                    <DisplaySchedule Schedule="schedule" ReadOnly="true" DisplayHeader="@(vm.Schedules.Count > 1)"/>
                 }
-            </div>
-        </NotAuthorized>
-    </AuthorizeView>
-</div>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudStack>
+</MudContainer>
 
 @code {
     [CascadingParameter]

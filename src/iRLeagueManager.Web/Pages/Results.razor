@@ -15,7 +15,7 @@
 
 <PageTitle>Results - @LeagueName</PageTitle>
 
-<MudPaper Elevation="1" Class="sticky pa-0 mb-2" Square="true">
+<MudPaper Elevation="1" Class="sticky pa-0 mb-2" >
     <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
         <MudStack Class="mb-2 mt-2">
             <MudText Typo="Typo.h5" Class="ma-2 ml-6">Results</MudText>
@@ -51,7 +51,7 @@
 
 @if (@Bind(vm, x => x.Results)?.Count == 0)
 {
-    <MudPaper Elevation="1" Square="true">
+    <MudPaper Elevation="1" >
         <MudText Typo="Typo.h5" Class="ma-2 ml-6">No Results</MudText>
     </MudPaper>
 }
@@ -66,7 +66,7 @@ else
                     <MudStack Class="gap-2 pt-2">
                         @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
                         {
-                            <MudPaper Elevation="2" Square="true">
+                            <MudPaper Elevation="2" >
                                 <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
                                     <Authorized>
                                         <DisplayResult Result="result" CanEdit="true" />
@@ -88,7 +88,7 @@ else
         <MudStack Class="gap-2">
             @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
             {
-                <MudPaper Elevation="2" Square="true">
+                <MudPaper Elevation="2" >
                     <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
                         <Authorized>
                             <DisplayResult Result="result" CanEdit="true" />

@@ -2,28 +2,35 @@
 @inject LeagueApiService ApiService
 @inject NavigationManager NavigationManager
 
-<div class="container-sm" style="max-width: 790px;">
-    @if (Success)
-    {
-        <p class="mb-3">
-            Your email has been successfully verified.
-            You can now log into your account with your username and password
-        </p>
-        <a class="btn btn-primary" href="/member/login">
-            Login
-        </a>
-    }
-    else if (Error)
-    {
-        <p>Oops, something went wrong! Please contact the administrator if you continue having problems.</p>
-    }
-    else
-    {
-        <p>
-            <span class="spinner-border spinner-border-sm me-1" />Processing email confirmation ...
-        </p>
-    }
-</div>
+<MudContainer MaxWidth="MaxWidth.Small">
+    <MudPaper Elevation="1" Class="pa-4">
+        @if (Success)
+        {
+            <MudStack Spacing="2">
+                <MudText>
+                    Your email has been successfully verified.
+                    You can now log into your account with your username and password.
+                </MudText>
+                <MudLink Href="/member/login">
+                    Login
+                </MudLink>
+            </MudStack>
+        }
+        else if (Error)
+        {
+            <MudText>Oops, something went wrong! Please contact the administrator if you continue having problems.</MudText>
+        }
+        else
+        {
+            <MudStack Row="true" AlignItems="AlignItems.Center">
+                <MudProgressCircular Size="Size.Small" Color="Color.Default" Indeterminate="true"/>
+                <MudText>
+                    Processing email confirmation ...
+                </MudText>
+            </MudStack>
+        }
+    </MudPaper>
+</MudContainer>
 
 @code {
     [Parameter]

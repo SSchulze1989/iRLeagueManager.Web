@@ -15,11 +15,11 @@
 
 <PageTitle>Results - @LeagueName</PageTitle>
 
-<MudPaper Elevation="1" Class="sticky pa-0 mb-2" >
+<MudPaper Elevation="2" Class="sticky pa-0 mb-2" >
     <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
-        <MudStack Class="mb-2 mt-2">
-            <MudText Typo="Typo.h5" Class="ma-2 ml-6">Results</MudText>
-            <MudToolBar Class="gap-2" Dense="true">
+        <MudStack>
+            <MudText Typo="Typo.h6" Class="mx-6 mt-4">Results</MudText>
+            <MudToolBar Class="gap-2 mb-2" Dense="true">
                 <EventSelect Label="Results"/>
                 <MudSpacer/>
                 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
@@ -59,14 +59,14 @@ else
 {
     @if (vm.Results.Count > 1)
     {
-        <MudTabs @bind-ActivePanelIndex="@SelectedTabIndex" Elevation="1">
+        <MudTabs @bind-ActivePanelIndex="@SelectedTabIndex" Elevation="2">
             @foreach ((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x, i)))
             {
                 <MudTabPanel Text="@eventResult.Name">
                     <MudStack Class="gap-2 pt-2">
                         @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
                         {
-                            <MudPaper Elevation="2" >
+                            <MudPaper Elevation="4" >
                                 <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
                                     <Authorized>
                                         <DisplayResult Result="result" CanEdit="true" />

@@ -11,13 +11,13 @@
     <AuthorizeView>
         <Authorized Context="auth">
             <MudMenu Icon="@Icons.Material.Filled.Person" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
-                <MudMenuItem Href="@($"members/{auth.User}profile")">My Profile</MudMenuItem>
-                <MudMenuItem Href="@($"members/logout?returUrl={GetReturnUrl()}")">Logout</MudMenuItem>
+                <MudMenuItem Href="@($"members/{auth.User.GetUserId()}/profile")">My Profile</MudMenuItem>
+                <MudMenuItem Href="@($"members/logout?returnUrl={GetReturnUrl()}")">Logout</MudMenuItem>
             </MudMenu>
         </Authorized>
         <NotAuthorized>
             <MudMenu Icon="@Icons.Material.Filled.Person" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
-                <MudMenuItem Href="@($"members/login?returUrl={GetReturnUrl()}")">Login</MudMenuItem>
+                <MudMenuItem Href="@($"members/login?returnUrl={GetReturnUrl()}")">Login</MudMenuItem>
             </MudMenu>
         </NotAuthorized>
     </AuthorizeView>

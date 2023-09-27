@@ -41,6 +41,11 @@
     [Parameter]
     public string CancelButtonText { get; set; } = "Cancel";
 
+    protected override void OnParametersSet()
+    {
+        BlazorParameterNullException.ThrowIfNull(this, ModalInstance);
+    }
+
     private void OkClick()
     {
         ModalInstance.Close();

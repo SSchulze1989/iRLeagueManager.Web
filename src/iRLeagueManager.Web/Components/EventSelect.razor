@@ -7,14 +7,13 @@
 @using System.Linq
 @inherits MudComponentBase
 
-<div style="width: 50em">
+<div style="width: 50em; max-width: 100%">
     <MudSelect
         @bind-Value="EventList.Selected" 
         Variant="Variant.Outlined" 
         AnchorOrigin="Origin.BottomLeft" 
         TransformOrigin="Origin.TopLeft"
-        Margin="Margin.Dense"
-    >
+        Margin="Margin.Dense">
         @foreach(var (index, @event) in EventList.EventList.Select((x, i) => (i, x)))
         {
             <MudSelectItem Value="@(@event)">

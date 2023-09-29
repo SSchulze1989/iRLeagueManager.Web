@@ -15,8 +15,8 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
     private long? loadedSeasonId;
     public long? LoadedSeasonId { get => loadedSeasonId; set => Set(ref loadedSeasonId, value); }
 
-    private ObservableCollection<EventViewModel> eventList;
-    public ObservableCollection<EventViewModel> EventList { get => eventList; set => Set(ref eventList, value); }
+    private List<EventViewModel> eventList;
+    public List<EventViewModel> EventList { get => eventList; set => Set(ref eventList, value); }
 
     private int selectedResultIndex;
     public int SelectedResultIndex { get => selectedResultIndex; set { if (Set(ref selectedResultIndex, value)) OnPropertyChanged(nameof(SelectedEventResult)); } }
@@ -57,7 +57,7 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
         }
 
         var sessions = result.Content;
-        EventList = new ObservableCollection<EventViewModel>(sessions.Select(x => new EventViewModel(LoggerFactory, ApiService, x)));
+        EventList = sessions.Select(x => new EventViewModel(LoggerFactory, ApiService, x)).ToList();
         OnPropertyChanged(nameof(SelectedEvent));
     }
 

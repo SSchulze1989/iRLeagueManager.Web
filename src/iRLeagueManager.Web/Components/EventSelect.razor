@@ -7,22 +7,31 @@
 @using System.Linq
 @inherits MudComponentBase
 
-<MudSelect 
-    ToStringFunc="@GetEventText" 
-    Label="Event" Class="flex-grow-1" 
-    @bind-Value="EventList.Selected" 
-    Variant="Variant.Outlined" 
-    AnchorOrigin="Origin.BottomLeft" 
-    TransformOrigin="Origin.TopLeft"
-    Margin="Margin.Dense"
->
-    @foreach(var @event in EventList.EventList)
-    {
-        <MudSelectItem Value="@(@event)">@GetEventText(@event)</MudSelectItem>
-    }
-</MudSelect>
-<MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" OnClick=EventMovePrevious Variant="Variant.Text" />
-<MudIconButton Icon="@Icons.Material.Filled.ChevronRight" OnClick=EventMoveNext Variant="Variant.Text" />
+<div style="width: 50em">
+    <MudSelect
+        @bind-Value="EventList.Selected" 
+        Variant="Variant.Outlined" 
+        AnchorOrigin="Origin.BottomLeft" 
+        TransformOrigin="Origin.TopLeft"
+        Margin="Margin.Dense"
+    >
+        @foreach(var (index, @event) in EventList.EventList.Select((x, i) => (i, x)))
+        {
+            <MudSelectItem Value="@(@event)">
+                <div class="d-flex align-center">
+                    @GetEventText(@event, index) 
+                    @if (@event.HasResult)
+                    {
+                        <MudIcon Class="ms-2" Color="Color.Tertiary" Icon="@Icons.Material.Filled.FlagCircle" Size="Size.Small"/>
+                    }
+                </div>
+            </MudSelectItem>
+        }
+    </MudSelect>
+</div>
+<MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowLeft" OnClick="EventMovePrevious" Variant="Variant.Text" Disabled="!CanMovePrevious"/>
+<MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowRight" OnClick="EventMoveNext" Variant="Variant.Text" Disabled="!CanMoveNext"/>
+<MudIconButton Icon="@Icons.Material.Filled.KeyboardDoubleArrowRight" OnClick="EventMoveLastWithResult" Variant="Variant.Text" Disabled="!CanMoveLast"/>
 
 @code {
     [CascadingParameter]
@@ -32,7 +41,7 @@
     [CascadingParameter]
     public EventListViewModel EventList { get; set; } = default!;
 
-    private ObservableCollection<EventViewModel> Events => EventList.EventList;
+    private List<EventViewModel> Events => EventList.EventList;
 
     private EventViewModel? Selected 
     { 
@@ -43,6 +52,10 @@
             _ = SelectedChanged.InvokeAsync(value);
         }
     }
+
+    private bool CanMovePrevious => SelectedIndex > 0;
+    private bool CanMoveNext => SelectedIndex < Events.Count - 1;
+    private bool CanMoveLast => SelectedIndex != Events.FindLastIndex(x => x.HasResult);
 
     [Parameter]
     public EventCallback<EventViewModel?> SelectedChanged { get; set; }
@@ -56,7 +69,7 @@
             if (selectedIndex != value)
             {
                 selectedIndex = value;
-                _ =OnSelectionChanged();
+                _ = OnSelectionChanged();
             }
         }
     }
@@ -65,24 +78,13 @@
     {
         if (eventListPrivate != null)
         {
-            eventListPrivate.EventList.CollectionChanged -= OnEventsCollectionChanged;
             eventListPrivate.PropertyChanged -= OnEventListPropertyChanged;
         }
 
         BlazorParameterNullException.ThrowIfNull(this, EventList);
         eventListPrivate = EventList;
-        EventList.EventList.CollectionChanged += OnEventsCollectionChanged;
         EventList.PropertyChanged += OnEventListPropertyChanged;
-        
-        if (Selected != null && Events.IndexOf(Selected) != selectedIndex)
-        {
-            SelectedIndex = Events.IndexOf(Selected);
-        }
-    }
 
-    private void OnEventsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        // Update selectedIndex
         if (Selected != null && Events.IndexOf(Selected) != selectedIndex)
         {
             SelectedIndex = Events.IndexOf(Selected);
@@ -94,8 +96,10 @@
     {
         switch (e?.PropertyName)
         {
+            case nameof(EventListViewModel.EventList):
             case nameof(EventListViewModel.Selected):
                 OnEventsChanged();
+                InvokeAsync(StateHasChanged);
                 break;
         }
     }
@@ -107,13 +111,12 @@
         {
             SelectedIndex = Events.IndexOf(Selected);
         }
-        InvokeAsync(StateHasChanged);
     }
 
     private async Task OnSelectionChanged()
     {
         Selected = Events.ElementAtOrDefault(SelectedIndex) ?? Selected;
-        await Task.FromResult(true);
+        await Task.CompletedTask;
     }
 
     private void EventMoveNext()
@@ -132,21 +135,31 @@
         }
     }
 
-    private string? GetEventText(EventViewModel? @event)
+    private void EventMoveLastWithResult()
+    {
+        var lastEventWithResult = Events
+            .LastOrDefault(x => x.HasResult);
+        if (lastEventWithResult is null)
+        {
+            return;
+        }
+        SelectedIndex = Events.IndexOf(lastEventWithResult);
+    }
+
+    private string? GetEventText(EventViewModel? @event, int? index = null)
     {
         if (@event is null)
         {
             return null;
         }
-        var index = EventList.EventList.IndexOf(@event);
-        return $"{(index + 1).ToString("00")}. {@event.Date.ToString("dd.MM.yy")}: {@event.TrackName}" + (@event.ConfigName != "-" ? $" - {@event.ConfigName}" : "");
+        index ??= EventList.EventList.IndexOf(@event);
+        return $"{(index + 1).Value.ToString("00")}. {@event.Date.ToString("dd.MM.yy")}: {@event.TrackName}" + (@event.ConfigName != "-" ? $" - {@event.ConfigName}" : "");
     }
 
     public void Dispose()
     {
         if (eventListPrivate != null)
         {
-            eventListPrivate.EventList.CollectionChanged -= OnEventsCollectionChanged;
             eventListPrivate.PropertyChanged -= OnEventListPropertyChanged;
         }
     }

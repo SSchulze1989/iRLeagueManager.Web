@@ -1,5 +1,14 @@
 ﻿@using iRLeagueApiCore.Common.Models;
-<label class="@(MuteTextOnFallback && string.IsNullOrEmpty(League?.NameFull) ? "text-muted" : "")" title="@GetLeagueName()">@GetLeagueName()</label>
+@if (WrapElement)
+{
+    <MudElement HtmlTag="@HtmlTag" Class="@WrapElementClass" title="@GetLeagueName()">
+        @GetLeagueName()
+    </MudElement>
+}
+else 
+{
+    @GetLeagueName()
+}
 
 @code {
     [Parameter]
@@ -8,6 +17,14 @@
     public string Fallback { get; set; } = string.Empty;
     [Parameter]
     public bool MuteTextOnFallback { get; set; } = false;
+    [Parameter]
+    public string Class { get; set; } = string.Empty;
+    [Parameter]
+    public bool WrapElement { get; set; } = true;
+    [Parameter]
+    public string HtmlTag { get; set; } = "div";
+
+    private string WrapElementClass => $"{(MuteTextOnFallback && string.IsNullOrEmpty(League?.NameFull) ? "text-muted" : "")} {Class}";
 
     private string GetLeagueName()
     {

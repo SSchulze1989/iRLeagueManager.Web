@@ -6,7 +6,7 @@
                    OnClick="@((e) => DrawerToggle())" />
 
     <MudSpacer />
-    <MudText Typo="Typo.h4">@Shared.LeagueInfo?.NameFull</MudText>
+    <MudText Typo="Typo.h4"><DisplayLeague League="Shared.LeagueInfo"/></MudText>
     <MudSpacer />
     <AuthorizeView>
         <Authorized Context="auth">

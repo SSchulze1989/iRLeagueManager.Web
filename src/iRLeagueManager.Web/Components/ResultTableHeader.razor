@@ -4,7 +4,7 @@
         py-2 px-1
         @(Active ? "active" : "" )
         @(HasAction ? "action" : "")
-        @(CurrentDirection == ViewModels.SortDirection.Ascending ? "sort-ascending" : "sort-descending")
+        @(CurrentDirection == SortDirection.Ascending ? "sort-ascending" : "sort-descending")
         @Class
     "
     width="@Width"
@@ -19,7 +19,7 @@
             <span class="@GetLongTextClass()">@Text</span>
             <span class="@GetShortTextClass()">@(string.IsNullOrEmpty(TextShort) ? Text : TextShort)</span>
         }
-        <MudIcon Icon="@(CurrentDirection == ViewModels.SortDirection.Ascending ? Icons.Material.Filled.KeyboardArrowUp : Icons.Material.Filled.KeyboardArrowDown)" 
+        <MudIcon Icon="@(CurrentDirection == SortDirection.Ascending ? Icons.Material.Filled.KeyboardArrowUp : Icons.Material.Filled.KeyboardArrowDown)" 
                  Size="Size.Small"
                  Class="table-header-adorner"/>
     </MudStack>
@@ -37,7 +37,7 @@
     [Parameter]
     public bool Default { get; set; } = false;
     [Parameter]
-    public ViewModels.SortDirection Direction { get; set; } = ViewModels.SortDirection.Ascending;
+    public MudBlazor.SortDirection Direction { get; set; } = SortDirection.Ascending;
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
     [Parameter]
@@ -47,7 +47,7 @@
     [Parameter]
     public string Width { get; set; } = string.Empty;
 
-    private ViewModels.SortDirection CurrentDirection { get; set; }
+    private SortDirection CurrentDirection { get; set; }
 
     private bool Active => CascadingSortState.SortFunc == Sort && HasAction;
 
@@ -76,7 +76,7 @@
 
         if (Active)
         {
-            CurrentDirection = CurrentDirection == ViewModels.SortDirection.Ascending ? ViewModels.SortDirection.Descending : ViewModels.SortDirection.Ascending;
+            CurrentDirection = CurrentDirection == SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending;
         }
 
         CascadingSortState.Direction = CurrentDirection;

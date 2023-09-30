@@ -223,7 +223,7 @@
         };
     }
 
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    protected override void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         SelectedTabIndex = NavigationManager.QueryParameter<int>(tabIndexParam);
         SelectedReviewId = NavigationManager.QueryParameter<long>(reviewIdParam);

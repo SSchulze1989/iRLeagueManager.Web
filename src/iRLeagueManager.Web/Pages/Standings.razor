@@ -89,7 +89,7 @@
         vm.SelectedStandingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
     }
 
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    protected override void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         vm.SelectedStandingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
     }

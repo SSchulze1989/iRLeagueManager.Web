@@ -4,6 +4,7 @@
 @implements IDisposable
 @inject SharedStateService SharedState
 @inject ILocalStorageService LocalStorage
+@inject IDialogService DialogService
 
 <MudElement HtmlTag="footer">
     <MudPaper Elevation="0" Class="px-4 py-0">
@@ -35,13 +36,9 @@
     private const string cookieSettingsKey = "allowEssentialCookies";
     private DateTime cookiePolicyValidFrom = new DateTime(2023, 01, 28);
 
-    [CascadingParameter]
-    private IModalService ModalService { get; set; } = default!;
-
     protected override void OnInitialized()
     {
         SharedState.StateChanged += OnSharedStateChanged;
-        BlazorParameterNullException.ThrowIfNull(this, ModalService);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -87,14 +84,13 @@
 
     private async Task<bool> OnCookieBannerClick()
     {
-        var options = new ModalOptions()
+        var options = new DialogOptions()
         {
-            DisableBackgroundCancel = true,
-            HideCloseButton = true,
-            HideHeader = true,
+            DisableBackdropClick= true,
+            NoHeader = true,
         };
-        var result = await ModalService.Show<CookieBannerModal>("", options).Result;
-        return result.Confirmed;
+        var result = await DialogService.Show<CookieBannerModal>("", options).Result;
+        return result.Cancelled == false;
     }
 
     public virtual void Dispose()

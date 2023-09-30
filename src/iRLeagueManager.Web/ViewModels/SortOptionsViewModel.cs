@@ -1,5 +1,6 @@
 ﻿using iRLeagueApiCore.Common.Enums;
 using iRLeagueManager.Web.Data;
+using MudBlazor;
 
 namespace iRLeagueManager.Web.ViewModels;
 
@@ -73,10 +74,4 @@ public enum SortValue
     RacesCounted,
     RacesScored,
     RacesInPoints,
-}
-
-public enum SortDirection
-{
-    Ascending,
-    Descending,
 }

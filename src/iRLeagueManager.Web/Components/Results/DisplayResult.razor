@@ -38,18 +38,18 @@
             <ResultTableHeader Text="Fastest Lap" Sort="@(x => x.FastestLapTime == TimeSpan.Zero ? TimeSpan.MaxValue : x.FastestLapTime)" />
             <ResultTableHeader Text="Avg. Lap" Sort="@(x => x.AvgLapTime == TimeSpan.Zero ? TimeSpan.MaxValue : x.AvgLapTime)" />
             <ResultTableHeader Text="Interval" Sort="@(x => x.Interval)" />
-            <ResultTableHeader Text="Laps Lead" Sort="@(x => x.LeadLaps)" Direction="ViewModels.SortDirection.Descending" />
-            <ResultTableHeader Text="Laps Compl." Sort="@(x => x.CompletedLaps)" Direction="ViewModels.SortDirection.Descending" />
-            <ResultTableHeader Text="Race Pts." Sort="@(x => x.RacePoints)" Direction="ViewModels.SortDirection.Descending" />
+            <ResultTableHeader Text="Laps Lead" Sort="@(x => x.LeadLaps)" Direction="SortDirection.Descending" />
+            <ResultTableHeader Text="Laps Compl." Sort="@(x => x.CompletedLaps)" Direction="SortDirection.Descending" />
+            <ResultTableHeader Text="Race Pts." Sort="@(x => x.RacePoints)" Direction="SortDirection.Descending" />
             @if (displayBonusPoints)
             {
-                <ResultTableHeader Text="Bonus Pts." Sort="@(x => x.BonusPoints)" Direction="ViewModels.SortDirection.Descending" />
+                <ResultTableHeader Text="Bonus Pts." Sort="@(x => x.BonusPoints)" Direction="SortDirection.Descending" />
             }
             <ResultTableHeader Text="Penalty" TextShort="Pen." Breakpoint="Breakpoint.Xl" Sort="@(x => x.PenaltyPoints)" />
-            <ResultTableHeader Text="Total Pts." Sort="@(x => x.TotalPoints)" Direction="ViewModels.SortDirection.Descending" />
+            <ResultTableHeader Text="Total Pts." Sort="@(x => x.TotalPoints)" Direction="SortDirection.Descending" />
             @if (isTeamResult == false)
             {
-                <ResultTableHeader Text="@($"IR ({EvenStrengthOfField(Result)})")" Sort="@(x => x.OldIrating)" Direction="ViewModels.SortDirection.Descending" />
+                <ResultTableHeader Text="@($"IR ({EvenStrengthOfField(Result)})")" Sort="@(x => x.OldIrating)" Direction="SortDirection.Descending" />
             }
             <ResultTableHeader Text="Incs." Sort="@(x => x.Incidents)" />
             @if (CanEdit)

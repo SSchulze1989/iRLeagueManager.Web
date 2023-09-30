@@ -29,8 +29,8 @@
 
         return sortState.Direction switch
         {
-            ViewModels.SortDirection.Ascending => data.OrderBy(sortState.SortFunc),
-            ViewModels.SortDirection.Descending => data.OrderByDescending(sortState.SortFunc),
+            SortDirection.Ascending => data.OrderBy(sortState.SortFunc),
+            SortDirection.Descending => data.OrderByDescending(sortState.SortFunc),
             _ => data
         };
     }

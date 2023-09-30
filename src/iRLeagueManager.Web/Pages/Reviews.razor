@@ -34,6 +34,7 @@
 
     <CascadingValue Value=@Bind(ReviewsVm, x => x.EventCars)>
     <CascadingValue Value=ReviewsVm.LeagueUsers>
+    <MudBreakpointProvider>
 
     <MudStack Spacing="2" Class="pt-2">
         @switch (SelectedTabIndex)
@@ -128,6 +129,8 @@
                 break;
         }
     </MudStack>
+
+    </MudBreakpointProvider>
     </CascadingValue>
     </CascadingValue>
 </MudContainer>

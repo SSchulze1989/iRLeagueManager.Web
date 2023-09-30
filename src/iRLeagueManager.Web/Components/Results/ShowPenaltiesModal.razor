@@ -11,14 +11,33 @@
             @foreach(var penalty in Penalties)
             {
                 <MudCard Elevation="5">
-                    @if (ShowSessionName)
-                    {
-                        <MudCardHeader>
-                            <CardHeaderContent>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            @if (ShowSessionName)
+                            {
                                 <MudText Typo="Typo.h6">@penalty.SessionName</MudText>
-                            </CardHeaderContent>
-                        </MudCardHeader>
-                    }
+                            }
+                        </CardHeaderContent>
+                        <CardHeaderActions>
+                            @if (penalty.ReviewId != null)
+                            {
+                                <MudTooltip Text="Open Review">
+                                    <MudIconButton OnClick="@(() => NavigateTo($"/{Shared.LeagueName}/Reviews/Events/{penalty.EventId}?reviewId={penalty.ReviewId}"))" 
+                                        Icon="@Icons.Material.Filled.Reviews"
+                                        Size="Size.Small" />
+                                </MudTooltip>
+                            }
+                            @if (penalty.AddPenaltyId != null && CanEdit)
+                            {
+                                <MudTooltip Text="Edit">
+                                    <MudIconButton OnClick="@(() => EditAddPenaltyAsync(penalty))" Icon="@Icons.Material.Filled.Edit" Size="Size.Small"/>
+                                </MudTooltip>
+                                <MudTooltip Text="Delete">
+                                    <MudIconButton OnClick="@(() => DeleteAddPenaltyAsync(penalty))" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" />
+                                </MudTooltip>
+                            }
+                        </CardHeaderActions>
+                    </MudCardHeader>
                     <MudCardContent>
                         <MudGrid>
                             <MudItem xs="6">
@@ -46,33 +65,19 @@
                                 <MudText>@penalty.Reason</MudText>
                             </MudItem>
                         </MudGrid>
-                        <MudCardActions>
-                            @if (penalty.ReviewId != null)
-                            {
-                                <MudTooltip Text="Open Review">
-                                    <MudIconButton OnClick="@(() => NavigateTo($"/{Shared.LeagueName}/Reviews/Events/{penalty.EventId}?reviewId={penalty.ReviewId}"))" 
-                                        Icon="@Icons.Material.Filled.Reviews"
-                                        Size="Size.Small" />
-                                </MudTooltip>
-                            }
-                            @if (penalty.AddPenaltyId != null && CanEdit)
-                            {
-                                <MudTooltip Text="Edit">
-                                    <MudIconButton OnClick="@(() => EditAddPenaltyAsync(penalty))" Icon="@Icons.Material.Filled.Edit" Size="Size.Small"/>
-                                </MudTooltip>
-                                <MudTooltip Text="Delete">
-                                    <MudIconButton OnClick="@(() => DeleteAddPenaltyAsync(penalty))" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" />
-                                </MudTooltip>
-                            }
-                        </MudCardActions>
                     </MudCardContent>
                 </MudCard>
             }
         </MudStack>
     </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => DialogInstance.Close())">Close</MudButton>
+    </DialogActions>
 </MudDialog>
 
 @code {
+    [CascadingParameter]
+    public MudDialogInstance DialogInstance { get; set; } = default!;
     [Parameter]
     public bool CanEdit { get; set; } = false;
     [Parameter]

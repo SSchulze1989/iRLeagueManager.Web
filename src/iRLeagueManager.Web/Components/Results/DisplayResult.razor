@@ -193,6 +193,7 @@
             DisableBackdropClick = false,
             Position = DialogPosition.Center,
             FullWidth = true,
+            CloseButton = true,
         };
         await DialogService.Show<ShowPenaltiesModal>("Penalties", parameters, options).Result;
     }

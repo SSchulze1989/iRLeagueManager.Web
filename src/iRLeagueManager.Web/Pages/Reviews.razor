@@ -15,20 +15,18 @@
 <PageTitle>Reviews - @LeagueName</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large">
-    <MudPaper Elevation="2" Class="pa-0 mb-2">
-        <LoadingHeader Loading=@Bind(ReviewsVm, x => x.Loading)>
-            <MudStack>
-                <MudText Typo="Typo.h6" Class="mx-6 mt-4">Reviews</MudText>
-                <MudToolBar Class="gap-2 mb-2" Dense="true">
-                    <EventSelect/>
-                </MudToolBar>
-            </MudStack>
-        </LoadingHeader>
-    </MudPaper>
+    <LoadingHeader Loading=@Bind(ReviewsVm, x => x.Loading)>
+        <HeaderText>
+            <MudText Typo="Typo.h6">Reviews</MudText>
+        </HeaderText>
+        <HeaderActions>
+            <EventSelect/>
+        </HeaderActions>
+    </LoadingHeader>
 
     @if (ReviewsVm.ProtestsEnabled)
     {
-        <MudTabs Elevation="2">
+        <MudTabs Elevation="2" MinimumTabWidth="40px">
             <MudTabPanel Text="Reviews" OnClick="@(() => NavigateTo(GetTabLink(0)))"/>
             <MudTabPanel Text="Protests" OnClick="@(() => NavigateTo(GetTabLink(1)))"/>
         </MudTabs>

@@ -11,39 +11,41 @@
 
 <PageTitle>Leagues</PageTitle>
 
-<MudPaper Elevation="2" Class="mb-2 pa-2">
+<MudContainer MaxWidth="MaxWidth.Large">
     <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
-        <MudText Typo="Typo.h5">Leagues</MudText>
+        <HeaderText>
+            <MudText Typo="Typo.h5">Leagues</MudText>
+        </HeaderText>
     </LoadingHeader>
-</MudPaper>
 
-<MudPaper Elevation="1">
-    <MudSimpleTable Dense="true" Hover="true">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var league in @Bind(vm, x => x.Leagues))
-            {
+    <MudPaper Elevation="1">
+        <MudSimpleTable Dense="true" Hover="true">
+            <thead>
                 <tr>
-                    <td class="pa-0">
-                        <MudLink Class="d-block ma-0 py-2 px-4" Href="@league.LeagueName" tabindex="-1">
-                            @Bind(league, x => x.LeagueId)
-                        </MudLink>
-                    </td>
-                    <td class="pa-0">
-                        <MudLink Class="d-block ma-0 py-2 px-4" Href="@league.LeagueName">
-                            <DisplayLeague League=league.GetModel() />
-                        </MudLink>
-                    </td>
+                    <th>Id</th>
+                    <th>Name</th>
                 </tr>
-            }
-        </tbody>
-    </MudSimpleTable>
-</MudPaper>
+            </thead>
+            <tbody>
+                @foreach (var league in @Bind(vm, x => x.Leagues))
+                {
+                    <tr>
+                        <td class="pa-0">
+                            <MudLink Class="d-block ma-0 py-2 px-4" Href="@league.LeagueName" tabindex="-1">
+                                @Bind(league, x => x.LeagueId)
+                            </MudLink>
+                        </td>
+                        <td class="pa-0">
+                            <MudLink Class="d-block ma-0 py-2 px-4" Href="@league.LeagueName">
+                                <DisplayLeague League=league.GetModel() />
+                            </MudLink>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+    </MudPaper>
+</MudContainer>
 
 @code {
     protected override Task OnAfterRenderAsync(bool firstRender)

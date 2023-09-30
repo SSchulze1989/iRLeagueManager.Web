@@ -5,9 +5,13 @@
 @inject SharedStateService Shared
 @inject NavigationManager NavigationManager
 
-<div class="container-xl">
+<MudContainer MaxWidth="MaxWidth.Large">
     <div class="sticky-header">
-        <LoadingHeader><h3>Settings</h3></LoadingHeader>
+        <LoadingHeader>
+            <HeaderText>
+                <h3>Settings</h3>
+            </HeaderText>
+        </LoadingHeader>
         <ul class="nav nav-tabs">
             <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin)>
                 <Authorized Context=AdminContext>
@@ -31,7 +35,7 @@
         </ul>
     </div>
     @Body
-</div>
+</MudContainer>
 
 @code {
     protected override void OnInitialized()

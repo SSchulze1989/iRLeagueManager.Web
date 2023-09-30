@@ -13,11 +13,11 @@
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudStack Spacing="2">
-        <MudPaper Elevation="2">
-            <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
-                <MudText Typo="Typo.h6" Class="mx-6 my-4">Schedule</MudText>
-            </LoadingHeader>
-        </MudPaper>
+        <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+            <HeaderText>
+                <MudText Typo="Typo.h6">Schedule</MudText>
+            </HeaderText>
+        </LoadingHeader>
 
         <AuthorizeView Roles=@(GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer))>
             <Authorized>

@@ -14,25 +14,24 @@
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudStack Spacing="2">
-        <MudPaper Elevation="2">
-            <LoadingHeader Loading="vm.Loading">
-                <MudToolBar>
-                    <MudText Typo="Typo.h6">Teams</MudText>
-                    <MudSpacer/>
-                    <MudSpacer/>
-                    <MudSpacer/>
-                    <MudTextField
-                        Label="Search Team"
-                        Margin="Margin.Dense"
-                        @bind-Value="TeamFilter"
-                        Adornment="Adornment.End"
-                        AdornmentIcon="@Icons.Material.Filled.Search"
-                        Variant="Variant.Outlined"
-                        Immediate="true"
-                        Clearable="true"/>
-                </MudToolBar>
-            </LoadingHeader>
-        </MudPaper>
+        <LoadingHeader Loading="vm.Loading" Row="true">
+            <HeaderActions>
+                <MudText Typo="Typo.h6">Teams</MudText>
+                <MudSpacer />
+                <MudSpacer />
+                <MudSpacer />
+                <MudTextField
+                    Class="object-right"
+                    Label="Search Team"
+                    Margin="Margin.Dense"
+                    @bind-Value="TeamFilter"
+                    Adornment="Adornment.End"
+                    AdornmentIcon="@Icons.Material.Filled.Search"
+                    Variant="Variant.Outlined"
+                    Immediate="true"
+                    Clearable="true"/>
+            </HeaderActions>
+        </LoadingHeader>
         @foreach(var team in Bind(vm, x => x.Teams).Where(FilterTeams).OrderBy(x => x.Name))
         {
             <MudCard Elevation="4">

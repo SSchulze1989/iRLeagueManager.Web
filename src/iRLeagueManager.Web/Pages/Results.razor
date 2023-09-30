@@ -15,102 +15,102 @@
 
 <PageTitle>Results - @LeagueName</PageTitle>
 
-<MudPaper Elevation="2" Class="pa-0 mb-2" >
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
     <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
-        <MudStack>
-            <MudText Typo="Typo.h6" Class="mx-6 mt-4">Results</MudText>
-            <MudToolBar Class="gap-2 mb-2" Dense="true" WrapContent="true">
-                <EventSelect />
-                <MudSpacer />
-                <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
-                    <Authorized>
-                        @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
+        <HeaderText>
+            <MudText Typo="Typo.h6">Results</MudText>
+        </HeaderText>
+        <HeaderActions>
+            <EventSelect />
+            <MudSpacer />
+            <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+                <Authorized>
+                    @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
+                    {
+                        <MudButton OnClick=TriggerCalculation 
+                                    Variant="Variant.Text">
+                            Calculate
+                        </MudButton>
+                        @if (vm.Results.Count > 0)
                         {
-                            <MudButton OnClick=TriggerCalculation 
-                                       Variant="Variant.Text">
-                                Calculate
-                            </MudButton>
-                            @if (vm.Results.Count > 0)
-                            {
-                                <MudTooltip Text="Delete Results"
-                                            Delay="0.5"
-                                            Arrow="true">
-                                    <MudIconButton Variant="Variant.Text"
-                                                   Icon="@Icons.Material.Filled.Delete" 
-                                                   Color="@Color.Error" OnClick=DeleteResultsClick/>
-                                </MudTooltip>
-                            }
+                            <MudTooltip Text="Delete Results"
+                                        Delay="0.5"
+                                        Arrow="true">
+                                <MudIconButton Variant="Variant.Text"
+                                                Icon="@Icons.Material.Filled.Delete" 
+                                                Color="@Color.Error" OnClick=DeleteResultsClick/>
+                            </MudTooltip>
                         }
-                    </Authorized>
-                </AuthorizeView>
-            </MudToolBar>
-        </MudStack>
+                    }
+                </Authorized>
+            </AuthorizeView>
+        </HeaderActions>
     </LoadingHeader>
-</MudPaper>
 
 
-@if (@Bind(vm, x => x.Results)?.Count == 0)
-{
-    <MudPaper Elevation="1" >
-        <MudText Typo="Typo.h5" Class="ma-2 ml-6">No Results</MudText>
-    </MudPaper>
-}
-else
-{
-    @if (vm.Results.Count > 1)
+    @if (@Bind(vm, x => x.Results)?.Count == 0)
     {
-        <MudTabs @bind-ActivePanelIndex="@SelectedTabIndex" Elevation="2">
-            @foreach ((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x, i)))
-            {
-                <MudTabPanel Text="@eventResult.Name">
-                    <MudStack Class="gap-2 pt-2">
-                        @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
-                        {
-                            <MudPaper Elevation="4" >
-                                <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
-                                    <Authorized>
-                                        <DisplayResult Result="result" CanEdit="true" />
-                                    </Authorized>
-                                    <NotAuthorized>
-                                        <DisplayResult Result="result" />
-                                    </NotAuthorized>
-                                </AuthorizeView>
-                            </MudPaper>
-                        }
-                    </MudStack>
-                </MudTabPanel>
-            }
-        </MudTabs>
+        <MudPaper Elevation="1" >
+            <MudText Typo="Typo.h5" Class="ma-2 ml-6">No Results</MudText>
+        </MudPaper>
     }
     else
     {
-        var eventResult = vm.Results.First();
-        <MudStack Class="gap-2">
-            @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
-            {
-                <MudPaper Elevation="2" >
-                    <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
-                        <Authorized>
-                            <DisplayResult Result="result" CanEdit="true" />
-                        </Authorized>
-                        <NotAuthorized>
-                            <DisplayResult Result="result" />
-                        </NotAuthorized>
-                    </AuthorizeView>
-                </MudPaper>
-            }
-        </MudStack>
-    }
-}
-
-<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
-    <Authorized>
-        @if (SharedState.SeasonFinished == false)
+        @if (vm.Results.Count > 1)
         {
-            <MudButton Color="Color.Primary" OnClick=UploadButtonClick Class="mt-2">Upload Result</MudButton>
+            <MudTabs @bind-ActivePanelIndex="@SelectedTabIndex" Elevation="2" MinimumTabWidth="40px">
+                @foreach ((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x, i)))
+                {
+                    <MudTabPanel Text="@eventResult.Name">
+                        <MudStack Class="gap-2 pt-2">
+                            @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
+                            {
+                                <MudPaper Elevation="4" >
+                                    <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
+                                        <Authorized>
+                                            <DisplayResult Result="result" CanEdit="true" />
+                                        </Authorized>
+                                        <NotAuthorized>
+                                            <DisplayResult Result="result" />
+                                        </NotAuthorized>
+                                    </AuthorizeView>
+                                </MudPaper>
+                            }
+                        </MudStack>
+                    </MudTabPanel>
+                }
+            </MudTabs>
         }
-    </Authorized>
-</AuthorizeView>
+        else
+        {
+            var eventResult = vm.Results.First();
+            <MudStack Class="gap-2">
+                @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
+                {
+                    <MudPaper Elevation="2" >
+                        <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
+                            <Authorized>
+                                <DisplayResult Result="result" CanEdit="true" />
+                            </Authorized>
+                            <NotAuthorized>
+                                <DisplayResult Result="result" />
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    </MudPaper>
+                }
+            </MudStack>
+        }
+    }
+
+    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+        <Authorized>
+            @if (SharedState.SeasonFinished == false)
+            {
+                <MudButton Color="Color.Primary" OnClick=UploadButtonClick Class="mt-2">Upload Result</MudButton>
+            }
+        </Authorized>
+    </AuthorizeView>
+</MudContainer>
 
 @code {
     private const string resultTabParam = "resultTab";

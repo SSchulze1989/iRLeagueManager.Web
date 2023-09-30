@@ -10,159 +10,136 @@
 @inject NavigationManager NavigationManager
 
 <CascadingValue Value=Review.InvolvedMembers>
-<MudPaper Elevation="4" Class="pa-4">
-    <div @attributes=AdditionalAttributes class="card @AddCssClass @GetBorderClass(Selected, Bind(Review, x => x.Status))" id="review-card-@Review.ReviewId" @ref=Card>
-         <div class="card-header accordion-header review-header @GetBorderClass(Selected, Bind(Review, x => x.Status))">
-            <div class="row">
-                <div class="col d-md-flex justify-content-start">
+    <MudPaper Elevation="2">
+        <MudExpansionPanel>
+            <TitleContent>
+                <MudToolBar Class="gap-1 px-0" WrapContent="true" Dense="true">
                     <span>@Review.SessionName:</span>
-                    <span>@Bind(Review, x => x.IncidentNr)</span>
-                    <span class="oi oi-flag m-1" /><span>@Bind(Review, x => x.OnLap)</span>
-                    <span class="oi oi-action-undo m-1" /><span>@Bind(Review, x => x.Corner)</span>
-                    <span class="oi oi-chevron-right m1" /><span>@Bind(Review, x => x.IncidentKind)</span>
-                    <span class="oi oi-chat m1" /><span>@Bind(Review, x => x.Comments).Count</span>
-                    <span class="oi oi-task" /><span>@Bind(Review, x => x.Comments).Where(x => x.Votes.Any()).Count()</span>
+                    <span>@Review.IncidentNr</span>
+                    <MudIcon Icon="@Icons.Material.Filled.Flag"/>@Review.OnLap
+                    <MudIcon Icon="@Icons.Material.Filled.TurnLeft"/>@Review.Corner
+                    <MudIcon Icon="@Icons.Material.Filled.ChevronRight"/>@Review.IncidentKind
+                    <MudIcon Icon="@Icons.Material.Filled.Comment"/>@Review.Comments.Count()
+                    <MudIcon Icon="@Icons.Material.Filled.CheckBox" />@Review.Comments.Where(x => x.Votes.Any()).Count()
                     @if (UserHasCommented(Review))
                     {
-                        <span class="oi oi-task text-success"></span>
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small"/>
                     }
-                </div>
-                <div class="col-md-auto d-grid d-flex flex-nowrap justify-content-end">
-                    @if (Collapsed)
+                    <MudSpacer />
+                    <MudIconButton Icon="@Icons.Material.Filled.Link" OnClick="CopyDirectLink" Size="Size.Small" />
+                    @if (OnEditClick.HasDelegate && ReadOnly == false)
                     {
-                        <button class="oi oi-chevron-bottom btn review-header-button" @onclick=ToggleCollapsed />
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="OnEditClick" Size="Size.Small" />
                     }
-                    else
+                    @if (OnDeleteClick.HasDelegate && ReadOnly == false)
                     {
-                        <button class="oi oi-chevron-top btn review-header-button" @onclick=ToggleCollapsed />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="OnDeleteClick" Size="Size.Small" />
                     }
-                    <div class="dropdown">
-                        <button class="oi oi-ellipses btn review-header-button" type="button" id="DropDownMenuButton-@Review.ReviewId" data-bs-toggle="dropdown" aria-expanded="false" />
-                        <ul class="dropdown-menu">
-                            @if (OnEditClick.HasDelegate && ReadOnly == false)
+                </MudToolBar>
+                <MudGrid>
+                    <MudItem xs="2" Class="py-1 d-flex align-center">
+                        Involved
+                    </MudItem>
+                    <MudItem xs="10" Class="py-1 d-flex align-center">
+                        <MudChipSet ReadOnly="true">
+                            @foreach(var member in Bind(Review, x => x.InvolvedMembers))
                             {
-                                <li><a class="dropdown-item" @onclick=OnEditClick><span class="oi oi-pencil"/>Edit</a></li>
+                                <MudChip Label="true" Size="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? Size.Small : Size.Medium)" Variant="Variant.Outlined">@member.FirstName @member.LastName</MudChip>        
                             }
-                            <li><a class="dropdown-item" href="" @onclick=CopyDirectLink @onclick:preventDefault><span class="oi oi-clipboard"/>Copy direct link</a></li>
-                            @if (OnDeleteClick.HasDelegate && ReadOnly == false)
+                        </MudChipSet>
+                    </MudItem>
+                        <MudItem xs="2" Class="py-1 d-flex align-center">
+                        Result
+                    </MudItem>
+                    <MudItem xs="10" Class="py-1 d-flex align-center">
+                        <MudChipSet ReadOnly="true">
+                            @foreach(var vote in Bind(Review, x => x.Votes))
                             {
-                                <li><a class="dropdown-item" @onclick=OnDeleteClick><span class="oi oi-x text-danger"/>Delete</a></li>
+                                var member = vote.MemberAtFault;
+                                <MudChip Label="true" Size="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? Size.Small : Size.Medium)" Color="Color.Error">
+                                    @Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
+                                </MudChip>
                             }
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="container-xxl @(Collapsed ? "" : " collapse")">
-                <div class="row">
-                    <div class="col-md-auto">
-                        <h5>Involved</h5>
-                    </div>
-                    <div class="col">
-                        @foreach(var member in @Bind(Review, x => x.InvolvedMembers))
-                        {
-                            <span class="badge bg-secondary h-auto me-1">@member.FirstName @member.LastName</span>
-                        }
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-auto">
-                        <h5>Result</h5>
-                    </div>
-                    <div class="col">
-                        @foreach(var vote in @Bind(Review, x => x.Votes))
-                        {
-                            var member = @Bind(vote, x => x.MemberAtFault);
-                            <span class="badge bg-danger h-auto me-1">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
-                        }
-                    </div>
-                </div>
-            </div>
-            <div class="container-xxl @(Collapsed ? " collapse" : "")" id="review_text_@Review.ReviewId" @ref=ReviewText>
-                <div class="row">
-                    <div class="col">
-                        <h5>Involved Drivers</h5>
-                        <div class="d-flex flex-wrap">
-                            @foreach(var member in @Bind(Review, x => x.InvolvedMembers))
-                            {
-                                <span class="badge bg-secondary me-1 mb-1">@member.FirstName @member.LastName</span>
-                            }
-                        </div>
-                    </div>
-                    <div class="col">
-                        <h5>Votes</h5>
-                        <div class="d-flex flex-wrap">
-                            @foreach(var countedVote in @Bind(Review, x => x.CountedVotes))
-                            {
-                                var member = countedVote.Vote.MemberAtFault;
-                                <span class="badge bg-warning me-1 mb-1">
-                                    @countedVote.Vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
-                                    <span class="badge rounded-pill bg-danger ms-1">@(countedVote.Count)x</span>
-                                </span>
-                            }
-                        </div>
-                    </div>
-                </div>
-                <hr/>
-                @if (string.IsNullOrWhiteSpace(Review.FullDescription) == false)
-                {
-                    <div>
-                        <h5>Description</h5>
-                        <div class="preserve-format">
-                            @Review.FullDescription
-                        </div>
-                    </div>
-                    <hr/>
-                }
-                <div>
-                    <h5>Result</h5>
-                    <div>
-                        @foreach(var vote in @Bind(Review, x => x.Votes))
-                        {
-                            var member = vote.MemberAtFault;
-                            <span class="badge bg-danger me-1 mb-1">
-                                @vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
-                            </span>
-                        }
-                    </div>
-                    <div class="preserve-format">
-                        @Bind(Review, x => x.ResultText)
-                    </div>
-                    @if (IsSteward && ReadOnly == false)
+                        </MudChipSet>
+                    </MudItem>
+                </MudGrid>
+            </TitleContent>
+            <ChildContent>
+                <MudStack Class="gap-1">
+                    @if (string.IsNullOrWhiteSpace(Review.FullDescription) == false)
                     {
-                        <div class="mt-2">
-                            <button class="btn btn-outline-secondary py-0" @onclick=EditResultClick>Edit</button>
-                        </div>
+                        <MudCard Elevation="4">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">Description</MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudText Style="white-space: pre-wrap">
+                                    @Review.FullDescription
+                                </MudText>
+                            </MudCardContent>
+                        </MudCard>
                     }
-                </div>
-                <hr/>
-                @if (IsSteward)
-                {
-                    <div>
-                        <h5>Comments</h5>
-                        <ul class="list-group">
-                            @foreach (var comment in @Bind(Review, x => x.Comments))
-                            {
-                                <li class="list-group-item">
-                                    <ReviewComment Comment=comment 
-                                                    OnStateHasChanged=@(() => CommentStateChanged(comment)) 
-                                                    OnDeleteClick=@(() => DeleteCommentClick(comment))/>
-                                </li>
-                            }
-                        </ul>
-                        @if (ReadOnly == false && UserHasCommented(Review) == false)
-                        {
-                            <button class="btn btn-outline-secondary mt-2" @onclick=AddCommentClick>
-                                Add Comment
-                            </button>
-                        }
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-</MudPaper>
+                    <MudCard Elevation="4">
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Result</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                @if (IsSteward && ReadOnly == false)
+                                {
+                                    <MudButton StartIcon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" OnClick=EditResultClick>Edit</MudButton>
+                                }
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudChipSet ReadOnly="true" Class="d-flex gap-2">
+                                @foreach (var vote in @Bind(Review, x => x.CountedVotes))
+                                {
+                                    var member = vote.Vote.MemberAtFault;
+                                    <MudBadge Content="@vote.Count" Overlap="true" Color="Color.Primary">
+                                        <MudChip Color="Color.Warning" Size="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? Size.Small : Size.Medium)" Label="true">
+                                            @vote.Vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
+                                        </MudChip>
+                                    </MudBadge>
+                                }
+                            </MudChipSet>
+                            <MudText Style="white-space: pre-wrap;">
+                                @Bind(Review, x => x.ResultText)
+                            </MudText>
+                        </MudCardContent>
+                    </MudCard>
+                    @if (IsSteward)
+                    {
+                        <MudCard Elevation="4">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">Comments</MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudStack>
+                                    @foreach (var comment in @Bind(Review, x => x.Comments))
+                                    {
+                                        <ReviewComment Comment=comment
+                                                OnStateHasChanged=@(() => CommentStateChanged(comment))
+                                                OnDeleteClick=@(() => DeleteCommentClick(comment)) />
+                                    }
+                                </MudStack>
+                                @if (ReadOnly == false && UserHasCommented(Review) == false)
+                                {
+                                    <MudButton StartIcon="@Icons.Material.Filled.AddComment" Color="Color.Tertiary" OnClick=AddCommentClick>
+                                        Add Comment
+                                    </MudButton>
+                                }
+                            </MudCardContent>
+                        </MudCard>
+                    }
+                </MudStack>
+            </ChildContent>
+        </MudExpansionPanel>
+    </MudPaper>
 </CascadingValue>
 
 @code {
@@ -170,6 +147,8 @@
     public IModalService ModalService { get; set; } = default!;
     [CascadingParameter]
     public Task<AuthenticationState> AuthenticationTask { get; set; } = default!;
+    [CascadingParameter]
+    public Breakpoint Breakpoint { get; set; }
     [CascadingParameter]
     public CarListModel EventCars { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues=true)]
@@ -189,10 +168,9 @@
     [Parameter]
     public bool Selected { get; set; }
 
-    private string AddCssClass { get; set; } = string.Empty;
+    private MudBreakpointProvider? BreakpointProvider { get; set; } = default!;
 
-    public ElementReference Card { get; set; }
-    private ElementReference ReviewText { get; set; }
+    private string AddCssClass { get; set; } = string.Empty;
 
     public bool Collapsed { get; set; } = true;
 

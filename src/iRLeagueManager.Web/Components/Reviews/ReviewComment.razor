@@ -29,7 +29,7 @@
             @foreach (var vote in @Bind(Comment, x => x.Votes))
             {
                 var member = @Bind(vote, x => x.MemberAtFault);
-                <MudChip Label="true" Color="Color.Warning">
+                <MudChip Label="true" Color="Color.Warning" Size="Size.Small">
                     @Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
                 </MudChip>
             }

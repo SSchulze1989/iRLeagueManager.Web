@@ -10,6 +10,7 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
+<MudBreakpointProvider>
 <CascadingValue Value="EventList">
 <CascadingValue Value="SharedState">
 <CascadingBlazoredModal DisableBackgroundCancel="true" Size="ModalSize.Large">
@@ -36,6 +37,7 @@
 </CascadingBlazoredModal>
 </CascadingValue>
 </CascadingValue>
+</MudBreakpointProvider>
 
 @code {
     MudTheme TestTheme = new()

@@ -58,7 +58,7 @@
     {
         @if (vm.Results.Count > 1)
         {
-            <MudTabs @bind-ActivePanelIndex="@SelectedTabIndex" Elevation="2" MinimumTabWidth="40px">
+            <MudTabs @bind-ActivePanelIndex="@SelectedTabIndex" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
                 @foreach ((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x, i)))
                 {
                     <MudTabPanel Text="@eventResult.Name">
@@ -121,6 +121,8 @@
     public SharedStateService SharedState { get; set; } = default!;
     [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
+    [CascadingParameter]
+    public Breakpoint Breakpoint { get; set; }
 
 
     protected override async Task OnInitializedAsync()

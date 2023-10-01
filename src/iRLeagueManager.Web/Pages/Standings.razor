@@ -36,7 +36,7 @@
     {
         @if (vm.Standings.Count > 1)
         {
-            <MudTabs @bind-ActivePanelIndex="@vm.SelectedStandingIndex" Elevation="2" MinimumTabWidth="8em">
+            <MudTabs @bind-ActivePanelIndex="@vm.SelectedStandingIndex" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
                 @foreach ((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x, i)))
                 {
                     <MudTabPanel Text="@standing.Name">
@@ -56,6 +56,9 @@
 </MudContainer>
 
 @code {
+    [CascadingParameter]
+    public Breakpoint Breakpoint { get; set; }
+
     private const string standingTabParam = "standingTab";
 
     protected override void OnInitialized()

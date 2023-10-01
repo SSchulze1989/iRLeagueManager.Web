@@ -90,7 +90,7 @@
             NoHeader = true,
         };
         var result = await DialogService.Show<CookieBannerModal>("", options).Result;
-        return result.Cancelled == false;
+        return result.Canceled == false;
     }
 
     public virtual void Dispose()

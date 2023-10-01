@@ -11,30 +11,32 @@
 
 <CascadingValue Value=Review.InvolvedMembers>
     <MudPaper Elevation="2">
-        <MudExpansionPanel>
+        <MudExpansionPanel HideIcon="true" DisableGutters="true" Dense="true">
             <TitleContent>
-                <MudToolBar Class="gap-1 px-0" WrapContent="true" Dense="true">
+                <MudToolBar Class="gap-1 px-0" WrapContent="true" Dense="false">
                     <span>@Review.SessionName:</span>
                     <span>@Review.IncidentNr</span>
-                    <MudIcon Icon="@Icons.Material.Filled.Flag"/>@Review.OnLap
-                    <MudIcon Icon="@Icons.Material.Filled.TurnLeft"/>@Review.Corner
-                    <MudIcon Icon="@Icons.Material.Filled.ChevronRight"/>@Review.IncidentKind
-                    <MudIcon Icon="@Icons.Material.Filled.Comment"/>@Review.Comments.Count()
-                    <MudIcon Icon="@Icons.Material.Filled.CheckBox" />@Review.Comments.Where(x => x.Votes.Any()).Count()
+                    <MudIcon Icon="@Icons.Material.Outlined.Flag"/>@Review.OnLap
+                    <MudIcon Icon="@Icons.Material.Outlined.TurnLeft" />@Review.Corner
+                    <MudIcon Icon="@Icons.Material.Outlined.ChevronRight"/>@Review.IncidentKind
+                    @*<MudIcon Icon="@Icons.Material.Outlined.Comment"/>@Review.Comments.Count()
+                    <MudIcon Icon="@Icons.Material.Outlined.CheckBox" />@Review.Comments.Where(x => x.Votes.Any()).Count()*@
                     @if (UserHasCommented(Review))
                     {
                         <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small"/>
                     }
                     <MudSpacer />
-                    <MudIconButton Icon="@Icons.Material.Filled.Link" OnClick="CopyDirectLink" Size="Size.Small" />
-                    @if (OnEditClick.HasDelegate && ReadOnly == false)
-                    {
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="OnEditClick" Size="Size.Small" />
-                    }
-                    @if (OnDeleteClick.HasDelegate && ReadOnly == false)
-                    {
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="OnDeleteClick" Size="Size.Small" />
-                    }
+                    <MudMenu Icon="@Icons.Material.Outlined.Menu" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                        <MudMenuItem Icon="@Icons.Material.Outlined.Link" OnClick="CopyDirectLink">Copy Link</MudMenuItem>
+                        @if (OnEditClick.HasDelegate && ReadOnly == false)
+                        {
+                            <MudMenuItem Icon="@Icons.Material.Outlined.Edit" OnClick="OnEditClick">Edit</MudMenuItem>
+                        }
+                        @if (OnDeleteClick.HasDelegate && ReadOnly == false)
+                        {
+                            <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="OnDeleteClick">Delete</MudMenuItem>
+                        }
+                    </MudMenu>
                 </MudToolBar>
                 <MudGrid>
                     <MudItem xs="2" Class="py-1 d-flex align-center">
@@ -44,7 +46,7 @@
                         <MudChipSet ReadOnly="true">
                             @foreach(var member in Bind(Review, x => x.InvolvedMembers))
                             {
-                                <MudChip Label="true" Size="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? Size.Small : Size.Medium)" Variant="Variant.Outlined">@member.FirstName @member.LastName</MudChip>        
+                                <MudChip Label="true" Size="Size.Small" Variant="Variant.Outlined">@member.FirstName @member.LastName</MudChip>        
                             }
                         </MudChipSet>
                     </MudItem>
@@ -56,7 +58,7 @@
                             @foreach(var vote in Bind(Review, x => x.Votes))
                             {
                                 var member = vote.MemberAtFault;
-                                <MudChip Label="true" Size="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? Size.Small : Size.Medium)" Color="Color.Error">
+                                <MudChip Label="true" Size="Size.Small" Color="Color.Error">
                                     @Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
                                 </MudChip>
                             }
@@ -65,78 +67,89 @@
                 </MudGrid>
             </TitleContent>
             <ChildContent>
-                <MudStack Class="gap-1">
-                    @if (string.IsNullOrWhiteSpace(Review.FullDescription) == false)
-                    {
+                <MudPaper Class="pa-2" Outlined="true" Style="background-color: var(--mud-palette-background)">
+                    <MudStack Class="gap-1">
+                        @if (string.IsNullOrWhiteSpace(Review.FullDescription) == false)
+                        {
+                            <MudCard Elevation="4">
+                                <MudCardHeader Class="py-1">
+                                    <CardHeaderContent>
+                                        <MudText Typo="Typo.h6">Description</MudText>
+                                    </CardHeaderContent>
+                                </MudCardHeader>
+                                <MudCardContent>
+                                    <MudText Typo="Typo.body2" Class="ps-2" Style="white-space: pre-wrap">
+                                        @Review.FullDescription
+                                    </MudText>
+                                </MudCardContent>
+                            </MudCard>
+                        }
                         <MudCard Elevation="4">
-                            <MudCardHeader>
+                            <MudCardHeader Class="py-1">
                                 <CardHeaderContent>
-                                    <MudText Typo="Typo.h6">Description</MudText>
+                                    <MudText Typo="Typo.h6">Votes</MudText>
                                 </CardHeaderContent>
                             </MudCardHeader>
                             <MudCardContent>
-                                <MudText Style="white-space: pre-wrap">
-                                    @Review.FullDescription
+                                <MudChipSet ReadOnly="true" Class="d-flex gap-2">
+                                    @foreach (var vote in @Bind(Review, x => x.CountedVotes))
+                                    {
+                                        var member = vote.Vote.MemberAtFault;
+                                        <MudBadge Content="@vote.Count" Overlap="true" Color="Color.Primary">
+                                            <MudChip Color="Color.Warning" Size="Size.Small" Label="true">
+                                                @vote.Vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
+                                            </MudChip>
+                                        </MudBadge>
+                                    }
+                                </MudChipSet>
+                            </MudCardContent>
+                        </MudCard>
+                        <MudCard Elevation="4">
+                            <MudCardHeader Class="py-1">
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">Result</MudText>
+                                </CardHeaderContent>
+                                <CardHeaderActions>
+                                    @if (IsSteward && ReadOnly == false)
+                                    {
+                                        <MudButton StartIcon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" OnClick=EditResultClick>Edit</MudButton>
+                                    }
+                                </CardHeaderActions>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudText Typo="Typo.body2" Class="ps-2" Style="white-space: pre-wrap;">
+                                    @Bind(Review, x => x.ResultText)
                                 </MudText>
                             </MudCardContent>
                         </MudCard>
-                    }
-                    <MudCard Elevation="4">
-                        <MudCardHeader>
-                            <CardHeaderContent>
-                                <MudText Typo="Typo.h6">Result</MudText>
-                            </CardHeaderContent>
-                            <CardHeaderActions>
-                                @if (IsSteward && ReadOnly == false)
-                                {
-                                    <MudButton StartIcon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" OnClick=EditResultClick>Edit</MudButton>
-                                }
-                            </CardHeaderActions>
-                        </MudCardHeader>
-                        <MudCardContent>
-                            <MudChipSet ReadOnly="true" Class="d-flex gap-2">
-                                @foreach (var vote in @Bind(Review, x => x.CountedVotes))
-                                {
-                                    var member = vote.Vote.MemberAtFault;
-                                    <MudBadge Content="@vote.Count" Overlap="true" Color="Color.Primary">
-                                        <MudChip Color="Color.Warning" Size="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? Size.Small : Size.Medium)" Label="true">
-                                            @vote.Vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
-                                        </MudChip>
-                                    </MudBadge>
-                                }
-                            </MudChipSet>
-                            <MudText Style="white-space: pre-wrap;">
-                                @Bind(Review, x => x.ResultText)
-                            </MudText>
-                        </MudCardContent>
-                    </MudCard>
-                    @if (IsSteward)
-                    {
-                        <MudCard Elevation="4">
-                            <MudCardHeader>
-                                <CardHeaderContent>
-                                    <MudText Typo="Typo.h6">Comments</MudText>
-                                </CardHeaderContent>
-                            </MudCardHeader>
-                            <MudCardContent>
-                                <MudStack>
-                                    @foreach (var comment in @Bind(Review, x => x.Comments))
+                        @if (IsSteward)
+                        {
+                            <MudCard Elevation="4">
+                                <MudCardHeader Class="py-1">
+                                    <CardHeaderContent>
+                                        <MudText Typo="Typo.h6">Comments</MudText>
+                                    </CardHeaderContent>
+                                </MudCardHeader>
+                                <MudCardContent>
+                                    <MudStack>
+                                        @foreach (var comment in @Bind(Review, x => x.Comments))
+                                        {
+                                            <ReviewComment Comment=comment
+                                                    OnStateHasChanged=@(() => CommentStateChanged(comment))
+                                                    OnDeleteClick=@(() => DeleteCommentClick(comment)) />
+                                        }
+                                    </MudStack>
+                                    @if (ReadOnly == false && UserHasCommented(Review) == false)
                                     {
-                                        <ReviewComment Comment=comment
-                                                OnStateHasChanged=@(() => CommentStateChanged(comment))
-                                                OnDeleteClick=@(() => DeleteCommentClick(comment)) />
+                                        <MudButton StartIcon="@Icons.Material.Filled.AddComment" Color="Color.Tertiary" OnClick=AddCommentClick>
+                                            Add Comment
+                                        </MudButton>
                                     }
-                                </MudStack>
-                                @if (ReadOnly == false && UserHasCommented(Review) == false)
-                                {
-                                    <MudButton StartIcon="@Icons.Material.Filled.AddComment" Color="Color.Tertiary" OnClick=AddCommentClick>
-                                        Add Comment
-                                    </MudButton>
-                                }
-                            </MudCardContent>
-                        </MudCard>
-                    }
-                </MudStack>
+                                </MudCardContent>
+                            </MudCard>
+                        }
+                    </MudStack>
+                </MudPaper>
             </ChildContent>
         </MudExpansionPanel>
     </MudPaper>
@@ -149,6 +162,8 @@
     public Task<AuthenticationState> AuthenticationTask { get; set; } = default!;
     [CascadingParameter]
     public Breakpoint Breakpoint { get; set; }
+    [CascadingParameter]
+    public MudThemeProvider ThemeProvider { get; set; } = default!;
     [CascadingParameter]
     public CarListModel EventCars { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues=true)]

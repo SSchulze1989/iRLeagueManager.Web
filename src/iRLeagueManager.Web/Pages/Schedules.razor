@@ -23,7 +23,7 @@
             <Authorized>
                 @foreach(var schedule in @Bind(vm, x => x.Schedules))
                 {
-                    <DisplaySchedule Schedule="schedule" ReadOnly=SharedState.SeasonFinished DisplayHeader="@(vm.Schedules.Count > 1)"/>
+                    <DisplaySchedule Schedule="schedule" ReadOnly=Shared.SeasonFinished DisplayHeader="@(vm.Schedules.Count > 1)"/>
                 }
             </Authorized>
             <NotAuthorized>
@@ -37,9 +37,6 @@
 </MudContainer>
 
 @code {
-    [CascadingParameter]
-    public SharedStateService SharedState { get; set; } = default!;
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);

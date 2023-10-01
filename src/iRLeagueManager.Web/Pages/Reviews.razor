@@ -26,7 +26,7 @@
 
     @if (ReviewsVm.ProtestsEnabled)
     {
-        <MudTabs Elevation="2" MinimumTabWidth="40px">
+        <MudTabs Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
             <MudTabPanel Text="Reviews" OnClick="@(() => NavigateTo(GetTabLink(0)))"/>
             <MudTabPanel Text="Protests" OnClick="@(() => NavigateTo(GetTabLink(1)))"/>
         </MudTabs>
@@ -48,8 +48,7 @@
                     <Authorized>
                         @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
                         {
-                            <ReviewCard class="px-0 mb-2 mx-0"
-                                        Review=review
+                            <ReviewCard Review=review
                                         Selected=@(review.ReviewId == SelectedReviewId)
                                         OnEditClick=@(async () => await OnEditClick(review)) 
                                         OnDeleteClick=@(async () => await OnDeleteClick(review))
@@ -59,15 +58,13 @@
                         }
                         @if (ReadOnly == false)
                         {
-                            <button class="btn btn-outline-secondary" type="button" @onclick=OnAddClick>Add Review</button>
+                            <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary" ButtonType="ButtonType.Button" OnClick=OnAddClick>Add Review</MudButton>
                         }
                     </Authorized>
                     <NotAuthorized>
                         @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
                         {
-                            <ReviewCard class="px-0 mb-2 mx-0"
-                                        Review=review
-                                        Selected=@(review.ReviewId == SelectedReviewId) />
+                            <ReviewCard Review=review Selected=@(review.ReviewId == SelectedReviewId) />
                         }
                     </NotAuthorized>
                 </AuthorizeView>
@@ -137,15 +134,15 @@
 
 @code {
     [CascadingParameter]
-    public SharedStateService SharedState { get; set; } = default!;
-    [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
     [CascadingParameter]
     private Task<AuthenticationState> AuthTask { get; set; } = default!;
+    [CascadingParameter]
+    public Breakpoint Breakpoint { get; set; }
 
     private string UserId { get; set; } = string.Empty;
 
-    private bool ReadOnly => SharedState.SeasonFinished;
+    private bool ReadOnly => Shared.SeasonFinished;
 
     // Query parameters
     private const string tabIndexParam = "tabIndex";

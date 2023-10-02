@@ -8,70 +8,56 @@
 @using iRLeagueApiCore.Common.Models.Users;
 @using iRLeagueManager.Web.ViewModels
 @inject NavigationManager NavigationManager
+@inject IDialogService DialogService
 
 <CascadingValue Value=Review.InvolvedMembers>
-    <MudPaper Elevation="2">
-        <MudExpansionPanel HideIcon="true" DisableGutters="true" Dense="true">
+<CascadingValue Value="ChipSize" Name="ChipSize">
+    <MudCard Elevation="2">
+        <MudExpansionPanel DisableGutters="true" Dense="true" @bind-IsExpanded="IsExpanded">
             <TitleContent>
-                <MudToolBar Class="gap-1 px-0" WrapContent="true" Dense="false">
+                <div class="d-flex d-flex-wrap align-center gap-1"
+                     style="
+                        margin: -16px calc(0px - 24px - 1.6em) -16px -24px;
+                        padding: 16px calc(0px + 24px + 1.6em) 16px 24px;
+                        border-top: 6px; 
+                        border-top-color: var(--mud-palette-@StatusColor); 
+                        border-top-style: solid;">
                     <span>@Review.SessionName:</span>
                     <span>@Review.IncidentNr</span>
                     <MudIcon Icon="@Icons.Material.Outlined.Flag"/>@Review.OnLap
                     <MudIcon Icon="@Icons.Material.Outlined.TurnLeft" />@Review.Corner
                     <MudIcon Icon="@Icons.Material.Outlined.ChevronRight"/>@Review.IncidentKind
-                    @*<MudIcon Icon="@Icons.Material.Outlined.Comment"/>@Review.Comments.Count()
-                    <MudIcon Icon="@Icons.Material.Outlined.CheckBox" />@Review.Comments.Where(x => x.Votes.Any()).Count()*@
+                    <MudIcon Icon="@Icons.Material.Outlined.Comment"/>@Review.Comments.Count()
+                    <MudIcon Icon="@Icons.Material.Outlined.CheckBox" />@Review.Comments.Where(x => x.Votes.Any()).Count()
                     @if (UserHasCommented(Review))
                     {
                         <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small"/>
                     }
                     <MudSpacer />
-                    <MudMenu Icon="@Icons.Material.Outlined.Menu" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
-                        <MudMenuItem Icon="@Icons.Material.Outlined.Link" OnClick="CopyDirectLink">Copy Link</MudMenuItem>
-                        @if (OnEditClick.HasDelegate && ReadOnly == false)
-                        {
-                            <MudMenuItem Icon="@Icons.Material.Outlined.Edit" OnClick="OnEditClick">Edit</MudMenuItem>
-                        }
-                        @if (OnDeleteClick.HasDelegate && ReadOnly == false)
-                        {
-                            <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="OnDeleteClick">Delete</MudMenuItem>
-                        }
+                    <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                        <ActivatorContent>
+                            <MudIconButton Icon="@Icons.Material.Outlined.Menu" Style="margin: -12px; margin-right: 0px"/>
+                        </ActivatorContent>
+                        <ChildContent>
+                            <MudMenuItem Icon="@Icons.Material.Outlined.Link" OnClick="CopyDirectLink">Copy Link</MudMenuItem>
+                            @if (OnEditClick.HasDelegate && ReadOnly == false)
+                            {
+                                <MudMenuItem Icon="@Icons.Material.Outlined.Edit" OnClick="OnEditClick">Edit</MudMenuItem>
+                            }
+                            @if (OnDeleteClick.HasDelegate && ReadOnly == false)
+                            {
+                                <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="OnDeleteClick">Delete</MudMenuItem>
+                            }
+                        </ChildContent>
                     </MudMenu>
-                </MudToolBar>
-                <MudGrid>
-                    <MudItem xs="2" Class="py-1 d-flex align-center">
-                        Involved
-                    </MudItem>
-                    <MudItem xs="10" Class="py-1 d-flex align-center">
-                        <MudChipSet ReadOnly="true">
-                            @foreach(var member in Bind(Review, x => x.InvolvedMembers))
-                            {
-                                <MudChip Label="true" Size="Size.Small" Variant="Variant.Outlined">@member.FirstName @member.LastName</MudChip>        
-                            }
-                        </MudChipSet>
-                    </MudItem>
-                        <MudItem xs="2" Class="py-1 d-flex align-center">
-                        Result
-                    </MudItem>
-                    <MudItem xs="10" Class="py-1 d-flex align-center">
-                        <MudChipSet ReadOnly="true">
-                            @foreach(var vote in Bind(Review, x => x.Votes))
-                            {
-                                var member = vote.MemberAtFault;
-                                <MudChip Label="true" Size="Size.Small" Color="Color.Error">
-                                    @Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
-                                </MudChip>
-                            }
-                        </MudChipSet>
-                    </MudItem>
-                </MudGrid>
+                </div>
             </TitleContent>
             <ChildContent>
-                <MudPaper Class="pa-2" Outlined="true" Style="background-color: var(--mud-palette-background)">
+                <MudCard Class="pa-0" Outlined="true" Style="background-color: var(--mud-palette-background-grey);">
                     <MudStack Class="gap-1">
                         @if (string.IsNullOrWhiteSpace(Review.FullDescription) == false)
                         {
-                            <MudCard Elevation="4">
+                                <MudCard Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
                                 <MudCardHeader Class="py-1">
                                     <CardHeaderContent>
                                         <MudText Typo="Typo.h6">Description</MudText>
@@ -84,27 +70,50 @@
                                 </MudCardContent>
                             </MudCard>
                         }
-                        <MudCard Elevation="4">
-                            <MudCardHeader Class="py-1">
-                                <CardHeaderContent>
-                                    <MudText Typo="Typo.h6">Votes</MudText>
-                                </CardHeaderContent>
-                            </MudCardHeader>
-                            <MudCardContent>
-                                <MudChipSet ReadOnly="true" Class="d-flex gap-2">
-                                    @foreach (var vote in @Bind(Review, x => x.CountedVotes))
-                                    {
-                                        var member = vote.Vote.MemberAtFault;
-                                        <MudBadge Content="@vote.Count" Overlap="true" Color="Color.Primary">
-                                            <MudChip Color="Color.Warning" Size="Size.Small" Label="true">
-                                                @vote.Vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
-                                            </MudChip>
-                                        </MudBadge>
-                                    }
-                                </MudChipSet>
-                            </MudCardContent>
-                        </MudCard>
-                        <MudCard Elevation="4">
+                        <MudDivider />
+                        <MudGrid Spacing="1">
+                            <MudItem xs="12" sm="6">
+                                    <MudCard Elevation="0" Style="background-color: var(--mud-palette-background-grey); height: 100%">
+                                    <MudCardHeader Class="py-1">
+                                        <CardHeaderContent>
+                                            <MudText Typo="Typo.h6">Involved</MudText>
+                                        </CardHeaderContent>
+                                    </MudCardHeader>
+                                    <MudCardContent>
+                                        <MudChipSet ReadOnly="true">
+                                            @foreach (var member in Bind(Review, x => x.InvolvedMembers))
+                                            {
+                                                <MudChip Icon="@Icons.Material.Outlined.Person" Label="true" Size="ChipSize" Variant="Variant.Outlined">@member.FirstName @member.LastName</MudChip>
+                                            }
+                                        </MudChipSet>
+                                    </MudCardContent>
+                                </MudCard>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                    <MudCard Elevation="0" Style="background-color: var(--mud-palette-background-grey); height: 100%">
+                                    <MudCardHeader Class="py-1">
+                                        <CardHeaderContent>
+                                            <MudText Typo="Typo.h6">Votes</MudText>
+                                        </CardHeaderContent>
+                                    </MudCardHeader>
+                                    <MudCardContent>
+                                        <MudChipSet ReadOnly="true" Class="d-flex gap-2">
+                                            @foreach (var vote in @Bind(Review, x => x.CountedVotes))
+                                            {
+                                                var member = vote.Vote.MemberAtFault;
+                                                <MudBadge Content="@vote.Count" Overlap="true" Color="Color.Primary">
+                                                    <MudChip Color="Color.Warning" Size="ChipSize" Label="true">
+                                                        @vote.Vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
+                                                    </MudChip>
+                                                </MudBadge>
+                                            }
+                                        </MudChipSet>
+                                    </MudCardContent>
+                                </MudCard>
+                            </MudItem>
+                        </MudGrid>
+                        <MudDivider />
+                        <MudCard Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
                             <MudCardHeader Class="py-1">
                                 <CardHeaderContent>
                                     <MudText Typo="Typo.h6">Result</MudText>
@@ -124,7 +133,8 @@
                         </MudCard>
                         @if (IsSteward)
                         {
-                            <MudCard Elevation="4">
+                            <MudDivider/>
+                            <MudCard Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
                                 <MudCardHeader Class="py-1">
                                     <CardHeaderContent>
                                         <MudText Typo="Typo.h6">Comments</MudText>
@@ -149,15 +159,48 @@
                             </MudCard>
                         }
                     </MudStack>
-                </MudPaper>
+                </MudCard>
             </ChildContent>
         </MudExpansionPanel>
-    </MudPaper>
+        @if (IsExpanded == false)
+        {
+            <MudPaper Class="ma-2 pa-4" Elevation="0">
+                <MudGrid>
+                    <MudItem xs="2" Class="py-1 d-flex align-center">
+                        <MudText Typo="Typo.h6">Involved</MudText>
+                    </MudItem>
+                    <MudItem xs="10" Class="py-1 d-flex align-center">
+                        <MudChipSet ReadOnly="true">
+                            @foreach (var member in Bind(Review, x => x.InvolvedMembers))
+                            {
+                                <MudChip Icon="@Icons.Material.Outlined.Person" Label="true" Size="ChipSize" Variant="Variant.Outlined">@member.FirstName @member.LastName</MudChip>
+                            }
+                        </MudChipSet>
+                    </MudItem>
+                    <MudItem xs="2" Class="py-1 d-flex align-center">
+                        <MudText Typo="Typo.h6">Result</MudText>
+                    </MudItem>
+                    <MudItem xs="10" Class="py-1 d-flex align-center">
+                        <MudChipSet ReadOnly="true">
+                            @foreach (var vote in Bind(Review, x => x.Votes))
+                            {
+                                var member = vote.MemberAtFault;
+                                <MudChip Label="true" Size="ChipSize" Color="Color.Error">
+                                    @Bind(vote, x => x.VoteCategoryText)@(
+                                        member != null ? $": {member.FirstName} {member.LastName}" : string.Empty
+                                    )
+                                </MudChip>
+                            }
+                        </MudChipSet>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+        }
+    </MudCard>
+</CascadingValue>
 </CascadingValue>
 
 @code {
-    [CascadingParameter]
-    public IModalService ModalService { get; set; } = default!;
     [CascadingParameter]
     public Task<AuthenticationState> AuthenticationTask { get; set; } = default!;
     [CascadingParameter]
@@ -183,9 +226,13 @@
     [Parameter]
     public bool Selected { get; set; }
 
-    private MudBreakpointProvider? BreakpointProvider { get; set; } = default!;
+    private string StatusColor => GetStatusColor(Selected, Review.Status);
+
+    private bool IsExpanded { get; set; } = false;
 
     private string AddCssClass { get; set; } = string.Empty;
+
+    private Size ChipSize => Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? Size.Small : Size.Medium;
 
     public bool Collapsed { get; set; } = true;
 
@@ -195,10 +242,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        await base.OnParametersSetAsync();
-        BlazorParameterNullException.ThrowIfNull(this, Review);
-        BlazorParameterNullException.ThrowIfNull(this, ModalService);
-        BlazorParameterNullException.ThrowIfNull(this, EventCars);
+        _ = Review ?? throw new InvalidOperationException($"Parameter {nameof(Review)} must have a value");
         var addClassAttribute = (AdditionalAttributes?.TryGetValue("class", out var @class) == true) ? @class : string.Empty;
         AddCssClass = addClassAttribute.ToString()!;
         Collapsed &= !Selected;
@@ -237,19 +281,15 @@
 
     private async Task EditResultClick()
     {
-        var parameters = new ModalParameters<EditReviewResultModal>()
+        var parameters = new DialogParameters<EditReviewResultModal>()
         {
-            { x => x.Model, Review.CopyModel() },
-            { x => x.InvolvedCars, InvolvedCars },
-            { x => x.IsTeamEvent, IsTeamEvent },
-            { x => x.OnSubmit, async (review, cancellation) => await review.SaveChangesAsync(cancellation) },
+            {x => x.Model, Review.CopyModel()},
+            {x => x.InvolvedMembers, Review.InvolvedMembers},
+            {x => x.IsTeamEvent, IsTeamEvent},
+            {x => x.OnSubmit, async (review, cancellation) => await review.SaveChangesAsync(cancellation)},
         };
-        var options = new ModalOptions()
-        {
-            DisableBackgroundCancel = true,
-        };
-        var result = await ModalService.Show<EditReviewResultModal>("Edit Result", parameters, options).Result;
-        if (result.Confirmed && result.Data is ReviewModel reviewModel)
+        var result = await DialogService.Show<EditReviewResultModal>("Edit Result", parameters).Result;
+        if (result.Canceled == false && result.Data is ReviewModel reviewModel)
         {
             Review.SetModel(reviewModel);
         }
@@ -257,28 +297,30 @@
 
     private async Task AddCommentClick()
     {
-        var parameters = new ModalParameters<EditCommentModal>()
+        var parameters = new DialogParameters<EditCommentModal>()
         {
-            { x => x.Model, new ReviewCommentModel() { Votes = new List<VoteModel>() } },
-            { x => x.InvolvedCars, InvolvedCars },
+            {x => x.Model, new ReviewCommentModel() { Votes = new List<VoteModel>() }},
+            {x => x.InvolvedMembers, Review.InvolvedMembers},
             { x => x.IsTeamEvent, IsTeamEvent },
-            { x => x.OnSubmit, async (comment, cancellation) => await Review.AddComment(comment.GetModel(), cancellation)},
+            {x => x.OnSubmit, async (comment, cancellation) => await Review.AddComment(comment.GetModel(), cancellation)},
         };
-        var options = new ModalOptions()
-        {
-            DisableBackgroundCancel = false
-        };
-        await ModalService.Show<EditCommentModal>("Add Comment", parameters, options).Result;
+        await DialogService.Show<EditCommentModal>("Add Comment", parameters).Result;
         await InvokeAsync(StateHasChanged);
     }
 
     private async Task DeleteCommentClick(ReviewCommentViewModel comment)
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(ConfirmModal.Text), "Are you sure you want to delete this comment?")
-            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
-        var confirm = await ModalService.Show<ConfirmModal>("Delete Comment", parameters).Result;
-        if (confirm.Confirmed)
+        var parameters = new DialogParameters<MudConfirmModal>()
+        {
+            {x => x.Text, "Are you sure you want to delete this comment?"},
+            {x => x.ButtonTypes, ButtonTypes.YesNo},
+        };
+        var options = new DialogOptions()
+        {
+            DisableBackdropClick = false,
+        };
+        var confirm = await DialogService.Show<MudConfirmModal>("Delete Comment", parameters, options).Result;
+        if (confirm.Canceled == false)
         {
             await Review.RemoveComment(comment);
         }
@@ -290,22 +332,22 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private string GetBorderClass(bool selected, ReviewStatus status)
+    private string GetStatusColor(bool selected, ReviewStatus status)
     {
         if (selected)
         {
-            return "border-info";
+            return "info";
         }
         switch(status)
         {
             case ReviewStatus.Open:
-                return "border-warning";
+                return "warning";
             case ReviewStatus.Closed:
-                return "border-success";
+                return "success";
             case ReviewStatus.OpenConflicted:
-                return "border-warning";
+                return "warning";
             case ReviewStatus.OpenEnoughVotes:
-                return "border-primary";
+                return "primary";
         }
         return "";
     }

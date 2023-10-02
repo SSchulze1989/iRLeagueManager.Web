@@ -16,8 +16,6 @@ public class EditMudModalBase<TViewModel, TModel> : MvvmComponentBase where TVie
 {
     [Inject]
     protected TViewModel Vm { get; set; } = default!;
-    [Inject]
-    protected IJSRuntime JSRuntime { get; set; } = default!;
 
     [CascadingParameter]
     MudDialogInstance MudDialog { get; set; } = default!;
@@ -36,11 +34,6 @@ public class EditMudModalBase<TViewModel, TModel> : MvvmComponentBase where TVie
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
-        if (firstRender == false)
-        {
-            return;
-        }
-        await JSRuntime.InvokeVoidAsync("enableTooltips", "right");
     }
 
     protected override void OnParametersSet()

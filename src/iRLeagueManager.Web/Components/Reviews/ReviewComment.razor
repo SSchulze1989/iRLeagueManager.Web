@@ -4,8 +4,9 @@
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueApiCore.Common.Models.Users;
 @using iRLeagueManager.Web.ViewModels
+@inject IDialogService DialogService
 
-<MudCard Outlined="true">
+<MudCard Elevation="4">
     <MudCardHeader Class="py-2">
         <CardHeaderAvatar>
             <MudAvatar Color="Color.Secondary" Variant="Variant.Outlined">@GetAuthorInitials(GetUser(Comment.AuthorUserId), Comment.AuthorName)</MudAvatar>
@@ -25,11 +26,11 @@
         <MudText Style="white-space: pre-wrap" Typo="Typo.body2" Class="ps-2">
             @Bind(Comment, x=> x.Text)
         </MudText>
-        <MudChipSet>
+        <MudChipSet ReadOnly="true">
             @foreach (var vote in @Bind(Comment, x => x.Votes))
             {
                 var member = @Bind(vote, x => x.MemberAtFault);
-                <MudChip Label="true" Color="Color.Warning" Size="Size.Small">
+                <MudChip Label="true" Color="Color.Warning" Size="ChipSize">
                     @Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
                 </MudChip>
             }
@@ -39,9 +40,7 @@
 
 @code {
     [CascadingParameter]
-    public IModalService ModalService { get; set; } = default!;
-    [CascadingParameter]
-    public IEnumerable<EventCarInfoModel> InvolvedCars { get; set; } = Array.Empty<EventCarInfoModel>();
+    public IEnumerable<MemberInfoModel> InvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
     [CascadingParameter]
     public IEnumerable<UserModel> LeagueUsers { get; set; } = Array.Empty<UserModel>();
     [Parameter, EditorRequired]
@@ -50,6 +49,8 @@
     public bool IsTeamEvent { get; set; }
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+    [CascadingParameter(Name = "ChipSize")]
+    public Size ChipSize { get; set; }
     [Parameter]
     public EventCallback OnStateHasChanged { get; set; }
     [Parameter]
@@ -90,7 +91,7 @@
 
     private async Task EditClick()
     {
-        var parameters = new ModalParameters<EditCommentModal>()
+        var parameters = new DialogParameters<EditCommentModal>()
         {
             { x => x.Model, Comment.CopyModel() },
             { x => x.InvolvedCars, InvolvedCars },

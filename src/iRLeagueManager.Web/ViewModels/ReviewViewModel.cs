@@ -39,6 +39,7 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
     public TimeSpan TimeStamp { get => model.TimeStamp; set => SetP(model.TimeStamp, value => model.TimeStamp = value, value); }
     public string IncidentNr { get => model.IncidentNr; set => SetP(model.IncidentNr, value => model.IncidentNr = value, value); }
     public string ResultText { get => model.ResultText; set => SetP(model.ResultText, value => model.ResultText = value, value); }
+    public IEnumerable<MemberInfoModel> InvolvedMembers { get => model.InvolvedMembers; set => SetP(model.InvolvedMembers, value => model.InvolvedMembers = value.ToList(), value); }
 
     private IList<MemberInfoModel> involvedMembers = new List<MemberInfoModel>();
     public IList<MemberInfoModel> InvolvedMembers { get => involvedMembers; set => Set(ref involvedMembers, value); }
@@ -371,6 +372,6 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
         RefreshCommentList();
         RefreshVoteList();
         UpdateReviewStatus();
-        SessionId = model.SessionId;
+        SessionId = model.SessionId == 0 ? null : model.SessionId;
     }
 }

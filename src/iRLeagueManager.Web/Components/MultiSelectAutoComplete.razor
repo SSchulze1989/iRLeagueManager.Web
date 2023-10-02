@@ -10,7 +10,7 @@
                      Immediate="false"           
                      CoerceValue="true"           
                      ToStringFunc="ToStrinFunc"
-                     Variant="@Variant" />
+                     Variant="@Variant"/>
     <MudChipSet Class="mt-1" AllClosable=true OnClose="RemoveValue">
         @foreach (var val in selectedValues)
         {
@@ -37,6 +37,9 @@
 
     [Parameter]
     public Variant Variant { get; set; }
+
+    [Parameter]
+    public System.Linq.Expressions.Expression<Func<IEnumerable<T>>>? For { get; set; }
 
     private HashSet<T> selectedValues = new HashSet<T>();
 

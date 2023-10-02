@@ -3,82 +3,63 @@
 @using iRLeagueApiCore.Common.Models.Results;
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueManager.Web.ViewModels
-@inherits MvvmComponentBase
+@inherits EditMudModalBase<ReviewViewModel, ReviewModel>
 @inject LeagueApiService ApiService
-@inject ReviewViewModel Review
 
-<EditForm Model=Review OnValidSubmit=Submit>
-    <div class="input-group-list">
-        <InputGroup Label="Text">
-            <InputTextArea class="form-control" @bind-Value=Review.ResultText style="height: 140px;"/>
-        </InputGroup>
-        @foreach(var vote in Review.Votes)
-        {
-            <InputGroup Label="Vote">
-                <InputSelect class="form-select" @bind-Value=vote.VoteCategoryId>
-                    @foreach(var cat in AvailableVoteCategories)
-                    {
-                        <option value=@cat.Id>@cat.Text</option>
-                    }
-                </InputSelect>
-                @if (IsTeamEvent)
+<EditForm Model=Vm OnValidSubmit=Submit>
+    <MudDialog>
+        <DialogContent>
+                <MudTextField Label="Text" @bind-Value="Vm.ResultText" Lines="6" Variant="Variant.Filled"/>
+                <MudDivider/>
+                @foreach (var vote in Vm.Votes)
                 {
-                    <InputSelect class="form-select" @bind-Value=vote.TeamAtFaultId>
-                        <option value=0></option>
-                        @foreach (var car in InvolvedCars)
-                        {
-
-                            var team = car.Team ?? new();
-                            <option value=@team.TeamId>@car.Number: @team.Name</option>
-                        }
-                    </InputSelect>
+                    <MudGrid Spacing="1" Style="width: 100%">
+                        <MudItem xs="5">
+                            <MudSelect Label="Vote" @bind-Value="vote.VoteCategoryId" Variant="Variant.Filled">
+                                @foreach (var cat in AvailableVoteCategories)
+                                {
+                                    <MudSelectItem Value=@((long?)cat.Id)>@cat.Text</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudSelect Label="Driver at fault"
+                                   @bind-Value="vote.MemberAtFault"
+                                   Variant="Variant.Filled"
+                                   ToStringFunc="@(member => member != null ? $"{member.FirstName} {member.LastName}" : string.Empty)">
+                                <MudSelectItem Value="default(MemberInfoModel)"></MudSelectItem>
+                                @foreach (var member in InvolvedMembers)
+                                {
+                                    <MudSelectItem Value="@member" />
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="1" Class="d-flex align-center">
+                            <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Error" OnClick="@(() => Vm.RemoveVote(vote))" />
+                        </MudItem>
+                    </MudGrid>
                 }
-                else
-                {
-                    <InputSelect class="form-select" @bind-Value=vote.MemberAtFaultId>
-                        <option value=0></option>
-                        @foreach(var car in InvolvedCars)
-                        {
-                            
-                            var member = car.Members.FirstOrDefault() ?? new();
-                            <option value=@member.MemberId>#@car.Number: @member.FirstName @member.LastName</option>
-                        }
-                    </InputSelect>
-                }
-                <button class="btn btn-outline-danger" type="button" @onclick=@(() => Review.RemoveVote(vote))>
-                    <span class="oi oi-x"/>
-                </button>
-            </InputGroup>
-        }
-        <InputGroup Label="Vote">
-            <InputSelect class="form-select" @bind-Value=@NewValue @ref=@NewValueInput>
-                <option value=""></option>
-                @foreach(var cat in AvailableVoteCategories)
-                {
-                    <option value=@cat.Id>@cat.Text</option>
-                }
-            </InputSelect>
-            <div class="input-group-text" type="button">
-                <span class="oi oi-x invisible"/>
-            </div>
-        </InputGroup>
-    </div>
-    <CancelSubmitButtons ModelState=Review SubmitText="Save" OnCancel=Cancel/>
+                <MudGrid Spacing="1" Style="width: 100%">
+                    <MudItem xs="5">
+                        <MudSelect Label="Vote" @bind-Value="NewValue" Variant="Variant.Filled" @ref=@NewValueInput>
+                            @foreach (var cat in AvailableVoteCategories)
+                            {
+                                <MudSelectItem Value=@((long?)cat.Id)>@cat.Text</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+        </DialogContent>
+        <DialogActions>
+            <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+            <ProgressButton Color="Color.Primary" ButtonType="ButtonType.Submit" Loading="Vm.Loading">Save</ProgressButton>
+        </DialogActions>
+    </MudDialog>
 </EditForm>
 
 @code {
-    private CancellationTokenSource cts = new();
-
-    [CascadingParameter]
-    public BlazoredModalInstance? ModalInstance { get; set; }
     [Parameter]
-    public IEnumerable<EventCarInfoModel> InvolvedCars { get; set; } = Array.Empty<EventCarInfoModel>();
-
-    [Parameter]
-    public ReviewModel Model { get; set; } = default!;
-
-    [Parameter]
-    public Func<ReviewViewModel, CancellationToken, Task<StatusResult>>? OnSubmit { get; set; }
+    public IEnumerable<MemberInfoModel> InvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
 
     [Parameter]
     public bool IsTeamEvent { get; set; } = false;
@@ -95,14 +76,9 @@
         }
     }
 
-    private InputSelect<long?> NewValueInput { get; set; } = default!;
+    private MudSelect<long?> NewValueInput { get; set; } = default!;
 
     private IEnumerable<VoteCategoryModel> AvailableVoteCategories = Array.Empty<VoteCategoryModel>();
-
-    protected override void OnParametersSet()
-    {
-        _ = Model ?? throw BlazorParameterNullException.New(this, Model);
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -111,7 +87,6 @@
             return;
         }
         AvailableVoteCategories = await GetAvailableVoteCategories();
-        Review.SetModel(Model);
         await InvokeAsync(StateHasChanged);
     }
 
@@ -125,12 +100,9 @@
                 VoteCategoryId = voteCat.Id,
                 VoteCategoryText = voteCat.Text,
             };
-            Review.AddVote(vote);
+            Vm.AddVote(vote);
         }
-        if (NewValueInput.Element  is not null)
-        {
-            await NewValueInput.Element.Value.FocusAsync();
-        }
+        await NewValueInput.FocusAsync();
     }
 
     private void SetMemberAtFault(VoteViewModel vote, long? memberId)
@@ -153,30 +125,6 @@
         };
     }
 
-    private async Task Submit()
-    {
-        //var success = await Review.SaveChangesAsync(cts.Token);
-        bool success = true;
-        if (OnSubmit != null)
-        {
-            var status = await OnSubmit.Invoke(Review, cts.Token);
-            success |= status.IsSuccess;
-        }
-        if (success && ModalInstance != null)
-        {
-            var result = ModalResult.Ok(Review.GetModel());
-            await ModalInstance.CloseAsync(result);
-        }
-    }
-
-    private async Task Cancel()
-    {
-        if (ModalInstance != null)
-        {
-            await ModalInstance.CancelAsync();   
-        }
-    }
-
     private async Task<IEnumerable<VoteCategoryModel>> GetAvailableVoteCategories()
     {
         if (ApiService.CurrentLeague is null)
@@ -186,22 +134,12 @@
 
         var request = ApiService.CurrentLeague
             .VoteCategories()
-            .Get();
+            .Get(Cts.Token);
         var result = await request;
         if (result.Success && result.Content is IEnumerable<VoteCategoryModel> models)
         {
             return models.OrderBy(x => x.Index);
         }
         return Array.Empty<VoteCategoryModel>();
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing == false)
-        {
-            cts.Cancel();
-            cts.Dispose();
-        }
-        base.Dispose(disposing);
     }
 }

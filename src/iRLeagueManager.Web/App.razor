@@ -7,7 +7,7 @@
 @inject IJSRuntime JsRuntime
 
 <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" Theme="TestTheme"/>
-<MudDialogProvider />
+<MudDialogProvider FullWidth="true" DisableBackdropClick="true" CloseButton="true"/>
 <MudSnackbarProvider />
 
 <MudBreakpointProvider>
@@ -45,7 +45,8 @@
         Palette = new PaletteLight()
         {
             Primary = Colors.Blue.Darken1,
-            Background = Colors.Grey.Lighten3,
+            Background = Colors.Grey.Lighten2,
+            BackgroundGrey = Colors.Grey.Lighten3,
             AppbarBackground = Colors.Blue.Darken1,
             DrawerBackground = Colors.Grey.Lighten4,
             Surface = Colors.Grey.Lighten4,
@@ -54,7 +55,7 @@
         {
             Primary = Colors.Blue.Darken1,
             Background = "#262629",
-            BackgroundGrey = "#323235",
+            BackgroundGrey = "#282931",
             DrawerBackground = "#323235",
             Surface = "#343639",
             AppbarBackground = Colors.LightBlue.Darken4,

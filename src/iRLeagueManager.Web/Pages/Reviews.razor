@@ -11,6 +11,7 @@
 @inherits LeagueComponentBase
 @inject ReviewsPageViewModel ReviewsVm
 @inject ClientLocalTimeProvider ClientTime
+@inject IDialogService DialogService
 
 <PageTitle>Reviews - @LeagueName</PageTitle>
 
@@ -34,7 +35,6 @@
 
     <CascadingValue Value=@Bind(ReviewsVm, x => x.EventCars)>
     <CascadingValue Value=ReviewsVm.LeagueUsers>
-    <MudBreakpointProvider>
 
     <MudStack Spacing="2" Class="pt-2">
         @switch (SelectedTabIndex)
@@ -127,14 +127,11 @@
         }
     </MudStack>
 
-    </MudBreakpointProvider>
     </CascadingValue>
     </CascadingValue>
 </MudContainer>
 
 @code {
-    [CascadingParameter]
-    public IModalService ModalService { get; set; } = default!;
     [CascadingParameter]
     private Task<AuthenticationState> AuthTask { get; set; } = default!;
     [CascadingParameter]
@@ -238,20 +235,16 @@
 
     private async Task OnEditClick(ReviewViewModel review)
     {
-        var parameters = new ModalParameters<EditReviewModal>()
+        var parameters = new DialogParameters<EditReviewModal>()
         {
-            { x => x.Model, review.CopyModel() },
-            { x => x.EventCars, ReviewsVm.EventCars },
-            { x => x.OnSubmit, async (review, cancellation) => await review.SaveChangesAsync(cancellation) },
+            {x => x.Model, review.CopyModel()},
+            {x => x.EventList, EventList},
+            {x => x.EventMembers, ReviewsVm.EventMembers},
+            {x => x.OnSubmit, async (review, cancellation) => await review.SaveChangesAsync(cancellation)},
         };
-        var options = new ModalOptions()
-        {
-            Size = ModalSize.Medium,
-            DisableBackgroundCancel = true,
-        };
-        var modal = ModalService.Show<EditReviewModal>("Edit Review", parameters, options);
+        var modal = DialogService.Show<EditReviewModal>("Edit Review", parameters);
         var result = await modal.Result;
-        if (result.Confirmed && result.Data is ReviewModel reviewModel)
+        if (result.Canceled == false && result.Data is ReviewModel reviewModel)
         {
             review.SetModel(reviewModel);
         }
@@ -259,11 +252,13 @@
 
     private async Task OnDeleteClick(ReviewViewModel review)
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(ConfirmModal.Text), "Are you sure you want to delete this review?")
-            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
-        var confirm = await ModalService.Show<ConfirmModal>("Delete Review", parameters).Result;
-        if (confirm.Cancelled)
+        var parameters = new DialogParameters<MudConfirmModal>()
+        {
+            {x => x.Text, "Are you sure you want to delete this review?"},
+            {x => x.ButtonTypes, ButtonTypes.YesNo},
+        };
+        var confirm = await DialogService.Show<MudConfirmModal>("Delete Review", parameters).Result;
+        if (confirm.Canceled)
         {
             return;
         }
@@ -276,11 +271,13 @@
 
     private async Task OnProtestDeleteClick(ProtestViewModel protest)
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(ConfirmModal.Text), "Are you sure you want to delete this protest?")
-            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
-        var confirm = await ModalService.Show<ConfirmModal>("Delete Protest", parameters).Result;
-        if (confirm.Cancelled)
+        var parameters = new DialogParameters<MudConfirmModal>()
+        {
+            {x => x.Text, "Are you sure you want to delete this protest?"},
+            {x => x.ButtonTypes, ButtonTypes.YesNo},
+        };
+        var confirm = await DialogService.Show<ConfirmModal>("Delete Protest", parameters).Result;
+        if (confirm.Canceled)
         {
             return;
         }
@@ -315,18 +312,14 @@
 
     private async Task OpenAddReviewModal(ReviewModel review)
     {
-        var parameters = new ModalParameters<EditReviewModal>()
+        var parameters = new DialogParameters<EditReviewModal>()
         {
-            { x => x.Model, review },
-            { x => x.EventCars, ReviewsVm.EventCars },
-            { x => x.OnSubmit, async (reviewVm, cancellation) => await reviewVm.AddToSessionAsync(reviewVm.SessionId.GetValueOrDefault(), cancellation) },
+            {x => x.Model, review},
+            {x => x.EventList, EventList},
+            {x => x.EventMembers, ReviewsVm.EventMembers},
+            {x => x.OnSubmit, async (reviewVm, cancellation) => await reviewVm.AddToSessionAsync(reviewVm.SessionId.GetValueOrDefault(), cancellation)},
         };
-        var options = new ModalOptions()
-        {
-            Size = ModalSize.Medium,
-            DisableBackgroundCancel = true,
-        };
-        var modal = ModalService.Show<EditReviewModal>("Add Review", parameters, options);
+        var modal = DialogService.Show<EditReviewModal>("Add Review", parameters);
         await modal.Result;
         if (EventId != null)
         {

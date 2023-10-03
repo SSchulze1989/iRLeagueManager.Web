@@ -15,18 +15,18 @@
     <MudCard Elevation="2">
         <MudExpansionPanel DisableGutters="true" Dense="true" @bind-IsExpanded="IsExpanded">
             <TitleContent>
-                <div class="d-flex d-flex-wrap align-center gap-1"
+                <div class="d-flex flex-wrap align-center gap-1"
                      style="
                         margin: -16px calc(0px - 24px - 1.6em) -16px -24px;
                         padding: 16px calc(0px + 24px + 1.6em) 16px 24px;
                         border-top: 6px; 
                         border-top-color: var(--mud-palette-@StatusColor); 
                         border-top-style: solid;">
-                    <span>@Review.SessionName:</span>
-                    <span>@Review.IncidentNr</span>
+                    <div>@Review.SessionName:</div>
+                    <div>@Review.IncidentNr</div>
                     <MudIcon Icon="@Icons.Material.Outlined.Flag"/>@Review.OnLap
                     <MudIcon Icon="@Icons.Material.Outlined.TurnLeft" />@Review.Corner
-                    <MudIcon Icon="@Icons.Material.Outlined.ChevronRight"/>@Review.IncidentKind
+                    <MudIcon Icon="@Icons.Material.Outlined.ChevronRight"/><div style="flex: 0.4 0 60px;">@Review.IncidentKind</div>
                     <MudIcon Icon="@Icons.Material.Outlined.Comment"/>@Review.Comments.Count()
                     <MudIcon Icon="@Icons.Material.Outlined.CheckBox" />@Review.Comments.Where(x => x.Votes.Any()).Count()
                     @if (UserHasCommented(Review))

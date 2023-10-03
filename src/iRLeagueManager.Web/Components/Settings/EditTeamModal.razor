@@ -5,7 +5,7 @@
 
 <EditForm Model=Vm OnValidSubmit=Submit>
     <StatusResultValidator @ref=ResultValidator />
-    <MudDialog>
+    <MudDialog Style="background-color: var(--mud-palette-background-grey);">
         <DialogContent>
             <MudStack Spacing="2">
                 <MudTextField Label="Name" @bind-Value="Vm.Name" For="@(() => Vm.Name)" Variant="Variant.Filled"/>

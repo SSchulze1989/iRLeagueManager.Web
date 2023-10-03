@@ -35,6 +35,9 @@
 
     <CascadingValue Value=@Bind(ReviewsVm, x => x.EventCars)>
     <CascadingValue Value=ReviewsVm.LeagueUsers>
+    <CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
+    <CascadingValue Value=ReviewsVm.LeagueUsers.AsEnumerable()>
+    <CascadingValue Value=ReviewsVm.VoteCategories.AsEnumerable()>
 
     <MudStack Spacing="2" Class="pt-2">
         @switch (SelectedTabIndex)
@@ -129,6 +132,7 @@
 
     </CascadingValue>
     </CascadingValue>
+    </CascadingValue>
 </MudContainer>
 
 @code {
@@ -140,6 +144,8 @@
     private string UserId { get; set; } = string.Empty;
 
     private bool ReadOnly => Shared.SeasonFinished;
+
+    private IEnumerable<VoteCategoryModel> AvailableVoteCategories = Array.Empty<VoteCategoryModel>();
 
     // Query parameters
     private const string tabIndexParam = "tabIndex";
@@ -181,9 +187,10 @@
         {
             return;
         }
-        await ReviewsVm.LoadUsers();
         SelectedTabIndex = NavigationManager.QueryParameter<int>(tabIndexParam);
         SelectedReviewId = NavigationManager.QueryParameter<long>(reviewIdParam);
+        await ReviewsVm.LoadUsers();
+        await ReviewsVm.LoadVoteCategories();
         StateHasChanged();
     }
 

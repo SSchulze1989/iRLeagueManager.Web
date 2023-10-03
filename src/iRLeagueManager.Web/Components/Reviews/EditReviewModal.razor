@@ -6,71 +6,52 @@
 @using iRLeagueManager.Web.ViewModels
 @inherits EditMudModalBase<ReviewViewModel, ReviewModel>
 
-<EditForm Model=Review OnValidSubmit=Submit>
-    <StatusResultValidator @ref=ResultValidator/>
-    <div class="input-group-list p-1">
-        <InputGroup Label="Session">
-            <InputSelect class="form-select" placeholder="Select Session" ariaaria-label="Select Session" id="incident_session" @bind-Value="Review.SessionId"> 
-                @if (EventList.Selected != null)
-                {
-                    @foreach(var session in EventList.Selected.Sessions)
-                    {
-                        <option value=@session.SessionId>@session.Name</option>
-                    }
-                }
-            </InputSelect>
-        </InputGroup>
-        <FormValidationMessage For=@(() => Review.SessionId) />
-        <InputGroup Label="Nr.">
-            <InputText class="form-control" placeholder="Incident Nr." aria-label="IncidentNr" id="incident_nr" @bind-Value="Review.IncidentNr"/>
-        </InputGroup>
-        <InputGroup Label="Lap">
-            <InputText class="form-control" placeholder="Lap" aria-label="Lap" id="incident_lap" @bind-Value="Review.OnLap" />
-        </InputGroup>
-        <InputGroup Label="Corner">
-            <InputText class="form-control" placeholder="Corner" aria-label="Corner" id="incident_corner" @bind-Value="Review.Corner" />
-        </InputGroup>
-        <InputGroup Label="Incident">
-            <InputText class="form-control" placeholder="Incident Kind" aria-label="Incident Kind" id="incident_kind" @bind-Value="Review.IncidentKind" />
-        </InputGroup>
-        <InputGroup Label="Description">
-            <InputTextArea class="form-control" placeholder="Description" aria-label="Description" id="description" @bind-Value="Review.FullDescription" style="height: 140px;"/>
-        </InputGroup>
-    </div>
-    <FormValidationMessage For=@(() => Review.IncidentKind) />
-    <div class="p-1">
-        <div class="row g-0">
-            <div class="input-group-text" style="border-bottom-left-radius:0; border-bottom-right-radius:0; border-bottom: none">
-                <label>Involved Drivers</label>
-            </div>
-        </div>
-        <div>
-            <BlazoredTypeahead
-                @bind-Values=Review.InvolvedMembers
-                class="form-control p-0"
-                style="border-top-right-radius:0; border-top-left-radius:0;"
-                EnableDropDown=true  
-                SearchMethod=SearchMembers 
-                MinimumLength=1
-                MaximumSuggestions=100
-                DeleteItemsOnBackspace=false
-                placeholder="Search driver by name...">
-
-                <SelectedTemplate Context=member>
-                    @member.FirstName @member.LastName
-                </SelectedTemplate>
-                <ResultTemplate Context=member>
-                    @member.FirstName @member.LastName
-                </ResultTemplate>
-                <NotFoundTemplate Context=name>
-                    <span>Driver <b>@name</b> Not found!</span>
-                </NotFoundTemplate>
-            </BlazoredTypeahead>
-        </div>
-    </div>
-    <FormValidationMessage For=@(() => Review.InvolvedMembers) />
-    <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
-    <CancelSubmitButtons ModelState=Review SubmitText="Save" OnCancel=Cancel/>
+<EditForm Model=Vm OnValidSubmit=Submit>
+    <StatusResultValidator @ref=ResultValidator />
+    <MudDialog Style="background-color: var(--mud-palette-background-grey);">
+        <DialogContent>
+            <MudGrid Spacing="1">
+                <MudItem xs=12>
+                    <MudSelect Label="Session" @bind-Value="Vm.SessionId" For="@(() => Vm.SessionId)" Variant="Variant.Filled">
+                        @if (EventList.Selected != null)
+                        {
+                            @foreach (var session in EventList.Selected.Sessions)
+                            {
+                                <MudSelectItem Value=@((long?)session.SessionId)>@session.Name</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="4">
+                    <MudTextField Label="Incident Nr." @bind-Value="Vm.IncidentNr" Variant="Variant.Filled"/>
+                </MudItem>
+                <MudItem xs="4">
+                    <MudTextField Label="Lap" @bind-Value="Vm.OnLap" Variant="Variant.Filled" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudTextField Label="Corner" @bind-Value="Vm.Corner" Variant="Variant.Filled" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField Label="Incident Kind" @bind-Value="Vm.IncidentKind" For="@(() => Vm.IncidentKind)" Variant="Variant.Filled" id="incident_kind"/>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField Label="Description" @bind-Value="Vm.FullDescription" Lines="4" Variant="Variant.Filled" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MultiSelectAutoComplete Label="Members"
+                                             @bind-Values=Vm.InvolvedMembers
+                                             SearchFunc="SearchMembers"
+                                             ToStrinFunc="@(member => member is null ? string.Empty : $"{member.FirstName} {member.LastName}")"
+                                             Variant="Variant.Filled"/>
+                </MudItem>
+            </MudGrid>
+            <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+        </DialogContent>
+        <DialogActions>
+            <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+            <ProgressButton Color="Color.Primary" OnClick="Submit" Loading="Loading" Disabled="!HasChanged">Save</ProgressButton>
+        </DialogActions>
+    </MudDialog>
 </EditForm>
 
 @code {

@@ -16,7 +16,7 @@
     @if (Event is not null)
     {
         <h5 class="mb-3">
-            Event: @(Event.Date.ToString("dd.MM.yy")): @(Event.TrackName)@(Event.ConfigName == "-" ? "" : $" - {Event.ConfigName}")
+            Event: @(Event.Date.GetValueOrDefault().ToString("dd.MM.yy")): @(Event.TrackName)@(Event.ConfigName == "-" ? "" : $" - {Event.ConfigName}")
         </h5>
     }
 

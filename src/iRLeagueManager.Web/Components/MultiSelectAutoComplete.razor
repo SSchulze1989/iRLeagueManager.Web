@@ -14,7 +14,7 @@
     <MudChipSet Class="mt-1" AllClosable=true OnClose="RemoveValue">
         @foreach (var val in selectedValues)
         {
-            <MudChip Size=Size.Small Text="@ToStrinFunc(val)" />
+            <MudChip Size="ChipSize" Text="@ToStrinFunc(val)" />
         }
     </MudChipSet>
 </div>
@@ -40,6 +40,9 @@
 
     [Parameter]
     public System.Linq.Expressions.Expression<Func<IEnumerable<T>>>? For { get; set; }
+
+    [Parameter]
+    public Size ChipSize { get; set; } = Size.Medium;
 
     private HashSet<T> selectedValues = new HashSet<T>();
 

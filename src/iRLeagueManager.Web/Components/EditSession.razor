@@ -2,12 +2,14 @@
 
 @if (Session != null)
 {
-    <InputGroup Label="Duration">
-        <input class="form-control" type="time" arial-label="StartTime" @bind="Session!.Duration"/>
-    </InputGroup>
-    <InputGroup Label="Laps">
-        <InputNumber class="form-control" placholder="10" aria-label="TrackId" @bind-Value=Session!.Laps/>
-    </InputGroup>
+    <MudGrid>
+        <MudItem xs="6">
+            <MudTextField Label="Duration" @bind-Value="Session.Duration" InputType="InputType.Time" />
+        </MudItem>
+        <MudItem xs="6">
+            <MudNumericField Label="Laps" @bind-Value="Session.Laps"/>
+        </MudItem>
+    </MudGrid>
 }
 
 @code {

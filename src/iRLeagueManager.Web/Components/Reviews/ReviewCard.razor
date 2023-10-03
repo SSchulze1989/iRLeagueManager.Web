@@ -13,30 +13,32 @@
 <CascadingValue Value=Review.InvolvedMembers>
 <CascadingValue Value="ChipSize" Name="ChipSize">
     <MudCard Elevation="2">
-        <MudExpansionPanel DisableGutters="true" Dense="true" @bind-IsExpanded="IsExpanded">
+        <MudExpansionPanel DisableGutters="true" Dense="true" @bind-IsExpanded="IsExpanded" HideIcon="true">
             <TitleContent>
-                <div class="d-flex flex-wrap align-center gap-1"
-                     style="
-                        margin: -16px calc(0px - 24px - 1.6em) -16px -24px;
-                        padding: 16px calc(0px + 24px + 1.6em) 16px 24px;
-                        border-top: 6px; 
-                        border-top-color: var(--mud-palette-@StatusColor); 
-                        border-top-style: solid;">
-                    <div>@Review.SessionName:</div>
-                    <div>@Review.IncidentNr</div>
-                    <MudIcon Icon="@Icons.Material.Outlined.Flag"/>@Review.OnLap
-                    <MudIcon Icon="@Icons.Material.Outlined.TurnLeft" />@Review.Corner
-                    <MudIcon Icon="@Icons.Material.Outlined.ChevronRight"/><div style="flex: 0.4 0 60px;">@Review.IncidentKind</div>
-                    <MudIcon Icon="@Icons.Material.Outlined.Comment"/>@Review.Comments.Count()
-                    <MudIcon Icon="@Icons.Material.Outlined.CheckBox" />@Review.Comments.Where(x => x.Votes.Any()).Count()
-                    @if (UserHasCommented(Review))
-                    {
-                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small"/>
-                    }
+                <MudStack Row="true" AlignItems="AlignItems.Center"
+                    Style="@($@"
+                        margin: -16px -24px -16px -24px; 
+                        padding: 10px 1.5em; 
+                        border-top: 6px; border-top-color: var(--mud-palette-{StatusColor}); 
+                        border-top-style: solid;")">
+                    <div class="d-flex flex-wrap align-center gap-1">
+                        <div>@Review.SessionName:</div>
+                        <div>@Review.IncidentNr</div>
+                        <MudIcon Icon="@Icons.Material.Outlined.Flag"/>@Review.OnLap
+                        <MudIcon Icon="@Icons.Material.Outlined.TurnLeft" />@Review.Corner
+                        <MudIcon Icon="@Icons.Material.Outlined.ChevronRight"/><div style="flex: 1 0 60px;">@Review.IncidentKind</div>
+                        <MudIcon Icon="@Icons.Material.Outlined.Comment"/>@Review.Comments.Count()
+                        <MudIcon Icon="@Icons.Material.Outlined.CheckBox" />@Review.Comments.Where(x => x.Votes.Any()).Count()
+                        @if (UserHasCommented(Review))
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small"/>
+                        }
+                    </div>
                     <MudSpacer />
+                    <MudIcon Icon="@(IsExpanded ? Icons.Material.Filled.KeyboardArrowUp : Icons.Material.Filled.KeyboardArrowDown)" />
                     <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
                         <ActivatorContent>
-                            <MudIconButton Icon="@Icons.Material.Outlined.Menu" Style="margin: -12px; margin-right: 0px"/>
+                            <MudIconButton Icon="@Icons.Material.Outlined.Menu" Style="padding: 6px; margin: -6px"/>
                         </ActivatorContent>
                         <ChildContent>
                             <MudMenuItem Icon="@Icons.Material.Outlined.Link" OnClick="CopyDirectLink">Copy Link</MudMenuItem>
@@ -50,14 +52,14 @@
                             }
                         </ChildContent>
                     </MudMenu>
-                </div>
+                </MudStack>
             </TitleContent>
             <ChildContent>
-                <MudCard Class="pa-0" Outlined="true" Style="background-color: var(--mud-palette-background-grey);">
-                    <MudStack Class="gap-1">
+                <MudCard Class="pa-0" Outlined="false" Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
+                    <MudStack Spacing="0">
                         @if (string.IsNullOrWhiteSpace(Review.FullDescription) == false)
                         {
-                                <MudCard Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
+                            <MudCard Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
                                 <MudCardHeader Class="py-1">
                                     <CardHeaderContent>
                                         <MudText Typo="Typo.h6">Description</MudText>
@@ -71,7 +73,7 @@
                             </MudCard>
                         }
                         <MudDivider />
-                        <MudGrid Spacing="1">
+                        <MudGrid Spacing="0">
                             <MudItem xs="12" sm="6">
                                     <MudCard Elevation="0" Style="background-color: var(--mud-palette-background-grey); height: 100%">
                                     <MudCardHeader Class="py-1">
@@ -114,34 +116,47 @@
                         </MudGrid>
                         <MudDivider />
                         <MudCard Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
-                            <MudCardHeader Class="py-1">
+                            <MudCardHeader Class="py-0">
                                 <CardHeaderContent>
                                     <MudText Typo="Typo.h6">Result</MudText>
                                 </CardHeaderContent>
                                 <CardHeaderActions>
-                                    @if (IsSteward && ReadOnly == false)
-                                    {
-                                        <MudButton StartIcon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" OnClick=EditResultClick>Edit</MudButton>
-                                    }
+                                    <div style="margin: 8px 8px 0px 0px">
+                                        @if (IsSteward && ReadOnly == false)
+                                        {
+                                            <MudButton StartIcon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" OnClick=EditResultClick>Edit</MudButton>
+                                        }
+                                    </div>
                                 </CardHeaderActions>
                             </MudCardHeader>
                             <MudCardContent>
                                 <MudText Typo="Typo.body2" Class="ps-2" Style="white-space: pre-wrap;">
                                     @Bind(Review, x => x.ResultText)
                                 </MudText>
+                                <MudChipSet ReadOnly="true">
+                                    @foreach (var vote in Bind(Review, x => x.Votes))
+                                    {
+                                        var member = vote.MemberAtFault;
+                                        <MudChip Label="true" Size="ChipSize" Color="Color.Error">
+                                            @Bind(vote, x => x.VoteCategoryText)@(
+                                        member != null ? $": {member.FirstName} {member.LastName}" : string.Empty
+                                        )
+                                        </MudChip>
+                                    }
+                                </MudChipSet>
                             </MudCardContent>
                         </MudCard>
                         @if (IsSteward)
                         {
                             <MudDivider/>
                             <MudCard Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
-                                <MudCardHeader Class="py-1">
+                                <MudCardHeader Class="py-0">
                                     <CardHeaderContent>
                                         <MudText Typo="Typo.h6">Comments</MudText>
                                     </CardHeaderContent>
                                 </MudCardHeader>
                                 <MudCardContent>
-                                    <MudStack>
+                                    <MudStack Spacing="1">
                                         @foreach (var comment in @Bind(Review, x => x.Comments))
                                         {
                                             <ReviewComment Comment=comment
@@ -164,7 +179,7 @@
         </MudExpansionPanel>
         @if (IsExpanded == false)
         {
-            <MudPaper Class="ma-2 pa-4" Elevation="0">
+            <MudPaper Class="ma-0 pa-4" Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
                 <MudGrid>
                     <MudItem xs="2" Class="py-1 d-flex align-center">
                         <MudText Typo="Typo.h6">Involved</MudText>
@@ -201,6 +216,8 @@
 </CascadingValue>
 
 @code {
+    [CascadingParameter]
+    public IEnumerable<VoteCategoryViewModel> VoteCategories { get; set; } = default!;
     [CascadingParameter]
     public Task<AuthenticationState> AuthenticationTask { get; set; } = default!;
     [CascadingParameter]
@@ -243,6 +260,8 @@
     protected override async Task OnParametersSetAsync()
     {
         _ = Review ?? throw new InvalidOperationException($"Parameter {nameof(Review)} must have a value");
+        BlazorParameterNullException.ThrowIfNull(this, EventMembers, nameof(EventMembers));
+        BlazorParameterNullException.ThrowIfNull(this, VoteCategories);
         var addClassAttribute = (AdditionalAttributes?.TryGetValue("class", out var @class) == true) ? @class : string.Empty;
         AddCssClass = addClassAttribute.ToString()!;
         Collapsed &= !Selected;
@@ -285,6 +304,7 @@
         {
             {x => x.Model, Review.CopyModel()},
             {x => x.InvolvedMembers, Review.InvolvedMembers},
+            {x => x.VoteCategories, VoteCategories},
             {x => x.IsTeamEvent, IsTeamEvent},
             {x => x.OnSubmit, async (review, cancellation) => await review.SaveChangesAsync(cancellation)},
         };

@@ -7,7 +7,7 @@
 @inject LeagueApiService ApiService
 
 <EditForm Model=Vm OnValidSubmit=Submit>
-    <MudDialog>
+    <MudDialog Style="background-color: var(--mud-palette-background-grey);">
         <DialogContent>
                 <MudTextField Label="Text" @bind-Value="Vm.ResultText" Lines="6" Variant="Variant.Filled"/>
                 <MudDivider/>
@@ -16,9 +16,9 @@
                     <MudGrid Spacing="1" Style="width: 100%">
                         <MudItem xs="5">
                             <MudSelect Label="Vote" @bind-Value="vote.VoteCategoryId" Variant="Variant.Filled">
-                                @foreach (var cat in AvailableVoteCategories)
+                                @foreach (var cat in VoteCategories)
                                 {
-                                    <MudSelectItem Value=@((long?)cat.Id)>@cat.Text</MudSelectItem>
+                                    <MudSelectItem Value=@((long?)cat.CatId)>@cat.Text</MudSelectItem>
                                 }
                             </MudSelect>
                         </MudItem>
@@ -42,9 +42,9 @@
                 <MudGrid Spacing="1" Style="width: 100%">
                     <MudItem xs="5">
                         <MudSelect Label="Vote" @bind-Value="NewValue" Variant="Variant.Filled" @ref=@NewValueInput>
-                            @foreach (var cat in AvailableVoteCategories)
+                            @foreach (var cat in VoteCategories)
                             {
-                                <MudSelectItem Value=@((long?)cat.Id)>@cat.Text</MudSelectItem>
+                                <MudSelectItem Value=@((long?)cat.CatId)>@cat.Text</MudSelectItem>
                             }
                         </MudSelect>
                     </MudItem>
@@ -60,6 +60,8 @@
 @code {
     [Parameter]
     public IEnumerable<MemberInfoModel> InvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
+    [Parameter]
+    public IEnumerable<VoteCategoryViewModel> VoteCategories { get; set; } = Array.Empty<VoteCategoryViewModel>();
 
     [Parameter]
     public bool IsTeamEvent { get; set; } = false;
@@ -78,26 +80,14 @@
 
     private MudSelect<long?> NewValueInput { get; set; } = default!;
 
-    private IEnumerable<VoteCategoryModel> AvailableVoteCategories = Array.Empty<VoteCategoryModel>();
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender == false)
-        {
-            return;
-        }
-        AvailableVoteCategories = await GetAvailableVoteCategories();
-        await InvokeAsync(StateHasChanged);
-    }
-
     private async Task SetNewValue(long? value)
     {
-        var voteCat = AvailableVoteCategories.FirstOrDefault(x => x.Id == value);
+        var voteCat = VoteCategories.FirstOrDefault(x => x.CatId == value);
         if (voteCat is not null)
         {
             var vote = new VoteModel()
             {
-                VoteCategoryId = voteCat.Id,
+                    VoteCategoryId = voteCat.CatId,
                 VoteCategoryText = voteCat.Text,
             };
             Vm.AddVote(vote);
@@ -123,23 +113,5 @@
             FirstName = member.FirstName,
             LastName = member.LastName,
         };
-    }
-
-    private async Task<IEnumerable<VoteCategoryModel>> GetAvailableVoteCategories()
-    {
-        if (ApiService.CurrentLeague is null)
-        {
-            return Array.Empty<VoteCategoryModel>();
-        }
-
-        var request = ApiService.CurrentLeague
-            .VoteCategories()
-            .Get(Cts.Token);
-        var result = await request;
-        if (result.Success && result.Content is IEnumerable<VoteCategoryModel> models)
-        {
-            return models.OrderBy(x => x.Index);
-        }
-        return Array.Empty<VoteCategoryModel>();
     }
 }

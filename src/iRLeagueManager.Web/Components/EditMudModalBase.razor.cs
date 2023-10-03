@@ -30,6 +30,8 @@ public class EditMudModalBase<TViewModel, TModel> : MvvmComponentBase where TVie
 
     protected CancellationTokenSource Cts { get; } = new();
     protected StatusResultValidator? ResultValidator { get; set; }
+    protected bool Loading => Vm.Loading;
+    protected bool HasChanged => Vm.HasChanged;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -58,8 +60,7 @@ public class EditMudModalBase<TViewModel, TModel> : MvvmComponentBase where TVie
         }
         if (success)
         {
-            var result = ModalResult.Ok(Vm.GetModel());
-            MudDialog.Close(result);
+            MudDialog.Close(Vm.GetModel());
         }
     }
 

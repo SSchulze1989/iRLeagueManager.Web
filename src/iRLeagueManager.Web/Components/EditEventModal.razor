@@ -3,139 +3,114 @@
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueApiCore.Common.Models.Tracks
 @using iRLeagueManager.Web.ViewModels
-@inherits MvvmComponentBase
-@inject EventViewModel Event
+@inherits EditMudModalBase<EventViewModel, EventModel>
 @inject JsonSerializerOptions jsonOptions
 @inject TrackListService trackListService
 
-<EditForm Model=Event OnValidSubmit=Submit>
+<EditForm Model=Vm OnValidSubmit=Submit>
     <StatusResultValidator @ref=ResultValidator TrimPrefix="Event."/>
-    <div class="input-group-list mb-2">
-        <InputGroup Label="Name"> 
-            <InputText class="form-control" placeholder="Event Name" aria-label="EventName" id="name" @bind-Value="Event.Name"/>
-        </InputGroup>
-        <InputGroup Label="Date">
-            <InputDate class="form-control" aria-label="Date" id="date" @bind-Value="Event.Date"/>
-        </InputGroup>
-        <InputGroup Label="Start-Time">
-            <input class="form-control" type="time" arial-label="StartTime" @bind="Event.StartTime"/>
-        </InputGroup>
-        <InputGroup Label="Track">
-            <BlazoredTypeahead @bind-Value=SelectedTrack  
-                               SearchMethod=SearchTracks 
-                               MinimumLength=1
-                               MaximumSuggestions=100
-                               EnableDropDown=true
-                               class="form-control py-0 px-0 ps-1"
-                               placeholder="Search by Track name...">
-                <SelectedTemplate Context=track >
-                    @track?.TrackName
-                </SelectedTemplate>
-                <ResultTemplate Context=track>
-                    @track.TrackName
-                </ResultTemplate>
-            </BlazoredTypeahead>
-        </InputGroup>
-        <InputGroup Label="Config"  Class="">
-            <select class="form-select" aria-label="SelectTrackConfig" @bind="Event.TrackId"
-                placeholder="..."
-                disabled="@(SelectedTrack == null)">
-                @if (SelectedTrack != null)
-                {
-                    @foreach(var config in SelectedTrack.Configs)
-                    {
-                        <option value="@config.TrackId">@config.ConfigName</option>
-                    }
-                }
-            </select>
-        </InputGroup>
-    </div>
-    <div class="input-group-list mb-2">
-        <div class="input-group">
-            <div class="input-group-text">
-                <InputCheckbox class="form-check-input mt-0" @bind-Value="Event.HasPractice"/>
-            </div>
-            <label class="form-control">Practice</label>
-        </div>
-        <EditSession Session=Event.Practice />
-    </div>
-    <div class="input-group-list mb-2">
-        <div class="input-group">
-            <div class="input-group-text">
-                <InputCheckbox class="form-check-input mt-0" @bind-Value="Event.HasQualifying"/>
-            </div>
-            <label class="form-control">Qualifying</label>
-        </div>
-        <EditSession Session=Event.Qualifying />
-    </div>
-    <div class="card mb-2">
-        <div class="card-body">
-            <div class="card-title">
-                Race Sessions
-            </div>
-            @foreach(var session in @Bind(Event, x => x.Races))
-            {
-                <div class="input-group-list">
-                    <div class="input-group">
-                        <InputText class="form-control" @bind-Value="session.Name"/>
-                        <button class="btn btn-outline-danger" type="button" style="border-bottom: 1px; border-bottom-style: solid; margin-bottom: -1px" @onclick="@(() => Event.Sessions.Remove(session))"><span class="oi oi-trash"/></button>
-                    </div>
-                    <EditSession Session=session />
-                </div>
-                @if (@Event.CanMoveSessionDown(session))
-                {
-                    <div class="container d-flex justify-content-center my-1 py-0">
-                        <button class="btn btn-outline-secondary fw-bold px-5 py-0 align-content-center" style="height: 1.5rem; font-size: 0.75rem" type="button" @onclick="@(() => Event.MoveSessionDown(session))">&uarr; &darr;</button>
-                    </div>
-                }
-            }
-            <div class="mt-3">
-                <button class="btn btn-outline-secondary" type="button" @onclick="@(() => Event.AddSession("Race", SessionType.Race, onlyOnce: false))">Add Race</button>
-            </div>
-        </div>
-    </div>
-    <div class="input-group-list mb-2">
-        <InputGroup Label="Point Systems">
-            <BlazoredTypeahead @bind-Values=Event.ResultConfigs
-                               SearchMethod=SearchResultConfigs 
-                               MinimumLength=0
-                               MaximumSuggestions=10
-                               EnableDropDown=true
-                               DeleteItemsOnBackspace=false
-                               class="form-control py-0 px-0 ps-1"
-                               placeholder="Enter config name...">
-                <SelectedTemplate Context=config >
-                    @GetReferencedResultConfigName(config)
-                </SelectedTemplate>
-                <ResultTemplate Context=config>
-                    @GetReferencedResultConfigName(config)
-                </ResultTemplate>
-                <NotFoundTemplate Context=name>
-                    @name not found!
-                </NotFoundTemplate>
-            </BlazoredTypeahead>
-        </InputGroup>
-    </div>
-    <FormValidationMessage For="() => Event.ResultConfigs" />
-    <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
-    <CancelSubmitButtons ModelState=Event SubmitText="Save" OnCancel=Cancel/>
+    <MudDialog Style="background-color: var(--mud-palette-background-grey);">
+        <DialogContent>
+            <MudGrid Spacing="1">
+                <MudItem xs="12">
+                    <MudTextField Label="Event Name" @bind-Value="Vm.Name" For="@(() => Vm.Name)" Variant="Variant.Filled" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudDatePicker Label="Date" @bind-Date="Vm.Date" Variant="Variant.Filled" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudTimePicker Label="Start Time" @bind-Time="Vm.StartTime" Variant="Variant.Filled" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudAutocomplete Label="Track"
+                                     @bind-Value="SelectedTrack"
+                                     SearchFunc="SearchTracks"
+                                     MinCharacters="0"
+                                     MaxItems="100"
+                                     ToStringFunc="@(track => track?.TrackName)"
+                                     Variant="Variant.Filled">
+                        <ItemTemplate Context="Track">
+                            @Track?.TrackName
+                        </ItemTemplate>
+                        <ItemSelectedTemplate Context="Track">
+                            @Track?.TrackName
+                        </ItemSelectedTemplate>
+                    </MudAutocomplete>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudSelect Label="Config" @bind-Value="Vm.TrackId" Disabled="@(SelectedTrack is null)" Variant="Variant.Filled" ToStringFunc="@(id => SelectedTrack?.Configs.FirstOrDefault(x => x.TrackId == id)?.ConfigName)">
+                        @if (SelectedTrack is not null)
+                        {
+                            @foreach (var config in SelectedTrack.Configs)
+                            {
+                                <MudSelectItem Value="@((long?)config.TrackId)">@config.ConfigName</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudField Label="Practice" Variant="Variant.Filled">
+                        <MudCheckBox Label="Has Practice" @bind-Checked="Vm.HasPractice" />
+                        <EditSession Session=Vm.Practice />
+                    </MudField>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudField Label="Qualifying" Variant="Variant.Filled">
+                        <MudCheckBox Label="Has Qualifying" @bind-Checked="Vm.HasQualifying" />
+                        <EditSession Session=Vm.Qualifying />
+                    </MudField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudField Label="Race Sessions" Variant="Variant.Filled">
+                        <MudStack Spacing="2" AlignItems="AlignItems.Center">
+                            @foreach (var session in Bind(Vm, x => x.Races))
+                            {
+                                <div class="d-flex align-end">
+                                    <MudGrid>
+                                        <MudItem xs="4">
+                                            <MudTextField Label="Session Name" @bind-Value="session.Name" />
+                                        </MudItem>
+                                        <MudItem xs="4">
+                                            <MudTextField Label="Duration" @bind-Value="session.Duration" InputType="InputType.Time" />
+                                        </MudItem>
+                                        <MudItem xs="4">
+                                            <MudNumericField Label="Laps" @bind-Value="session.Laps" />
+                                        </MudItem>
+                                    </MudGrid>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Error" OnClick="@(() => Vm.Sessions.Remove(session))"/>
+                                </div>
+                                @if (@Vm.CanMoveSessionDown(session))
+                                {
+                                    <MudButton OnClick="@(() => Vm.MoveSessionDown(session))" Color="Color.Secondary">&uarr; &darr;</MudButton>
+                                }
+                            }
+                            <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="@(() => Vm.AddSession("Race", SessionType.Race, onlyOnce: false))">Add Race</MudButton>
+                        </MudStack>
+                    </MudField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MultiSelectAutoComplete Label="Point Systems"
+                                             @bind-Values="Vm.ResultConfigs"
+                                             SearchFunc="SearchResultConfigs"
+                                             ToStrinFunc="GetReferencedResultConfigName"
+                                             Variant="Variant.Filled" />
+                </MudItem>
+            </MudGrid>
+            <FormValidationMessage For="() => Vm.ResultConfigs" />
+            <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="Cancel" Color="Color.Secondary">Cancel</MudButton>
+            <ProgressButton ButtonType="ButtonType.Submit" Color="Color.Primary" Loading="Loading">Save</ProgressButton>
+        </DialogActions>
+    </MudDialog>
 </EditForm>
 
 @code {
-    private CancellationTokenSource cts = new();
-
     [CascadingParameter]
-    public BlazoredModalInstance ModalInstance { get; set; } = default!;
-
-    [Parameter]
-    public EventModel EventModel { get; set; } = default!;
-
-    [Parameter]
-    public Func<EventViewModel, CancellationToken, Task<StatusResult>>? OnSubmit { get; set; }
+    public MudDialogInstance DialogInstance { get; set; } = default!;
 
     private IList<TrackGroupModel> TrackList { get; set; } = Array.Empty<TrackGroupModel>();
-
-    private StatusResultValidator? ResultValidator { get; set; }
 
     private TrackGroupModel? selectedTrack;
     private TrackGroupModel? SelectedTrack
@@ -154,21 +129,21 @@
 
     protected override void OnParametersSet()
     {
-        _ = ModalInstance ?? throw BlazorParameterNullException.New(this, ModalInstance);
-        _ = EventModel ?? throw BlazorParameterNullException.New(this, EventModel);
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, DialogInstance);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
         if (firstRender == false)
         {
             return;
         }
-        Event.SetModel(EventModel);
         TrackList = await trackListService.GetTracks();
-        SelectedTrack = TrackList.FirstOrDefault(x => x.Configs.Any(y => y.TrackId == EventModel.TrackId));
-        await Event.LoadAvailableResultConfigs();
-        ResultConfigs = Event.AvailableResultConfigs;
+        SelectedTrack = TrackList.FirstOrDefault(x => x.Configs.Any(y => y.TrackId == Vm.TrackId));
+        await Vm.LoadAvailableResultConfigs();
+        ResultConfigs = Vm.AvailableResultConfigs;
         await InvokeAsync(StateHasChanged);
     }
 
@@ -177,67 +152,42 @@
         if (track == null)
         {
             selectedTrack = null;
-            Event.TrackId = null;
+            Vm.TrackId = null;
             return;
         }
 
         selectedTrack = track;
-        var trackGroup = track.Configs.FirstOrDefault(x => x.TrackId == Event.TrackId)
+        var trackGroup = track.Configs.FirstOrDefault(x => x.TrackId == Vm.TrackId)
             ?? track.Configs.FirstOrDefault();
-        Event.TrackId = trackGroup?.TrackId;
+        Vm.TrackId = trackGroup?.TrackId;
     }
 
-    private async Task<IEnumerable<TrackGroupModel>> SearchTracks(string search)
+    private async Task<IEnumerable<TrackGroupModel?>> SearchTracks(string search)
     {
+        if (string.IsNullOrEmpty(search))
+        {
+            return TrackList;
+        }
         return await Task.FromResult(TrackList.Where(x => x.TrackName.Contains(search, StringComparison.OrdinalIgnoreCase)));
     }
 
     private async Task<IEnumerable<ResultConfigInfoModel>> SearchResultConfigs(string name)
     {
         return await Task.FromResult(ResultConfigs
-            .Where(x => Event.ResultConfigs.Any(y => y.ResultConfigId == x.ResultConfigId) == false)
+            .Where(x => Vm.ResultConfigs.Any(y => y.ResultConfigId == x.ResultConfigId) == false)
             .Where(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase) || x.DisplayName.Contains(name, StringComparison.OrdinalIgnoreCase)));
     }
 
-    private string GetReferencedResultConfigName(ResultConfigInfoModel config)
+    private string GetReferencedResultConfigName(ResultConfigInfoModel? config)
     {
+        if (config is null)
+        {
+            return string.Empty;
+        }
         if (string.IsNullOrEmpty(config.ChampionshipName))
         {
             return config.Name;
         }
         return $"{config.ChampionshipName} - {config.Name}";
-    }
-
-    private async Task Submit()
-    {
-        //var status = await Event.SaveChangesAsync(cts.Token);
-        //var result = ModalResult.Ok(Event.GetModel());
-        bool success = true;
-        if (OnSubmit != null)
-        {
-            var result = await OnSubmit.Invoke(Event, cts.Token);
-            ResultValidator?.ValidateResult(result);
-            success &= result.IsSuccess;
-        }
-        if (success)
-        {
-            var result = ModalResult.Ok(Event.GetModel());
-            await ModalInstance.CloseAsync(result);
-        }
-    }
-
-    private async Task Cancel()
-    {
-        await ModalInstance.CancelAsync();
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing == false)
-        {
-            cts.Cancel();
-            cts.Dispose();
-        }
-        base.Dispose(disposing);
     }
 }

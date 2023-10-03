@@ -43,6 +43,8 @@
     public IEnumerable<MemberInfoModel> InvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
     [CascadingParameter]
     public IEnumerable<UserModel> LeagueUsers { get; set; } = Array.Empty<UserModel>();
+    [CascadingParameter]
+    public IEnumerable<VoteCategoryViewModel> VoteCategories { get; set; } = Array.Empty<VoteCategoryViewModel>();
     [Parameter, EditorRequired]
     public ReviewCommentViewModel Comment { get; set; } = default!;
     [Parameter, EditorRequired]
@@ -93,10 +95,11 @@
     {
         var parameters = new DialogParameters<EditCommentModal>()
         {
-            { x => x.Model, Comment.CopyModel() },
-            { x => x.InvolvedCars, InvolvedCars },
+            {x => x.Model, Comment.CopyModel()},
+            {x => x.InvolvedMembers, InvolvedMembers},
+            {x => x.VoteCategories, VoteCategories},
             { x => x.IsTeamEvent, IsTeamEvent },
-            { x => x.OnSubmit, async (comment, cancellation) => await comment.SaveChangesAsync(cancellation) },
+            {x => x.OnSubmit, async (comment, cancellation) => await comment.SaveChangesAsync(cancellation)},
         };
         var result = await ModalService.Show<EditCommentModal>("Edit Comment", parameters).Result;
         if (result.Confirmed && result.Data is ReviewCommentModel comment)

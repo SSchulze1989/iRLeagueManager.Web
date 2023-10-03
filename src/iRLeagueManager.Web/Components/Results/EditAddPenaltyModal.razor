@@ -3,7 +3,7 @@
 @inherits EditMudModalBase<AddPenaltyViewModel, PenaltyModel>
 
 <EditForm Model=@Model>
-    <MudDialog>
+    <MudDialog Style="background-color: var(--mud-palette-background-grey);">
         <DialogContent>
             <StatusResultValidator @ref="ResultValidator" />
             <MudStack Class="gap-2">
@@ -18,26 +18,6 @@
                 }
                 @if (CanSelectDriver)
                 {
-                    @*<BlazoredTypeahead @bind-Value=Vm.ResultRow
-                        class="form-control p-0"
-                                        style="border-top-right-radius:0; border-top-left-radius:0;"
-                                        EnableDropDown=true
-                                        SearchMethod=SearchResultRow
-                                        MinimumLength=1
-                                        MaximumSuggestions=100
-                                        DeleteItemsOnBackspace=false
-                                        placeholder="Search driver by name...">
-
-                        <SelectedTemplate Context=row>
-                            @(row?.FinalPosition). @row?.Firstname @row?.Lastname
-                        </SelectedTemplate>
-                        <ResultTemplate Context=row>
-                            @(row.FinalPosition). @row.Firstname @row.Lastname
-                        </ResultTemplate>
-                        <NotFoundTemplate Context=name>
-                            <span>Driver <b>@name</b> Not found!</span>
-                        </NotFoundTemplate>
-                    </BlazoredTypeahead>*@
                     <MudAutocomplete @bind-Value=Vm.ResultRow
                                  T=ResultRowModel
                                  SearchFunc="SearchResultRow"

@@ -201,7 +201,7 @@
             return;
         }
         var parameters = new ModalParameters()
-            .Add(nameof(ConfirmModal.Text), $"Really delete result for event \"{@event.Name} - {@event.Date.ToString(@"dd.MM.yyyy")}\"?")
+            .Add(nameof(ConfirmModal.Text), $"Really delete result for event \"{@event.Name} - {@event.Date.GetValueOrDefault().ToString(@"dd.MM.yyyy")}\"?")
             .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
         var result = await ModalService.Show<ConfirmModal>("Delete Results", parameters).Result;
         if (result.Confirmed)

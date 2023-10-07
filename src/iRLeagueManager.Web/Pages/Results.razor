@@ -65,7 +65,7 @@
                         <MudStack Class="gap-2 pt-2">
                             @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
                             {
-                                <MudPaper Elevation="4" >
+                                @*<MudPaper Elevation="4" >*@
                                     <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
                                         <Authorized>
                                             <DisplayResult Result="result" CanEdit="true" />
@@ -74,7 +74,7 @@
                                             <DisplayResult Result="result" />
                                         </NotAuthorized>
                                     </AuthorizeView>
-                                </MudPaper>
+                                @*</MudPaper>*@
                             }
                         </MudStack>
                     </MudTabPanel>
@@ -87,7 +87,7 @@
             <MudStack Class="gap-2">
                 @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
                 {
-                    <MudPaper Elevation="2" >
+                    @*<MudPaper Elevation="2" >*@
                         <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
                             <Authorized>
                                 <DisplayResult Result="result" CanEdit="true" />
@@ -96,7 +96,7 @@
                                 <DisplayResult Result="result" />
                             </NotAuthorized>
                         </AuthorizeView>
-                    </MudPaper>
+                    @*</MudPaper>*@
                 }
             </MudStack>
         }

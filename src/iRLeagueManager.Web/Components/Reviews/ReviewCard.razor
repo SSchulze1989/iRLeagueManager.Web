@@ -13,7 +13,7 @@
 <CascadingValue Value=Review.InvolvedMembers>
 <CascadingValue Value="ChipSize" Name="ChipSize">
     <MudCard Elevation="2">
-        <MudExpansionPanel DisableGutters="true" Dense="true" @bind-IsExpanded="IsExpanded" HideIcon="true">
+        <MudExpansionPanel DisableGutters="true" Dense="true" HideIcon="true" Style="background-color: var(--mud-palette-background-grey)">
             <TitleContent>
                 <MudStack Row="true" AlignItems="AlignItems.Center"
                     Style="@($@"
@@ -55,31 +55,55 @@
                 </MudStack>
             </TitleContent>
             <ChildContent>
-                <MudCard Class="pa-0" Outlined="false" Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
+                <MudCard Class="pa-0" Outlined="false" Elevation="0">
                     <MudStack Spacing="0">
-                        @if (string.IsNullOrWhiteSpace(Review.FullDescription) == false)
-                        {
-                            <MudCard Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
-                                <MudCardHeader Class="py-1">
-                                    <CardHeaderContent>
-                                        <MudText Typo="Typo.h6">Description</MudText>
-                                    </CardHeaderContent>
-                                </MudCardHeader>
-                                <MudCardContent>
-                                    <MudText Typo="Typo.body2" Class="ps-2" Style="white-space: pre-wrap">
-                                        @Review.FullDescription
-                                    </MudText>
-                                </MudCardContent>
-                            </MudCard>
-                        }
                         <MudDivider />
                         <MudGrid Spacing="0">
+                            <MudItem xs="12">
+                                @if (string.IsNullOrWhiteSpace(Review.FullDescription) == false)
+                                {
+                                    <MudCard Elevation="0">
+                                        <MudCardHeader Class="py-1">
+                                            <CardHeaderContent>
+                                                <MudText Typo="Typo.h6">Description</MudText>
+                                            </CardHeaderContent>
+                                            <CardHeaderActions>
+                                                <div style="margin: 8px 8px 0px 0px">
+                                                    @if (IsSteward && ReadOnly == false)
+                                                    {
+                                                        <MudTooltip Text="Edit Review">
+                                                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" OnClick=OnEditClick />
+                                                        </MudTooltip>
+                                                    }
+                                                </div>
+                                            </CardHeaderActions>
+                                        </MudCardHeader>
+                                        <MudCardContent>
+                                            <MudText Typo="Typo.body2" Class="ps-2" Style="white-space: pre-wrap">
+                                                @Review.FullDescription
+                                            </MudText>
+                                        </MudCardContent>
+                                    </MudCard>
+                                }
+                            </MudItem>
                             <MudItem xs="12" sm="6">
-                                    <MudCard Elevation="0" Style="background-color: var(--mud-palette-background-grey); height: 100%">
+                                    <MudCard Elevation="0">
                                     <MudCardHeader Class="py-1">
                                         <CardHeaderContent>
                                             <MudText Typo="Typo.h6">Involved</MudText>
                                         </CardHeaderContent>
+                                        <CardHeaderActions>
+                                            <MudHidden Breakpoint="Breakpoint.SmAndUp">
+                                                <div style="margin: 8px 8px 0px 0px">
+                                                    @if (IsSteward && ReadOnly == false && string.IsNullOrWhiteSpace(Review.FullDescription))
+                                                    {
+                                                        <MudTooltip Text="Edit Review">
+                                                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" OnClick=OnEditClick />
+                                                        </MudTooltip>
+                                                    }
+                                                </div>
+                                            </MudHidden>
+                                        </CardHeaderActions>
                                     </MudCardHeader>
                                     <MudCardContent>
                                         <MudChipSet ReadOnly="true">
@@ -92,11 +116,23 @@
                                 </MudCard>
                             </MudItem>
                             <MudItem xs="12" sm="6">
-                                    <MudCard Elevation="0" Style="background-color: var(--mud-palette-background-grey); height: 100%">
+                                    <MudCard Elevation="0">
                                     <MudCardHeader Class="py-1">
                                         <CardHeaderContent>
                                             <MudText Typo="Typo.h6">Votes</MudText>
                                         </CardHeaderContent>
+                                        <CardHeaderActions>
+                                            <MudHidden Breakpoint="Breakpoint.SmAndUp" Invert="true">
+                                                <div style="margin: 8px 8px 0px 0px">
+                                                    @if (IsSteward && ReadOnly == false && string.IsNullOrWhiteSpace(Review.FullDescription))
+                                                    {
+                                                        <MudTooltip Text="Edit Review">
+                                                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" OnClick=OnEditClick/>
+                                                        </MudTooltip>
+                                                    }
+                                                </div>
+                                            </MudHidden>
+                                        </CardHeaderActions>
                                     </MudCardHeader>
                                     <MudCardContent>
                                         <MudChipSet ReadOnly="true" Class="d-flex gap-2">
@@ -115,7 +151,7 @@
                             </MudItem>
                         </MudGrid>
                         <MudDivider />
-                        <MudCard Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
+                        <MudCard Elevation="0">
                             <MudCardHeader Class="py-0">
                                 <CardHeaderContent>
                                     <MudText Typo="Typo.h6">Result</MudText>
@@ -124,7 +160,9 @@
                                     <div style="margin: 8px 8px 0px 0px">
                                         @if (IsSteward && ReadOnly == false)
                                         {
-                                            <MudButton StartIcon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" OnClick=EditResultClick>Edit</MudButton>
+                                            <MudTooltip Text="Edit Result">
+                                                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" OnClick=EditResultClick/>
+                                            </MudTooltip>
                                         }
                                     </div>
                                 </CardHeaderActions>
@@ -149,29 +187,22 @@
                         @if (IsSteward)
                         {
                             <MudDivider/>
-                            <MudCard Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
-                                <MudCardHeader Class="py-0">
-                                    <CardHeaderContent>
-                                        <MudText Typo="Typo.h6">Comments</MudText>
-                                    </CardHeaderContent>
-                                </MudCardHeader>
-                                <MudCardContent>
-                                    <MudStack Spacing="1">
-                                        @foreach (var comment in @Bind(Review, x => x.Comments))
-                                        {
-                                            <ReviewComment Comment=comment
-                                                    OnStateHasChanged=@(() => CommentStateChanged(comment))
-                                                    OnDeleteClick=@(() => DeleteCommentClick(comment)) />
-                                        }
-                                    </MudStack>
-                                    @if (ReadOnly == false && UserHasCommented(Review) == false)
+                            <MudStack Spacing="1">
+                                @foreach (var (comment, index) in Bind(Review, x => x.Comments).Select((x,i) => (x,i)))
+                                {
+                                    @if (index > 0)
                                     {
-                                        <MudButton StartIcon="@Icons.Material.Filled.AddComment" Color="Color.Tertiary" OnClick=AddCommentClick>
-                                            Add Comment
-                                        </MudButton>
+                                        <MudDivider DividerType="DividerType.Middle" />
                                     }
-                                </MudCardContent>
-                            </MudCard>
+                                    <ReviewComment Comment=comment
+                                            OnStateHasChanged=@(() => CommentStateChanged(comment))
+                                            OnDeleteClick=@(() => DeleteCommentClick(comment)) />
+                                }
+                            </MudStack>
+                        }
+                        @if (IsSteward && Bind(Review, x => x.Comments).Any(x => x.AuthorUserId == UserId) == false)
+                        {
+                            <MudButton StartIcon="@Icons.Material.Outlined.AddComment" Color="Color.Primary" Class="ma-2" OnClick="AddCommentClick">Add Comment</MudButton>
                         }
                     </MudStack>
                 </MudCard>
@@ -179,7 +210,7 @@
         </MudExpansionPanel>
         @if (IsExpanded == false)
         {
-            <MudPaper Class="ma-0 pa-4" Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
+            <MudPaper Class="ma-0 pa-4" Elevation="0">
                 <MudGrid>
                     <MudItem xs="2" Class="py-1 d-flex align-center">
                         <MudText Typo="Typo.h6">Involved</MudText>

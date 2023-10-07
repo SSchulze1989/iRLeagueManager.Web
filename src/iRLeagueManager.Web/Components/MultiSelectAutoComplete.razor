@@ -9,12 +9,12 @@
                      Clearable="true" 
                      Immediate="false"           
                      CoerceValue="true"           
-                     ToStringFunc="ToStrinFunc"
+                     ToStringFunc="ToStringFunc"
                      Variant="@Variant"/>
     <MudChipSet Class="mt-1" AllClosable=true OnClose="RemoveValue">
         @foreach (var val in selectedValues)
         {
-            <MudChip Size="ChipSize" Text="@ToStrinFunc(val)" />
+            <MudChip Size="ChipSize" Text="@ToStringFunc(val)" />
         }
     </MudChipSet>
 </div>
@@ -33,7 +33,7 @@
     public Func<string, Task<IEnumerable<T>>> SearchFunc { get; set; } = default!;
 
     [Parameter, EditorRequired]
-    public Func<T, string> ToStrinFunc { get; set; } = default!;
+    public Func<T, string> ToStringFunc { get; set; } = default!;
 
     [Parameter]
     public Variant Variant { get; set; }
@@ -81,7 +81,7 @@
 
     private void RemoveValue(MudChip chip)
     {
-        if (selectedValues.RemoveWhere(x => ToStrinFunc(x) == chip.Text) > 0)
+        if (selectedValues.RemoveWhere(x => ToStringFunc(x) == chip.Text) > 0)
             RefreshBinding();
     }
 

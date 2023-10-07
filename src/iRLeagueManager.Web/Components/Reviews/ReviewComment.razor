@@ -6,43 +6,36 @@
 @using iRLeagueManager.Web.ViewModels
 @inject IDialogService DialogService
 
-<MudCard Elevation="0">
-    <MudCardHeader Class="py-2">
-        <CardHeaderAvatar>
-            <MudAvatar Color="Color.Secondary" Variant="Variant.Outlined">@GetAuthorInitials(GetUser(Comment.AuthorUserId), Comment.AuthorName)</MudAvatar>
-        </CardHeaderAvatar>
-        <CardHeaderContent>
-            <MudStack Spacing="0">
-                <MudText Typo="Typo.subtitle1"><DisplayUser User="Author" ShowUserName="false" FallbackName="@Comment.AuthorName"/></MudText>
-                @if (string.IsNullOrEmpty(Author?.Firstname) == false || string.IsNullOrEmpty(Author?.Lastname) == false)
-                {
-                    <MudText Typo="Typo.caption" GutterBottom="false">@Comment.AuthorName</MudText>
-                }
-            </MudStack>
-        </CardHeaderContent>
-        <CardHeaderActions>
-            @if (UserCanEdit)
+<MudStack Spacing="2" Class="px-4 py-2">
+    <div class="d-flex align-center ps-2 gap-2">
+        <MudAvatar Color="Color.Secondary" Variant="Variant.Outlined">@GetAuthorInitials(GetUser(Comment.AuthorUserId), Comment.AuthorName)</MudAvatar>
+        <MudStack Spacing="0">
+            <MudText Typo="Typo.subtitle1"><DisplayUser User="Author" ShowUserName="false" FallbackName="@Comment.AuthorName"/></MudText>
+            @if (string.IsNullOrEmpty(Author?.Firstname) == false || string.IsNullOrEmpty(Author?.Lastname) == false)
             {
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" OnClick="EditClick"/>
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="OnDeleteClick"/>
+                <MudText Typo="Typo.caption" GutterBottom="false">@Comment.AuthorName</MudText>
             }
-        </CardHeaderActions>
-    </MudCardHeader>
-    <MudCardContent Class="py-2">
-        <MudText Style="white-space: pre-wrap" Typo="Typo.body2" Class="ps-2">
-            @Bind(Comment, x=> x.Text)
-        </MudText>
-        <MudChipSet ReadOnly="true">
-            @foreach (var vote in @Bind(Comment, x => x.Votes))
-            {
-                var member = @Bind(vote, x => x.MemberAtFault);
-                <MudChip Label="true" Color="Color.Warning" Size="ChipSize">
-                    @Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
-                </MudChip>
-            }
-        </MudChipSet>
-    </MudCardContent>
-</MudCard>
+        </MudStack>
+        <MudSpacer/>
+        @if (UserCanEdit)
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" OnClick="EditClick"/>
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="OnDeleteClick"/>
+        }
+    </div>
+    <MudText Style="white-space: pre-wrap" Typo="Typo.body2" Class="ps-2">
+        @Bind(Comment, x=> x.Text)
+    </MudText>
+    <MudChipSet ReadOnly="true">
+        @foreach (var vote in @Bind(Comment, x => x.Votes))
+        {
+            var member = @Bind(vote, x => x.MemberAtFault);
+            <MudChip Label="true" Color="Color.Warning" Size="ChipSize">
+                @Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
+            </MudChip>
+        }
+    </MudChipSet>
+</MudStack>
 
 @code {
     [CascadingParameter]

@@ -6,11 +6,11 @@
 @inject IDialogService DialogService
 
 <div @attributes=AdditionalAttributes>
-    <MudToolBar>
-        <MudText Typo="Typo.h5">@Result.SessionName</MudText>
+    <div class="d-flex align-center px-2 pt-2">
+        <MudText Typo="Typo.h6">@Result.SessionName</MudText>
         <MudSpacer/>
         <MudIconButton Icon="@Icons.Material.Filled.Info" Title="Show penalties" OnClick=ShowPenaltiesClick/>
-    </MudToolBar>
+    </div>
     @{
         var resultRows = Result.ResultRows;
         var displayBonusPoints = resultRows.Any(x => x.BonusPoints != 0);

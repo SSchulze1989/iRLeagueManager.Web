@@ -14,7 +14,7 @@
                     Label="Members"
                     @bind-Values=Vm.Members
                     SearchFunc="SearchMembers"
-                    ToStrinFunc="@(member => member is null ? string.Empty : $"{member.FirstName} {member.LastName}")"
+                    ToStringFunc="@(member => member is null ? string.Empty : $"{member.FirstName} {member.LastName}")"
                     Variant="Variant.Filled" />
                 <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
             </MudStack>

@@ -6,13 +6,19 @@
 @using iRLeagueManager.Web.ViewModels
 @inject IDialogService DialogService
 
-<MudCard Elevation="4">
+<MudCard Elevation="0">
     <MudCardHeader Class="py-2">
         <CardHeaderAvatar>
             <MudAvatar Color="Color.Secondary" Variant="Variant.Outlined">@GetAuthorInitials(GetUser(Comment.AuthorUserId), Comment.AuthorName)</MudAvatar>
         </CardHeaderAvatar>
         <CardHeaderContent>
-            <MudText Typo="Typo.subtitle2"><DisplayUser User=@GetUser(Comment.AuthorUserId) FallbackName=@Comment.AuthorName /></MudText>
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.subtitle1"><DisplayUser User="Author" ShowUserName="false" FallbackName="@Comment.AuthorName"/></MudText>
+                @if (string.IsNullOrEmpty(Author?.Firstname) == false || string.IsNullOrEmpty(Author?.Lastname) == false)
+                {
+                    <MudText Typo="Typo.caption" GutterBottom="false">@Comment.AuthorName</MudText>
+                }
+            </MudStack>
         </CardHeaderContent>
         <CardHeaderActions>
             @if (UserCanEdit)
@@ -60,6 +66,8 @@
 
     private bool UserCanEdit;
 
+    private UserModel? Author { get; set; }
+
     //[Parameter]
     //public EventCallback<MouseEventArgs> EditClick { get; set; }
 
@@ -67,6 +75,9 @@
     {
         _ = Comment ?? throw BlazorParameterNullException.New(this, Comment);
         _ = AuthenticationStateTask ?? throw BlazorParameterNullException.New(this, AuthenticationStateTask);
+        BlazorParameterNullException.ThrowIfNull(this, LeagueUsers);
+        BlazorParameterNullException.ThrowIfNull(this, Comment);
+        Author = GetUser(Comment.AuthorUserId);
         UserCanEdit = await GetUserCanEdit();
         base.OnParametersSet();
     }

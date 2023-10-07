@@ -41,7 +41,7 @@
                     <MultiSelectAutoComplete Label="Members"
                                              @bind-Values=Vm.InvolvedMembers
                                              SearchFunc="SearchMembers"
-                                             ToStrinFunc="@(member => member is null ? string.Empty : $"{member.FirstName} {member.LastName}")"
+                                             ToStringFunc="@(member => member is null ? string.Empty : $"{member.FirstName} {member.LastName}")"
                                              Variant="Variant.Filled"/>
                 </MudItem>
             </MudGrid>

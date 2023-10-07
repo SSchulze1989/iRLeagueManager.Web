@@ -13,7 +13,7 @@
 <CascadingValue Value=Review.InvolvedMembers>
 <CascadingValue Value="ChipSize" Name="ChipSize">
     <MudCard Elevation="2">
-        <MudExpansionPanel DisableGutters="true" Dense="true" HideIcon="true" Style="background-color: var(--mud-palette-background-grey)">
+        <MudExpansionPanel DisableGutters="true" Dense="true" HideIcon="true" @bind-IsExpanded="IsExpanded" Style="background-color: var(--mud-palette-background-grey)">
             <TitleContent>
                 <MudStack Row="true" AlignItems="AlignItems.Center"
                     Style="@($@"

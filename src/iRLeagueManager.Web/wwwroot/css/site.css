@@ -18,6 +18,10 @@
     min-height: calc(100vh - 2.5em);
 }
 
+.surface-hover:hover {
+    filter: brightness(95%);
+}
+
 .blazored-typeahead {
     border-color: rgb(206, 212, 218);
 }

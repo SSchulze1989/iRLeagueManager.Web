@@ -4,13 +4,14 @@
     <MudAutocomplete @bind-Value="@theValue"
                      SearchFunc="@SearchFunc"      
                      ShowProgressIndicator="true" 
-                     DebounceInterval="600"        
+                     DebounceInterval="DebounceInterval"        
                      Label="@Label" 
                      Clearable="true" 
                      Immediate="false"           
                      CoerceValue="true"           
                      ToStringFunc="ToStringFunc"
-                     Variant="@Variant"/>
+                     Variant="@Variant"
+                     @ref=Autocomplete/>
     <MudChipSet Class="mt-1" AllClosable=true OnClose="RemoveValue">
         @foreach (var val in selectedValues)
         {
@@ -44,7 +45,12 @@
     [Parameter]
     public Size ChipSize { get; set; } = Size.Medium;
 
+    [Parameter]
+    public int DebounceInterval { get; set; } = 400;
+
     private HashSet<T> selectedValues = new HashSet<T>();
+
+    private MudAutocomplete<T> Autocomplete { get; set; } = default!;
 
     private async Task<IEnumerable<T>> FilteredSearchFunc(string searchText)
     {
@@ -91,6 +97,7 @@
         {
             if (selectedValues.Add(newValue))
                 RefreshBinding();
+            Autocomplete.Clear();
         }
     }
 
@@ -103,6 +110,7 @@
     private T theValue
     {
         get => default(T)!;
-        set { AddValue(value); }
+        set 
+        { AddValue(value); }
     }
 }

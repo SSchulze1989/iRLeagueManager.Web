@@ -13,15 +13,17 @@
 <CascadingValue Value=Review.InvolvedMembers>
 <CascadingValue Value="ChipSize" Name="ChipSize">
     <MudCard Elevation="2">
-        <MudExpansionPanel DisableGutters="true" Dense="true" HideIcon="true" @bind-IsExpanded="IsExpanded" Style="background-color: var(--mud-palette-background-grey)">
+        <MudExpansionPanel DisableGutters="true" Dense="true" HideIcon="true" @bind-IsExpanded="IsExpanded">
             <TitleContent>
                 <MudStack Row="true" AlignItems="AlignItems.Center"
+                    Class="surface-hover"
                     Style="@($@"
                         margin: -16px -24px -16px -24px; 
-                        padding: 10px 1.5em; 
+                        padding: 10px 1.5em;
+                        background-color: var(--mud-palette-surface);
                         border-top: 6px; border-top-color: var(--mud-palette-{StatusColor}); 
                         border-top-style: solid;")">
-                    <div class="d-flex flex-wrap align-center gap-1">
+                    <MudText Typo="Typo.button" Class="@($"d-flex flex-wrap align-center {(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "gap-1" : "gap-2")}")">
                         <div>@Review.SessionName:</div>
                         <div>@Review.IncidentNr</div>
                         <MudIcon Icon="@Icons.Material.Outlined.Flag"/>@Review.OnLap
@@ -33,7 +35,7 @@
                         {
                             <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small"/>
                         }
-                    </div>
+                    </MudText>
                     <MudSpacer />
                     <MudIcon Icon="@(IsExpanded ? Icons.Material.Filled.KeyboardArrowUp : Icons.Material.Filled.KeyboardArrowDown)" />
                     <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
@@ -352,6 +354,7 @@
         {
             {x => x.Model, new ReviewCommentModel() { Votes = new List<VoteModel>() }},
             {x => x.InvolvedMembers, Review.InvolvedMembers},
+            {x => x.VoteCategories, VoteCategories},
             { x => x.IsTeamEvent, IsTeamEvent },
             {x => x.OnSubmit, async (comment, cancellation) => await Review.AddComment(comment.GetModel(), cancellation)},
         };

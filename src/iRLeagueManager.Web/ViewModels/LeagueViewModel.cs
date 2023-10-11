@@ -20,7 +20,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
 
     public long LeagueId => model.Id;
     public string LeagueName { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
-    public string NameFull { get => model.NameFull; set => SetP(model.NameFull, value => model.Name = value, value); }
+    public string NameFull { get => model.NameFull; set => SetP(model.NameFull, value => model.NameFull = value, value); }
     public string Description { get => model.Description; set => SetP(model.Description, value => model.Description = value, value); }
 
     private ObservableCollection<SeasonViewModel> seasons;

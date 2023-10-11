@@ -1,70 +1,10 @@
-﻿@using iRLeagueManager.Web.Components
-@inherits LayoutComponentBase
-@implements IDisposable
+﻿@inherits LayoutComponentBase
 @layout MainLayout
-@inject SharedStateService Shared
-@inject NavigationManager NavigationManager
 
 <MudContainer MaxWidth="MaxWidth.Large">
-    <div class="sticky-header">
-        <LoadingHeader>
-            <HeaderText>
-                <h3>Settings</h3>
-            </HeaderText>
-        </LoadingHeader>
-        <ul class="nav nav-tabs">
-            <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin)>
-                <Authorized Context=AdminContext>
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/League")>League</NavLink>
-                    </li>
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Users")>Users</NavLink>
-                    </li>
-                </Authorized>
-            </AuthorizeView>
-            <li class="nav-item">
-                <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Results")>Results</NavLink>
-            </li>
-            <li class="nav-item">
-                <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Teams")>Teams</NavLink>
-            </li>
-            <li class="nav-item">
-                <NavLink class="nav-link" href=@($"/{Shared.LeagueName}/Settings/Reviews")>Reviews</NavLink>
-            </li>
-        </ul>
-    </div>
     @Body
 </MudContainer>
 
 @code {
-    protected override void OnInitialized()
-    {
-        Shared.StateChanged += SharedStateChanged;
-    }
 
-    protected string GetRoleString(params string[] roleNames)
-    {
-        IEnumerable<string> roles = new[] { "Admin" };
-        if (Shared.LeagueName != null)
-        {
-            var roleValues = roleNames.Select(x => LeagueRoles.GetRoleValue(x));
-            roleValues = roleValues.Concat(roleValues.SelectMany(LeagueRoles.ImplicitRoleOf)).Distinct();
-            var leagueRoleNames = roleValues
-                .Select(x => LeagueRoles.GetLeagueRoleName(Shared.LeagueName, x))
-                .NotNull();
-            roles = roles.Concat(leagueRoleNames);
-        }
-        return string.Join(',', roles);
-    }
-
-    private async void SharedStateChanged(object? sender, EventArgs e)
-    {
-        await InvokeAsync(StateHasChanged);
-    }
-
-    public void Dispose()
-    {
-        Shared.StateChanged -= SharedStateChanged;
-    }
 }

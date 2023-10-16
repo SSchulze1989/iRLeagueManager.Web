@@ -14,6 +14,10 @@
     }
 }
 
+body.scroll-locked-no-padding {
+    overflow: hidden !important;
+}
+
 .page {
     min-height: calc(100vh - 2.5em);
 }

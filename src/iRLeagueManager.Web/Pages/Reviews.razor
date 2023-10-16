@@ -18,7 +18,7 @@
 <MudContainer MaxWidth="MaxWidth.Large">
     <LoadingHeader Loading=@Bind(ReviewsVm, x => x.Loading)>
         <HeaderText>
-            <MudText Typo="Typo.h6">Reviews</MudText>
+            <MudText Typo="Typo.h5">Reviews</MudText>
         </HeaderText>
         <HeaderActions>
             <EventSelect/>
@@ -39,7 +39,7 @@
     <CascadingValue Value=ReviewsVm.LeagueUsers.AsEnumerable()>
     <CascadingValue Value=ReviewsVm.VoteCategories.AsEnumerable()>
 
-    <MudStack Spacing="4" Class="py-4">
+    <MudStack Spacing="5" Class="py-4">
         @switch (SelectedTabIndex)
         {
             case 0:

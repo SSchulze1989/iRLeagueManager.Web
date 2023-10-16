@@ -53,18 +53,20 @@
                     </CardHeaderActions>
                 </MudCardHeader>
                 <MudCardContent>
-                    @foreach (var member in team.MemberList.OrderBy(x => x.LastName).ThenBy(x => x.FirstName))
-                    {
-                        <MudChip Icon="@Icons.Material.Filled.Person" Label="true">
-                            <MudHighlighter Text="@($"{member.FirstName} {member.LastName}")" HighlightedText="@TeamFilter"/>
-                        </MudChip>
-                    }
-                    @if (team.MemberList.Any() == false)
-                    {
-                        <MudChip Disabled="true" Label="true">
-                            <MudIcon Icon="@Icons.Material.Filled.PersonOff" />
-                        </MudChip>
-                    }
+                    <MudChipSet ReadOnly="true">
+                        @foreach (var member in team.MemberList.OrderBy(x => x.LastName).ThenBy(x => x.FirstName))
+                        {
+                            <MudChip Icon="@Icons.Material.Filled.Person" Label="true" Variant="Variant.Outlined">
+                                <MudHighlighter Text="@($"{member.FirstName} {member.LastName}")" HighlightedText="@TeamFilter"/>
+                            </MudChip>
+                        }
+                        @if (team.MemberList.Any() == false)
+                        {
+                            <MudChip Disabled="true" Label="true" Variant="Variant.Outlined">
+                                <MudIcon Icon="@Icons.Material.Filled.PersonOff" />
+                            </MudChip>
+                        }
+                    </MudChipSet>
                 </MudCardContent>
             </MudCard>
         }

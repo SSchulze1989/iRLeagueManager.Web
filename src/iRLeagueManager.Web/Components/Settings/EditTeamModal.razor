@@ -3,28 +3,37 @@
 @using iRLeagueManager.Web.ViewModels
 @inherits EditMudModalBase<TeamViewModel, TeamModel>
 
-<EditForm Model=Vm OnValidSubmit=Submit>
-    <StatusResultValidator @ref=ResultValidator />
-    <MudDialog Style="background-color: var(--mud-palette-background-grey);">
-        <DialogContent>
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model=Vm OnValidSubmit=Submit>
+            <StatusResultValidator @ref=ResultValidator />
             <MudStack Spacing="2">
-                <MudTextField Label="Name" @bind-Value="Vm.Name" For="@(() => Vm.Name)" Variant="Variant.Filled"/>
-                <MudColorPicker Label="Color" @bind-Text="Vm.TeamColor" style="@($"color: {Vm.TeamColor}")" ColorPickerMode="ColorPickerMode.HEX" Variant="Variant.Filled" />
+                <MudTextField Label="Name" @bind-Value="Vm.Name" For="@(() => Vm.Name)" Variant="Variant.Outlined"/>
+                <MudColorPicker 
+                    Label="Color" 
+                    @bind-Text="Vm.TeamColor" 
+                    style="@($"color: {Vm.TeamColor}")" 
+                    ColorPickerMode="ColorPickerMode.HEX" 
+                    DisableAlpha="true"
+                    DisableToolbar="false"
+                    PickerVariant="PickerVariant.Inline"
+                    Variant="Variant.Outlined" />
                 <MultiSelectAutoComplete
                     Label="Members"
                     @bind-Values=Vm.Members
                     SearchFunc="SearchMembers"
                     ToStringFunc="@(member => member is null ? string.Empty : $"{member.FirstName} {member.LastName}")"
-                    Variant="Variant.Filled" />
+                    Variant="Variant.Outlined" />
                 <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
             </MudStack>
-        </DialogContent>
-        <DialogActions>
-            <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
-            <MudButton Color="Color.Primary" OnClick="Submit">Submit</MudButton>
-        </DialogActions>
-    </MudDialog>
-</EditForm>
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Submit</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
     [Parameter]

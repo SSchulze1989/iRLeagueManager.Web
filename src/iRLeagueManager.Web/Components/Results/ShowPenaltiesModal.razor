@@ -4,12 +4,12 @@
 @inject AddPenaltyViewModel Vm
 @inject IDialogService DialogService
 
-<MudDialog Style="background-color: var(--mud-palette-background-grey);">
+<MudDialog>
     <DialogContent>
         <MudStack Spacing="2">
             @foreach(var penalty in Penalties)
             {
-                <MudCard Elevation="5">
+                <MudCard Outlined="true">
                     <MudCardHeader>
                         <CardHeaderContent>
                             @if (ShowSessionName)

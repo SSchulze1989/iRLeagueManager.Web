@@ -7,15 +7,19 @@
 @inject LeagueApiService ApiService
 
 <EditForm Model=Vm OnValidSubmit=Submit>
-    <MudDialog Style="background-color: var(--mud-palette-background-grey);">
+    <MudDialog>
         <DialogContent>
-                <MudTextField Label="Text" @bind-Value="Vm.ResultText" Lines="6" Variant="Variant.Filled"/>
-                <MudDivider/>
-                @foreach (var vote in Vm.Votes)
-                {
-                    <MudGrid Spacing="1" Style="width: 100%">
+            <MudStack Spacing="2">
+                <MudTextField Label="Text" @bind-Value="Vm.ResultText" Lines="6" Variant="Variant.Outlined"/>
+                <MudGrid Spacing="1" Style="width: 100%">
+                    @foreach (var vote in Vm.Votes)
+                    {
                         <MudItem xs="5">
-                            <MudSelect Label="Vote" @bind-Value="vote.VoteCategoryId" Variant="Variant.Filled">
+                            <MudSelect Label="Vote"
+                                   @bind-Value="vote.VoteCategoryId"
+                                   Variant="Variant.Outlined"
+                                   AnchorOrigin="Origin.BottomLeft"
+                                   TransformOrigin="Origin.TopLeft">
                                 @foreach (var cat in VoteCategories)
                                 {
                                     <MudSelectItem Value=@((long?)cat.CatId)>@cat.Text</MudSelectItem>
@@ -24,10 +28,13 @@
                         </MudItem>
                         <MudItem xs="6">
                             <MudSelect Label="Driver at fault"
+                                   Placeholder="No Driver Selected"
                                    @bind-Value="vote.MemberAtFault"
-                                   Variant="Variant.Filled"
-                                   ToStringFunc="@(member => member != null ? $"{member.FirstName} {member.LastName}" : string.Empty)">
-                                <MudSelectItem Value="default(MemberInfoModel)"></MudSelectItem>
+                                   Variant="Variant.Outlined"
+                                   ToStringFunc="@(member => member != null ? $"{member.FirstName} {member.LastName}" : string.Empty)"
+                                   AnchorOrigin="Origin.BottomLeft"
+                                   TransformOrigin="Origin.TopLeft"
+                                   Clearable="true">
                                 @foreach (var member in InvolvedMembers)
                                 {
                                     <MudSelectItem Value="@member" />
@@ -37,11 +44,14 @@
                         <MudItem xs="1" Class="d-flex align-center">
                             <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Error" OnClick="@(() => Vm.RemoveVote(vote))" />
                         </MudItem>
-                    </MudGrid>
-                }
-                <MudGrid Spacing="1" Style="width: 100%">
+                    }
                     <MudItem xs="5">
-                        <MudSelect Label="Vote" @bind-Value="NewValue" Variant="Variant.Filled" @ref=@NewValueInput>
+                        <MudSelect Label="Vote"
+                                   @bind-Value="NewValue"
+                                   Variant="Variant.Outlined"
+                                   AnchorOrigin="Origin.BottomLeft"
+                                   TransformOrigin="Origin.TopLeft"
+                                   @ref=@NewValueInput>
                             @foreach (var cat in VoteCategories)
                             {
                                 <MudSelectItem Value=@((long?)cat.CatId)>@cat.Text</MudSelectItem>
@@ -49,6 +59,7 @@
                         </MudSelect>
                     </MudItem>
                 </MudGrid>
+            </MudStack>
         </DialogContent>
         <DialogActions>
             <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>

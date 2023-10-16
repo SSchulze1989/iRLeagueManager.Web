@@ -8,11 +8,11 @@
 
 <EditForm Model=Vm OnValidSubmit=Submit>
     <StatusResultValidator @ref=ResultValidator />
-    <MudDialog Style="background-color: var(--mud-palette-background-grey);">
+    <MudDialog>
         <DialogContent>
             <MudGrid Spacing="1">
                 <MudItem xs=12>
-                    <MudSelect Label="Session" @bind-Value="Vm.SessionId" For="@(() => Vm.SessionId)" Variant="Variant.Filled">
+                    <MudSelect Label="Session" @bind-Value="Vm.SessionId" For="@(() => Vm.SessionId)" Variant="Variant.Outlined">
                         @if (EventList.Selected != null)
                         {
                             @foreach (var session in EventList.Selected.Sessions)
@@ -23,26 +23,26 @@
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="4">
-                    <MudTextField Label="Incident Nr." @bind-Value="Vm.IncidentNr" Variant="Variant.Filled"/>
+                    <MudTextField Label="Incident Nr." @bind-Value="Vm.IncidentNr" Variant="Variant.Outlined"/>
                 </MudItem>
                 <MudItem xs="4">
-                    <MudTextField Label="Lap" @bind-Value="Vm.OnLap" Variant="Variant.Filled" />
+                    <MudTextField Label="Lap" @bind-Value="Vm.OnLap" Variant="Variant.Outlined" />
                 </MudItem>
                 <MudItem xs="4">
-                    <MudTextField Label="Corner" @bind-Value="Vm.Corner" Variant="Variant.Filled" />
+                    <MudTextField Label="Corner" @bind-Value="Vm.Corner" Variant="Variant.Outlined" />
                 </MudItem>
                 <MudItem xs="12">
-                    <MudTextField Label="Incident Kind" @bind-Value="Vm.IncidentKind" For="@(() => Vm.IncidentKind)" Variant="Variant.Filled" id="incident_kind"/>
+                    <MudTextField Label="Incident Kind" @bind-Value="Vm.IncidentKind" For="@(() => Vm.IncidentKind)" Variant="Variant.Outlined" id="incident_kind"/>
                 </MudItem>
                 <MudItem xs="12">
-                    <MudTextField Label="Description" @bind-Value="Vm.FullDescription" Lines="4" Variant="Variant.Filled" />
+                    <MudTextField Label="Description" @bind-Value="Vm.FullDescription" Lines="4" Variant="Variant.Outlined" />
                 </MudItem>
                 <MudItem xs="12">
                     <MultiSelectAutoComplete Label="Members"
                                              @bind-Values=Vm.InvolvedMembers
                                              SearchFunc="SearchMembers"
                                              ToStringFunc="@(member => member is null ? string.Empty : $"{member.FirstName} {member.LastName}")"
-                                             Variant="Variant.Filled"/>
+                                             Variant="Variant.Outlined"/>
                 </MudItem>
             </MudGrid>
             <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />

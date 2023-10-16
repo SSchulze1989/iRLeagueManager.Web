@@ -3,13 +3,13 @@
 @inherits EditMudModalBase<AddPenaltyViewModel, PenaltyModel>
 
 <EditForm Model=@Model>
-    <MudDialog Style="background-color: var(--mud-palette-background-grey);">
+    <MudDialog>
         <DialogContent>
             <StatusResultValidator @ref="ResultValidator" />
             <MudStack Class="gap-2">
                 @if (AvailableSessions.Any())
                 {
-                    <MudSelect Label="Session" @bind-Value="Vm.SessionResult" Variant="Variant.Filled">
+                    <MudSelect Label="Session" @bind-Value="Vm.SessionResult" Variant="Variant.Outlined">
                         @foreach(var session in AvailableSessions)
                         {
                             <MudSelectItem Value="@session">@session.SessionName</MudSelectItem>
@@ -24,7 +24,7 @@
                                  Label="Driver"
                                  Placeholder="Search driver by name..."
                                  ToStringFunc="@(x => x == null ? null : $"{x.FinalPosition}. {x.Firstname} {x.Lastname}")"
-                                 Variant="Variant.Filled">
+                                 Variant="Variant.Outlined">
                     <ItemSelectedTemplate Context="row">
                         @(row?.FinalPosition). @row?.Firstname @row?.Lastname
                     </ItemSelectedTemplate>
@@ -37,8 +37,8 @@
                 {
                     <label class="form-select disabled">@Vm.Firstname @Vm.Lastname</label>
                 }
-                <MudTextField Label="Reason" @bind-Value="Vm.Reason" Variant="Variant.Filled"/>
-                <MudSelect Label="Penalty Type" @bind-Value="Vm.Type" Variant="Variant.Filled">
+                <MudTextField Label="Reason" @bind-Value="Vm.Reason" Variant="Variant.Outlined" Lines="2"/>
+                <MudSelect Label="Penalty Type" @bind-Value="Vm.Type" Variant="Variant.Outlined">
                     @foreach(var penaltyType in Enum.GetValues<PenaltyType>())
                     {
                         <MudSelectItem Value="@penaltyType" />
@@ -47,13 +47,13 @@
                 @switch (Vm.Type)
                 {
                     case PenaltyType.Points:
-                        <MudNumericField Label="Points" @bind-Value="Vm.Points" Variant="Variant.Filled"/>
+                        <MudNumericField Label="Points" @bind-Value="Vm.Points" Variant="Variant.Outlined"/>
                         break;
                     case PenaltyType.Position:
-                        <MudNumericField Label="Positions" @bind-Value="Vm.Positions" Variant="Variant.Filled" />
+                        <MudNumericField Label="Positions" @bind-Value="Vm.Positions" Variant="Variant.Outlined" />
                         break;
                     case PenaltyType.Time:
-                        <MudNumericField Label="Time" @bind-Value="Vm.Points" Variant="Variant.Filled" Adornment="Adornment.End" AdornmentText="seconds"/>
+                        <MudNumericField Label="Time" @bind-Value="Vm.Points" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="seconds"/>
                         break;
                 }
             </MudStack>

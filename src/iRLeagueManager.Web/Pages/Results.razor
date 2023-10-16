@@ -18,7 +18,7 @@
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
     <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
         <HeaderText>
-            <MudText Typo="Typo.h6">Results</MudText>
+            <MudText Typo="Typo.h5">Results</MudText>
         </HeaderText>
         <HeaderActions>
             <EventSelect />
@@ -50,8 +50,8 @@
 
     @if (@Bind(vm, x => x.Results)?.Count == 0)
     {
-        <MudPaper Elevation="1" >
-            <MudText Typo="Typo.h5" Class="ma-2 ml-6">No Results</MudText>
+        <MudPaper Elevation="5" Class="py-4 px-6">
+            <MudText Typo="Typo.h5">No Results</MudText>
         </MudPaper>
     }
     else

@@ -13,10 +13,10 @@
 <PageTitle>Settings - @LeagueName</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large">
-    <MudStack Spacing="2">
+    <MudStack Spacing="4">
         <LoadingHeader Loading="vm.Loading" Row="true">
             <HeaderActions>
-                <MudText Typo="Typo.h6">Teams</MudText>
+                <MudText Typo="Typo.h5">Teams</MudText>
                 <MudSpacer />
                 <MudSpacer />
                 <MudSpacer />
@@ -35,7 +35,7 @@
         </LoadingHeader>
         @foreach(var team in Bind(vm, x => x.Teams).Where(FilterTeams).OrderBy(x => x.Name))
         {
-            <MudCard Elevation="4">
+            <MudCard Elevation="5">
                 <MudCardHeader Style="@($"color: {team.TeamColor}")">
                     <CardHeaderContent>
                         <MudText Typo="Typo.h6" Style="">

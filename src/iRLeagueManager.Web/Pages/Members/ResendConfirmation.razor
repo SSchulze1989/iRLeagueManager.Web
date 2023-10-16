@@ -7,7 +7,7 @@
 <MudContainer MaxWidth="MaxWidth.Small">
     @if (Success)
     {
-        <MudPaper Elevation="1" Class="pa-4">
+        <MudPaper Elevation="5" Class="pa-4">
             <p>An email with a confirmation link has been send to the given email address. Please make sure to check your spam folder if you cannot find any mail from us.</p>
             <p>If you continue having problems with this step please contact <a href="mailto:simon@irleaguemanager.net">simon@iRLeagueManager.net</a></p>
         </MudPaper>
@@ -68,7 +68,7 @@
         try
         {
             Loading = true;
-            var linkTemplate = $$"""{{NavigationManager.BaseUri}}member/{userId}/confirm/{token}""";
+            var linkTemplate = $$"""{{NavigationManager.BaseUri}}members/{userId}/confirm/{token}""";
             var result = await ApiService.Client
                 .Users()
                 .ResendConfirmation()

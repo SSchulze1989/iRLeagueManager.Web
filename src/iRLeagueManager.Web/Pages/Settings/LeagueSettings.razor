@@ -17,7 +17,7 @@
 
 <LoadingHeader Loading="@Bind(Vm, x => x.Loading)">
     <HeaderText>
-        <MudText Typo="Typo.h4">League Settings</MudText>
+        <MudText Typo="Typo.h5">League Settings</MudText>
     </HeaderText>
 </LoadingHeader>
 
@@ -30,7 +30,7 @@
                 <MudLink Color="Color.Primary" OnClick="MakePublicListed">Make public</MudLink>
             </MudAlert>
         }
-        <MudPaper Elevation="4">
+        <MudPaper Elevation="5">
             <EditForm Model="Vm" OnValidSubmit="SubmitLeague">
                 <StatusResultValidator @ref="ResultValidator"/>
                 <MudList Class="mt-4" Clickable="true">

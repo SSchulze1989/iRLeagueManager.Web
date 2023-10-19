@@ -23,7 +23,14 @@
             <div class="row mb-2">
                 <div class="col-6">
                     <h6 class="text-muted">Driver</h6>
-                    @penalty.Firstname @penalty.Lastname
+                    @if (IsTeamResult)
+                    {
+                        @penalty.Team?.Name
+                    }
+                    else
+                    {
+                        @penalty.Member?.FirstName @penalty.Member?.LastName
+                    }
                 </div>
                 <div class="col-3">
                     @if (string.IsNullOrWhiteSpace(penalty.Lap) == false)
@@ -76,6 +83,8 @@
     public IEnumerable<PenaltyModel> Penalties { get; set; } = default!;
     [Parameter]
     public bool CanEdit { get; set; } = false;
+    [Parameter]
+    public bool IsTeamResult { get; set; } = false;
 
     protected override void OnParametersSet()
     {
@@ -118,8 +127,13 @@
 
     private async Task DeleteAddPenaltyAsync(PenaltyModel penalty)
     {
+        var text = IsTeamResult switch
+        {
+            true => $"Really delete this penalty for {penalty.Team?.Name}?",
+            false => $"Really delete this penalty for {penalty.Member?.FirstName} {penalty.Member?.LastName}?",
+        };
         var parameters = new ModalParameters<ConfirmModal>()
-            .Add(x => x.Text, $"Really delete this penalty for {penalty.Firstname} {penalty.Lastname}?")
+            .Add(x => x.Text, text)
             .Add(x => x.ButtonTypes, ButtonTypes.YesNo);
         var confirmed = await ModalService.Show<ConfirmModal>("Delete penalty", parameters).Result;
         if (confirmed.Confirmed == false)

@@ -42,6 +42,9 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
     private IList<MemberInfoModel> involvedMembers = new List<MemberInfoModel>();
     public IList<MemberInfoModel> InvolvedMembers { get => involvedMembers; set => Set(ref involvedMembers, value); }
 
+    private IList<TeamInfoModel> involvedTeams = new List<TeamInfoModel>();
+    public IList<TeamInfoModel> InvolvedTeams { get => involvedTeams; set => Set(ref involvedTeams, value); }
+
     private ObservableCollection<ReviewCommentViewModel> comments = new();
     public ReadOnlyObservableCollection<ReviewCommentViewModel> Comments => new(comments);
 
@@ -124,6 +127,58 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
             }
         }
         RefreshMemberList();
+    }
+
+    /// <summary>
+    /// Add one or more teams to the <see cref="InvolvedTeams"/> selection"/>
+    /// </summary>
+    /// <param name="selection"></param>
+    public void AddTeamSelection(IEnumerable<TeamInfoModel> selection)
+    {
+        foreach (var team in selection)
+        {
+            if (model.InvolvedTeams.Contains(team))
+            {
+                continue;
+            }
+            if (team.TeamId == 0)
+            {
+                continue;
+            }
+            if (model.InvolvedTeams.Any(x => x.TeamId == team.TeamId))
+            {
+                continue;
+            }
+            model.InvolvedTeams.Add(team);
+        }
+        RefreshTeamList();
+    }
+
+    /// <summary>
+    /// Remove one or more members from the <see cref="InvolvedTeams"/> selection"/>
+    /// </summary>
+    /// <param name="selection"></param>
+    public void RemoveTeamSelection(IEnumerable<TeamInfoModel> selection)
+    {
+        foreach (var team in selection)
+        {
+            if (model.InvolvedTeams.Contains(team))
+            {
+                model.InvolvedTeams.Remove(team);
+                continue;
+            }
+            if (team.TeamId == 0)
+            {
+                continue;
+            }
+            var involvedTeam = model.InvolvedTeams.FirstOrDefault(x => x.TeamId == team.TeamId);
+            if (involvedTeam != null)
+            {
+                model.InvolvedTeams.Remove(involvedTeam);
+                continue;
+            }
+        }
+        RefreshTeamList();
     }
 
     /// <summary>
@@ -225,6 +280,26 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
             if (model.InvolvedMembers.Any(x => x.MemberId == member.MemberId) == false)
             {
                 InvolvedMembers.Remove(member);
+            }
+        }
+    }
+
+    private void RefreshTeamList()
+    {
+        // Add comments from to list that are not already in there
+        foreach (var team in model.InvolvedTeams)
+        {
+            if (InvolvedTeams.Any(x => x.TeamId == team.TeamId) == false)
+            {
+                InvolvedTeams.Add(team);
+            }
+        }
+        // Remove comments that are no longer in the model
+        foreach (var team in InvolvedTeams.ToArray())
+        {
+            if (model.InvolvedTeams.Any(x => x.TeamId == team.TeamId) == false)
+            {
+                InvolvedTeams.Remove(team);
             }
         }
     }

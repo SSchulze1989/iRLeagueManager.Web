@@ -58,9 +58,19 @@
                     <h5>Involved</h5>
                 </div>
                 <div class="col">
-                    @foreach(var member in @Bind(Review, x => x.InvolvedMembers))
+                    @if (IsTeamResult)
                     {
-                        <span class="badge bg-secondary h-auto me-1">@member.FirstName @member.LastName</span>
+                        @foreach(var team in Bind(Review, x => x.InvolvedTeams))
+                        {
+                            <span class="badge bg-secondary h-auto me-1">@team.Name</span>
+                        }
+                    }
+                    else
+                    {
+                        @foreach(var member in @Bind(Review, x => x.InvolvedMembers))
+                        {
+                            <span class="badge bg-secondary h-auto me-1">@member.FirstName @member.LastName</span>
+                        }
                     }
                 </div>
             </div>
@@ -71,8 +81,8 @@
                 <div class="col">
                     @foreach(var vote in @Bind(Review, x => x.Votes))
                     {
-                        var member = @Bind(vote, x => x.MemberAtFault);
-                        <span class="badge bg-danger h-auto me-1">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
+                        var atFault = IsTeamResult ? vote.TeamAtFault?.Name : vote.MemberAtFault == null ? null : $"{vote.MemberAtFault.FirstName} {vote.MemberAtFault.LastName}";
+                        <span class="badge bg-danger h-auto me-1">@Bind(vote, x => x.VoteCategoryText)@(atFault != null ? $": {atFault}" : string.Empty)</span>
                     }
                 </div>
             </div>
@@ -82,9 +92,19 @@
                 <div class="col">
                     <h5>Involved Drivers</h5>
                     <div class="d-flex flex-wrap">
-                        @foreach(var member in @Bind(Review, x => x.InvolvedMembers))
+                        @if (IsTeamResult)
                         {
-                            <span class="badge bg-secondary me-1 mb-1">@member.FirstName @member.LastName</span>
+                            @foreach (var team in Bind(Review, x => x.InvolvedTeams))
+                            {
+                                <span class="badge bg-secondary h-auto me-1">@team.Name</span>
+                            }
+                        }
+                        else
+                        {
+                            @foreach (var member in @Bind(Review, x => x.InvolvedMembers))
+                            {
+                                <span class="badge bg-secondary h-auto me-1">@member.FirstName @member.LastName</span>
+                            }
                         }
                     </div>
                 </div>
@@ -93,9 +113,10 @@
                     <div class="d-flex flex-wrap">
                         @foreach(var countedVote in @Bind(Review, x => x.CountedVotes))
                         {
-                            var member = countedVote.Vote.MemberAtFault;
+                            var vote = countedVote.Vote;
+                            var atFault = IsTeamResult ? vote.TeamAtFault?.Name : vote.MemberAtFault == null ? null : $"{vote.MemberAtFault.FirstName} {vote.MemberAtFault.LastName}";
                             <span class="badge bg-warning me-1 mb-1">
-                                @countedVote.Vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
+                                @countedVote.Vote.VoteCategoryText@(atFault != null ? $": {atFault}" : string.Empty)
                                 <span class="badge rounded-pill bg-danger ms-1">@(countedVote.Count)x</span>
                             </span>
                         }
@@ -118,9 +139,9 @@
                 <div>
                     @foreach(var vote in @Bind(Review, x => x.Votes))
                     {
-                        var member = vote.MemberAtFault;
+                        var atFault = IsTeamResult ? vote.TeamAtFault?.Name : vote.MemberAtFault == null ? null : $"{vote.MemberAtFault.FirstName} {vote.MemberAtFault.LastName}";
                         <span class="badge bg-danger me-1 mb-1">
-                            @vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
+                            @vote.VoteCategoryText@(atFault != null ? $": {atFault}" : string.Empty)
                         </span>
                     }
                 </div>
@@ -144,8 +165,8 @@
                         {
                             <li class="list-group-item">
                                 <ReviewComment Comment=comment 
-                                                OnStateHasChanged=@(() => CommentStateChanged(comment)) 
-                                                OnDeleteClick=@(() => DeleteCommentClick(comment))/>
+                                               OnStateHasChanged=@(() => CommentStateChanged(comment)) 
+                                               OnDeleteClick=@(() => DeleteCommentClick(comment))/>
                             </li>
                         }
                     </ul>
@@ -169,6 +190,8 @@
     public IModalService ModalService { get; set; } = default!;
     [CascadingParameter]
     public Task<AuthenticationState> AuthenticationTask { get; set; } = default!;
+    [CascadingParameter]
+    public bool IsTeamResult { get; set; } = false;
     [Parameter(CaptureUnmatchedValues=true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter, EditorRequired]

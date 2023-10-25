@@ -13,8 +13,8 @@
         <div>
             @foreach(var vote in @Bind(Comment, x => x.Votes))
             {
-                var member = @Bind(vote, x => x.MemberAtFault);
-                <span class="badge bg-warning">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
+                var atFault = IsTeamResult ? vote.TeamAtFault?.Name : vote.MemberAtFault == null ? null : $"{vote.MemberAtFault.FirstName} {vote.MemberAtFault.LastName}";
+                <span class="badge bg-warning">@Bind(vote, x => x.VoteCategoryText)@(atFault != null ? $": {atFault}" : string.Empty)</span>
             }
         </div>
     </div>
@@ -39,6 +39,8 @@
     public IEnumerable<MemberInfoModel> InvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
     [CascadingParameter]
     public IEnumerable<UserModel> LeagueUsers { get; set; } = Array.Empty<UserModel>();
+    [CascadingParameter(Name = "IsTeamResult")]
+    public bool IsTeamResult { get; set; } = false;
     [Parameter, EditorRequired]
     public ReviewCommentViewModel Comment { get; set; } = default!;
     [CascadingParameter]

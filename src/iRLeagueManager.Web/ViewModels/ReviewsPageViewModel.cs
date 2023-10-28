@@ -1,5 +1,6 @@
 ﻿using iRLeagueApiCore.Common.Enums;
 using iRLeagueApiCore.Common.Models;
+using iRLeagueApiCore.Common.Models.Results;
 using iRLeagueApiCore.Common.Models.Users;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
@@ -12,6 +13,7 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
         base(loggerFactory, apiService)
     {
         leagueModel = new();
+        eventCars = new();
     }
 
     private LeagueModel leagueModel;
@@ -28,17 +30,17 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
     private ObservableCollection<ProtestViewModel> protests = new();
     public ObservableCollection<ProtestViewModel> Protests { get => protests; set => Set(ref protests, value); }
 
-    private IEnumerable<MemberInfoModel> eventMembers = Array.Empty<MemberInfoModel>();
-    public IEnumerable<MemberInfoModel> EventMembers { get => eventMembers; set => Set(ref eventMembers, value); }
-
     private ObservableCollection<UserModel> leagueUsers = new();
     public ObservableCollection<UserModel> LeagueUsers { get => leagueUsers; set => Set(ref leagueUsers, value); }
 
-    public async Task LoadFromEventAsync(long eventId, CancellationToken cancellationToken = default)
+    private CarListModel eventCars;
+    public CarListModel EventCars { get => eventCars; set => Set(ref eventCars, value); }
+
+    public async Task<StatusResult> LoadFromEventAsync(long eventId, CancellationToken cancellationToken = default)
     {
         if (ApiService.CurrentLeague == null)
         {
-            return;
+            return LeagueNullResult();
         }
 
         try
@@ -51,43 +53,33 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
             var leagueResult = await leagueRequest;
             if (leagueResult.Success == false || leagueResult.Content is null)
             {
-                return;
+                return leagueResult.ToStatusResult();
             }
             leagueModel = leagueResult.Content;
 
             var eventEndpoint = ApiService.CurrentLeague
                 .Events()
                 .WithId(eventId);
-            EventModel? @event;
-            if (ApiService.CurrentSeason == null)
-            {
-                @event = (await eventEndpoint.Get(cancellationToken)).EnsureSuccess();
-                if (@event == null)
-                {
-                    return;
-                }
-                await ApiService.SetCurrentSeasonAsync(ApiService.CurrentLeague.Name, @event.SeasonId);
-            }
 
             var reviewsEndpoint = eventEndpoint
                 .Reviews();
             var result = await reviewsEndpoint.Get(cancellationToken);
             if (result.Success == false || result.Content is null)
             {
-                return;
+                return result.ToStatusResult();
             }
 
             var reviewModels = result.Content;
             Reviews = new(reviewModels.Select(x => new ReviewViewModel(LoggerFactory, ApiService, x)));
 
-            var membersEndpoint = eventEndpoint
-                .Members();
-            var membersResult = await membersEndpoint.Get(cancellationToken);
-            if (membersResult.Success == false || membersResult.Content is null)
+            var eventCars = await eventEndpoint
+                .Cars()
+                .Get(cancellationToken);
+            if (eventCars.Success == false || eventCars.Content is null)
             {
-                return;
+                return eventCars.ToStatusResult();
             }
-            EventMembers = membersResult.Content;
+            EventCars = eventCars.Content;
 
             var protestsRequest = eventEndpoint
                 .Protests()
@@ -95,7 +87,7 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
             var protestsResult = await protestsRequest;
             if (protestsResult.Success == false || protestsResult.Content is null)
             {
-                return;
+                return protestsResult.ToStatusResult();
             }
             Protests = new(protestsResult.Content.Select(x => new ProtestViewModel(LoggerFactory, ApiService, x)));
         }
@@ -103,6 +95,8 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
         {
             Loading = false;
         }
+
+        return StatusResult.SuccessResult();
     }
 
     public async Task<StatusResult> LoadUsers(CancellationToken cancellationToken = default)

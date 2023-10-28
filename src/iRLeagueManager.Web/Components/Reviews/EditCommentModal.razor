@@ -1,5 +1,6 @@
 ﻿@using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Results;
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
@@ -20,13 +21,30 @@
                         <option value=@cat.Id>@cat.Text</option>
                     }
                 </InputSelect>
-                <InputSelect class="form-select" @bind-Value=vote.MemberAtFaultId>
-                    <option value=0></option>
-                    @foreach(var member in InvolvedMembers)
-                    {
-                        <option value=@member.MemberId>@member.FirstName @member.LastName</option>
-                    }
-                </InputSelect>
+                @if (IsTeamEvent)
+                {
+                    <InputSelect class="form-select" @bind-Value=vote.TeamAtFaultId>
+                        <option value=0></option>
+                        @foreach (var car in InvolvedCars)
+                        {
+
+                            var team = car.Team ?? new();
+                            <option value=@team.TeamId>@car.Number @team.Name</option>
+                        }
+                    </InputSelect>
+                }
+                else
+                {
+                    <InputSelect class="form-select" @bind-Value=vote.MemberAtFaultId>
+                        <option value=0></option>
+                        @foreach (var car in InvolvedCars)
+                        {
+
+                            var member = car.Members.FirstOrDefault() ?? new();
+                            <option value=@member.MemberId>#@car.Number @member.FirstName @member.LastName</option>
+                        }
+                    </InputSelect>
+                }
                 <button class="btn btn-outline-danger" type="button" @onclick=@(() => Comment.RemoveVote(vote))>
                     <span class="oi oi-x"/>
                 </button>
@@ -54,13 +72,15 @@
     [CascadingParameter]
     public BlazoredModalInstance? ModalInstance { get; set; }
     [Parameter]
-    public IEnumerable<MemberInfoModel> InvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
+    public IEnumerable<EventCarInfoModel> InvolvedCars { get; set; } = Array.Empty<EventCarInfoModel>();
     //[Parameter]
     //public ReviewViewModel Review { get; set; } = default!;
     [Parameter]
     public ReviewCommentModel Model { get; set; } = default!;
     [Parameter]
     public Func<ReviewCommentViewModel, CancellationToken, Task<StatusResult>>? OnSubmit { get; set; }
+    [Parameter]
+    public bool IsTeamEvent { get; set; } = false;
 
     private long? NewValue
     {
@@ -114,7 +134,10 @@
 
     private void SetMemberAtFault(VoteViewModel vote, long? memberId)
     {
-        var member = InvolvedMembers.FirstOrDefault(x => x.MemberId == memberId);
+        var member = InvolvedCars
+            .Select(x => x.Members.FirstOrDefault())
+            .NotNull()
+            .FirstOrDefault(x => x.MemberId == memberId);
 
         if (memberId is null || member is null)
         {

@@ -74,7 +74,7 @@
 
                                 <SelectedTemplate Context=memberId>
                                     @{
-                                        var member = ReviewsVm.EventMembers.FirstOrDefault(x => x.MemberId == memberId);
+                                        var member = EventMembers.FirstOrDefault(x => x.MemberId == memberId);
                                     }
                                     @member?.FirstName @member?.LastName
                                 </SelectedTemplate>
@@ -164,7 +164,7 @@
     [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
 
-    private StatusResultValidator ResultValidator { get; set; } = default!;
+    private StatusResultValidator? ResultValidator { get; set; } = default!;
 
     private PostProtestModel Protest { get; } = new();
 
@@ -172,17 +172,19 @@
 
     private bool Success { get; set; } = false;
 
+    private IEnumerable<MemberInfoModel> EventMembers { get; set; } = Array.Empty<MemberInfoModel>();
+
     private async Task<IEnumerable<MemberInfoModel>> SearchMembers(string searchString)
     {
         if (string.IsNullOrEmpty(searchString))
         {
-            return await Task.FromResult(ReviewsVm.EventMembers);
+            return await Task.FromResult(EventMembers);
         }
 
         var terms = searchString.ToLower().Split(',', ' ', ';')
         .Where(x => string.IsNullOrWhiteSpace(x) == false)
             .ToArray();
-        return await Task.FromResult(ReviewsVm.EventMembers
+        return await Task.FromResult(EventMembers
             .Where(x => MatchMemberSearchTerms(x, terms)));
     }
 
@@ -223,7 +225,7 @@
         var result = await ReviewsVm.FileProtest(SessionId.Value, Protest);
         if (result.IsSuccess == false)
         {
-            ResultValidator.ValidateResult(result);
+            ResultValidator!.ValidateResult(result);
             return;
         }
         Success = true;

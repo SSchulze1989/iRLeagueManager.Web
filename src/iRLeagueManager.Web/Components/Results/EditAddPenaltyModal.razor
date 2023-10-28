@@ -30,7 +30,7 @@
                                    placeholder="Search driver by name...">
 
                     <SelectedTemplate Context=row>
-                        @(IsTeamResult ? $"{row.FinalPosition}. {row?.TeamName}" : $"{row?.FinalPosition}. {row?.Firstname} {row?.Lastname}")
+                        @(IsTeamResult ? $"{row?.FinalPosition}. {row?.TeamName}" : $"{row?.FinalPosition}. {row?.Firstname} {row?.Lastname}")
                     </SelectedTemplate>
                     <ResultTemplate Context=row>
                         @(IsTeamResult ? $"{row.FinalPosition}. {row.TeamName}" : $"{row.FinalPosition}. {row.Firstname} {row.Lastname}")

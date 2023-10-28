@@ -36,7 +36,7 @@
         }
     </div>
 
-    <CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
+    <CascadingValue Value=@Bind(ReviewsVm, x => x.EventCars)>
     <CascadingValue Value=ReviewsVm.LeagueUsers>
     @switch (SelectedTabIndex)
     {
@@ -239,12 +239,12 @@
 
     private async Task OnEditClick(ReviewViewModel review)
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(EditReviewModal.Model), review.CopyModel())
-            .Add(nameof(EditReviewModal.EventMembers), ReviewsVm.EventMembers)
-            .Add(nameof(EditReviewModal.OnSubmit),
-                new Func<ReviewViewModel, CancellationToken, 
-                    Task<StatusResult>>(async (review, cancellationToken) => await review.SaveChangesAsync(cancellationToken)));
+        var parameters = new ModalParameters<EditReviewModal>()
+        {
+            { x => x.Model, review.CopyModel() },
+            { x => x.EventCars, ReviewsVm.EventCars },
+            { x => x.OnSubmit, async (review, cancellation) => await review.SaveChangesAsync(cancellation) },
+        };
         var options = new ModalOptions()
         {
             Size = ModalSize.Medium,
@@ -317,9 +317,11 @@
     private async Task OpenAddReviewModal(ReviewModel review)
     {
         var parameters = new ModalParameters<EditReviewModal>()
-            .Add(x => x.Model, review)
-            .Add(x => x.EventMembers, ReviewsVm.EventMembers)
-            .Add(x => x.OnSubmit, async (reviewVm, ct) => await reviewVm.AddToSessionAsync(reviewVm.SessionId.GetValueOrDefault(), ct));
+        {
+            { x => x.Model, review },
+            { x => x.EventCars, ReviewsVm.EventCars },
+            { x => x.OnSubmit, async (reviewVm, cancellation) => await reviewVm.AddToSessionAsync(reviewVm.SessionId.GetValueOrDefault(), cancellation) },
+        };
         var options = new ModalOptions()
         {
             Size = ModalSize.Medium,

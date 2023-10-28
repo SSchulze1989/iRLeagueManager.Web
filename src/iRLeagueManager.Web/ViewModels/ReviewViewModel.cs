@@ -1,5 +1,6 @@
 ﻿using iRLeagueApiCore.Client.Endpoints.Reviews;
 using iRLeagueApiCore.Common.Models;
+using iRLeagueApiCore.Common.Models.Results;
 using iRLeagueApiCore.Common.Models.Reviews;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
@@ -42,6 +43,9 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
     private IList<MemberInfoModel> involvedMembers = new List<MemberInfoModel>();
     public IList<MemberInfoModel> InvolvedMembers { get => involvedMembers; set => Set(ref involvedMembers, value); }
 
+    private IList<TeamInfoModel> involvedTeams = new List<TeamInfoModel>();
+    public IList<TeamInfoModel> InvolvedTeams { get => involvedTeams; set => Set(ref involvedTeams, value); }
+
     private ObservableCollection<ReviewCommentViewModel> comments = new();
     public ReadOnlyObservableCollection<ReviewCommentViewModel> Comments => new(comments);
 
@@ -72,58 +76,6 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
         votes.Remove(vote);
         model.VoteResults.Remove(vote.GetModel());
         UpdateReviewStatus();
-    }
-
-    /// <summary>
-    /// Add one or more members to the <see cref="InvolvedMembers"/> selection"/>
-    /// </summary>
-    /// <param name="selection"></param>
-    public void AddMemberSelection(IEnumerable<MemberInfoModel> selection)
-    {
-        foreach (var member in selection)
-        {
-            if (model.InvolvedMembers.Contains(member))
-            {
-                continue;
-            }
-            if (member.MemberId == 0)
-            {
-                continue;
-            }
-            if (model.InvolvedMembers.Any(x => x.MemberId == member.MemberId))
-            {
-                continue;
-            }
-            model.InvolvedMembers.Add(member);
-        }
-        RefreshMemberList();
-    }
-
-    /// <summary>
-    /// Remove one or more members from the <see cref="InvolvedMembers"/> selection"/>
-    /// </summary>
-    /// <param name="selection"></param>
-    public void RemoveMemberSelection(IEnumerable<MemberInfoModel> selection)
-    {
-        foreach (var member in selection)
-        {
-            if (model.InvolvedMembers.Contains(member))
-            {
-                model.InvolvedMembers.Remove(member);
-                continue;
-            }
-            if (member.MemberId == 0)
-            {
-                continue;
-            }
-            var involvedMember = model.InvolvedMembers.FirstOrDefault(x => x.MemberId == member.MemberId);
-            if (involvedMember != null)
-            {
-                model.InvolvedMembers.Remove(involvedMember);
-                continue;
-            }
-        }
-        RefreshMemberList();
     }
 
     /// <summary>
@@ -191,44 +143,6 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
         return ApiService.CurrentLeague?.Reviews().WithId(ReviewId);
     }
 
-    private void UpdateModelMemberList()
-    {
-        foreach (var member in InvolvedMembers)
-        {
-            if (model.InvolvedMembers.Any(x => x.MemberId == member.MemberId) == false)
-            {
-                model.InvolvedMembers.Add(member);
-            }
-        }
-        foreach (var member in model.InvolvedMembers.ToArray())
-        {
-            if (InvolvedMembers.Any(x => x.MemberId == member.MemberId) == false)
-            {
-                model.InvolvedMembers.Remove(member);
-            }
-        }
-    }
-
-    private void RefreshMemberList()
-    {
-        // Add comments from to list that are not already in there
-        foreach (var member in model.InvolvedMembers)
-        {
-            if (InvolvedMembers.Any(x => x.MemberId == member.MemberId) == false)
-            {
-                InvolvedMembers.Add(member);
-            }
-        }
-        // Remove comments that are no longer in the model
-        foreach (var member in InvolvedMembers.ToArray())
-        {
-            if (model.InvolvedMembers.Any(x => x.MemberId == member.MemberId) == false)
-            {
-                InvolvedMembers.Remove(member);
-            }
-        }
-    }
-
     /// <summary>
     /// Refresh comment list with the current comment models
     /// </summary>
@@ -265,7 +179,7 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
             return LeagueNullResult();
         }
 
-        UpdateModelMemberList();
+        UpdateInvolved();
 
         try
         {
@@ -345,6 +259,12 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
         Status = ReviewStatus.Open;
     }
 
+    private void UpdateInvolved()
+    {
+        model.InvolvedMembers = InvolvedMembers;
+        model.InvolvedTeams = InvolvedTeams;
+    }
+
     private bool IsClosed()
     {
         return Votes.Count > 0;
@@ -374,7 +294,7 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
         return Comments.Count(x => x.Votes.Any()) >= minVoteCount;
     }
 
-    private bool CompareVotes(VoteViewModel vote1, VoteViewModel vote2)
+    private static bool CompareVotes(VoteViewModel vote1, VoteViewModel vote2)
     {
         return vote1.MemberAtFault?.MemberId == vote2.MemberAtFault?.MemberId && vote1.VoteCategoryId == vote2.VoteCategoryId;
     }
@@ -390,7 +310,7 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
             return LeagueNullResult();
         }
 
-        UpdateModelMemberList();
+        UpdateInvolved();
 
         try
         {
@@ -446,7 +366,8 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
     public override void SetModel(ReviewModel model)
     {
         base.SetModel(model);
-        RefreshMemberList();
+        InvolvedMembers = model.InvolvedMembers.ToList();
+        InvolvedTeams = model.InvolvedTeams.ToList();
         RefreshCommentList();
         RefreshVoteList();
         UpdateReviewStatus();

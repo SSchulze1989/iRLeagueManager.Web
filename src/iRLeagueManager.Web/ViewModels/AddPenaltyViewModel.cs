@@ -18,17 +18,16 @@ public sealed class AddPenaltyViewModel : LeagueViewModelBase<AddPenaltyViewMode
     }
 
     public long AddPenaltyId => model.AddPenaltyId ?? 0;
-    public long MeberId => model.MemberId;
-    public string Firstname => model.Firstname;
-    public string Lastname => model.Lastname;
+    public MemberInfoModel? Member => model.Member;
+    public TeamInfoModel? Team => model.Team;
 
     private ResultModel? sessionResult;
     public ResultModel? SessionResult { get => sessionResult; set => sessionResult = value; }
 
     public ResultRowModel? ResultRow 
     { 
-        get => sessionResult?.ResultRows.FirstOrDefault(x => x.MemberId == model.MemberId); 
-        set => SetP(ResultRow, value => model.MemberId = value?.MemberId ?? 0, value); 
+        get => sessionResult?.ResultRows.FirstOrDefault(x => x.ScoredResultRowId == model.ResultRowId); 
+        set => SetP(model.ResultRowId, value => model.ResultRowId = value ?? 0, value?.ScoredResultRowId); 
     }
 
     public string Reason { get => model.Reason; set => SetP(model.Reason, value => model.Reason = value, value); }
@@ -82,10 +81,9 @@ public sealed class AddPenaltyViewModel : LeagueViewModelBase<AddPenaltyViewMode
             {
                 return StatusResult.FailedResult("Result row null", "Result row is required but was null", Array.Empty<object>());
             }
-            var route = $"ScoredSessionResults/{SessionResult.SessionResultId}/Drivers/{ResultRow.MemberId}/Penalties";
+            var route = $"ScoredSessionResults/{SessionResult.SessionResultId}/Rows/{ResultRow.ScoredResultRowId}/Penalties";
             var endpoint = CurrentLeague
                 .CustomEndpoint<PenaltyModel>(route);
-            var url = endpoint.QueryUrl;
             var result = await endpoint
                 .Post(model, cancellationToken);
             if (result.Success && result.Content is not null)

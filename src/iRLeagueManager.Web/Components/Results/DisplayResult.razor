@@ -165,7 +165,8 @@
             .Add(x => x.SelectedSession, Result.GetModel())
             .Add(x => x.SelectedRow, row)
             .Add(x => x.CanSelectSession, true)
-            .Add(x => x.OnSubmit, async (p, ct) => await p.SaveNew(ct));
+            .Add(x => x.OnSubmit, async (p, ct) => await p.SaveNew(ct))
+            .Add(x => x.IsTeamResult, isTeamResult);
         var result = await ModalService.Show<EditAddPenaltyModal>("Add Penalty", parameters).Result;
     }
 
@@ -182,7 +183,8 @@
         }
         var parameters = new ModalParameters<ShowPenaltiesModal>()
             .Add(x => x.Penalties, penalties.Content.Where(x => Result.SessionNr == 999 || x.SessionNr == Result.SessionNr))
-            .Add(x => x.CanEdit, CanEdit);
+            .Add(x => x.CanEdit, CanEdit)
+            .Add(x => x.IsTeamResult, isTeamResult);
         var options = new ModalOptions()
         {
             DisableBackgroundCancel = false,

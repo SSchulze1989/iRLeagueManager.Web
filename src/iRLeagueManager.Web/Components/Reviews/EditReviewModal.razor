@@ -1,6 +1,7 @@
 ﻿@using Blazored.Typeahead
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Results;
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
@@ -41,34 +42,33 @@
     <div class="p-1">
         <div class="row g-0">
             <div class="input-group-text" style="border-bottom-left-radius:0; border-bottom-right-radius:0; border-bottom: none">
-                <label>Involved Drivers</label>
+                <span>Involved Cars</span>
             </div>
         </div>
         <div>
-            <BlazoredTypeahead
-                @bind-Values=Review.InvolvedMembers
-                class="form-control p-0"
-                style="border-top-right-radius:0; border-top-left-radius:0;"
-                EnableDropDown=true  
-                SearchMethod=SearchMembers 
-                MinimumLength=1
-                MaximumSuggestions=100
-                DeleteItemsOnBackspace=false
-                placeholder="Search driver by name...">
-
-                <SelectedTemplate Context=member>
-                    @member.FirstName @member.LastName
+            <BlazoredTypeahead @bind-Values=InvolvedCars
+                                class="form-control p-0"
+                                style="border-top-right-radius:0; border-top-left-radius:0;"
+                                EnableDropDown=true
+                                SearchMethod=SearchCars
+                                MinimumLength=1
+                                MaximumSuggestions=100
+                                DeleteItemsOnBackspace=false
+                                placeholder="Search Team by name or driver...">
+                <SelectedTemplate Context=car>
+                    #@car.Number @(IsTeamEvent ? car.Team?.Name : $"{car.Members.FirstOrDefault()?.FirstName} {car.Members.FirstOrDefault()?.LastName}")
                 </SelectedTemplate>
-                <ResultTemplate Context=member>
-                    @member.FirstName @member.LastName
+                <ResultTemplate Context=car>
+                    #@car.Number @(IsTeamEvent ? $"{car.Team?.Name} ({string.Join(',', car.Members.Select(x => $"{x.FirstName} {x.LastName}"))}" : $"{car.Members.FirstOrDefault()?.FirstName} {car.Members.FirstOrDefault()?.LastName}")
                 </ResultTemplate>
                 <NotFoundTemplate Context=name>
-                    <span>Driver <b>@name</b> Not found!</span>
+                    <span>Team Not found!</span>
                 </NotFoundTemplate>
             </BlazoredTypeahead>
         </div>
     </div>
     <FormValidationMessage For=@(() => Review.InvolvedMembers) />
+    <FormValidationMessage For=@(() => Review.InvolvedTeams) />
     <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
     <CancelSubmitButtons ModelState=Review SubmitText="Save" OnCancel=Cancel/>
 </EditForm>
@@ -80,19 +80,21 @@
     public BlazoredModalInstance? ModalInstance { get; set; }
     [CascadingParameter]
     public EventListViewModel EventList { get; set; } = default!;
-    //[Parameter]
-    //public ReviewViewModel Review { get; set; } = default!;
 
     [Parameter]
     public ReviewModel Model { get; set; } = default!;
 
     [Parameter]
-    public IEnumerable<MemberInfoModel> EventMembers { get; set; } = Array.Empty<MemberInfoModel>();
+    public CarListModel EventCars { get; set; } = new();
 
     [Parameter]
     public Func<ReviewViewModel, CancellationToken, Task<StatusResult>>? OnSubmit { get; set; }
 
     private StatusResultValidator? ResultValidator { get; set; }
+
+    private IList<EventCarInfoModel> InvolvedCars { get; set; } = Array.Empty<EventCarInfoModel>();
+
+    private bool IsTeamEvent => EventCars.IsTeamEvent;
 
     protected override void OnParametersSet()
     {
@@ -106,11 +108,12 @@
             return;
         }
         Review.SetModel(Model);
+        InvolvedCars = GetInvolvedCars().ToList();
     }
 
     private async Task Submit()
     {
-        //var success = await Review.SaveChangesAsync(cts.Token);
+        UpdateInvolved();
         bool success = true;
         if (OnSubmit != null)
         {
@@ -133,26 +136,49 @@
         }
     }
 
-    private Task<IEnumerable<MemberInfoModel>> SearchMembers(string searchString)
+    private async Task<IEnumerable<EventCarInfoModel>> SearchCars(string searchString)
     {
+        var filteredCars = await Task.FromResult(EventCars.Cars
+            .Where(x => InvolvedCars.Contains(x) == false));
         if (string.IsNullOrEmpty(searchString))
         {
-            return Task.FromResult(EventMembers
-                .Where(x => Review.InvolvedMembers.Any(r => r.MemberId == x.MemberId) == false));
+            return filteredCars;
         }
 
-        var terms = searchString.ToLower().Split(',', ' ', ';')
-        .Where(x => string.IsNullOrWhiteSpace(x) == false)
-            .ToArray();
-        return Task.FromResult(EventMembers
-            .Where(x => MatchMemberSearchTerms(x, terms))
-            .Where(x => Review.InvolvedMembers.Any(r => r.MemberId == x.MemberId) == false));
+        var terms = searchString.ToLower().Split(',', ' ', ';');
+        return filteredCars
+            .Where(x => MatchCarSearchTerms(x, terms));
     }
 
-    private bool MatchMemberSearchTerms(MemberInfoModel member, params string[] terms)
+    private bool MatchCarSearchTerms(EventCarInfoModel car, params string[] terms)
     {
-        var searchName = member.FirstName + member.LastName;
-        return terms.Any(x => searchName.Contains(x, StringComparison.OrdinalIgnoreCase));
+        var carMatchString = $"#{car.Number} {car.Team?.Name ?? ""} {string.Join(" ", car.Members.Select(member => member.FirstName + " " + member.LastName))}";
+        return terms.Any(x => carMatchString.Contains(x, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private IEnumerable<EventCarInfoModel> GetInvolvedCars()
+    {
+        if (IsTeamEvent)
+        {
+            return EventCars.Cars
+                .Where(car => Review.InvolvedTeams.Any(team => team.TeamId == car.Team?.TeamId))
+                .OrderBy(x => x.Number);
+        }
+        return EventCars.Cars
+            .Where(car => Review.InvolvedMembers.Any(member => car.Members.Any(carMember => carMember.MemberId == member.MemberId)))
+            .OrderBy(x => x.Number);
+    }
+
+    private void UpdateInvolved()
+    {
+        if (IsTeamEvent)
+        {
+            Review.InvolvedTeams = InvolvedCars.Select(x => x.Team).NotNull().ToList();
+            Review.InvolvedMembers.Clear();
+            return;
+        }
+        Review.InvolvedMembers = InvolvedCars.SelectMany(x => x.Members).ToList();
+        Review.InvolvedTeams.Clear();
     }
 
     protected override void Dispose(bool disposing)

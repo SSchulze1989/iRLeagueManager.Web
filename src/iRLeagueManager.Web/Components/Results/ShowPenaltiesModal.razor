@@ -41,7 +41,7 @@
                         <MudGrid>
                             <MudItem xs="6">
                                 <MudText Typo="Typo.caption">Driver</MudText>
-                                <MudText>@penalty.Firstname @penalty.Lastname</MudText>
+                                <MudText>@penalty.Member?.FirstName @penalty.Member?.LastName</MudText>
                             </MudItem>
                             <MudItem xs="3">
                                 @if (string.IsNullOrWhiteSpace(penalty.Lap) == false)
@@ -136,7 +136,7 @@
     {
         var parameters = new DialogParameters<MudConfirmModal>()
         {
-            {x => x.Text, $"Really delete this penalty for {penalty.Firstname} {penalty.Lastname}?"},
+            {x => x.Text, $"Really delete this penalty for {penalty.Member?.FirstName} {penalty.Member?.LastName}?"},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
         var confirmed = await DialogService.Show<MudConfirmModal>("Delete penalty", parameters).Result;

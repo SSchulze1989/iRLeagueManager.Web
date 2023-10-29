@@ -123,6 +123,7 @@
                                 </div>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" @onclick=@(() => OnRowOptionsClick(Row))>Add Penalty</a></li>
+                                    <li><a class="dropdown-item" @onclick=@(() => ShowPenaltiesClick())>Show Penalties</a></li>
                                 </ul>
                             </div>
                         </td>
@@ -163,9 +164,9 @@
     {
         var rowValue = selector(row);
         var minValue = resultRows
-            .Select(x => selector(x))
-            .Where(x => x > TimeSpan.FromSeconds(1))
-            .MinOrDefault();
+        .Select(x => selector(x))
+        .Where(x => x > TimeSpan.FromSeconds(1))
+        .MinOrDefault();
         return rowValue == minValue;
     }
 

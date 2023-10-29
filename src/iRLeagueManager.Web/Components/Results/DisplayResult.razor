@@ -1,4 +1,5 @@
 ﻿@using System.Linq.Expressions
+@using iRLeagueApiCore.Common.Enums;
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
@@ -52,6 +53,10 @@
                         <ResultTableHeader Text="@($"IR ({EvenStrengthOfField(Result)})")" Sort="@(x => x.OldIrating)" Direction="SortDirection.Descending" />
                     }
                     <ResultTableHeader Text="Incs." Sort="@(x => x.Incidents)" />
+                    @if (showDisqualification)
+                    {
+                        <th></th>
+                    }
                     @if (CanEdit)
                     {
                         <th></th>
@@ -97,6 +102,15 @@
                         <td>@Row.OldIrating</td>
                     }
                     <td>@Row.Incidents</td>
+                    @if (showDisqualification)
+                    {
+                        <td>
+                            @if (Row.Status == RaceStatus.Disqualified)
+                            {
+                                <span class="bi bi-flag-fill" style="color: black" title="Disqualified"/>
+                            }
+                        </td>
+                    }
                     @if (CanEdit)
                     {
                         <td>
@@ -109,6 +123,7 @@
                                 </div>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" @onclick=@(() => OnRowOptionsClick(Row))>Add Penalty</a></li>
+                                    <li><a class="dropdown-item" @onclick=@(() => ShowPenaltiesClick())>Show Penalties</a></li>
                                 </ul>
                             </div>
                         </td>
@@ -133,6 +148,8 @@
 
     private bool isTeamResult = false;
 
+    private bool showDisqualification = false;
+
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
@@ -140,15 +157,16 @@
         BlazorParameterNullException.ThrowIfNull(this, ModalService);
         BlazorParameterNullException.ThrowIfNull(this, Result);
         isTeamResult = Result.ResultRows.Any(x => x.MemberId == null);
+        showDisqualification = Result.ResultRows.Any(x => x.Status == RaceStatus.Disqualified);
     }
 
     private bool IsFastestLap(IEnumerable<ResultRowModel> resultRows, ResultRowModel row, Func<ResultRowModel, TimeSpan> selector)
     {
         var rowValue = selector(row);
         var minValue = resultRows
-            .Select(x => selector(x))
-            .Where(x => x > TimeSpan.FromSeconds(1))
-            .MinOrDefault();
+        .Select(x => selector(x))
+        .Where(x => x > TimeSpan.FromSeconds(1))
+        .MinOrDefault();
         return rowValue == minValue;
     }
 

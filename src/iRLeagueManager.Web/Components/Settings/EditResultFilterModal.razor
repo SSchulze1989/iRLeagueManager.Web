@@ -144,6 +144,15 @@
                         {
                             <InputText class="form-control" @bind-Value=filter.Value />
                         }
+                        else if (propertyType == typeof(RaceStatus))
+                        {
+                            <InputSelect class="form-select" @bind-Value=filter.Value>
+                                @foreach(var status in Enum.GetValues(typeof(RaceStatus)))
+                                {
+                                    <option value="@((int)status)">@status.ToString()</option>
+                                }
+                            </InputSelect>
+                        }
                         else if (propertyType == typeof(double) || propertyType == typeof(double?) || propertyType == typeof(int) || propertyType == typeof(int?))
                         {
 
@@ -193,6 +202,7 @@
         nameof(ResultRowModel.OldSafetyRating),
         nameof(ResultRowModel.NewSafetyRating),
         nameof(ResultRowModel.Incidents),
+        nameof(ResultRowModel.Status),
         "Member",
         "Team",
     };

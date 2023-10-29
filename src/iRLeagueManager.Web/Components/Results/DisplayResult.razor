@@ -194,19 +194,23 @@
         {
             return;
         }
-        var penalties = await Result.EventResult.GetPenalties();
-        if (penalties.IsSuccess == false || penalties.Content is null)
-        {
-            return;
+        async Task<IEnumerable<PenaltyModel>> GetPenalties() {
+            var penalties = await Result.EventResult.GetPenalties();
+            if (penalties.IsSuccess == false || penalties.Content is null)
+            {
+                return Array.Empty<PenaltyModel>();
+            }
+            return penalties.Content.Where(x => Result.SessionNr == 999 || x.SessionNr == Result.SessionNr);
         }
+
         var parameters = new ModalParameters<ShowPenaltiesModal>()
-            .Add(x => x.Penalties, penalties.Content.Where(x => Result.SessionNr == 999 || x.SessionNr == Result.SessionNr))
+            .Add(x => x.GetPenalties, GetPenalties)
             .Add(x => x.CanEdit, CanEdit)
             .Add(x => x.IsTeamResult, isTeamResult);
         var options = new ModalOptions()
         {
             DisableBackgroundCancel = false,
         };
-        await ModalService.Show<ShowPenaltiesModal>("Penalties", parameters, options).Result;
+        var result = await ModalService.Show<ShowPenaltiesModal>("Penalties", parameters, options).Result;
     }
 }

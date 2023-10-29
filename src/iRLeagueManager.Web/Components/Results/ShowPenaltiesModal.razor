@@ -4,13 +4,13 @@
 @inject AddPenaltyViewModel Vm
 
 @{
-    var showSessionName = Penalties
+    var showSessionName = penalties
         .Select(x => x.SessionNr)
         .Distinct()
         .Count() > 1;
 }
 
-@foreach(var penalty in Penalties)
+@foreach(var penalty in penalties)
 {
     <div class="card mb-2">
         @if(showSessionName)
@@ -78,19 +78,25 @@
 
 @code {
     [CascadingParameter]
+    public BlazoredModalInstance ModalInstance { get; set; } = default!;
+    [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
-    [Parameter]
-    public IEnumerable<PenaltyModel> Penalties { get; set; } = default!;
     [Parameter]
     public bool CanEdit { get; set; } = false;
     [Parameter]
     public bool IsTeamResult { get; set; } = false;
+    [Parameter]
+    public Func<Task<IEnumerable<PenaltyModel>>> GetPenalties { get; set; } = default!;
 
-    protected override void OnParametersSet()
+    private IEnumerable<PenaltyModel> penalties = Array.Empty<PenaltyModel>();
+
+    protected override async Task OnParametersSetAsync()
     {
-        base.OnParametersSet();
+        await base.OnParametersSetAsync();
+        BlazorParameterNullException.ThrowIfNull(this, ModalInstance);
         BlazorParameterNullException.ThrowIfNull(this, ModalService);
-        BlazorParameterNullException.ThrowIfNull(this, Penalties);
+        BlazorParameterNullException.ThrowIfNull(this, GetPenalties);
+        await RefreshPenalties();
     }
 
     private string GetPenaltyTypeString(PenaltyType type) => type switch
@@ -125,6 +131,7 @@
             .Add(x => x.CanSelectDriver, false)
             .Add(x => x.OnSubmit, async (p, ct) => await p.SaveChanges(ct));
         await ModalService.Show<EditAddPenaltyModal>("Edit penalty", parameters).Result;
+        await RefreshPenalties();
     }
 
     private async Task DeleteAddPenaltyAsync(PenaltyModel penalty)
@@ -146,7 +153,13 @@
         var result = await Vm.Delete();
         if (result.IsSuccess)
         {
-            Penalties = Penalties.Where(x => x != penalty);
+            penalties = penalties.Where(x => x != penalty);
         }
+        await RefreshPenalties();
+    }
+
+    private async Task RefreshPenalties()
+    {
+        penalties = await GetPenalties();
     }
 }

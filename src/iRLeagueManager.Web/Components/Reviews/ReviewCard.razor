@@ -3,12 +3,13 @@
 @using System.ComponentModel
 @using Blazored.Typeahead
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Results;
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueApiCore.Common.Models.Users;
 @using iRLeagueManager.Web.ViewModels
 @inject NavigationManager NavigationManager
 
-<CascadingValue Value=Review.InvolvedMembers>
+<CascadingValue Value=InvolvedCars>
 <div @attributes=AdditionalAttributes class="card @AddCssClass @GetBorderClass(Selected, Bind(Review, x => x.Status))" id="review-card-@Review.ReviewId" @ref=Card>
      <div class="card-header accordion-header review-header @GetBorderClass(Selected, Bind(Review, x => x.Status))">
         <div class="row">
@@ -58,9 +59,18 @@
                     <h5>Involved</h5>
                 </div>
                 <div class="col">
-                    @foreach(var member in @Bind(Review, x => x.InvolvedMembers))
+                    @foreach(var car in InvolvedCars)
                     {
-                        <span class="badge bg-secondary h-auto me-1">@member.FirstName @member.LastName</span>
+                        @if (IsTeamEvent)
+                        {
+                            var team = car.Team ?? new();
+                            <span class="badge bg-secondary h-auto me-1">#@car.Number @team.Name</span>
+                        }
+                        else
+                        {
+                            var member = car.Members.FirstOrDefault() ?? new();
+                            <span class="badge bg-secondary h-auto me-1">#@car.Number @member.FirstName @member.LastName</span>
+                        }
                     }
                 </div>
             </div>
@@ -71,8 +81,15 @@
                 <div class="col">
                     @foreach(var vote in @Bind(Review, x => x.Votes))
                     {
-                        var member = @Bind(vote, x => x.MemberAtFault);
-                        <span class="badge bg-danger h-auto me-1">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
+                        var carAtFault = IsTeamEvent
+                            ? InvolvedCars.FirstOrDefault(x => x.Team?.TeamId == vote.TeamAtFaultId)
+                            : InvolvedCars.FirstOrDefault(x => x.Members.Any(y => y.MemberId == vote.MemberAtFaultId));
+                        var atFault = IsTeamEvent 
+                            ? vote.TeamAtFault?.Name 
+                            : vote.MemberAtFault == null ? null : $"{vote.MemberAtFault.FirstName} {vote.MemberAtFault.LastName}";
+                        <span class="badge bg-danger h-auto me-1">
+                            @Bind(vote, x => x.VoteCategoryText)@((atFault != null && carAtFault != null) ? $": #{carAtFault.Number} {atFault}" : string.Empty)
+                        </span>
                     }
                 </div>
             </div>
@@ -80,11 +97,20 @@
         <div class="container-xxl @(Collapsed ? " collapse" : "")" id="review_text_@Review.ReviewId" @ref=ReviewText>
             <div class="row">
                 <div class="col">
-                    <h5>Involved Drivers</h5>
+                    <h5>Involved</h5>
                     <div class="d-flex flex-wrap">
-                        @foreach(var member in @Bind(Review, x => x.InvolvedMembers))
+                        @foreach(var car in InvolvedCars)
                         {
-                            <span class="badge bg-secondary me-1 mb-1">@member.FirstName @member.LastName</span>
+                            @if (IsTeamEvent)
+                            {
+                                var team = car.Team ?? new();
+                                <span class="badge bg-secondary h-auto me-1">#@car.Number @team.Name</span>
+                            }
+                            else
+                            {
+                                var member = car.Members.FirstOrDefault() ?? new();
+                                <span class="badge bg-secondary h-auto me-1">#@car.Number @member.FirstName @member.LastName</span>
+                            }
                         }
                     </div>
                 </div>
@@ -93,9 +119,15 @@
                     <div class="d-flex flex-wrap">
                         @foreach(var countedVote in @Bind(Review, x => x.CountedVotes))
                         {
-                            var member = countedVote.Vote.MemberAtFault;
+                            var vote = countedVote.Vote;
+                            var carAtFault = IsTeamEvent
+                                ? InvolvedCars.FirstOrDefault(x => x.Team?.TeamId == vote.TeamAtFaultId)
+                                : InvolvedCars.FirstOrDefault(x => x.Members.Any(y => y.MemberId == vote.MemberAtFaultId));
+                            var atFault = IsTeamEvent
+                                ? vote.TeamAtFault?.Name
+                                : vote.MemberAtFault == null ? null : $"{vote.MemberAtFault.FirstName} {vote.MemberAtFault.LastName}";
                             <span class="badge bg-warning me-1 mb-1">
-                                @countedVote.Vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
+                                @countedVote.Vote.VoteCategoryText@((atFault != null && carAtFault != null) ? $": #{carAtFault.Number} {atFault}" : string.Empty)
                                 <span class="badge rounded-pill bg-danger ms-1">@(countedVote.Count)x</span>
                             </span>
                         }
@@ -118,9 +150,14 @@
                 <div>
                     @foreach(var vote in @Bind(Review, x => x.Votes))
                     {
-                        var member = vote.MemberAtFault;
-                        <span class="badge bg-danger me-1 mb-1">
-                            @vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
+                        var carAtFault = IsTeamEvent
+                            ? InvolvedCars.FirstOrDefault(x => x.Team?.TeamId == vote.TeamAtFaultId)
+                            : InvolvedCars.FirstOrDefault(x => x.Members.Any(y => y.MemberId == vote.MemberAtFaultId));
+                        var atFault = IsTeamEvent
+                            ? vote.TeamAtFault?.Name
+                            : vote.MemberAtFault == null ? null : $"{vote.MemberAtFault.FirstName} {vote.MemberAtFault.LastName}";
+                        <span class="badge bg-danger h-auto me-1">
+                            @Bind(vote, x => x.VoteCategoryText)@((atFault != null && carAtFault != null) ? $": #{carAtFault.Number} {atFault}" : string.Empty)
                         </span>
                     }
                 </div>
@@ -143,9 +180,10 @@
                         @foreach (var comment in @Bind(Review, x => x.Comments))
                         {
                             <li class="list-group-item">
-                                <ReviewComment Comment=comment 
-                                                OnStateHasChanged=@(() => CommentStateChanged(comment)) 
-                                                OnDeleteClick=@(() => DeleteCommentClick(comment))/>
+                                <ReviewComment Comment=comment
+                                               IsTeamEvent=IsTeamEvent
+                                               OnStateHasChanged=@(() => CommentStateChanged(comment)) 
+                                               OnDeleteClick=@(() => DeleteCommentClick(comment))/>
                             </li>
                         }
                     </ul>
@@ -163,12 +201,12 @@
 </CascadingValue>
 
 @code {
-    [CascadingParameter(Name = nameof(EventMembers))]
-    public IEnumerable<MemberInfoModel> EventMembers { get; set; } = default!;
     [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
     [CascadingParameter]
     public Task<AuthenticationState> AuthenticationTask { get; set; } = default!;
+    [CascadingParameter]
+    public CarListModel EventCars { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues=true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter, EditorRequired]
@@ -193,14 +231,21 @@
 
     public bool Collapsed { get; set; } = true;
 
+    private bool IsTeamEvent => EventCars.IsTeamEvent;
+
+    private IEnumerable<EventCarInfoModel> InvolvedCars { get; set; } = Array.Empty<EventCarInfoModel>();
+
     protected override async Task OnParametersSetAsync()
     {
-        _ = Review ?? throw new InvalidOperationException($"Parameter {nameof(Review)} must have a value");
-        _ = ModalService ?? throw BlazorParameterNullException.New(this, ModalService);
+        await base.OnParametersSetAsync();
+        BlazorParameterNullException.ThrowIfNull(this, Review);
+        BlazorParameterNullException.ThrowIfNull(this, ModalService);
+        BlazorParameterNullException.ThrowIfNull(this, EventCars);
         var addClassAttribute = (AdditionalAttributes?.TryGetValue("class", out var @class) == true) ? @class : string.Empty;
         AddCssClass = addClassAttribute.ToString()!;
         Collapsed &= !Selected;
-        await base.OnParametersSetAsync();
+        InvolvedCars = GetInvolvedCars();
+        StateHasChanged();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -234,11 +279,13 @@
 
     private async Task EditResultClick()
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(EditReviewResultModal.Model), Review.CopyModel())
-            .Add(nameof(EditReviewResultModal.InvolvedMembers), Review.InvolvedMembers)
-            .Add(nameof(EditReviewResultModal.OnSubmit), 
-                new Func<ReviewViewModel, CancellationToken, Task<StatusResult>>(async (review, cancellationToken) => await review.SaveChangesAsync(cancellationToken)));
+        var parameters = new ModalParameters<EditReviewResultModal>()
+        {
+            { x => x.Model, Review.CopyModel() },
+            { x => x.InvolvedCars, InvolvedCars },
+            { x => x.IsTeamEvent, IsTeamEvent },
+            { x => x.OnSubmit, async (review, cancellation) => await review.SaveChangesAsync(cancellation) },
+        };
         var options = new ModalOptions()
         {
             DisableBackgroundCancel = true,
@@ -252,11 +299,13 @@
 
     private async Task AddCommentClick()
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(EditCommentModal.Model), new ReviewCommentModel() { Votes = new List<VoteModel>() })
-            .Add(nameof(EditReviewResultModal.InvolvedMembers), Review.InvolvedMembers)
-            .Add(nameof(EditCommentModal.OnSubmit), new Func<ReviewCommentViewModel, CancellationToken, Task<StatusResult>>((comment, cancellationToken) =>
-                Review.AddComment(comment.GetModel(), cancellationToken)));
+        var parameters = new ModalParameters<EditCommentModal>()
+        {
+            { x => x.Model, new ReviewCommentModel() { Votes = new List<VoteModel>() } },
+            { x => x.InvolvedCars, InvolvedCars },
+            { x => x.IsTeamEvent, IsTeamEvent },
+            { x => x.OnSubmit, async (comment, cancellation) => await Review.AddComment(comment.GetModel(), cancellation)},
+        };
         var options = new ModalOptions()
         {
             DisableBackgroundCancel = false
@@ -312,5 +361,14 @@
     protected async Task ScrollToElementId(string id)
     {
         await JsRuntime.InvokeVoidAsync("scrollToElementId", id);
+    }
+
+    private IEnumerable<EventCarInfoModel> GetInvolvedCars()
+    {
+        if (IsTeamEvent)
+        {
+            return EventCars.Cars.Where(car => Review.InvolvedTeams.Any(team => team.TeamId == car.Team?.TeamId));
+        }
+        return EventCars.Cars.Where(car => Review.InvolvedMembers.Any(member => car.Members.Any(carMember => carMember.MemberId == member.MemberId)));
     }
 }

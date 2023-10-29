@@ -1,6 +1,7 @@
 ﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueApiCore.Common.Models.Reviews;
 using iRLeagueManager.Web.Data;
+using Markdig.Extensions.Yaml;
 
 namespace iRLeagueManager.Web.ViewModels;
 
@@ -16,6 +17,7 @@ public sealed class VoteViewModel : LeagueViewModelBase<VoteViewModel, VoteModel
     public string? VoteCategoryText { get => model.VoteCategoryText; }
     public string Description { get => model.Description; set => SetP(model.Description, value => model.Description = value, value); }
     public MemberInfoModel? MemberAtFault { get => model.MemberAtFault; set => SetP(model.MemberAtFault, value => model.MemberAtFault = value, value); }
+    public TeamInfoModel? TeamAtFault { get => model.TeamAtFault; set => SetP(model.TeamAtFault, value => model.TeamAtFault = value, value); }
 
     public long? MemberAtFaultId
     {
@@ -36,5 +38,14 @@ public sealed class VoteViewModel : LeagueViewModelBase<VoteViewModel, VoteModel
             }
             OnPropertyChanged();
         }
+    }
+
+    public long? TeamAtFaultId
+    {
+        get => TeamAtFault?.TeamId;
+        set => SetP(TeamAtFault, value => TeamAtFault = value, value == null ? default : new()
+        {
+            TeamId = value.Value,
+        });
     }
 }

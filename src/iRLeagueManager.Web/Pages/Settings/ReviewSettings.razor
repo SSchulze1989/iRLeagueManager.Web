@@ -115,7 +115,7 @@
     {
         return new()
         {
-            Index = Vm.VoteCategories.Max(x => x.Index) + 1,
+            Index = Vm.VoteCategories.Any() ? Vm.VoteCategories.Max(x => x.Index) + 1 : 0,
         };
     }
 }

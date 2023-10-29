@@ -1,5 +1,6 @@
 ﻿@inherits MvvmComponentBase
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Results;
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueApiCore.Common.Models.Users;
 @using iRLeagueManager.Web.ViewModels
@@ -13,8 +14,15 @@
         <div>
             @foreach(var vote in @Bind(Comment, x => x.Votes))
             {
-                var member = @Bind(vote, x => x.MemberAtFault);
-                <span class="badge bg-warning">@Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)</span>
+                var carAtFault = IsTeamEvent
+                    ? InvolvedCars.FirstOrDefault(x => x.Team?.TeamId == vote.TeamAtFaultId)
+                    : InvolvedCars.FirstOrDefault(x => x.Members.Any(y => y.MemberId == vote.MemberAtFaultId));
+                var atFault = IsTeamEvent
+                    ? vote.TeamAtFault?.Name
+                    : vote.MemberAtFault == null ? null : $"{vote.MemberAtFault.FirstName} {vote.MemberAtFault.LastName}";
+                <span class="badge bg-warning">
+                    @Bind(vote, x => x.VoteCategoryText)@((atFault != null && carAtFault != null) ? $": #{carAtFault.Number} {atFault}" : string.Empty)
+                </span>
             }
         </div>
     </div>
@@ -36,11 +44,13 @@
     [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
     [CascadingParameter]
-    public IEnumerable<MemberInfoModel> InvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
+    public IEnumerable<EventCarInfoModel> InvolvedCars { get; set; } = Array.Empty<EventCarInfoModel>();
     [CascadingParameter]
     public IEnumerable<UserModel> LeagueUsers { get; set; } = Array.Empty<UserModel>();
     [Parameter, EditorRequired]
     public ReviewCommentViewModel Comment { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public bool IsTeamEvent { get; set; }
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
     [Parameter]
@@ -83,12 +93,13 @@
 
     private async Task EditClick()
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(EditCommentModal.Model), Comment.CopyModel())
-            .Add(nameof(EditCommentModal.InvolvedMembers), InvolvedMembers)
-            .Add(nameof(EditCommentModal.OnSubmit), 
-                new Func<ReviewCommentViewModel, CancellationToken, Task<StatusResult>>((comment, cancellationToken) => 
-                    comment.SaveChangesAsync(cancellationToken)));
+        var parameters = new ModalParameters<EditCommentModal>()
+        {
+            { x => x.Model, Comment.CopyModel() },
+            { x => x.InvolvedCars, InvolvedCars },
+            { x => x.IsTeamEvent, IsTeamEvent },
+            { x => x.OnSubmit, async (comment, cancellation) => await comment.SaveChangesAsync(cancellation) },
+        };
         var result = await ModalService.Show<EditCommentModal>("Edit Comment", parameters).Result;
         if (result.Confirmed && result.Data is ReviewCommentModel comment)
         {

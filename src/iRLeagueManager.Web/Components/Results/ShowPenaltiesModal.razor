@@ -4,13 +4,13 @@
 @inject AddPenaltyViewModel Vm
 
 @{
-    var showSessionName = Penalties
+    var showSessionName = penalties
         .Select(x => x.SessionNr)
         .Distinct()
         .Count() > 1;
 }
 
-@foreach(var penalty in Penalties)
+@foreach(var penalty in penalties)
 {
     <div class="card mb-2">
         @if(showSessionName)
@@ -23,7 +23,14 @@
             <div class="row mb-2">
                 <div class="col-6">
                     <h6 class="text-muted">Driver</h6>
-                    @penalty.Firstname @penalty.Lastname
+                    @if (IsTeamResult)
+                    {
+                        @penalty.Team?.Name
+                    }
+                    else
+                    {
+                        @penalty.Member?.FirstName @penalty.Member?.LastName
+                    }
                 </div>
                 <div class="col-3">
                     @if (string.IsNullOrWhiteSpace(penalty.Lap) == false)
@@ -42,7 +49,7 @@
             </div>
             <div class="row mb-2">
                 <div class="col-6">
-                    <label style="color: @GetPenaltyColor(penalty)">@GetPenaltyValueString(penalty)</label>
+                    <label style="color: @GetPenaltyColor(penalty)">@((MarkupString)GetPenaltyValue(penalty))</label>
                 </div>
                 <div class="col-6">
                     @penalty.Reason
@@ -71,17 +78,25 @@
 
 @code {
     [CascadingParameter]
+    public BlazoredModalInstance ModalInstance { get; set; } = default!;
+    [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
     [Parameter]
-    public IEnumerable<PenaltyModel> Penalties { get; set; } = default!;
-    [Parameter]
     public bool CanEdit { get; set; } = false;
+    [Parameter]
+    public bool IsTeamResult { get; set; } = false;
+    [Parameter]
+    public Func<Task<IEnumerable<PenaltyModel>>> GetPenalties { get; set; } = default!;
 
-    protected override void OnParametersSet()
+    private IEnumerable<PenaltyModel> penalties = Array.Empty<PenaltyModel>();
+
+    protected override async Task OnParametersSetAsync()
     {
-        base.OnParametersSet();
+        await base.OnParametersSetAsync();
+        BlazorParameterNullException.ThrowIfNull(this, ModalInstance);
         BlazorParameterNullException.ThrowIfNull(this, ModalService);
-        BlazorParameterNullException.ThrowIfNull(this, Penalties);
+        BlazorParameterNullException.ThrowIfNull(this, GetPenalties);
+        await RefreshPenalties();
     }
 
     private string GetPenaltyTypeString(PenaltyType type) => type switch
@@ -89,14 +104,16 @@
         PenaltyType.Points => "Points",
         PenaltyType.Position => "Positions",
         PenaltyType.Time => "Time",
+        PenaltyType.Disqualification => "DSQ",
         _ => string.Empty,
     };
 
-    private string GetPenaltyValueString(PenaltyModel penalty) => penalty.Type switch
+    private string GetPenaltyValue(PenaltyModel penalty) => penalty.Type switch
     {
         PenaltyType.Points => $"- {penalty.Points} pt{(penalty.Points != 1 ? "s" : "")}",
         PenaltyType.Position => $"+ {penalty.Positions.ToString()} position{(penalty.Positions != 1 ? "s" : "")}",
         PenaltyType.Time => $"+ {penalty.Time.ToString()}",
+        PenaltyType.Disqualification => """DSQ <span class="bi bi-flag-fill" style="color: black"/>""",
         _ => string.Empty,
     };
 
@@ -114,12 +131,18 @@
             .Add(x => x.CanSelectDriver, false)
             .Add(x => x.OnSubmit, async (p, ct) => await p.SaveChanges(ct));
         await ModalService.Show<EditAddPenaltyModal>("Edit penalty", parameters).Result;
+        await RefreshPenalties();
     }
 
     private async Task DeleteAddPenaltyAsync(PenaltyModel penalty)
     {
+        var text = IsTeamResult switch
+        {
+            true => $"Really delete this penalty for {penalty.Team?.Name}?",
+            false => $"Really delete this penalty for {penalty.Member?.FirstName} {penalty.Member?.LastName}?",
+        };
         var parameters = new ModalParameters<ConfirmModal>()
-            .Add(x => x.Text, $"Really delete this penalty for {penalty.Firstname} {penalty.Lastname}?")
+            .Add(x => x.Text, text)
             .Add(x => x.ButtonTypes, ButtonTypes.YesNo);
         var confirmed = await ModalService.Show<ConfirmModal>("Delete penalty", parameters).Result;
         if (confirmed.Confirmed == false)
@@ -130,7 +153,13 @@
         var result = await Vm.Delete();
         if (result.IsSuccess)
         {
-            Penalties = Penalties.Where(x => x != penalty);
+            penalties = penalties.Where(x => x != penalty);
         }
+        await RefreshPenalties();
+    }
+
+    private async Task RefreshPenalties()
+    {
+        penalties = await GetPenalties();
     }
 }

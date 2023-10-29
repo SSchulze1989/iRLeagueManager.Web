@@ -16,7 +16,7 @@
                 </InputSelect>
             </InputGroup>
         }
-        <InputGroup Label="Driver">
+        <InputGroup Label="@(IsTeamResult ? "Team" : "Driver")">
             @if (CanSelectDriver)
             {
                 <BlazoredTypeahead @bind-Value=Vm.ResultRow
@@ -30,19 +30,33 @@
                                    placeholder="Search driver by name...">
 
                     <SelectedTemplate Context=row>
-                        @(row?.FinalPosition). @row?.Firstname @row?.Lastname
+                        @(IsTeamResult ? $"{row?.FinalPosition}. {row?.TeamName}" : $"{row?.FinalPosition}. {row?.Firstname} {row?.Lastname}")
                     </SelectedTemplate>
                     <ResultTemplate Context=row>
-                        @(row.FinalPosition). @row.Firstname @row.Lastname
+                        @(IsTeamResult ? $"{row.FinalPosition}. {row.TeamName}" : $"{row.FinalPosition}. {row.Firstname} {row.Lastname}")
                     </ResultTemplate>
                     <NotFoundTemplate Context=name>
-                        <span>Driver <b>@name</b> Not found!</span>
+                        @if (IsTeamResult)
+                        {
+                            <div>Team <b>@name</b> Not found!</div>
+                        }
+                        else
+                        {
+                            <div>Driver <b>@name</b> Not found!</div>
+                        }
                     </NotFoundTemplate>
                 </BlazoredTypeahead>
             }
             else
             {
-                <label class="form-select disabled">@Vm.Firstname @Vm.Lastname</label>
+                @if (Vm.Member is not null)
+                {
+                    <label class="form-select disabled">@Vm.Member.FirstName @Vm.Member.LastName</label>
+                }
+                else if (Vm.Team is not null)
+                {
+                    <lable class="form-select disabled">@Vm.Team.Name</lable>
+                }
             }
         </InputGroup>
         <InputGroup Label="Reason">
@@ -74,6 +88,10 @@
                     <label class="input-group-text">Seconds</label>
                 </InputGroup>
                 break;
+            case PenaltyType.Disqualification:
+                break;
+            default:
+                break;
         }
     </div>
     <ValidationSummary />
@@ -104,6 +122,8 @@
     public bool CanSelectSession { get; set; } = false;
     [Parameter]
     public bool CanSelectDriver { get; set; } = true;
+    [Parameter]
+    public bool IsTeamResult { get; set; } = false;
 
     private long SelectedSessionId
     {
@@ -144,12 +164,12 @@
         .Where(x => string.IsNullOrWhiteSpace(x) == false)
             .ToArray();
         return await Task.FromResult(SelectedSession.ResultRows
-            .Where(x => MatchMemberSearchTerms(x, terms)));
+            .Where(x => MatchSearchTerms(x, terms)));
     }
 
-    private bool MatchMemberSearchTerms(ResultRowModel row, params string[] terms)
+    private bool MatchSearchTerms(ResultRowModel row, params string[] terms)
     {
-        var searchName = row.Firstname + row.Lastname;
+        var searchName = row.Firstname + " " + row.Lastname + row.TeamName;
         return terms.Any(x => searchName.Contains(x, StringComparison.OrdinalIgnoreCase));
     }
 }

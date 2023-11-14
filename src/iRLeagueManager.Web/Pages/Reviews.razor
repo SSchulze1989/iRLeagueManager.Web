@@ -35,7 +35,6 @@
 
     <CascadingValue Value=@Bind(ReviewsVm, x => x.EventCars)>
     <CascadingValue Value=ReviewsVm.LeagueUsers>
-    <CascadingValue Value=ReviewsVm.EventMembers Name=EventMembers>
     <CascadingValue Value=ReviewsVm.LeagueUsers.AsEnumerable()>
     <CascadingValue Value=ReviewsVm.VoteCategories.AsEnumerable()>
 
@@ -130,6 +129,7 @@
         }
     </MudStack>
 
+    </CascadingValue>
     </CascadingValue>
     </CascadingValue>
     </CascadingValue>
@@ -246,7 +246,7 @@
         {
             {x => x.Model, review.CopyModel()},
             {x => x.EventList, EventList},
-            {x => x.EventMembers, ReviewsVm.EventMembers},
+            {x => x.EventCars, ReviewsVm.EventCars},
             {x => x.OnSubmit, async (review, cancellation) => await review.SaveChangesAsync(cancellation)},
         };
         var modal = DialogService.Show<EditReviewModal>("Edit Review", parameters);
@@ -323,7 +323,7 @@
         {
             {x => x.Model, review},
             {x => x.EventList, EventList},
-            {x => x.EventMembers, ReviewsVm.EventMembers},
+            {x => x.EventCars, ReviewsVm.EventCars},
             {x => x.OnSubmit, async (reviewVm, cancellation) => await reviewVm.AddToSessionAsync(reviewVm.SessionId.GetValueOrDefault(), cancellation)},
         };
         var modal = DialogService.Show<EditReviewModal>("Add Review", parameters);

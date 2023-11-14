@@ -39,9 +39,9 @@
                 </MudItem>
                 <MudItem xs="12">
                     <MultiSelectAutoComplete Label="Members"
-                                             @bind-Values=Vm.InvolvedMembers
-                                             SearchFunc="SearchMembers"
-                                             ToStringFunc="@(member => member is null ? string.Empty : $"{member.FirstName} {member.LastName}")"
+                                             @bind-Values=InvolvedCars
+                                             SearchFunc="SearchCars"
+                                             ToStringFunc="CarToStringFunc"
                                              Variant="Variant.Outlined"/>
                 </MudItem>
             </MudGrid>
@@ -57,86 +57,81 @@
 @code {
     [Parameter]
     public EventListViewModel EventList { get; set; } = default!;
-    //[Parameter]
-    //public ReviewViewModel Review { get; set; } = default!;
-
-    [Parameter]
-    public ReviewModel Model { get; set; } = default!;
-
     [Parameter]
     public CarListModel EventCars { get; set; } = new();
 
-    [Parameter]
-    public Func<ReviewViewModel, CancellationToken, Task<StatusResult>>? OnSubmit { get; set; }
-
-    private StatusResultValidator? ResultValidator { get; set; }
+    private IEnumerable<EventCarInfoModel> InvolvedCars { get; set; } = Array.Empty<EventCarInfoModel>();
+    private bool IsTeamEvent => EventCars.IsTeamEvent;
 
     protected override void OnParametersSet()
     {
-        _ = Model ?? throw new InvalidOperationException($"Parameter {nameof(Model)} must have a value");
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, EventCars);
+        InvolvedCars = GetInvolvedCars();
     }
 
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender == false)
-        {
-            return;
-        }
-        Review.SetModel(Model);
-    }
-
-    private async Task Submit()
-    {
-        //var success = await Review.SaveChangesAsync(cts.Token);
-        bool success = true;
-        if (OnSubmit != null)
-        {
-            var result = await OnSubmit.Invoke(Review, cts.Token);
-            ResultValidator?.ValidateResult(result);
-            success &= result.IsSuccess;
-        }
-        if (success && ModalInstance != null)
-        {
-            var result = ModalResult.Ok(Review.GetModel());
-            await ModalInstance.CloseAsync(result);
-        }
-    }
-
-    private async Task Cancel()
-    {
-        if (ModalInstance != null)
-        {
-            await ModalInstance.CancelAsync();   
-        }
-    }
-
-    private Task<IEnumerable<MemberInfoModel>> SearchMembers(string searchString)
+    private async Task<IEnumerable<EventCarInfoModel>> SearchCars(string searchString)
     {
         var filteredCars = await Task.FromResult(EventCars.Cars
             .Where(x => InvolvedCars.Contains(x) == false));
         if (string.IsNullOrEmpty(searchString))
         {
-            return Task.FromResult(EventMembers
-                .Where(x => Review.InvolvedMembers.Any(r => r.MemberId == x.MemberId) == false));
+            return filteredCars;
         }
 
-        var terms = searchString.ToLower().Split(',', ' ', ';')
-        .Where(x => string.IsNullOrWhiteSpace(x) == false)
-            .ToArray();
-        return Task.FromResult(EventMembers
-            .Where(x => MatchMemberSearchTerms(x, terms))
-            .Where(x => Review.InvolvedMembers.Any(r => r.MemberId == x.MemberId) == false));
+        var terms = searchString.ToLower().Split(',', ' ', ';');
+        return filteredCars
+            .Where(x => MatchCarSearchTerms(x, terms));
+    }
+
+    private bool MatchCarSearchTerms(EventCarInfoModel car, params string[] terms)
+    {
+        var carMatchString = $"#{car.Number} {car.Team?.Name ?? ""} {string.Join(" ", car.Members.Select(member => member.FirstName + " " + member.LastName))}";
+        return terms.Any(x => carMatchString.Contains(x, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private IEnumerable<EventCarInfoModel> GetInvolvedCars()
+    {
+        if (IsTeamEvent)
+        {
+            return EventCars.Cars
+                .Where(car => Vm.InvolvedTeams.Any(team => team.TeamId == car.Team?.TeamId))
+                .OrderBy(x => x.Number);
+        }
+        return EventCars.Cars
+            .Where(car => Vm.InvolvedMembers.Any(member => car.Members.Any(carMember => carMember.MemberId == member.MemberId)))
+            .OrderBy(x => x.Number);
+    }
+
+    private string CarToStringFunc(EventCarInfoModel? car)
+    {
+        if (car is null)
+        {
+            return string.Empty;
+        }
+        if (IsTeamEvent)
+        {
+            return $"#{car.Number} {car.Team?.Name}";
+        }
+        var member = car.Members.FirstOrDefault() ?? new();
+        return $"#{car.Number} {member.FirstName} {member.LastName}";
     }
 
     private void UpdateInvolved()
     {
         if (IsTeamEvent)
         {
-            Review.InvolvedTeams = InvolvedCars.Select(x => x.Team).NotNull().ToList();
-            Review.InvolvedMembers.Clear();
+            Vm.InvolvedTeams = InvolvedCars.Select(x => x.Team).NotNull().ToList();
+            Vm.InvolvedMembers = Array.Empty<MemberInfoModel>();
             return;
         }
-        Review.InvolvedMembers = InvolvedCars.SelectMany(x => x.Members).ToList();
-        Review.InvolvedTeams.Clear();
+        Vm.InvolvedMembers = InvolvedCars.SelectMany(x => x.Members).ToList();
+        Vm.InvolvedTeams = Array.Empty<TeamInfoModel>();
+    }
+
+    protected override Task Submit()
+    {
+        UpdateInvolved();
+        return base.Submit();
     }
 }

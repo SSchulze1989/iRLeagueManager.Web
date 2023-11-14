@@ -23,16 +23,35 @@
                             </MudSelect>
                         </MudItem>
                         <MudItem xs="6">
-                            <MudSelect Label="Driver at fault" 
-                                        @bind-Value="vote.MemberAtFault" 
-                                        Variant="Variant.Outlined" 
-                                        ToStringFunc="@(member => member != null ? $"{member.FirstName} {member.LastName}" : string.Empty)">
-                                <MudSelectItem Value="default(MemberInfoModel)"></MudSelectItem>
-                                @foreach (var member in InvolvedMembers)
-                                {
-                                    <MudSelectItem Value="@member" />
-                                }
-                            </MudSelect>
+                            @if (IsTeamEvent)
+                            {
+                                <MudSelect Label="Team at fault"
+                                           @bind-Value="vote.TeamAtFault"
+                                           Variant="Variant.Outlined"
+                                           ToStringFunc="@(team => team?.Name)"
+                                           Clearable="true">
+                                    <MudSelectItem Value="default(MemberInfoModel)"></MudSelectItem>
+                                    @foreach (var car in InvolvedCars)
+                                    {
+                                        <MudSelectItem Value="@car.Team">#@car.Number @car.Team?.Name</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            }
+                            else 
+                            {
+                                <MudSelect Label="Driver at fault" 
+                                           @bind-Value="vote.MemberAtFault" 
+                                           Variant="Variant.Outlined" 
+                                           ToStringFunc="@(member => member != null ? $"{member.FirstName} {member.LastName}" : string.Empty)"
+                                           Clearable="true">
+                                    <MudSelectItem Value="default(MemberInfoModel)"></MudSelectItem>
+                                    @foreach (var car in InvolvedCars)
+                                    {
+                                        var member = car.Members.FirstOrDefault() ?? new();
+                                        <MudSelectItem Value="@member">#@car.Number @member.FirstName @member.LastName</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            }
                         </MudItem>
                         <MudItem xs="1" Class="d-flex align-center">
                             <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Error" OnClick="@(() => Vm.RemoveVote(vote))"/>
@@ -58,9 +77,11 @@
 
 @code {
     [Parameter]
-    public IEnumerable<MemberInfoModel> InvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
+    public IEnumerable<EventCarInfoModel> InvolvedCars { get; set; } = Array.Empty<EventCarInfoModel>();
     [Parameter]
     public IEnumerable<VoteCategoryViewModel> VoteCategories { get; set; } = default!;
+    [Parameter]
+    public bool IsTeamEvent { get; set; } = false;
 
     private long? NewValue
     {
@@ -79,7 +100,6 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        BlazorParameterNullException.ThrowIfNull(this, InvolvedMembers);
         BlazorParameterNullException.ThrowIfNull(this, VoteCategories);
     }
 
@@ -89,7 +109,7 @@
         {
             return;
         }
-        
+
         await InvokeAsync(StateHasChanged);
         foreach (var vote in Vm.Votes)
         {

@@ -184,7 +184,7 @@
         }
         var parameters = new DialogParameters<ShowPenaltiesModal>()
         {
-            {x => x.Penalties, penalties.Content.Where(x => Result.SessionNr == 999 || x.SessionNr == Result.SessionNr)},
+            {x => x.GetPenalties, GetPenalties},
             {x => x.CanEdit, CanEdit},
             {x => x.IsTeamResult, isTeamResult},
         };

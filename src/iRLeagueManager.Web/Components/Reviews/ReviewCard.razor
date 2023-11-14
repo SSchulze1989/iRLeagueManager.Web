@@ -10,7 +10,7 @@
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 
-<CascadingValue Value=Review.InvolvedMembers>
+<CascadingValue Value="InvolvedCars">
 <CascadingValue Value="ChipSize" Name="ChipSize">
     <MudCard Elevation="5">
         <MudExpansionPanel DisableGutters="true" Dense="true" HideIcon="true" @bind-IsExpanded="IsExpanded">
@@ -108,10 +108,12 @@
                                         </CardHeaderActions>
                                     </MudCardHeader>
                                     <MudCardContent>
-                                        <MudChipSet ReadOnly="true">
-                                            @foreach (var member in Bind(Review, x => x.InvolvedMembers))
+                                        <MudChipSet ReadOnly="true" Class="d-flex gap-0 flex-wrap">
+                                            @foreach(var car in InvolvedCars) 
                                             {
-                                                <MudChip Icon="@Icons.Material.Outlined.Person" Label="true" Size="ChipSize" Variant="Variant.Outlined">@member.FirstName @member.LastName</MudChip>
+                                                <MudChip Icon="@Icons.Material.Outlined.Person" Label="true" Size="ChipSize" Variant="Variant.Outlined">
+                                                    @CarToString(car)
+                                                </MudChip>
                                             }
                                         </MudChipSet>
                                     </MudCardContent>
@@ -137,13 +139,13 @@
                                         </CardHeaderActions>
                                     </MudCardHeader>
                                     <MudCardContent>
-                                        <MudChipSet ReadOnly="true" Class="d-flex gap-2">
+                                        <MudChipSet ReadOnly="true" Class="d-flex gap-2 flex-wrap">
                                             @foreach (var vote in @Bind(Review, x => x.CountedVotes))
                                             {
-                                                var member = vote.Vote.MemberAtFault;
+                                                var atFault = VoteAtFaultToString(vote.Vote);
                                                 <MudBadge Content="@vote.Count" Overlap="true" Color="Color.Primary">
                                                     <MudChip Color="Color.Warning" Size="ChipSize" Label="true">
-                                                        @vote.Vote.VoteCategoryText@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
+                                                        @vote.Vote.VoteCategoryText@(string.IsNullOrEmpty(atFault) == false ? ": " : "")@VoteAtFaultToString(vote.Vote)
                                                     </MudChip>
                                                 </MudBadge>
                                             }
@@ -173,14 +175,12 @@
                                 <MudText Typo="Typo.body2" Class="ps-2" Style="white-space: pre-wrap;">
                                     @Bind(Review, x => x.ResultText)
                                 </MudText>
-                                <MudChipSet ReadOnly="true">
+                                    <MudChipSet ReadOnly="true" Class="d-flex gap-0 flex-wrap">
                                     @foreach (var vote in Bind(Review, x => x.Votes))
                                     {
-                                        var member = vote.MemberAtFault;
-                                        <MudChip Label="true" Size="ChipSize" Color="Color.Error">
-                                            @Bind(vote, x => x.VoteCategoryText)@(
-                                        member != null ? $": {member.FirstName} {member.LastName}" : string.Empty
-                                        )
+                                            var atFault = VoteAtFaultToString(vote);
+                                            <MudChip Label="true" Size="ChipSize" Color="Color.Error">
+                                                @vote.VoteCategoryText@(string.IsNullOrEmpty(atFault) == false ? ": " : "")@VoteAtFaultToString(vote)
                                         </MudChip>
                                     }
                                 </MudChipSet>
@@ -197,6 +197,7 @@
                                         <MudDivider DividerType="DividerType.Middle" />
                                     }
                                     <ReviewComment Comment=comment
+                                            IsTeamEvent="IsTeamEvent"
                                             OnStateHasChanged=@(() => CommentStateChanged(comment))
                                             OnDeleteClick=@(() => DeleteCommentClick(comment)) />
                                 }
@@ -219,9 +220,11 @@
                     </MudItem>
                     <MudItem xs="10" Class="py-1 d-flex align-center">
                         <MudChipSet ReadOnly="true">
-                            @foreach (var member in Bind(Review, x => x.InvolvedMembers))
+                            @foreach(var car in InvolvedCars) 
                             {
-                                <MudChip Icon="@Icons.Material.Outlined.Person" Label="true" Size="ChipSize" Variant="Variant.Outlined">@member.FirstName @member.LastName</MudChip>
+                                <MudChip Icon="@Icons.Material.Outlined.Person" Label="true" Size="ChipSize" Variant="Variant.Outlined">
+                                    @CarToString(car)
+                                </MudChip>
                             }
                         </MudChipSet>
                     </MudItem>
@@ -232,11 +235,9 @@
                         <MudChipSet ReadOnly="true">
                             @foreach (var vote in Bind(Review, x => x.Votes))
                             {
-                                var member = vote.MemberAtFault;
+                                var atFault = VoteAtFaultToString(vote);
                                 <MudChip Label="true" Size="ChipSize" Color="Color.Error">
-                                    @Bind(vote, x => x.VoteCategoryText)@(
-                                        member != null ? $": {member.FirstName} {member.LastName}" : string.Empty
-                                    )
+                                    @vote.VoteCategoryText@(string.IsNullOrEmpty(atFault) == false ? ": " : "")@VoteAtFaultToString(vote)
                                 </MudChip>
                             }
                         </MudChipSet>
@@ -290,10 +291,10 @@
 
     private IEnumerable<EventCarInfoModel> InvolvedCars { get; set; } = Array.Empty<EventCarInfoModel>();
 
-    protected override async Task OnParametersSetAsync()
+    protected override void OnParametersSet()
     {
-        _ = Review ?? throw new InvalidOperationException($"Parameter {nameof(Review)} must have a value");
-        BlazorParameterNullException.ThrowIfNull(this, EventMembers, nameof(EventMembers));
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, Review);
         BlazorParameterNullException.ThrowIfNull(this, VoteCategories);
         var addClassAttribute = (AdditionalAttributes?.TryGetValue("class", out var @class) == true) ? @class : string.Empty;
         AddCssClass = addClassAttribute.ToString()!;
@@ -336,7 +337,7 @@
         var parameters = new DialogParameters<EditReviewResultModal>()
         {
             {x => x.Model, Review.CopyModel()},
-            {x => x.InvolvedMembers, Review.InvolvedMembers},
+            {x => x.InvolvedCars, InvolvedCars},
             {x => x.VoteCategories, VoteCategories},
             {x => x.IsTeamEvent, IsTeamEvent},
             {x => x.OnSubmit, async (review, cancellation) => await review.SaveChangesAsync(cancellation)},
@@ -353,9 +354,9 @@
         var parameters = new DialogParameters<EditCommentModal>()
         {
             {x => x.Model, new ReviewCommentModel() { Votes = new List<VoteModel>() }},
-            {x => x.InvolvedMembers, Review.InvolvedMembers},
+            {x => x.InvolvedCars, InvolvedCars},
             {x => x.VoteCategories, VoteCategories},
-            { x => x.IsTeamEvent, IsTeamEvent },
+            {x => x.IsTeamEvent, IsTeamEvent },
             {x => x.OnSubmit, async (comment, cancellation) => await Review.AddComment(comment.GetModel(), cancellation)},
         };
         await DialogService.Show<EditCommentModal>("Add Comment", parameters).Result;
@@ -424,5 +425,38 @@
             return EventCars.Cars.Where(car => Review.InvolvedTeams.Any(team => team.TeamId == car.Team?.TeamId));
         }
         return EventCars.Cars.Where(car => Review.InvolvedMembers.Any(member => car.Members.Any(carMember => carMember.MemberId == member.MemberId)));
+    }
+
+    private string CarToString(EventCarInfoModel car)
+    {
+        if (IsTeamEvent)
+        {
+            return $"#{car.Number} {car.Team?.Name}";
+        }
+        var member = car.Members.FirstOrDefault() ?? new();
+        return $"#{car.Number} {member.FirstName} {member.LastName}";
+    }
+
+    private EventCarInfoModel? GetCarAtFault(VoteViewModel vote)
+    {
+        if (IsTeamEvent)
+        {
+            return InvolvedCars.FirstOrDefault(car => car.Team?.TeamId == vote.TeamAtFaultId);
+        }
+        return InvolvedCars.FirstOrDefault(car => car.Members.Any(member => member.MemberId == vote.MemberAtFaultId));
+    }
+
+    private string VoteAtFaultToString(VoteViewModel vote)
+    {
+        var carAtFault = GetCarAtFault(vote);
+        if (carAtFault is null)
+        {
+            return string.Empty;
+        }
+        if (IsTeamEvent)
+        {
+            return $"#{carAtFault.Number} {vote.TeamAtFault?.Name}";
+        }
+        return $"#{carAtFault.Number} {vote.MemberAtFault?.FirstName} {vote.MemberAtFault?.LastName}";
     }
 }

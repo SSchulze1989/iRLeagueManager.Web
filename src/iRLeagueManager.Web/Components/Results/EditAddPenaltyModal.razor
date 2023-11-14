@@ -23,19 +23,19 @@
                                  SearchFunc="SearchResultRow"
                                  Label="Driver"
                                  Placeholder="Search driver by name..."
-                                 ToStringFunc="@(x => x == null ? null : $"{x.FinalPosition}. {x.Firstname} {x.Lastname}")"
+                                 ToStringFunc="RowToString"
                                  Variant="Variant.Outlined">
                     <ItemSelectedTemplate Context="row">
-                        @(row?.FinalPosition). @row?.Firstname @row?.Lastname
+                        @(row?.FinalPosition). @RowToString(row)
                     </ItemSelectedTemplate>
                     <ItemTemplate Context="row">
-                        @(row?.FinalPosition). @row?.Firstname @row?.Lastname
+                            @(row?.FinalPosition). @RowToString(row)
                     </ItemTemplate>
                 </MudAutocomplete>
                 }
                 else
                 {
-                    <label class="form-select disabled">@Vm.Firstname @Vm.Lastname</label>
+                    @AtFaultToString()
                 }
                 <MudTextField Label="Reason" @bind-Value="Vm.Reason" Variant="Variant.Outlined" Lines="2"/>
                 <MudSelect Label="Penalty Type" @bind-Value="Vm.Type" Variant="Variant.Outlined">
@@ -133,6 +133,28 @@
             .ToArray();
         return await Task.FromResult(SelectedSession.ResultRows
             .Where(x => MatchSearchTerms(x, terms)));
+    }
+
+    private string RowToString(ResultRowModel? row)
+    {
+        if(row is null)
+        {
+            return string.Empty;
+        }
+        if (IsTeamResult)
+        {
+            return row.TeamName;
+        }
+        return $"{row.Firstname} {row.Lastname}";
+    }
+
+    private string AtFaultToString()
+    {
+        if (IsTeamResult)
+        {
+            return Vm.Team?.Name ?? string.Empty;
+        }
+        return $"{Vm.Member?.FirstName} {Vm.Member?.LastName}";
     }
 
     private bool MatchSearchTerms(ResultRowModel row, params string[] terms)

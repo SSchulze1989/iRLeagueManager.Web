@@ -27,11 +27,11 @@
         @Bind(Comment, x=> x.Text)
     </MudText>
     <MudChipSet ReadOnly="true">
-        @foreach (var vote in @Bind(Comment, x => x.Votes))
+        @foreach (var vote in Bind(Comment, x => x.Votes))
         {
-            var member = @Bind(vote, x => x.MemberAtFault);
-            <MudChip Label="true" Color="Color.Warning" Size="ChipSize">
-                @Bind(vote, x => x.VoteCategoryText)@(member != null ? $": {member.FirstName} {member.LastName}" : string.Empty)
+            var atFault = VoteAtFaultToString(vote);
+            <MudChip Label="true" Size="ChipSize" Color="Color.Warning">
+                @vote.VoteCategoryText@(string.IsNullOrEmpty(atFault) == false ? ": " : "")@VoteAtFaultToString(vote)
             </MudChip>
         }
     </MudChipSet>
@@ -39,7 +39,7 @@
 
 @code {
     [CascadingParameter]
-    public IEnumerable<MemberInfoModel> InvolvedMembers { get; set; } = Array.Empty<MemberInfoModel>();
+    public IEnumerable<EventCarInfoModel> InvolvedCars { get; set; } = Array.Empty<EventCarInfoModel>();
     [CascadingParameter]
     public IEnumerable<UserModel> LeagueUsers { get; set; } = Array.Empty<UserModel>();
     [CascadingParameter]
@@ -100,13 +100,13 @@
         var parameters = new DialogParameters<EditCommentModal>()
         {
             {x => x.Model, Comment.CopyModel()},
-            {x => x.InvolvedMembers, InvolvedMembers},
+            {x => x.InvolvedCars, InvolvedCars},
             {x => x.VoteCategories, VoteCategories},
-            { x => x.IsTeamEvent, IsTeamEvent },
+            {x => x.IsTeamEvent, IsTeamEvent },
             {x => x.OnSubmit, async (comment, cancellation) => await comment.SaveChangesAsync(cancellation)},
         };
-        var result = await ModalService.Show<EditCommentModal>("Edit Comment", parameters).Result;
-        if (result.Confirmed && result.Data is ReviewCommentModel comment)
+        var result = await DialogService.Show<EditCommentModal>("Edit Comment", parameters).Result;
+        if (result.Canceled == false && result.Data is ReviewCommentModel comment)
         {
             Comment.SetModel(comment);
         }
@@ -140,5 +140,28 @@
         }
 
         return user.Firstname.Substring(0, 1) + user.Lastname.Substring(0, 1);
+    }
+
+    private EventCarInfoModel? GetCarAtFault(VoteViewModel vote)
+    {
+        if (IsTeamEvent)
+        {
+            return InvolvedCars.FirstOrDefault(car => car.Team?.TeamId == vote.TeamAtFaultId);
+        }
+        return InvolvedCars.FirstOrDefault(car => car.Members.Any(member => member.MemberId == vote.MemberAtFaultId));
+    }
+
+    private string VoteAtFaultToString(VoteViewModel vote)
+    {
+        var carAtFault = GetCarAtFault(vote);
+        if (carAtFault is null)
+        {
+            return string.Empty;
+        }
+        if (IsTeamEvent)
+        {
+            return $"#{carAtFault.Number} {vote.TeamAtFault?.Name}";
+        }
+        return $"#{carAtFault.Number} {vote.MemberAtFault?.FirstName} {vote.MemberAtFault?.LastName}";
     }
 }

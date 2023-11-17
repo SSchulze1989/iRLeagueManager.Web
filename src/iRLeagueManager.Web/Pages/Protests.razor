@@ -61,30 +61,7 @@
                     <div class="card-body">
                         <div class="mb-1">
                             <label class="form-label">Protester</label>
-                            <BlazoredTypeahead
-                                @bind-Value=Protest.AuthorMemberId
-                                ConvertMethod=@(member => member.MemberId)
-                                class="form-control p-0"
-                                EnableDropDown=true  
-                                SearchMethod=SearchMembers 
-                                MinimumLength=1
-                                MaximumSuggestions=100
-                                DeleteItemsOnBackspace=false
-                                placeholder="Search driver by name...">
-
-                                <SelectedTemplate Context=memberId>
-                                    @{
-                                        var member = EventMembers.FirstOrDefault(x => x.MemberId == memberId);
-                                    }
-                                    @member?.FirstName @member?.LastName
-                                </SelectedTemplate>
-                                <ResultTemplate Context=member>
-                                    @member.FirstName @member.LastName
-                                </ResultTemplate>
-                                <NotFoundTemplate Context=name>
-                                    <span>Driver <b>@name</b> Not found!</span>
-                                </NotFoundTemplate>
-                            </BlazoredTypeahead>
+                            @* TODO: Insert Protester Selection *@
                             <div class="form-text">Who is filing this protest?</div>
                             <ValidationMessage For="@(() => Protest.AuthorMemberId)" />
                         </div>
@@ -127,26 +104,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Involved Drivers</label>
-                            <BlazoredTypeahead
-                                @bind-Values=Protest.InvolvedMembers
-                                class="form-control p-0"
-                                EnableDropDown=true  
-                                SearchMethod=SearchMembers 
-                                MinimumLength=1
-                                MaximumSuggestions=100
-                                DeleteItemsOnBackspace=false
-                                placeholder="Search driver by name...">
-
-                                <SelectedTemplate Context=member>
-                                    @member?.FirstName @member?.LastName
-                                </SelectedTemplate>
-                                <ResultTemplate Context=member>
-                                    @member.FirstName @member.LastName
-                                </ResultTemplate>
-                                <NotFoundTemplate Context=name>
-                                    <span>Driver <b>@name</b> Not found!</span>
-                                </NotFoundTemplate>
-                            </BlazoredTypeahead>
+                            @* TODO: Insert involved selection *@
                             <div class="form-text">Who was involved in this incident?</div>
                             <ValidationMessage For="@(() => Protest.InvolvedMembers)" />
                         </div>

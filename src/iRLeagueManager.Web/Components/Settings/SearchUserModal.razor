@@ -3,19 +3,7 @@
 @using iRLeagueManager.Web.ViewModels
 @inject LeagueApiService apiService
 
-<BlazoredTypeahead 
-    @bind-Value=User
-    SearchMethod=SearchUsers
-    MinimumLength=3
-    Debounce=500
-    placeholder="Type Name ...">
-    <SelectedTemplate Context=user>
-        <DisplayUser User=@user ShowUserName=false />
-    </SelectedTemplate>
-    <ResultTemplate Context=user>
-        <DisplayUser User=@user />
-    </ResultTemplate>
-</BlazoredTypeahead>
+@* TODO: Insert User search *@
 <CancelSubmitButtons 
     SubmitText=Ok 
     CancelText=Cancel 

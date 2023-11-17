@@ -33,72 +33,12 @@
             {
                 case FilterType.Member:
                     <InputGroup Label="Members">
-                        <BlazoredTypeahead @bind-Values=filter.FilterValues
-                                           class="form-control p-0"
-                                           style="border-top-right-radius:0; border-top-left-radius:0;"
-                               EnableDropDown=true
-                               SearchMethod=SearchMembers
-                               ConvertMethod="@(item => item.MemberId.ToString())"
-                               MinimumLength=1
-                               MaximumSuggestions=100
-                               DeleteItemsOnBackspace=false
-                                           placeholder="Search driver by name...">
-
-                            <SelectedTemplate Context=memberId>
-                                @{
-                                    var member = LeagueMembers.FirstOrDefault(x => x.MemberId.ToString() == memberId);
-                                }
-                                @if (member is null)
-                                {
-                                    @memberId
-                                }
-                                else
-                                {
-                                    @member.FirstName @member.LastName
-                                }
-                            </SelectedTemplate>
-                            <ResultTemplate Context=member>
-                                @member.FirstName @member.LastName (@member.IRacingId)
-                            </ResultTemplate>
-                            <NotFoundTemplate Context=name>
-                                <span>Driver <b>@name</b> Not found!</span>
-                            </NotFoundTemplate>
-                        </BlazoredTypeahead>
+                        @* TODO: Insert Member selection *@
                     </InputGroup>
                     break;
                 case FilterType.Team:
                     <InputGroup Label="Teams">
-                        <BlazoredTypeahead @bind-Values=filter.FilterValues
-                                           class="form-control p-0"
-                                           style="border-top-right-radius:0; border-top-left-radius:0;"
-                               EnableDropDown=true
-                               SearchMethod=SearchTeams
-                               ConvertMethod="@(item => item.TeamId.ToString())"
-                               MinimumLength=1
-                               MaximumSuggestions=100
-                               DeleteItemsOnBackspace=false
-                                           placeholder="Search driver by name...">
-
-                            <SelectedTemplate Context=teamId>
-                                @{
-                                    var team = Teams.FirstOrDefault(x => x.TeamId.ToString() == teamId);
-                                }
-                                @if (team is null)
-                                {
-                                    @teamId
-                                }
-                                else
-                                {
-                                    @team.Name
-                                }
-                            </SelectedTemplate>
-                            <ResultTemplate Context=team>
-                                @team.Name@(team.IRacingTeamId != null ? $" ({@team.IRacingTeamId})" : "")
-                            </ResultTemplate>
-                            <NotFoundTemplate Context=name>
-                                <span>Team <b>@name</b> Not found!</span>
-                            </NotFoundTemplate>
-                        </BlazoredTypeahead>
+                        @* TODO: Insert Team selection *@
                     </InputGroup>
                     break;
                 case FilterType.ColumnProperty:
@@ -124,21 +64,7 @@
                         }
                         else if (filter.Comparator == ComparatorType.InList)
                         {
-                            <BlazoredTypeahead @bind-Values=filter.FilterValues
-                               SearchMethod=@(str => Task.FromResult((IEnumerable<string>)Array.Empty<string>()))
-                               AddItemOnEmptyResultMethod=@(str => Task.FromResult(str))
-                               DeleteItemsOnBackspace=false
-                                               class="form-control">
-                                <SelectedTemplate Context=value>
-                                    @value
-                                </SelectedTemplate>
-                                <ResultTemplate Context=value>
-                                    @value
-                                </ResultTemplate>
-                                <NotFoundTemplate Context=value>
-                                    @value
-                                </NotFoundTemplate>
-                            </BlazoredTypeahead>
+                            @* TODO: Insert filter value selection *@
                         }
                         else if (propertyType == typeof(string))
                         {

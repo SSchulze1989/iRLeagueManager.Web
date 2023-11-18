@@ -54,8 +54,8 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
         }
         switch (e.PropertyName)
         {
-            case nameof(HasChanged):
-                HasChanged |= childState.HasChanged;
+            case nameof(HasChanges):
+                HasChanges |= childState.HasChanges;
                 break;
         }
     }

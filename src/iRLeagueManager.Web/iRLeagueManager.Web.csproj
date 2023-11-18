@@ -114,6 +114,7 @@
     <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_utilities.scss" />
     <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_variables.scss" />
     <Content Remove="compilerconfig.json" />
+    <Content Remove="Components\Settings\SettingsSwitch_old.razor" />
   </ItemGroup>
 
   <ItemGroup>
@@ -150,6 +151,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.3" />
     <PackageReference Include="MudBlazor" Version="6.11.0" />
     <PackageReference Include="MvvmBlazor" Version="6.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Components\Settings\SettingsSwitch_old.razor" />
   </ItemGroup>
 
 </Project>

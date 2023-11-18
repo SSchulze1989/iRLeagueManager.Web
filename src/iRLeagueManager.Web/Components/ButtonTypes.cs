@@ -5,4 +5,5 @@ public enum ButtonTypes
     Ok,
     OkCancel,
     YesNo,
+    YesNoCancel,
 }

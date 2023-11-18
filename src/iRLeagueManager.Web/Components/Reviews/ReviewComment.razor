@@ -131,7 +131,11 @@
         if (user is null)
         {
             var parts = fallback.Split(' ');
-            return string.Join("", parts.Take(2));
+            if (parts.Length == 1)
+            {
+                return parts[0].Substring(0, 2);
+            }
+            return string.Join("", parts.Take(3).Select(x => x.Substring(0, 1)));
         }
 
         if (string.IsNullOrEmpty(user.Firstname) && string.IsNullOrEmpty(user.Lastname))

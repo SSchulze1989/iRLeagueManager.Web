@@ -1,0 +1,38 @@
+﻿@inherits MudComponentBase
+
+<MudListItem
+    Class="me-4"
+    Disabled="Disabled"
+    Text="@Text"
+    Expanded="Expanded"
+    ExpandedChanged="ExpandedChanged"
+    InitiallyExpanded="InitiallyExpanded"
+    ChildContent="Header"
+    Dense="true">
+    <NestedList>
+        @ChildContent
+    </NestedList>
+</MudListItem>
+
+@code {
+    [Parameter] public string Text { get; set; } = string.Empty;
+    [Parameter] public bool Disabled { get; set; } = false;
+    [Parameter] public bool Expanded { get; set; } = false;
+    [Parameter] public EventCallback<bool> ExpandedChanged { get; set; }
+    [Parameter] public bool InitiallyExpanded { get; set; } = false;
+    [Parameter] public RenderFragment Header { get; set; } = default!;
+    [Parameter] public RenderFragment ChildContent { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (ExpandedChanged.HasDelegate)
+        {
+            InitiallyExpanded = Expanded;
+        }
+        else
+        {
+            Expanded = InitiallyExpanded;
+        }
+    }
+}

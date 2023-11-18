@@ -26,7 +26,7 @@
             </div>
 
             <div class="d-flex justify-content-end mb-1 gap-3">
-                @if (ChampSeason.HasChanged)
+                @if (ChampSeason.HasChanges)
                 {
                     <button class="btn btn-primary" @onclick=Submit>Save</button>
                 }
@@ -182,7 +182,7 @@ else
 }
 
 <div class="d-flex justify-content-end gap-3">
-    @if (ChampSeason.HasChanged)
+    @if (ChampSeason.HasChanges)
     {
         <button class="btn btn-primary" @onclick=Submit>Save</button>
     }
@@ -233,7 +233,7 @@ else
     {
         // Do nothing when viewmodel has no changes or navigation on same page
         var allowNavigation =
-            ChampSeason.HasChanged == false ||
+            ChampSeason.HasChanges == false ||
             context.TargetLocation.Contains($"/{LeagueName}/Settings/Results/Championships/{ChampionshipId}");
         if (allowNavigation)
         {
@@ -255,7 +255,7 @@ else
 
     private async Task Submit()
     {
-        if (ChampSeason.HasChanged)
+        if (ChampSeason.HasChanges)
         {
             await ChampSeason.SaveChangesAsync();
         }

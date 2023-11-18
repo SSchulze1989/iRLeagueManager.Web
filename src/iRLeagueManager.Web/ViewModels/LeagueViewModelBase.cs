@@ -2,6 +2,7 @@
 using iRLeagueApiCore.Client.Endpoints.Seasons;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Shared;
+using Microsoft.AspNetCore.Components;
 using MvvmBlazor.ViewModel;
 using System.Runtime.CompilerServices;
 
@@ -38,13 +39,16 @@ public abstract class LeagueViewModelBase<T> : ViewModelBase, IModelState
         protected set => Set(ref saving, value);
     }
 
-    private bool hasChanged = false;
+    private bool hasChanges = false;
 
-    public bool HasChanged
+    public bool HasChanges
     {
-        get => hasChanged;
-        protected set => Set(ref hasChanged, value);
+        get => hasChanges;
+        protected set => Set(ref hasChanges, value);
     }
+
+    public EventHandler? HasChanged { get; set; }
+    protected bool suppressHasChanged = false;
 
     /// <summary>
     /// Set a value on a model property and call OnPropertyChanged() if value changed
@@ -60,11 +64,20 @@ public abstract class LeagueViewModelBase<T> : ViewModelBase, IModelState
         if (!EqualityComparer<TProperty>.Default.Equals(get, value))
         {
             set.Invoke(value);
-            HasChanged = true;
+            HasChanges = true;
+            OnHasChanged();
             OnPropertyChanged(propertyName);
             return true;
         }
         return false;
+    }
+
+    protected virtual void OnHasChanged()
+    {
+        if (Loading == false)
+        {
+            HasChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     protected static StatusResult LeagueNullResult() =>
@@ -94,7 +107,7 @@ public abstract class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelB
     public virtual void SetModel(TModel model)
     {
         this.model = model;
-        HasChanged = false;
+        HasChanges = false;
     }
 
     public virtual TModel CopyModel()
@@ -104,6 +117,6 @@ public abstract class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelB
 
     public virtual void ResetChangedState()
     {
-        HasChanged = false;
+        HasChanges = false;
     }
 }

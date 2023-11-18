@@ -20,7 +20,12 @@
                 <MudButton Color="Color.Primary" OnClick=OkClick>@OkButtonText</MudButton>
                 break;
             case ButtonTypes.YesNo:
-                <MudButton Color="Color.Secondary" OnClick=CancelClick>No</MudButton>
+                <MudButton Color="Color.Secondary" OnClick=NoClick>No</MudButton>
+                <MudButton Color="Color.Primary" OnClick=OkClick>Yes</MudButton>
+                break;
+            case ButtonTypes.YesNoCancel:
+                <MudButton OnClick="CancelClick">Cancel</MudButton>
+                <MudButton Color="Color.Secondary" OnClick=NoClick>No</MudButton>
                 <MudButton Color="Color.Primary" OnClick=OkClick>Yes</MudButton>
                 break;
         }
@@ -48,7 +53,17 @@
 
     private void OkClick()
     {
-        ModalInstance.Close();
+        ModalInstance.Close(true);
+    }
+
+    private void NoClick()
+    {
+        if (ButtonTypes == ButtonTypes.YesNoCancel)
+        {
+            ModalInstance.Close(false);
+            return;
+        }
+        ModalInstance.Cancel();
     }
 
     private void CancelClick()

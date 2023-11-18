@@ -8,8 +8,8 @@
     <MudDialog>
         <DialogContent>
             <MudStack Spacing="2">
-                <MudTextField Label="Name" @bind-Value="Vm.Name" For="@(() => Vm.Name)" />
-                <MudCheckBox Label="Finished" @bind-Checked="Vm.Finished" />
+                <MudTextField Label="Name" @bind-Value="Vm.Name" For="@(() => Vm.Name)" Variant="Variant.Outlined"/>
+                <MudSwitch Label="Finished" @bind-Checked="Vm.Finished" Color="Color.Primary" Class="ms-4"/>
                 <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
             </MudStack>
         </DialogContent>

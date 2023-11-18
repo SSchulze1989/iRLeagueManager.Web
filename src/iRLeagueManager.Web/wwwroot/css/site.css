@@ -458,6 +458,18 @@ a, .btn-link {
         filter: opacity(90%);
     }
 
+.hover-box {
+
+}
+
+.hover-box-show {
+    visibility: hidden;
+}
+
+.hover-box:hover .hover-box-show {
+    visibility: visible;
+}
+
 @media (min-width: 1600px) {
     .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
         max-width: 1520px;

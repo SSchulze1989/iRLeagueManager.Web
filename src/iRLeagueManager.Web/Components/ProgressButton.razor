@@ -1,7 +1,7 @@
 ﻿<MudButton Color="Color" ButtonType="ButtonType" Class="@Class" Style="@Style" HtmlTag="@HtmlTag" OnClick="OnClick" Disabled="Disabled">
     @if (Loading)
     {
-        <MudProgressCircular Color="ProgressColor" Value="Value" Indeterminate="Indeterminate" Size="Size.Small" Class="me-2" />
+        <MudProgressCircular Color="ProgressColor" Value="Value" Indeterminate="Indeterminate" Size="Size.Small" Class="me-2" Style="scale: 0.75"/>
     }
     @ChildContent
 </MudButton>

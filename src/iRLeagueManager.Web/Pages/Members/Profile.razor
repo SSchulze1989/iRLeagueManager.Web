@@ -24,7 +24,7 @@
             </AuthorizeView>
         </MudCardContent>
         <MudCardActions>
-            <MudButton OnClick=SaveChanges Color="Color.Primary" Disabled="@(User.HasChanged == false)">
+            <MudButton OnClick=SaveChanges Color="Color.Primary" Disabled="@(User.HasChanges == false)">
                 <MudStack Row="true">
                     @if (User.Loading)
                     {
@@ -33,7 +33,7 @@
                     Save
                 </MudStack>
             </MudButton>
-            <MudButton OnClick="@(() => User.LoadUser(User.UserId))" Color="Color.Secondary" Disabled="@(User.HasChanged == false)">
+            <MudButton OnClick="@(() => User.LoadUser(User.UserId))" Color="Color.Secondary" Disabled="@(User.HasChanges == false)">
                 Reset
             </MudButton>
         </MudCardActions>

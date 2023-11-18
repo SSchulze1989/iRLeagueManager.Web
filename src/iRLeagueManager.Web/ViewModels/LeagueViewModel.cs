@@ -26,6 +26,9 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
     private ObservableCollection<SeasonViewModel> seasons;
     public ObservableCollection<SeasonViewModel> Seasons { get => seasons; set => Set(ref seasons, value); }
 
+    private SeasonViewModel? currentSeason;
+    public new SeasonViewModel? CurrentSeason { get => currentSeason; private set => Set(ref currentSeason, value); }
+
     public bool IsInitialized => model.IsInitialized;
     public bool EnableProtests { get => model.EnableProtests; set => SetP(model.EnableProtests, value => model.EnableProtests = value, value); }
     public TimeSpan ProtestCoolDownPeriod { get => model.ProtestCoolDownPeriod; set => SetP(model.ProtestCoolDownPeriod, value => model.ProtestCoolDownPeriod = value, value); }
@@ -53,7 +56,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
 
     public async Task<StatusResult> LoadCurrent(CancellationToken cancellationToken = default)
     {
-        if (ApiService.CurrentLeague is null)
+        if (CurrentLeague is null)
         {
             return LeagueNullResult();
         }
@@ -62,7 +65,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
         {
             Loading = true;
             var request = ApiService.Client.Leagues()
-                .WithName(ApiService.CurrentLeague.Name)
+                .WithName(CurrentLeague.Name)
                 .Get(cancellationToken);
             var result = await request;
             if (result.Success && result.Content is LeagueModel leagueModel)
@@ -79,7 +82,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
 
     public async Task<StatusResult> LoadSeasons(CancellationToken cancellationToken = default)
     {
-        if (ApiService.CurrentLeague is null)
+        if (CurrentLeague is null)
         {
             return LeagueNullResult();
         }
@@ -87,13 +90,18 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
         try
         {
             Loading = true;
-            var request = ApiService.CurrentLeague.Seasons()
+            var request = CurrentLeague.Seasons()
                 .Get(cancellationToken);
             var result = await request;
             if (result.Success && result.Content is IEnumerable<SeasonModel> seasonModels)
             {
                 Seasons = new(seasonModels.Select(x => new SeasonViewModel(LoggerFactory, ApiService, x)));
                 ApiService.Shared.SeasonList = new(Seasons.Select(x => x.GetModel()));
+            }
+            var currentSeason = await CurrentLeague.Seasons().Current().Get();
+            if (currentSeason.Success && currentSeason.Content is SeasonModel season)
+            {
+                CurrentSeason = Seasons.FirstOrDefault(x => x.SeasonId == season.SeasonId);
             }
             return result.ToStatusResult();
         }
@@ -105,7 +113,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
 
     public async Task<StatusResult> AddSeason(PostSeasonModel season, CancellationToken cancellationToken = default)
     {
-        if (ApiService.CurrentLeague is null)
+        if (CurrentLeague is null)
         {
             return LeagueNullResult();
         }
@@ -113,19 +121,19 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
         try
         {
             Loading = true;
-            var request = ApiService.CurrentLeague.Seasons()
+            var request = CurrentLeague.Seasons()
                 .Post(season, cancellationToken);
             var result = await request;
             if (result.Success == false || result.Content is not SeasonModel newSeason)
             {
                 return result.ToStatusResult();
             }
-            var scheduleRequest = ApiService.CurrentLeague.Seasons()
+            var scheduleRequest = CurrentLeague.Seasons()
                 .WithId(newSeason.SeasonId)
                 .Schedules()
                 .Post(new() { Name = "Schedule" }, cancellationToken);
             await scheduleRequest;
-            var activateSeasons = await ActivateChampSeasons(CurrentSeason?.Id, result.Content.SeasonId, cancellationToken);
+            var activateSeasons = await ActivateChampSeasons(base.CurrentSeason?.Id, result.Content.SeasonId, cancellationToken);
             if (activateSeasons.IsSuccess == false) return activateSeasons;
             return await LoadSeasons(cancellationToken);
         }
@@ -138,7 +146,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
     public async Task<StatusResult> ActivateChampSeasons(long? previousSeasonId, long? seasonId = null, CancellationToken cancellationToken = default)
     {
         if (CurrentLeague is null) return LeagueNullResult();
-        seasonId ??= CurrentSeason?.Id;
+        seasonId ??= base.CurrentSeason?.Id;
         if (seasonId == null) return SeasonNullResult();
         // if previous season is same as current or previous season is null => success (none action taken)
         if (previousSeasonId == null || previousSeasonId == seasonId) return StatusResult.SuccessResult();
@@ -183,7 +191,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
 
     public async Task<StatusResult> DeleteSeason(SeasonModel season, CancellationToken cancellationToken = default)
     {
-        if (ApiService.CurrentLeague is null)
+        if (CurrentLeague is null)
         {
             return LeagueNullResult();
         }
@@ -191,7 +199,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
         try
         {
             Loading = true;
-            var request = ApiService.CurrentLeague.Seasons()
+            var request = CurrentLeague.Seasons()
                 .WithId(season.SeasonId)
                 .Delete(cancellationToken);
             var result = await request;

@@ -3,28 +3,41 @@
 @using iRLeagueManager.Web.ViewModels
 @inject LeagueApiService apiService
 
-@* TODO: Insert User search *@
-<CancelSubmitButtons 
-    SubmitText=Ok 
-    CancelText=Cancel 
-    CanSubmit=@(User is not null) 
-    OnSubmit=Submit
-    OnCancel=Cancel
-    ModelState=LeagueUsers/>
+<MudDialog>
+    <DialogContent>
+        <MudAutocomplete @bind-Value="User"
+                         SearchFunc="SearchUsers"
+                         DebounceInterval="500"
+                         MinCharacters="2"
+                         ToStringFunc="UserToString"
+                         Variant="Variant.Outlined">
+            <ItemTemplate Context="user">
+                <DisplayUser User="user"/>
+            </ItemTemplate>
+            <ItemSelectedTemplate Context="user">
+                <DisplayUser User="user" ShowUserName="false"/>
+            </ItemSelectedTemplate>
+        </MudAutocomplete>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit" Disabled="@(User is null)">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
-    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; } = default!;
-    [Parameter] public LeagueUsersViewModel LeagueUsers { get; set; } = default!;
+        [CascadingParameter] public MudDialogInstance DialogInstance { get; set; } = default!;
+        [Parameter] public LeagueUsersViewModel LeagueUsers { get; set; } = default!;
 
     private UserModel? User { get; set; }
 
     protected override void OnParametersSet()
     {
-        _ = ModalInstance ?? throw new InvalidOperationException($"Usage of {GetType()} requires a CascadingParameter of type {typeof(BlazoredModalInstance)}");
-        _ = LeagueUsers ?? throw new InvalidOperationException($"Usage of {GetType()} requires a Parameter of type {typeof(LeagueUsersViewModel)}");
+        BlazorParameterNullException.ThrowIfNull(this, DialogInstance);
+        BlazorParameterNullException.ThrowIfNull(this, LeagueUsers);
     }
 
-    private async Task<IEnumerable<UserModel>> SearchUsers(string name)
+    private async Task<IEnumerable<UserModel?>> SearchUsers(string name)
     {
         if (apiService.CurrentLeague == null)
         {
@@ -54,12 +67,25 @@
         var result = await LeagueUsers.AddUser(User);
         if (result.IsSuccess)
         {
-            await ModalInstance.CloseAsync();
+            DialogInstance.Close();
         }
     }
 
-    private async Task Cancel()
+    private void Cancel()
     {
-        await ModalInstance.CancelAsync();
+        DialogInstance.Cancel();
+    }
+
+    private string UserToString(UserModel? user)
+    {
+        if (user is null)
+        {
+            return string.Empty;
+        }
+        if (string.IsNullOrEmpty(user.Firstname) && string.IsNullOrEmpty(user.Lastname))
+        {
+            return user.UserName;
+        }
+        return $"{user.Firstname} {user.Lastname}";
     }
 }

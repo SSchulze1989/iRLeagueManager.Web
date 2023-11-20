@@ -14,7 +14,30 @@ public sealed class ReviewSettingsViewModel : LeagueViewModelBase<ReviewSettings
     }
 
     private ObservableCollection<VoteCategoryViewModel> voteCategories;
-    public ObservableCollection<VoteCategoryViewModel> VoteCategories { get => voteCategories; set => Set(ref voteCategories, value); }
+    public ObservableCollection<VoteCategoryViewModel> VoteCategories 
+    { 
+        get => voteCategories;
+        set
+        {
+            if (voteCategories != value)
+            {
+                foreach (var category in voteCategories)
+                {
+                    category.HasChanged -= OnVoteCategoryChanged;
+                }
+                Set(ref voteCategories, value);
+                foreach (var category in voteCategories)
+                {
+                    category.HasChanged += OnVoteCategoryChanged;
+                }
+            }
+        }
+    }
+
+    private void OnVoteCategoryChanged(object? sender, EventArgs e)
+    {
+        OnHasChanged();
+    }
 
     public async Task<StatusResult> LoadAsync(CancellationToken cancellationToken = default)
     {
@@ -90,5 +113,17 @@ public sealed class ReviewSettingsViewModel : LeagueViewModelBase<ReviewSettings
         {
             Loading = false;
         }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            foreach(var category in VoteCategories)
+            {
+                category.HasChanged -= OnVoteCategoryChanged;
+            }
+        }
+        base.Dispose(disposing);
     }
 }

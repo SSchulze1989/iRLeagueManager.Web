@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public abstract class LeagueViewModelBase<T> : ViewModelBase, IModelState
+public abstract class LeagueViewModelBase<T> : ViewModelBase, IModelState, IDisposable
     where T : LeagueViewModelBase<T>
 {
     public LeagueViewModelBase(ILoggerFactory loggerFactory, LeagueApiService apiService)
@@ -49,6 +49,7 @@ public abstract class LeagueViewModelBase<T> : ViewModelBase, IModelState
 
     public EventHandler? HasChanged { get; set; }
     protected bool suppressHasChanged = false;
+    private bool disposedValue;
 
     /// <summary>
     /// Set a value on a model property and call OnPropertyChanged() if value changed
@@ -85,6 +86,21 @@ public abstract class LeagueViewModelBase<T> : ViewModelBase, IModelState
 
     protected static StatusResult SeasonNullResult() =>
         StatusResult.FailedResult("Season Null", $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentSeason)} was null", Array.Empty<object>());
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Ändern Sie diesen Code nicht. Fügen Sie Bereinigungscode in der Methode "Dispose(bool disposing)" ein.
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 }
 
 public abstract class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelBase<TViewModel>

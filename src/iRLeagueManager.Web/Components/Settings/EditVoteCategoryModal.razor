@@ -1,24 +1,26 @@
 ﻿@using iRLeagueApiCore.Common.Models.Reviews;
-@inherits EditModalBase<VoteCategoryViewModel, VoteCategoryModel>
+@inherits EditMudModalBase<VoteCategoryViewModel, VoteCategoryModel>
 
-<EditForm Model="Vm" OnValidSubmit=Submit>
-    <StatusResultValidator @ref=ResultValidator />
-    <div class="input-group-list p-1">
-        <InputGroup Label="Text">
-            <InputText class="form-control" @bind-Value=Vm.Text data-bs-toggle="tooltip" title="Text to be displayed as vote category"/>
-        </InputGroup>
-        <FormValidationMessage For=@(() => Vm.Text) />
-        <InputGroup Label="@GetPointLabel(Vm.DefaultPenalty)">
-            <InputNumber class="form-control" @bind-Value=Vm.DefaultPenalty data-bs-toggle="tooltip" title="Default penalty/bonus value in full points"/>
-        </InputGroup>
-        <FormValidationMessage For=@(() => Vm.DefaultPenalty) />
-        <InputGroup Label="Index">
-            <InputNumber class="form-control" @bind-Value=Vm.Index data-bs-toggle="tooltip" title="Index for ordering categories in dropdown"/>
-        </InputGroup>
-    </div>
-    <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
-    <CancelSubmitButtons ModelState=Vm SubmitText="Save" OnCancel=Cancel />
-</EditForm>
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="Vm" OnValidSubmit=Submit>
+            <StatusResultValidator @ref=ResultValidator />
+            <MudGrid Spacing="2">
+                <MudItem xs="8">
+                    <MudTextField @bind-Value="Vm.Text" Label="Name" For="() => Vm.Text" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudTextField @bind-Value="Vm.DefaultPenalty" Label="DefaultPenalty" For="() => Vm.DefaultPenalty" InputMode="InputMode.numeric" InputType="InputType.Number" Variant="Variant.Outlined" />
+                </MudItem>
+            </MudGrid>
+            <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+        <ProgressButton Color="Color.Primary" OnClick="Submit" Loading="Bind(Vm, x => x.Loading)" Indeterminate="true">Save</ProgressButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
     private string GetPointLabel(int defaultPenalty) => defaultPenalty switch

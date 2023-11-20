@@ -1,0 +1,50 @@
+﻿@inherits SettingBase
+
+<MudListItem Class="@Class"
+             Icon="@Icon"
+             IconSize="IconSize"
+             IconColor="IconColor"
+             OnClick="OnClick"
+             Disabled="Disabled">
+    <MudElement HtmlTag="div" Class="d-flex align-center gap-2">
+        <MudElement HtmlTag="div" Class="d-flex flex-column align-start justify-center flex-grow-1">
+            <MudText Color="Color" Style="width: 100%">
+                @if (ChildContent is null)
+                {
+                    @Text
+                }
+                else
+                {
+                    @ChildContent
+                }
+            </MudText>
+            @if (displayHelperText)
+            {
+                <p class="mud-input-helper-text">@HelperText</p>
+            }
+        </MudElement>
+        @if (displayDeleteButton)
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="Delete"/>
+        }
+    </MudElement>
+</MudListItem>
+
+@code {
+    [Parameter] public EventCallback Delete { get; set; }
+
+    private bool displayDeleteButton = false;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (Delete.HasDelegate)
+        {
+            displayDeleteButton = true;
+        }
+        if (IconColor == Color.Inherit)
+        {
+            IconColor = Color;
+        }
+    }
+}

@@ -1,6 +1,7 @@
 ﻿@using System.Linq.Expressions
 @using iRLeagueApiCore.Common.Enums;
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Results
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
 
@@ -8,7 +9,7 @@
     <div class="card my-2" id="results-session-@Bind(Result, x => x.SessionName)">
         <div class="card-header d-flex justify-content-between">
             <label>@Bind(Result, x => x.SessionName)</label>
-            <button class="btn p-0 m-0 text-danger" title="Show penalties" @onclick=ShowPenaltiesClick>
+            <button class="btn p-0 m-0 text-danger" title="Show penalties" @onclick=ShowPenaltiesBonusesClick>
                 <span class="bi bi-exclamation-diamond" />
             </button>
         </div>
@@ -122,8 +123,9 @@
                                     <span class="bi bi-three-dots-vertical"/>
                                 </div>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" @onclick=@(() => OnRowOptionsClick(Row))>Add Penalty</a></li>
-                                    <li><a class="dropdown-item" @onclick=@(() => ShowPenaltiesClick())>Show Penalties</a></li>
+                                    <li><a class="dropdown-item" @onclick=@(() => OnRowAddPenaltyClick(Row))>Add Penalty</a></li>
+                                    <li><a class="dropdown-item" @onclick=@(() => OnRowAddBonusClick(Row))>Add Bonus</a></li>
+                                    <li><a class="dropdown-item" @onclick=@(() => ShowPenaltiesBonusesClick())>Show Penalties/Bonuses</a></li>
                                 </ul>
                             </div>
                         </td>
@@ -175,7 +177,7 @@
         return result.EventResult?.StrengthOfField ?? 0;
     }
 
-    private async Task OnRowOptionsClick(ResultRowModel row)
+    private async Task OnRowAddPenaltyClick(ResultRowModel row)
     {
         var parameters = new ModalParameters<EditAddPenaltyModal>()
             .Add(x => x.Model, new())
@@ -188,7 +190,20 @@
         var result = await ModalService.Show<EditAddPenaltyModal>("Add Penalty", parameters).Result;
     }
 
-    private async Task ShowPenaltiesClick()
+    private async Task OnRowAddBonusClick(ResultRowModel row)
+    {
+        var parameters = new ModalParameters<EditAddBonusModal>()
+            .Add(x => x.Model, new())
+            .Add(x => x.AvailableSessions, Result.EventResult?.GetModel().SessionResults ?? Array.Empty<ResultModel>())
+            .Add(x => x.SelectedSession, Result.GetModel())
+            .Add(x => x.SelectedRow, row)
+            .Add(x => x.CanSelectSession, true)
+            .Add(x => x.OnSubmit, async (p, ct) => await p.SaveNew(ct))
+            .Add(x => x.IsTeamResult, isTeamResult);
+        var result = await ModalService.Show<EditAddBonusModal>("Add Bonus", parameters).Result;
+    }
+
+    private async Task ShowPenaltiesBonusesClick()
     {
         if (Result.EventResult is null)
         {
@@ -202,15 +217,20 @@
             }
             return penalties.Content.Where(x => Result.SessionNr == 999 || x.SessionNr == Result.SessionNr);
         }
+        async Task<IEnumerable<AddBonusModel>> GetBonuses()
+        {
+            return await Task.FromResult(Result.ResultRows.SelectMany(x => x.AddBonuses));
+        }
 
-        var parameters = new ModalParameters<ShowPenaltiesModal>()
+        var parameters = new ModalParameters<ShowPenaltiesBonusesModal>()
             .Add(x => x.GetPenalties, GetPenalties)
+            .Add(x => x.GetBonuses, GetBonuses)
             .Add(x => x.CanEdit, CanEdit)
             .Add(x => x.IsTeamResult, isTeamResult);
         var options = new ModalOptions()
         {
             DisableBackgroundCancel = false,
         };
-        var result = await ModalService.Show<ShowPenaltiesModal>("Penalties", parameters, options).Result;
+        var result = await ModalService.Show<ShowPenaltiesBonusesModal>("Penalties", parameters, options).Result;
     }
 }

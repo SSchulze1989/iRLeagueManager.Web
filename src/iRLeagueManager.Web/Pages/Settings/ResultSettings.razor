@@ -6,7 +6,7 @@
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
 @layout SettingsLayout
-@inject ResultSettingsViewModel vm
+@inject ResultSettingsViewModel Vm
 @inject LeagueApiService apiService
 @inject SharedStateService sharedState
 @inject ILogger<ResultSettings> logger
@@ -14,41 +14,44 @@
 
 <PageTitle>Settings - @LeagueName</PageTitle>
 
+<LoadingHeader>
+    <HeaderText>
+        <MudText Typo="Typo.h5">Result Settings</MudText>
+    </HeaderText>
+</LoadingHeader>
+
 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
     <Authorized>
-        <div class="input-group mt-2 mb-3">
-            <label class="input-group-text">Season</label>
-            <SeasonSelect SeasonChanged=OnSeasonSelectChanged />
-        </div>
-        <div class="card my-2 pb-0">
-            <div class="card-header">
-                Championships
-            </div>
-            <div class="list-group list-group-flush">
-                @foreach ((var championship, var index) in @Bind(vm, x => x.Championships).OrderByDescending(x => x.IsActive).Select((x, i) => (x, i)))
-                {
-                    var champSeason = vm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipId == championship.ChampionshipId);
-                    var disabled = champSeason == null;
-                    <div class="list-group-item @(disabled ? "" : "list-group-item-action") d-flex justify-content-between align-items-start" type="button" @onclick=@(async () => { if (champSeason is not null) await OnChampionshipClick(champSeason); })>
-                        <ChampionshipPreview Championship=championship ChampSeason=champSeason class="flex-fill" />
-                        <div>
-                            <label class="switch" @onclick:stopPropagation>
-                                <input type="checkbox" checked="@championship.IsActive" @onclick=@(() => ToggleChampionshipActive(championship)) @onclick:stopPropagation @onclick:preventDefault />
-                                <span class="slider round"></span>
-                            </label>
-                            <button class="btn btn-outline-danger" @onclick=@(() => OnDeleteChampionshipClick(championship)) @onclick:stopPropagation="true">
-                                <span class="oi oi-trash" />
-                            </button>
-                        </div>
-                    </div>
-                }
-                <div class="list-group-item">
-                    <button class="btn btn-outline-secondary" type="button" @onclick=OnAddChampionshipClick>
-                        Create new Championship
-                    </button>
-                </div>
-            </div>
-        </div>
+        <MudText Typo="Typo.h6" Class="mt-4 px-2">Championships</MudText>
+        <MudPaper Elevation="5">
+            <MudTable Items="Vm.Championships" Striped="true" Hover="true">
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Type</MudTh>
+                    <MudTh>Point Configs</MudTh>
+                </HeaderContent>
+                <RowTemplate Context=row>
+                    @{var champSeason = Vm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipId == row.ChampionshipId);}
+                    <MudTd DataLabel="Name">
+                        <MudLink Href="@($"{LeagueName}/Settings/Results/Championships/{row.ChampionshipId}")">@row.Name</MudLink>
+                    </MudTd>
+                    <MudTd DataLabel="Type">@champSeason?.ResultKind</MudTd>
+                    <MudTd DataLabel="Point Configs">
+                        @if (champSeason is null)
+                        {
+                        }
+                        else if(champSeason.ResultConfigs.Count <= 1)
+                        {
+                            @:Single Point config
+                        }
+                        else
+                        {
+                            @:Multiple Point configs
+                        }
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
     </Authorized>
     <NotAuthorized>
         You are not allowed here ...
@@ -65,7 +68,7 @@
     private async Task HandleSubmit()
     {
         logger.LogInformation("Handle submit called!");
-        if (vm.Selected == null)
+        if (Vm.Selected == null)
         {
             return;
         }
@@ -112,7 +115,7 @@
         var result = await ModalService.Show<ConfirmModal>("Delete Championship", parameters).Result;
         if (result.Confirmed)
         {
-            await vm.DeleteChampionship(championship.GetModel());
+            await Vm.DeleteChampionship(championship.GetModel());
         }
     }
 
@@ -120,11 +123,11 @@
     {
         var parameters = new ModalParameters<EditChampSeasonModal>()
             .Add(x => x.Model, CreateChampionshipFromTemplate())
-            .Add(x => x.OnSubmit, (x, c) => vm.AddChampionship(x.GetModel(), c));
+            .Add(x => x.OnSubmit, (x, c) => Vm.AddChampionship(x.GetModel(), c));
         var result = await ModalService.Show<EditChampSeasonModal>("Create Championship", parameters).Result;
         if (result.Confirmed)
         {
-            await vm.LoadFromCurrentSeasonAsync();
+            await Vm.LoadFromCurrentSeasonAsync();
         }
     }
 
@@ -138,7 +141,7 @@
         {
             await championship.ActivateForSeasonAsync();
         }
-        await vm.LoadFromCurrentSeasonAsync();
+        await Vm.LoadFromCurrentSeasonAsync();
     }
 
     private ResultConfigModel CreateConfigFromTemplate()
@@ -174,7 +177,7 @@
 
     private async Task OnSeasonSelectChanged(SeasonModel season)
     {
-        await vm.LoadFromCurrentSeasonAsync();
+        await Vm.LoadFromCurrentSeasonAsync();
         await InvokeAsync(StateHasChanged);
     }
 
@@ -185,7 +188,7 @@
         {
             return;
         }
-        await vm.LoadFromCurrentSeasonAsync();
+        await Vm.LoadFromCurrentSeasonAsync();
         await InvokeAsync(StateHasChanged);
     }
 }

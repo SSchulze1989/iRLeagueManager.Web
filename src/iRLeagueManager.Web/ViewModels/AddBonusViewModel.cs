@@ -79,7 +79,7 @@ public sealed class AddBonusViewModel : LeagueViewModelBase<AddBonusViewModel, A
                 return StatusResult.FailedResult("Result row null", "Result row is required but was null", Array.Empty<object>());
             }
             var result = await CurrentLeague
-                .Results()
+                .SessionResults()
                 .WithId(SessionResult.SessionResultId)
                 .Rows()
                 .WithId(ResultRow.ScoredResultRowId)

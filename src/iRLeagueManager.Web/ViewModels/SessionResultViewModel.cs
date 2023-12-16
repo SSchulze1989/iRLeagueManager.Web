@@ -1,4 +1,5 @@
 ﻿using iRLeagueApiCore.Common.Models;
+using iRLeagueApiCore.Common.Models.Results;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 
@@ -22,4 +23,27 @@ public sealed class SessionResultViewModel : LeagueViewModelBase<SessionResultVi
     public string SessionName => model.SessionName;
     public int? SessionNr => model.SessionNr;
     public IEnumerable<ResultRowModel> ResultRows => model.ResultRows;
+
+    public async Task<StatusResult<IEnumerable<AddBonusModel>>> GetBonuses(CancellationToken cancellationToken = default)
+    {
+        if (CurrentLeague is null)
+        {
+            return new StatusResult<IEnumerable<AddBonusModel>>(LeagueNullResult());
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await CurrentLeague
+                .SessionResults()
+                .WithId(SessionResultId)
+                .Bonuses()
+                .Get(cancellationToken);
+            return result.ToContentStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
 }

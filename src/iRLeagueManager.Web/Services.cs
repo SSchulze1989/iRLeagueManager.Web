@@ -47,6 +47,7 @@ public static class Services
         services.TryAddTransient<ChampSeasonViewModel>();
         services.TryAddTransient<UserViewModel>();
         services.TryAddTransient<AddPenaltyViewModel>();
+        services.TryAddTransient<AddBonusViewModel>();
         services.TryAddTransient<AutoPenaltiesCollectionViewModel>();
         services.TryAddScoped<ResultsPageViewModel>();
         services.TryAddScoped<ResultSettingsViewModel>();

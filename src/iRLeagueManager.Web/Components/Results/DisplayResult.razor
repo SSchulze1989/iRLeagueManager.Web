@@ -219,7 +219,12 @@
         }
         async Task<IEnumerable<AddBonusModel>> GetBonuses()
         {
-            return await Task.FromResult(Result.ResultRows.SelectMany(x => x.AddBonuses));
+            var bonuses = await Result.GetBonuses();
+            if (bonuses.IsSuccess == false || bonuses.Content is null)
+            {
+                return Array.Empty<AddBonusModel>();
+            }
+            return bonuses.Content;
         }
 
         var parameters = new ModalParameters<ShowPenaltiesBonusesModal>()

@@ -29,7 +29,7 @@
                     }
                     else
                     {
-                        @penalty.Member?.FirstName @penalty.Member?.LastName
+                        @:@penalty.Member?.FirstName @penalty.Member?.LastName
                     }
                 </div>
                 <div class="col-3">
@@ -108,18 +108,20 @@
         _ => string.Empty,
     };
 
-    private string GetPenaltyValue(PenaltyModel penalty) => penalty.Type switch
+    private string GetPenaltyValue(PenaltyModel penalty) => penalty switch
     {
-        PenaltyType.Points => $"- {penalty.Points} pt{(penalty.Points != 1 ? "s" : "")}",
-        PenaltyType.Position => $"+ {penalty.Positions.ToString()} position{(penalty.Positions != 1 ? "s" : "")}",
-        PenaltyType.Time => $"+ {penalty.Time.ToString()}",
-        PenaltyType.Disqualification => """DSQ <span class="bi bi-flag-fill" style="color: black"/>""",
+        { Type: PenaltyType.Points, Points: >= 0 } => $"{-penalty.Points} pt{(penalty.Points != 1 ? "s" : "")}",
+        { Type: PenaltyType.Points, Points: < 0 } => $"+{-penalty.Points} pt{(penalty.Points != 1 ? "s" : "")}",
+        { Type: PenaltyType.Position } => $"+ {penalty.Positions.ToString()} position{(penalty.Positions != 1 ? "s" : "")}",
+        { Type: PenaltyType.Time } => $"+ {penalty.Time.ToString()}",
+        { Type: PenaltyType.Disqualification } => """DSQ <span class="bi bi-flag-fill" style="color: black"/>""",
         _ => string.Empty,
     };
 
-    private string GetPenaltyColor(PenaltyModel penalty) => penalty.Type switch
+    private string GetPenaltyColor(PenaltyModel penalty) => penalty switch
     {
-        PenaltyType.Position or PenaltyType.Points => "red",
+        { Type: PenaltyType.Position, Positions: >= 0 } or {Type: PenaltyType.Points, Points: >= 0}  => "red",
+        { Type: PenaltyType.Position, Positions: < 0 } or { Type: PenaltyType.Points, Points: < 0 } => "green",
         _ => "inherit",
     };
 

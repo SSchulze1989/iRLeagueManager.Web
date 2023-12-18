@@ -8,8 +8,8 @@
             <InputText class="form-control" @bind-Value=Vm.Text data-bs-toggle="tooltip" title="Text to be displayed as vote category"/>
         </InputGroup>
         <FormValidationMessage For=@(() => Vm.Text) />
-        <InputGroup Label="Penalty">
-            <InputNumber class="form-control" @bind-Value=Vm.DefaultPenalty data-bs-toggle="tooltip" title="Default penalty value in full points"/>
+        <InputGroup Label="@GetPointLabel(Vm.DefaultPenalty)">
+            <InputNumber class="form-control" @bind-Value=Vm.DefaultPenalty data-bs-toggle="tooltip" title="Default penalty/bonus value in full points"/>
         </InputGroup>
         <FormValidationMessage For=@(() => Vm.DefaultPenalty) />
         <InputGroup Label="Index">
@@ -21,5 +21,10 @@
 </EditForm>
 
 @code {
-
+    private string GetPointLabel(int defaultPenalty) => defaultPenalty switch
+    {
+        > 0 => "Bonus",
+        < 0 => "Penalty",
+        _ => "Penalty/Bonus",
+    };
 }

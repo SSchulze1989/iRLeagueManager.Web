@@ -26,7 +26,16 @@
                                         <h5>Text</h5>
                                     </div>
                                     <div class="col">
-                                        <h5>Penalty</h5>
+                                        <h5>
+                                            @if (voteCategory.DefaultPenalty > 0)
+                                            {
+                                                @:Bonus
+                                            }
+                                            else
+                                            {
+                                                @:Penalty
+                                            }
+                                        </h5>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -34,7 +43,7 @@
                                         @voteCategory.Text
                                     </div>
                                     <div class="col">
-                                        @voteCategory.DefaultPenalty
+                                        @(voteCategory.DefaultPenalty > 0 ? "+" : "")@voteCategory.DefaultPenalty
                                     </div>
                                 </div>
                             </div>

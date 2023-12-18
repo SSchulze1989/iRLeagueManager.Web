@@ -62,7 +62,7 @@
         <InputGroup Label="Reason">
             <InputText class="form-control" @bind-Value="Vm.Reason" />
         </InputGroup>
-        <InputGroup Label="Penalty Type">
+        <InputGroup Label="Type">
             <InputSelect class="form-select" @bind-Value="Vm.Type">
                 @foreach(var penaltyType in Enum.GetValues<PenaltyType>())
                 {

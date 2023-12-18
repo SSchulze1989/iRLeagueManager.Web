@@ -18,7 +18,7 @@ public sealed class VoteCategoryViewModel : LeagueViewModelBase<VoteCategoryView
 
     public long CatId => model.Id;
     public string Text { get => model.Text; set => SetP(model.Text, value => model.Text = value, value); }
-    public int DefaultPenalty { get => model.DefaultPenalty; set => SetP(model.DefaultPenalty, value => model.DefaultPenalty = value, value); }
+    public int DefaultPenalty { get => -model.DefaultPenalty; set => SetP(model.DefaultPenalty, value => model.DefaultPenalty = value, -value); }
     public int Index { get => model.Index; set => SetP(model.Index, value => model.Index = value, value); }
 
     public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken = default)

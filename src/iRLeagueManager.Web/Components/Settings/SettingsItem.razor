@@ -8,6 +8,10 @@
              Disabled="Disabled">
     <MudElement HtmlTag="div" Class="d-flex align-center gap-2">
         <MudElement HtmlTag="div" Class="d-flex flex-column align-start justify-center flex-grow-1">
+            @if (displayLabel)
+            {
+                <label class="mud-input-label mud-input-label-text" style="font-size: 0.75em">@Label</label>
+            }
             <MudText Color="Color" Style="width: 100%">
                 @if (ChildContent is null)
                 {
@@ -25,7 +29,7 @@
         </MudElement>
         @if (displayDeleteButton)
         {
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="Delete"/>
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="Delete" />
         }
     </MudElement>
 </MudListItem>

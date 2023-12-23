@@ -1,0 +1,39 @@
+﻿@using System.ComponentModel
+@inherits LayoutComponentBase
+@inject SharedStateService Shared
+@inject BreadCrumbService BreadCrumbService
+@layout SettingsLayout
+@implements IDisposable
+
+<LoadingHeader Loading="Shared.Loading">
+    <HeaderText>
+        <MudText Typo="Typo.h5">Result Settings</MudText>
+        <MudBreadcrumbs Items="BreadCrumbService.Items" />
+    </HeaderText>
+</LoadingHeader>
+@Body
+
+@code {
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Shared.PropertyChanged += OnSharedPropertyChanged;
+        BreadCrumbService.ItemsChanged += OnBreadCrumbsChanged;
+    }
+
+    private void OnSharedPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnBreadCrumbsChanged(object? sender, EventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Shared.PropertyChanged -= OnSharedPropertyChanged;
+        BreadCrumbService.ItemsChanged -= OnBreadCrumbsChanged;
+    }
+}

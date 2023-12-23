@@ -1,0 +1,38 @@
+﻿@using iRLeagueManager.Web.Components.Dialogs
+@inherits PromptDialog<(string, string)>
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="2">
+            <MudTextField @bind-Value="Name"
+                          Label="Name"
+                          HelperText="Short name to identify championship"
+                          Variant="Variant.Outlined"/>
+            <MudTextField @bind-Value="DisplayName"
+                          Placeholder="@Name"
+                          Label="Display Name"
+                          HelperText="Name as displayed on other parts of the page"
+                          Variant="Variant.Outlined"/>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkText="@OkText" OkClick="Submit" CancelText="@CancelText" CancelClick="Cancel" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private string Name { get; set; } = string.Empty;
+    private string DisplayName { get; set; } = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        (Name, DisplayName) = Value;
+    }
+
+    protected override Task Submit()
+    {
+        Value = (Name, DisplayName);
+        return base.Submit();
+    }
+}

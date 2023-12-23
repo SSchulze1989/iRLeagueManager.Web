@@ -24,7 +24,7 @@
     <Authorized>
         <MudText Typo="Typo.h6" Class="mt-4 px-2">Championships</MudText>
         <MudPaper Elevation="5">
-            <MudTable Items="Vm.Championships" Striped="true" Hover="true">
+            <MudTable Items="Vm.Championships" Striped="true" Hover="true" Elevation="0" Breakpoint="Breakpoint.None">
                 <HeaderContent>
                     <MudTh>Name</MudTh>
                     <MudTh>Type</MudTh>
@@ -37,16 +37,9 @@
                     </MudTd>
                     <MudTd DataLabel="Type">@champSeason?.ResultKind</MudTd>
                     <MudTd DataLabel="Point Configs">
-                        @if (champSeason is null)
+                        @if (champSeason is not null)
                         {
-                        }
-                        else if(champSeason.ResultConfigs.Count <= 1)
-                        {
-                            @:Single Point config
-                        }
-                        else
-                        {
-                            @:Multiple Point configs
+                            @:@string.Join(", ", champSeason.ResultConfigs.Select(x => x.Name))
                         }
                     </MudTd>
                 </RowTemplate>

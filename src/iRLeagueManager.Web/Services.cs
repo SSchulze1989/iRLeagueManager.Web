@@ -1,8 +1,10 @@
 ﻿using Ganss.Xss;
 using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Shared;
 using iRLeagueManager.Web.ViewModels;
 using Markdig;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using MudBlazor;
 
 namespace iRLeagueManager.Web;
 
@@ -57,6 +59,7 @@ public static class Services
         services.TryAddScoped<ResultSettingsViewModel>();
         services.TryAddScoped<ReviewSettingsViewModel>();
         services.TryAddScoped<TeamsViewModel>();
+        services.TryAddScoped<BreadCrumbService>();
         return services;
     }
 }

@@ -1,0 +1,18 @@
+﻿<MudPaper Elevation="5" Class="mt-4">
+    <MudList Clickable="true">
+        @if (string.IsNullOrEmpty(Header) == false)
+        {
+            <MudListSubheader>
+                <MudText Color="Color.Info">
+                    @Header
+                </MudText>
+            </MudListSubheader>
+        }
+        @ChildContent
+    </MudList>
+</MudPaper>
+
+@code {
+    [Parameter] public string Header { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

@@ -1,0 +1,41 @@
+﻿@using iRLeagueManager.Web.Components.Dialogs
+@inherits SettingBase
+@inject IDialogService DialogService
+
+<SettingsItem Class="@Class"
+              Label="@Label"
+              Text="@Text"
+              HelperText="@HelperText"
+              ChildContent="ChildContent!"
+              Icon="@Icon"
+              IconSize="IconSize"
+              IconColor="IconColor"
+              OnClick="Click"
+              Disabled="Disabled"
+              Delete="Delete" />
+
+@code {
+    [Parameter] public EventCallback Delete { get; set; }
+    [Parameter] public EventCallback<string> TextChanged { get; set; }
+
+    private async Task Click()
+    {
+        var parameters = new DialogParameters<TextPromptDialog>()
+        {
+            { x => x.Value, Text },
+            { x => x.Label, Label },
+            { x => x.HelperText, HelperText },
+        };
+
+        var options = new DialogOptions()
+            {
+                NoHeader = true,
+            };
+
+        var result = await DialogService.Show<TextPromptDialog>("", parameters: parameters, options: options).Result;
+        if (!result.Canceled)
+        {
+            await TextChanged.InvokeAsync((string)result.Data);
+        }
+    }
+}

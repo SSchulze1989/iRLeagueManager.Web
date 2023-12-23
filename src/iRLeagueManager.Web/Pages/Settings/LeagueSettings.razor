@@ -14,13 +14,9 @@
 @inject IDialogService DialogService
 @attribute [Authorize]
 
-<PageTitle>Settings - @LeagueName</PageTitle>
-
-<LoadingHeader Loading="Loading">
-    <HeaderText>
-        <MudText Typo="Typo.h5">League Settings</MudText>
-    </HeaderText>
-</LoadingHeader>
+<PageTitle>
+    Settings - @LeagueName
+</PageTitle>
 
 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin) Context="AuthContext">
     <Authorized>
@@ -33,36 +29,33 @@
         }
         <MudPaper Elevation="5" Class="mt-4">
             <EditForm Model="League" OnValidSubmit="SaveChanges">
-                <StatusResultValidator @ref="ResultValidator"/>
+                <StatusResultValidator @ref="ResultValidator" />
                 <MudList Clickable="true">
                     <MudListSubheader>General</MudListSubheader>
                     <MudListItem>
-                        <MudTextField 
-                            Label="Display Name" 
-                            @bind-Value="League.NameFull"
-                            Immediate="true"
-                            DebounceInterval="500"
-                            Adornment="Adornment.End" 
-                            AdornmentIcon="@Icons.Material.Filled.Edit" 
-                            Variant="Variant.Outlined" 
-                            Class="me-4"/>
+                        <MudTextField Label="Display Name"
+                                      @bind-Value="League.NameFull"
+                                      Immediate="true"
+                                      DebounceInterval="500"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@Icons.Material.Filled.Edit"
+                                      Variant="Variant.Outlined"
+                                      Class="me-4" />
                     </MudListItem>
                     <MudListItem>
-                        <MudField 
-                            Label="Description" 
-                            OnAdornmentClick="@(() => EditDescriptionClick(League))" 
-                            Adornment="Adornment.End" 
-                            AdornmentIcon="@Icons.Material.Filled.Edit" 
-                            Variant="Variant.Outlined"
-                            Class="me-4"
-                        >
+                        <MudField Label="Description"
+                                  OnAdornmentClick="@(() => EditDescriptionClick(League))"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Material.Filled.Edit"
+                                  Variant="Variant.Outlined"
+                                  Class="me-4">
                             <div style="overflow-x: clip; overflow-y: auto; min-height: 4em; max-height: 12em;">
                                 @((MarkupString)RenderDescriptionPreview(League.Description))
                             </div>
                         </MudField>
                     </MudListItem>
 
-                    <MudDivider/>
+                    <MudDivider />
 
                     <MudListSubheader>Seasons</MudListSubheader>
                     @if (League.CurrentSeason != null)
@@ -172,7 +165,7 @@
         var result = await DialogService.Show<MudConfirmModal>("Delete Season", parameters).Result;
         if (result.Canceled == false)
         {
-            await League.DeleteSeason(season.GetModel());   
+            await League.DeleteSeason(season.GetModel());
         }
     }
 

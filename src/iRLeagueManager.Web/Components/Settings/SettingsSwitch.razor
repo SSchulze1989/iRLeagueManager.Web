@@ -22,7 +22,7 @@
             }
         </MudItem>
         <MudItem xs="2" Class="d-flex align-center justify-end">
-            <MudSwitch Checked="Checked" CheckedChanged="CheckedChanged" Color="Color"/>
+            <MudSwitch Checked="Checked" CheckedChanged="CheckedChanged" Color="Color" />
         </MudItem>
     </MudGrid>
 </MudListItem>
@@ -30,6 +30,15 @@
 @code {
     [Parameter] public bool Checked { get; set; } = false;
     [Parameter] public EventCallback<bool> CheckedChanged { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (Color == Color.Inherit)
+        {
+            Color = Color.Primary;
+        }
+    }
 
     async Task HandleClick()
     {

@@ -29,7 +29,13 @@ public abstract class LeagueViewModelBase<T> : ViewModelBase, IModelState, IDisp
     public bool Loading
     {
         get => loading;
-        protected set => Set(ref loading, value);
+        protected set
+        {
+            if(Set(ref loading, value))
+            {
+                ApiService.Shared.LoadingCount += loading ? 1 : -1;
+            }
+        }
     }
 
     private bool saving;

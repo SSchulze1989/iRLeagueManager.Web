@@ -1,0 +1,30 @@
+﻿@if (CancelClick.HasDelegate)
+{
+    <MudButton Color="Color.Secondary" OnClick="CancelClick">
+        @CancelText
+    </MudButton>
+}
+@if (OkClick.HasDelegate)
+{
+    <MudButton Color="Color.Primary" OnClick="OkClick">
+        @OkText
+    </MudButton>
+}
+
+@code {
+    [Parameter]
+    public string OkText { get; set; } = "Ok";
+    [Parameter]
+    public string CancelText { get; set; } = "Cancel";
+    [Parameter]
+    public EventCallback OkClick { get; set; }
+    [Parameter]
+    public EventCallback CancelClick { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, OkText);
+        BlazorParameterNullException.ThrowIfNull(this, CancelText);
+    }
+}

@@ -1,0 +1,18 @@
+﻿@inherits PromptDialog<string>
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="Value"
+                      Label="@Label"
+                      HelperText="@HelperText"
+                      Variant="Variant"
+                      InputType="InputType" />
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkClick="Submit" OkText="@OkText" CancelClick="Cancel" CancelText="@CancelText" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public InputType InputType { get; set; } = InputType.Text;
+}

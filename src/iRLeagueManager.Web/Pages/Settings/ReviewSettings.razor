@@ -11,7 +11,9 @@
 @inject IDialogService DialogService
 @attribute [Authorize]
 
-<PageTitle>Settings - @LeagueName</PageTitle>
+<PageTitle>
+    Settings - @LeagueName
+</PageTitle>
 
 <LoadingHeader Loading="Loading">
     <HeaderText>
@@ -31,28 +33,32 @@
                     Protest Options
                 </SettingsItem>
                 <SettingsSection Text="Incident Categories"
-                                    @bind-Expanded=categoriesExpanded
-                                    HelperText="@(categoriesExpanded ? "Collapse" : "Expand")"
-                                    InitiallyExpanded="false"
-                                    Class="me-4 pe-4">
-                    @foreach (var category in Bind(Reviews, x => x.VoteCategories))
-                    {
-                        <SettingsItem Class="pe-4" OnClick="() => OnVoteCategoryClick(category)" Delete="() => OnDeleteVoteCategoryClick(category)">
-                            <MudGrid Spacing="4">
-                                <MudItem xs="10" sm="8">
-                                    <MudText Typo="Typo.caption">Text</MudText>
-                                    <MudText>@category.Text</MudText>
-                                </MudItem>
-                                <MudItem xs="2" Class="d-flex justify-end">
-                                    <div class="d-flex flex-column">
-                                        <MudText Typo="Typo.caption">Penalty</MudText>
-                                        <MudText>@category.DefaultPenalty</MudText>
-                                    </div>
-                                </MudItem>
-                            </MudGrid>
-                        </SettingsItem>
-                    }
-                    <SettingsItem Icon="@Icons.Material.Outlined.Add" Text="Add Vote Category" OnClick="OnAddVoteCategoryClick" Color="Color.Tertiary"/>
+                                 @bind-Expanded=categoriesExpanded
+                                 HelperText="@(categoriesExpanded ? "Collapse" : "Expand")"
+                                 InitiallyExpanded="false"
+                                 Class="me-4 pe-4">
+                    <MudTable Items="Bind(Reviews, x => x.VoteCategories)"
+                              Breakpoint="Breakpoint.None"
+                              Hover="true"
+                              OnRowClick="@((TableRowClickEventArgs<VoteCategoryViewModel> e) => OnVoteCategoryClick(e.Item))">
+                        <HeaderContent>
+                            <MudTh Class="ps-4">Text</MudTh>
+                            <MudTh>Penalty/Bonus</MudTh>
+                            <MudTh></MudTh>
+                        </HeaderContent>
+                        <RowTemplate Context=category>
+                            <MudTd Class="ps-4">
+                                @category.Text
+                            </MudTd>
+                            <MudTd>
+                                @category.DefaultPenalty
+                            </MudTd>
+                            <MudTd>
+                                <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="@(() => OnDeleteVoteCategoryClick(category))" Size="Size.Small" />
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                    <SettingsItem Icon="@Icons.Material.Outlined.Add" Text="Add Vote Category" OnClick="OnAddVoteCategoryClick" Color="Color.Tertiary" />
                     <SettingsItem OnClick="() => categoriesExpanded = false">
                         <MudText Typo="Typo.caption">Collapse Categories</MudText>
                     </SettingsItem>
@@ -152,9 +158,9 @@
     private VoteCategoryModel CreateVoteCategoryTemplate()
     {
         return new()
-        {
-            Index = Reviews.VoteCategories.Any() ? Reviews.VoteCategories.Max(x => x.Index) + 1 : 0,
-        };
+            {
+                Index = Reviews.VoteCategories.Any() ? Reviews.VoteCategories.Max(x => x.Index) + 1 : 0,
+            };
     }
 
     private void OnVmChanged(object? sender, EventArgs e)

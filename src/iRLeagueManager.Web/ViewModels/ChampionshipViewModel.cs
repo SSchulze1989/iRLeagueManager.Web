@@ -23,6 +23,31 @@ public sealed class ChampionshipViewModel : LeagueViewModelBase<ChampionshipView
     public bool IsActive { get => isActive; private set => Set(ref isActive, value); }
     private bool isActive;
 
+    public async Task<StatusResult> Load(long championshipId, CancellationToken cancellationToken = default)
+    {
+        if (CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await CurrentLeague.Championships()
+                .WithId(championshipId)
+                .Get(cancellationToken);
+            if (result.Success && result.Content is not null)
+            {
+                SetModel(result.Content);
+            }
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
     public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         if (ApiService.CurrentLeague is null)

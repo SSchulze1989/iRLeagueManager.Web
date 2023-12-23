@@ -1,0 +1,26 @@
+﻿@typeparam T
+@inherits PromptDialog<T>
+
+<MudDialog>
+    <DialogContent>
+        <MudSelect @bind-Value="Value"
+                   Label="@Label"
+                   HelperText="@HelperText"
+                   Variant="Variant">
+            @ChildContent
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkClick="Submit" OkText="@OkText" CancelClick="Cancel" CancelText="@CancelText" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, ChildContent);
+    }
+}

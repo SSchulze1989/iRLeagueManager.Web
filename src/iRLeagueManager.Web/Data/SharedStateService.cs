@@ -37,6 +37,10 @@ public sealed class SharedStateService : INotifyPropertyChanged
     private LeagueModel? leagueInfo;
     public LeagueModel? LeagueInfo { get => leagueInfo; set => Set(ref leagueInfo, value); }
 
+    private int loadingCount;
+    internal int LoadingCount { get => loadingCount; set => Set(ref loadingCount, value, nameof(Loading)); }
+    public bool Loading { get => LoadingCount > 0; }
+
     public SharedStateService()
     {
         seasonList = new ObservableCollection<SeasonModel>();

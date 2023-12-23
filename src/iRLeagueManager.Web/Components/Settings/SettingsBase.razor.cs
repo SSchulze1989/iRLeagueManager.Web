@@ -6,6 +6,7 @@ namespace iRLeagueManager.Web.Components.Settings;
 
 public class SettingBase : MudComponentBase
 {
+    [Parameter] public string Label { get; set; } = string.Empty;
     [Parameter] public string Text { get; set; } = string.Empty;
     [Parameter] public string HelperText { get; set; } = string.Empty;
     [Parameter] public Color Color { get; set; } = Color.Inherit;
@@ -16,11 +17,6 @@ public class SettingBase : MudComponentBase
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
-    protected bool displayHelperText = false;
-
-    protected override void OnParametersSet()
-    {
-        base.OnParametersSet();
-        displayHelperText = string.IsNullOrEmpty(HelperText) == false;
-    }
+    protected bool displayLabel => string.IsNullOrEmpty(Label) == false;
+    protected bool displayHelperText => string.IsNullOrEmpty(HelperText) == false;
 }

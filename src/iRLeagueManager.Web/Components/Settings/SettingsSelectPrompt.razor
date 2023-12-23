@@ -1,0 +1,45 @@
+﻿@using iRLeagueManager.Web.Components.Dialogs
+@inherits SettingBase
+@typeparam T where T : Enum
+@inject IDialogService DialogService
+
+<SettingsItem Class="@Class"
+              Text="@ValueString"
+              HelperText="@HelperText"
+              Icon="@Icon"
+              IconSize="IconSize"
+              IconColor="IconColor"
+              OnClick="Click"
+              Disabled="Disabled"
+              Delete="Delete" />
+
+@code {
+    [Parameter, EditorRequired] public T Value { get; set; } = default!;
+    [Parameter] public EventCallback Delete { get; set; }
+    [Parameter] public EventCallback<T> ValueChanged { get; set; }
+    [Parameter] public Func<T, string> ToStringFunc { get; set; } = value => value.ToString();
+
+    private string ValueString => ToStringFunc(Value);
+
+    private async Task Click()
+    {
+        var parameters = new DialogParameters<SelectPromptDialog<T>>()
+        {
+            { x => x.Value, Value },
+            { x => x.Label, Label },
+            { x => x.HelperText, HelperText },
+            { x => x.ChildContent, ChildContent },
+        };
+
+        var options = new DialogOptions()
+            {
+                NoHeader = true,
+            };
+
+        var result = await DialogService.Show<SelectPromptDialog<T>>("", parameters: parameters, options: options).Result;
+        if (!result.Canceled)
+        {
+            await ValueChanged.InvokeAsync((T)result.Data);
+        }
+    }
+}

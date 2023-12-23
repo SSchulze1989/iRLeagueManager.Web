@@ -476,6 +476,25 @@ a, .btn-link {
     }
 }
 
+.mud-container {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+@media (min-width: 600px) {
+    .mud-container {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+}
+
+@media (min-width: 480px) {
+    .mud-container {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+
 @keyframes lds-ring {
     0% {
         transform: rotate(0deg);

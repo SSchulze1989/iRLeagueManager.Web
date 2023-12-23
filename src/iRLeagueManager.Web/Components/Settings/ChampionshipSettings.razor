@@ -1,0 +1,110 @@
+﻿@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@inject IDialogService DialogService
+
+<EditForm Model=ChampSeason>
+    <StatusResultValidator @ref=ResultValidator />
+    <SettingsTopSection Header="General">
+        <SettingsItem Label="Name"
+                      Text="@ChampSeason.ChampionshipName"
+                      HelperText="@(string.IsNullOrEmpty(ChampSeason.ChampionshipDisplayName) ? "" : ChampSeason.ChampionshipDisplayName)"
+                      OnClick="ChampionshipNameClick" />
+        <SettingsSelectPrompt @bind-Value="ChampSeason.ResultKind" Label="Type" HelperText="Championship type: Member or Team">
+            <MudSelectItem Value="ResultKind.Member" />
+            <MudSelectItem Value="ResultKind.Team" />
+        </SettingsSelectPrompt>
+    </SettingsTopSection>
+    <SettingsTopSection Header="Race Points">
+        @if (multiplePointconfigs)
+        {
+            <SettingsSection Text="Point Settings" Expanded="multiplePointconfigs" InitiallyExpanded="true">
+                @foreach (var config in ChampSeason.ResultConfigs)
+                {
+                    <SettingsItem Text="@config.Name" />
+                }
+                <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary">
+                    <MudText Color="Color.Tertiary">
+                        Add Result Config
+                    </MudText>
+                </MudListItem>
+            </SettingsSection>
+        }
+        else
+        {
+            <SettingsItem>
+                <MudStack Row="true">
+                    ConfigurePoints
+                    <MudSpacer/>
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ArrowForward"/>
+                </MudStack>
+            </SettingsItem>
+        }
+    </SettingsTopSection>
+    <SettingsTopSection Header="Advanced">
+        <SettingsSection Text="Filters" @bind-Expanded="filtersExpanded" HelperText="Limit drivers, teams or classes that will be scored in this championship">
+            <MudTable Items="ChampSeason.Filters" Breakpoint="Breakpoint.None" Hover="true" Elevation="0">
+                <HeaderContent>
+                    <MudTh Class="ps-8">Type</MudTh>
+                    <MudTh>Action</MudTh>
+                    <MudTh>Condition</MudTh>
+                    <MudTh Style="max-width: 3em"></MudTh>
+                </HeaderContent>
+                <RowTemplate Context="Filter">
+                    @{
+                        var condition = Filter.Condition;
+                    }
+                    <MudTd Class="ps-8">
+                        @condition.ColumnPropertyName
+                    </MudTd>
+                    <MudTd>
+                        @condition.Action
+                    </MudTd>
+                    <MudTd>
+                        @FilterTextUtils.GetConditionText(condition)
+                    </MudTd>
+                    <MudTd Style="max-width: 3em">
+                        <MudIconButton Icon="@Icons.Material.Outlined.Delete" Size="Size.Small" Color="Color.Error" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+            <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary">
+                <MudText Color="Color.Tertiary">Add Filter</MudText>
+            </MudListItem>
+        </SettingsSection>
+        <SettingsSection Text="More" HelperText="Show more advanced settings" @bind-Expanded="showAdvanced" InitiallyExpanded="false">
+            <SettingsSwitch @bind-Checked="multiplePointconfigs" Text="Multiple point configs" HelperText="Allow different point settings for each event" />
+        </SettingsSection>
+    </SettingsTopSection>
+    <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+</EditForm>
+
+@code {
+    [Parameter]
+    public ChampSeasonViewModel ChampSeason { get; set; } = default!;
+
+    private StatusResultValidator? ResultValidator { get; set; }
+
+    private bool showAdvanced = false;
+    private bool filtersExpanded = false;
+    private bool multiplePointconfigs = false;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, ChampSeason);
+        multiplePointconfigs = ChampSeason.ResultConfigs.Count > 1;
+    }
+
+    private async Task ChampionshipNameClick()
+    {
+        var parameters = new DialogParameters<ChampionshipNameDialog>()
+        {
+            { x => x.Value, (ChampSeason.ChampionshipName, ChampSeason.ChampionshipDisplayName) },
+        };
+        var result = await DialogService.Show<ChampionshipNameDialog>("", parameters).Result;
+        if (!result.Canceled)
+        {
+            (ChampSeason.ChampionshipName, ChampSeason.ChampionshipDisplayName) = ((string, string))result.Data;
+        }
+    }
+}

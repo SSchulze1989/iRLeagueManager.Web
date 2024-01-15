@@ -6,7 +6,7 @@
           Breakpoint="Breakpoint.None"
           Hover="true"
           Elevation="0"
-          OnRowClick="@((TableRowClickEventArgs<(ResultFilterModel item, int index)> e) => RowClick(e.Item.item))"
+          OnRowClick="@((TableRowClickEventArgs<(ResultFilterModel filter, int index)> e) => RowClick(e.Item.filter))"
           RowClass="hover-box">
     <HeaderContent>
         <MudTh Class="ps-8">Type</MudTh>
@@ -15,9 +15,10 @@
         <MudTh Style="max-width: 6em"></MudTh>
         <MudTh Style="max-width: 3em"></MudTh>
     </HeaderContent>
-    <RowTemplate Context="Filter">
+    <RowTemplate Context="RowContext">
         @{
-            var condition = Filter.item.Condition;
+            var (filter, index) = RowContext;
+            var condition = filter.Condition;
         }
         <MudTd Class="ps-8">
             @condition.ColumnPropertyName
@@ -30,13 +31,13 @@
         </MudTd>
         <MudTd Style="max-width: 3em">
             <MudStack Row="true" Spacing="0" Justify="Justify.FlexEnd" Class="hover-box-show">
-                @if (Filter.index > 0)
+                @if (index > 0)
                 {
-                    <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" OnClick="@(() => MoveUpClick(Filter.item))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" OnClick="@(() => MoveUpClick(filter))" />
                 }
-                @if (Filter.index < Filters.Count() - 1)
+                @if (index < Filters.Count() - 1)
                 {
-                    <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" OnClick="@(() => MoveDownClick(Filter.item))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" OnClick="@(() => MoveDownClick(filter))" />
                 }
             </MudStack>
         </MudTd>
@@ -65,7 +66,7 @@
     private async Task RowClick(ResultFilterModel filter)
     {
         await OnRowClick.InvokeAsync(filter);
-        await UpdateFilters(Filters);
+        await UpdateFilters(Filters.ToList());
     }
 
     private async Task UpdateFilters(IEnumerable<ResultFilterModel> filters)
@@ -85,8 +86,9 @@
         {
             return;
         }
-        filtersTmp[index] = filtersTmp[index - 1];
-        filtersTmp[index - 1] = filter;
+        var swapCondition = filtersTmp[index].Condition;
+        filtersTmp[index].Condition = filtersTmp[index - 1].Condition;
+        filtersTmp[index - 1].Condition = swapCondition;
         await UpdateFilters(filtersTmp);
     }
 
@@ -98,8 +100,9 @@
         {
             return;
         }
-        filtersTmp[index] = filtersTmp[index + 1];
-        filtersTmp[index + 1] = filter;
+        var swapCondition = filtersTmp[index].Condition;
+        filtersTmp[index].Condition = filtersTmp[index + 1].Condition;
+        filtersTmp[index + 1].Condition = swapCondition;
         await UpdateFilters(filtersTmp);
     }
 }

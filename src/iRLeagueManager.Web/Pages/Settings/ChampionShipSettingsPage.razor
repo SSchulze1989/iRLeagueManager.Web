@@ -67,6 +67,8 @@ else
         base.OnInitialized();
         UpdateBreadCrumb();
         RegisterLocationChangingHandler();
+        ChampSeason.HasChanged += ViewModelChanged;
+        ResultConfig.HasChanged += ViewModelChanged;
     }
 
     protected override async Task OnParametersSetAsync()
@@ -143,6 +145,20 @@ else
         }
         SettingsStack.NavigateTo(NavigationManager.ToBaseRelativePath(e.Location));
         UpdateBreadCrumb();
+    }
+
+    private async void ViewModelChanged(object? sender, EventArgs e)
+    {
+        if (sender is ChampSeasonViewModel champSeason)
+        {
+            await champSeason.SaveChangesAsync(CancellationToken);
+            return;
+        }
+        if (sender is ResultConfigViewModel resultConfig)
+        {
+            await resultConfig.SaveChangesAsync(CancellationToken);
+            return;
+        }
     }
 
     private async Task DisplayLeaveWarningMessage()
@@ -287,7 +303,17 @@ else
     }
 
     private ResultConfigModel CreateResultConfig() => new ResultConfigModel()
+    {
+        ChampSeasonId = ChampSeason.ChampSeasonId,
+    };
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
         {
-            ChampSeasonId = ChampSeason.ChampSeasonId,
-        };
+            ChampSeason.HasChanged -= ViewModelChanged;
+            ResultConfig.HasChanged -= ViewModelChanged;
+        }
+        base.Dispose(disposing);
+    }
 }

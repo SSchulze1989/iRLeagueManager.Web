@@ -46,6 +46,54 @@
                                                  ToStringFunc="GetTeamNameById"
                                                  Variant="Variant.Outlined" />
                         break;
+                    case FilterType.ColumnProperty:
+                        var valueLabel = Filter.Comparator == ComparatorType.InList ? "Values" : "Value";
+                        var propertyType = GetColumnPropertyType(Filter.ColumnPropertyName);
+
+                        <MudSelect Label="Type" @bind-Value="Filter.Comparator"
+                                   HelperText="Select how to compare values"
+                                   Variant="Variant.Outlined">
+                            @foreach (var compType in Enum.GetValues<ComparatorType>().Where(x => x != ComparatorType.InList))
+                            {
+                                if (AllowForEach == false && compType == ComparatorType.ForEach)
+                                {
+                                    continue;
+                                }
+                                <MudSelectItem Value=@compType>@compType.GetText()</MudSelectItem>
+                            }
+                        </MudSelect>
+
+                        @if (propertyType is null)
+                        {
+                            <MudField Label="@valueLabel" Disabled="true" Variant="Variant.Outlined" />
+                        }
+                        else if (Filter.Comparator == ComparatorType.InList)
+                        {
+                            @*TODO: Fill in Component for values selection from list*@
+                        }
+                        else if (propertyType == typeof(RaceStatus))
+                        {
+                            <MudSelect Label="@valueLabel" @bind-Value="Filter.Value" Variant="Variant.Outlined">
+                                @foreach (var status in Enum.GetValues(typeof(RaceStatus)))
+                                {
+                                    <MudSelectItem Value="@(((int)status).ToString())">@status.ToString()</MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
+                        else if (propertyType == typeof(string)
+                            || propertyType == typeof(double)
+                            || propertyType == typeof(double?)
+                            || propertyType == typeof(int)
+                            || propertyType == typeof(int?))
+                        {
+                            var isNumeric = propertyType == typeof(double) || propertyType == typeof(double?) || propertyType == typeof(int) || propertyType == typeof(int?);
+                            <MudTextField Label="@valueLabel" @bind-Value="Filter.Value" InputType="@(isNumeric ? InputType.Number : InputType.Text)" Variant="Variant.Outlined" />
+                        }
+                        else
+                        {
+                            <MudField Label="@valueLabel" Disabled="true" Variant="Variant.Outlined">Not supported</MudField>
+                        }
+                        break;
                 }
             </MudStack>
         </EditForm>
@@ -124,11 +172,11 @@
         }
 
         var terms = searchString.ToLower().Split(',', ' ', ';')
-            .Where(x => string.IsNullOrWhiteSpace(x) == false)
-            .ToArray();
+        .Where(x => string.IsNullOrWhiteSpace(x) == false)
+        .ToArray();
         return await Task.FromResult(LeagueMembers
-            .Where(x => MatchMemberSearchTerms(x, terms))
-            .Select(x => x.MemberId.ToString()));
+        .Where(x => MatchMemberSearchTerms(x, terms))
+        .Select(x => x.MemberId.ToString()));
     }
 
     private async Task<IEnumerable<string>> SearchTeams(string searchstring)
@@ -139,11 +187,11 @@
         }
 
         var terms = searchstring.ToLower().Split(',', ' ', ';')
-            .Where(x => string.IsNullOrWhiteSpace(x) == false)
-            .ToArray();
+        .Where(x => string.IsNullOrWhiteSpace(x) == false)
+        .ToArray();
         return await Task.FromResult(Teams.
-            Where(x => MatchTeamSearchTerms(x, terms))
-            .Select(x => x.TeamId.ToString()));
+        Where(x => MatchTeamSearchTerms(x, terms))
+        .Select(x => x.TeamId.ToString()));
     }
 
     private bool MatchMemberSearchTerms(MemberModel member, params string[] terms)
@@ -151,9 +199,9 @@
         var searchName = member.FirstName + member.LastName;
         var iracingId = member.IRacingId.ToString();
         return terms
-            .Any(x => searchName.Contains(x, StringComparison.OrdinalIgnoreCase) ||
-                      iracingId.Contains(x)
-            );
+        .Any(x => searchName.Contains(x, StringComparison.OrdinalIgnoreCase) ||
+          iracingId.Contains(x)
+        );
     }
 
     private bool MatchTeamSearchTerms(TeamModel team, params string[] terms)
@@ -161,8 +209,14 @@
         var searchName = team.Name;
         var iracingId = team.IRacingTeamId.GetValueOrDefault().ToString();
         return terms
-            .Any(x => searchName.Contains(x, StringComparison.OrdinalIgnoreCase) ||
-                      iracingId.Contains(x)
-            );
+        .Any(x => searchName.Contains(x, StringComparison.OrdinalIgnoreCase) ||
+          iracingId.Contains(x)
+        );
+    }
+
+    private Type? GetColumnPropertyType(string name)
+    {
+        var property = typeof(ResultRowModel).GetProperty(name);
+        return property?.PropertyType;
     }
 }

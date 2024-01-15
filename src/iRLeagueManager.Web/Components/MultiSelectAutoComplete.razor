@@ -6,6 +6,7 @@
                      ShowProgressIndicator="true" 
                      DebounceInterval="DebounceInterval"        
                      Label="@Label" 
+                     HelperText="@HelperText"
                      Clearable="true" 
                      Immediate="false"           
                      CoerceValue="true"           
@@ -29,6 +30,9 @@
 
     [Parameter]
     public string Label { get; set; } = string.Empty;
+
+    [Parameter]
+    public string HelperText { get; set; } = string.Empty;
 
     [Parameter, EditorRequired]
     public Func<string, Task<IEnumerable<T>>> SearchFunc { get; set; } = default!;

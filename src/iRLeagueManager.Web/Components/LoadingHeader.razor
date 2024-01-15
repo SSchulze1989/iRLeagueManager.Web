@@ -1,22 +1,23 @@
 ﻿@using System.ComponentModel
 
-<MudPaper Elevation="@Elevation" Class="pa-0 mb-2">
-    <MudStack>
-        @if (HeaderText is not null)
-        {
-            <div class="mx-6 mt-4 @(HeaderActions is null ? "mb-4" : "")">
-                @HeaderText
-            </div>
-        }
-        @if (HeaderActions is not null)
-        {
-            <MudToolBar Class="@($"gap-2 mb-2 {(HeaderText is null ? "mt-2" : "")}")" Dense="true" WrapContent="true">
+<MudStack>
+    @if (HeaderText is not null)
+    {
+        <div class="mx-2 mt-4 @(HeaderActions is null ? "mb-4" : "")">
+            @HeaderText
+        </div>
+    }
+    @if (HeaderActions is not null)
+    {
+        <MudPaper Elevation="@Elevation">
+            <MudToolBar Class="@($"gap-2 my-1 {(HeaderText is null ? "mt-2" : "")}")" Dense="true" WrapContent="true">
                 @HeaderActions
             </MudToolBar>
-        }
-    </MudStack>
-    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@(Loading ? "" : "invisible" + " my-0")" />
-</MudPaper>
+        </MudPaper>
+    }
+</MudStack>
+<MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@(Loading ? "" : "invisible" + " my-0")" />
+
 
 @code {
     [Parameter(CaptureUnmatchedValues = true)]

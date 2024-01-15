@@ -15,4 +15,9 @@ public static class EnumerableExtensions
         }
         return enumerable.Min();
     }
+
+    public static IEnumerable<(T item, int index)> WithIndex<T>(this IEnumerable<T> enumerable)
+    {
+        return enumerable.Select((x, i) => (x, i));
+    }
 }

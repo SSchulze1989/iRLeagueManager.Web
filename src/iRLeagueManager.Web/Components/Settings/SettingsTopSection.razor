@@ -1,4 +1,4 @@
-﻿<MudPaper Elevation="5" Class="mt-4">
+﻿<MudPaper Elevation="5" Class="@Class">
     <MudList Clickable="true">
         @if (string.IsNullOrEmpty(Header) == false)
         {
@@ -15,4 +15,5 @@
 @code {
     [Parameter] public string Header { get; set; } = string.Empty;
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string Class { get; set; } = string.Empty;
 }

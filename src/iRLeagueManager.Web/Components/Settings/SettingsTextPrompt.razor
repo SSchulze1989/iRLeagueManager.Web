@@ -1,10 +1,11 @@
 ﻿@using iRLeagueManager.Web.Components.Dialogs
 @inherits SettingBase
+@typeparam T
 @inject IDialogService DialogService
 
 <SettingsItem Class="@Class"
               Label="@Label"
-              Text="@Text"
+              Text="@GetText()"
               HelperText="@HelperText"
               ChildContent="ChildContent!"
               Icon="@Icon"
@@ -12,19 +13,23 @@
               IconColor="IconColor"
               OnClick="Click"
               Disabled="Disabled"
-              Delete="Delete" />
+              Delete="Delete" 
+              />
 
 @code {
     [Parameter] public EventCallback Delete { get; set; }
-    [Parameter] public EventCallback<string> TextChanged { get; set; }
+    [Parameter] public T? Value { get; set; }
+    [Parameter] public EventCallback<T> ValueChanged { get; set; }
+    [Parameter] public InputType InputType { get; set; } = InputType.Text;
 
     private async Task Click()
     {
-        var parameters = new DialogParameters<TextPromptDialog>()
+        var parameters = new DialogParameters<TextPromptDialog<T>>()
         {
-            { x => x.Value, Text },
+            { x => x.Value, Value },
             { x => x.Label, Label },
             { x => x.HelperText, HelperText },
+            { x => x.InputType, GetInputType() },
         };
 
         var options = new DialogOptions()
@@ -32,10 +37,26 @@
                 NoHeader = true,
             };
 
-        var result = await DialogService.Show<TextPromptDialog>("", parameters: parameters, options: options).Result;
+        var result = await DialogService.Show<TextPromptDialog<T>>("", parameters: parameters, options: options).Result;
         if (!result.Canceled)
         {
-            await TextChanged.InvokeAsync((string)result.Data);
+            await ValueChanged.InvokeAsync((T)result.Data);
         }
     }
+
+    private string GetText()
+    {
+        if (string.IsNullOrEmpty(Text))
+        {
+            return Value?.ToString() ?? string.Empty;
+        }
+        return Text;
+    }
+
+    private InputType GetInputType() => default(T) switch
+    {
+        int or double or decimal => InputType.Number,
+        DateTime => InputType.Date,
+        _ => InputType.Text,
+    };
 }

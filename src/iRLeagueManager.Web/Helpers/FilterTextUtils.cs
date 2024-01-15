@@ -7,11 +7,11 @@ internal static class FilterTextUtils
 {
     public static string GetConditionText(
         FilterConditionModel condition,
-        IEnumerable<MemberInfoModel>? members = default,
-        IEnumerable<TeamInfoModel>? teams = default)
+        IEnumerable<MemberModel>? members = default,
+        IEnumerable<TeamModel>? teams = default)
     {
-        members ??= Array.Empty<MemberInfoModel>();
-        teams ??= Array.Empty<TeamInfoModel>();
+        members ??= Array.Empty<MemberModel>();
+        teams ??= Array.Empty<TeamModel>();
         return condition.FilterType switch
         {
             FilterType.Member => string.Join(", ", condition.FilterValues.Select(x => GetMemberName(x, members))),
@@ -34,7 +34,7 @@ internal static class FilterTextUtils
         return $"{member.FirstName} {member.LastName}";
     }
 
-    private static string GetTeamName(string id, IEnumerable<TeamInfoModel> teams)
+    private static string GetTeamName(string id, IEnumerable<TeamModel> teams)
     {
         if (long.TryParse(id, out long idValue) == false)
         {

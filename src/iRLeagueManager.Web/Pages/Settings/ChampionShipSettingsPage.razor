@@ -1,12 +1,13 @@
 ﻿@page "/{LeagueName}/Settings/Results/Championships/{ChampionshipId:long}"
+@page "/{LeagueName}/Settings/Results/Championships/{ChampionshipId:long}/ResultConfigs/{ResultConfigId:long}"
 @using iRLeagueApiCore.Common.Enums;
 @using iRLeagueApiCore.Common.Models;
 @using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.Components.Settings
 @inherits LeagueComponentBase
 @layout ResultSettingsLayout
-@inject ChampionshipViewModel Championship
 @inject ChampSeasonViewModel ChampSeason
+@inject ResultConfigViewModel ResultConfig
 @inject IToastService ToastService
 @inject BreadCrumbService BreadCrumbService
 @attribute [Authorize]
@@ -17,7 +18,18 @@
 
 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
     <Authorized>
-        <ChampionshipSettings ChampSeason="ChampSeason" />
+        <CascadingValue Value="Bind(ResultConfig, x => x.LeagueMembers)">
+            <CascadingValue Value="Bind(ResultConfig, x => x.Teams)">
+                <SettingsStack @ref="SettingsStack">
+                    <SettingsStackItem Href="@($"{LeagueName}/Settings/Results/Championships/{ChampionshipId}")">
+                        <ChampionshipSettings ChampSeason="ChampSeason" />
+                    </SettingsStackItem>
+                    <SettingsStackItem Href="@($"{LeagueName}/Settings/Results/Championships/{ChampionshipId}/ResultConfigs/{ResultConfigId}")">
+                        <ResultConfigSettings Config="ResultConfig" AllowEditName="ChampSeason.ResultConfigs.Count > 1" />
+                    </SettingsStackItem>
+                </SettingsStack>
+            </CascadingValue>
+        </CascadingValue>
     </Authorized>
     <NotAuthorized>
         You are not allowed here ...
@@ -37,57 +49,72 @@ else
     <div></div>
 }
 
-<div class="d-flex justify-content-end gap-3">
-    @if (ChampSeason.HasChanges)
-    {
-        <button class="btn btn-primary" @onclick=Submit>Save</button>
-    }
-    <button class="btn btn-outline-secondary" @onclick=Close>Back</button>
-</div>
-
 @code {
-    [CascadingParameter]
-    public DialogService DialogService { get; set; } = default!;
-    [Parameter]
-    public long ChampionshipId { get; set; }
-    [Parameter]
-    [SupplyParameterFromQuery]
-    public string returnUrl { get; set; } = string.Empty;
+    [CascadingParameter] public DialogService DialogService { get; set; } = default!;
+    [Parameter] public long ChampionshipId { get; set; }
+    [Parameter] public long? ResultConfigId { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string returnUrl { get; set; } = string.Empty;
+
+    SettingsStack SettingsStack { get; set; } = default!;
 
     private bool DisplayLeaveWarning { get; set; } = false;
     private ElementReference LeaveWarning { get; set; }
     private StatusResultValidator? ResultValidator { get; set; }
+    private int CarouselIndex { get; set; }
 
     protected override void OnInitialized()
     {
+        base.OnInitialized();
+        UpdateBreadCrumb();
         RegisterLocationChangingHandler();
     }
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
-        base.OnParametersSet();
+        await base.OnParametersSetAsync();
         if (string.IsNullOrWhiteSpace(returnUrl))
         {
             returnUrl = $"/{LeagueName}/Settings/Results";
         }
+        if (ResultConfigId is not null)
+        {
+            CarouselIndex = 1;
+        }
+        else
+        {
+            CarouselIndex = 0;
+        }
+        if (ChampSeason.ChampionshipId != ChampionshipId)
+        {
+            await ChampSeason.Load(ChampionshipId, CancellationToken);
+            await ChampSeason.LoadResultConfigs(CancellationToken);
+        }
+        await ResultConfig.LoadLeagueMembersAndTeams(CancellationToken);
+        if (ResultConfigId is not null && ResultConfig.ResultConfigId != ResultConfigId)
+        {
+            await ResultConfig.Load(ResultConfigId.Value, CancellationToken);
+        }
+        UpdateBreadCrumb();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
-        await EnableTooltips();
         if (firstRender == false)
         {
             return;
         }
-        await Championship.Load(ChampionshipId);
-        await ChampSeason.Load(ChampionshipId);
-        await ChampSeason.LoadResultConfigs();
-        BreadCrumbService.Items = new()
+        if (ChampSeason.ChampionshipId != ChampionshipId)
         {
-            new BreadcrumbItem("Championships", $"{LeagueName}/Settings/Results"),
-            new BreadcrumbItem(ChampSeason.ChampionshipName, $"{LeagueName}/Settings/Results/Championships/{ChampionshipId}"),
-        };
+            await ChampSeason.Load(ChampionshipId, CancellationToken);
+            await ChampSeason.LoadResultConfigs(CancellationToken);
+        }
+        await ResultConfig.LoadLeagueMembersAndTeams(CancellationToken);
+        if (ResultConfigId is not null && ResultConfig.ResultConfigId != ResultConfigId)
+        {
+            await ResultConfig.Load(ResultConfigId.Value, CancellationToken);
+        }
+        UpdateBreadCrumb();
         await InvokeAsync(StateHasChanged);
     }
 
@@ -106,6 +133,16 @@ else
         // If viewmodel has changes: Cancel navigation and display message
         context.PreventNavigation();
         await DisplayLeaveWarningMessage();
+    }
+
+    protected override void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        if (e.Location.Contains($"/{LeagueName}/Settings/Results/Championships/{ChampionshipId}") == false)
+        {
+            return;
+        }
+        SettingsStack.NavigateTo(NavigationManager.ToBaseRelativePath(e.Location));
+        UpdateBreadCrumb();
     }
 
     private async Task DisplayLeaveWarningMessage()
@@ -200,6 +237,25 @@ else
             return;
         }
         ChampSeason.DefaultResultConfig = null;
+    }
+
+    private void UpdateBreadCrumb()
+    {
+        BreadCrumbService.Items = new()
+        {
+            new BreadcrumbItem("Championships", $"{Shared.LeagueName}/Settings/Results"),
+            new BreadcrumbItem(ChampSeason.ChampionshipName, $"{Shared.LeagueName}/Settings/Results/Championships/{ChampionshipId}"),
+        };
+        if (ResultConfigId is not null)
+        {
+            var name = ResultConfig.Name;
+            if (string.IsNullOrEmpty(name) || ChampSeason.ResultConfigs.Count <= 1)
+            {
+                name = "Race Points";
+            }
+            BreadCrumbService.Add(new BreadcrumbItem(name, $"{Shared.LeagueName}/Settings/Results/Championships/{ChampionshipId}/ResultConfigs/{ResultConfigId}"));
+        }
+        InvokeAsync(StateHasChanged);
     }
 
     private async Task EditSortOptionsClick(StandingConfigurationViewModel standingConfig)

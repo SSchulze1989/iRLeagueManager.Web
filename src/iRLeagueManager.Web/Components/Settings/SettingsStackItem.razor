@@ -1,0 +1,130 @@
+﻿@using MudBlazor.Utilities
+@implements IDisposable
+@inject NavigationManager Navigation
+
+@if (IsVisible())
+{
+    <div class="@className" @onanimationend="AnimationEnd">
+        @if (ItemIndex > 0)
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="BackClick" />
+        }
+        @ChildContent
+    </div>
+}
+
+@code {
+    public enum ItemTransitionState
+    {
+        None,
+        MovingOut,
+        MovingIn,
+    }
+
+    [CascadingParameter] public SettingsStack Parent { get; set; } = default!;
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public EventCallback OnBackClick { get; set; }
+    [Parameter, EditorRequired] public string Href { get; set; } = string.Empty;
+
+    public int ItemIndex => Parent?.Items.IndexOf(this) ?? -1;
+    private bool showing = false;
+    public ItemTransitionState TransitionState { get; private set; } = ItemTransitionState.None;
+    private int animationTimeout = 5000;
+
+    protected string className => new CssBuilder()
+        .AddClass("slide", TransitionState != ItemTransitionState.None)
+        .AddClass("slide-in", TransitionState == ItemTransitionState.MovingIn)
+        .AddClass("slide-out", TransitionState == ItemTransitionState.MovingOut)
+        .Build();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Parent?.Items.Add(this);
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, Parent);
+        BlazorParameterNullException.ThrowIfNull(this, ChildContent);
+        var shouldShow = Parent.Index >= ItemIndex;
+        if (shouldShow && !showing)
+        {
+            MoveIn();
+        }
+        if (!shouldShow && showing)
+        {
+            MoveOut();
+        }
+    }
+
+    private void MoveIn()
+    {
+        if (ItemIndex != 0)
+        {
+            TransitionState = ItemTransitionState.MovingIn;
+            Task.Run((Func<Task>)(async () =>
+            {
+                await Task.Delay(animationTimeout);
+                if (TransitionState == ItemTransitionState.MovingIn)
+                {
+                    TransitionState = ItemTransitionState.None;
+                    Parent.UpdateStack();
+                }
+            }));
+        }
+        showing = true;
+        Parent.UpdateStack();
+    }
+
+    private void MoveOut()
+    {
+        TransitionState = ItemTransitionState.MovingOut;
+        showing = false;
+        Task.Run((Func<Task>)(async () =>
+        {
+            await Task.Delay(animationTimeout);
+            if (TransitionState == ItemTransitionState.MovingOut)
+            {
+                TransitionState = ItemTransitionState.None;
+                Parent.UpdateStack();
+            }
+        }));
+        Parent.UpdateStack();
+    }
+
+    private bool IsVisible()
+    {
+        if (Parent is null)
+        {
+            return false;
+        }
+        return ItemIndex == Parent.Index
+            || TransitionState == ItemTransitionState.MovingOut
+            || (ItemIndex == Parent.Index - 1 && Parent.Items.ElementAt(Parent.Index).TransitionState == ItemTransitionState.MovingIn);
+    }
+
+    private void AnimationEnd()
+    {
+        TransitionState = ItemTransitionState.None;
+        Parent.UpdateStack();
+    }
+
+    private void BackClick()
+    {
+        if (ItemIndex > 0)
+        {
+            Navigation.NavigateTo(Parent.Items.ElementAt(ItemIndex - 1).Href);
+        }
+    }
+
+    public virtual void Dispose()
+    {
+        if (Parent is not null)
+        {
+            Parent.Items.Remove(this);
+        }
+    }
+}

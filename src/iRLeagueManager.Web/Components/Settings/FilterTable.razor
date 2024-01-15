@@ -1,0 +1,105 @@
+﻿@using iRLeagueApiCore.Common.Models
+@{
+    var filtersWithIndex = Filters.WithIndex();
+}
+<MudTable Items="filtersWithIndex"
+          Breakpoint="Breakpoint.None"
+          Hover="true"
+          Elevation="0"
+          OnRowClick="@((TableRowClickEventArgs<(ResultFilterModel item, int index)> e) => RowClick(e.Item.item))"
+          RowClass="hover-box">
+    <HeaderContent>
+        <MudTh Class="ps-8">Type</MudTh>
+        <MudTh>Action</MudTh>
+        <MudTh>Value</MudTh>
+        <MudTh Style="max-width: 6em"></MudTh>
+        <MudTh Style="max-width: 3em"></MudTh>
+    </HeaderContent>
+    <RowTemplate Context="Filter">
+        @{
+            var condition = Filter.item.Condition;
+        }
+        <MudTd Class="ps-8">
+            @condition.ColumnPropertyName
+        </MudTd>
+        <MudTd>
+            @condition.Action
+        </MudTd>
+        <MudTd>
+            @FilterTextUtils.GetConditionText(condition, members: LeagueMembers, teams: Teams)
+        </MudTd>
+        <MudTd Style="max-width: 3em">
+            <MudStack Row="true" Spacing="0" Justify="Justify.FlexEnd" Class="hover-box-show">
+                @if (Filter.index > 0)
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" OnClick="@(() => MoveUpClick(Filter.item))" />
+                }
+                @if (Filter.index < Filters.Count() - 1)
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" OnClick="@(() => MoveDownClick(Filter.item))" />
+                }
+            </MudStack>
+        </MudTd>
+        <MudTd Style="max-width: 3em">
+            <MudIconButton Icon="@Icons.Material.Outlined.Delete" Size="Size.Small" Color="Color.Error" />
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    [CascadingParameter] public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [CascadingParameter] public IEnumerable<TeamModel> Teams { get; set; } = default!;
+
+    [Parameter, EditorRequired] public IEnumerable<ResultFilterModel> Filters { get; set; } = default!;
+    [Parameter] public EventCallback<IEnumerable<ResultFilterModel>> FiltersChanged { get; set; }
+    [Parameter] public EventCallback<ResultFilterModel> OnRowClick { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, Teams, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, Filters);
+    }
+
+    private async Task RowClick(ResultFilterModel filter)
+    {
+        await OnRowClick.InvokeAsync(filter);
+        await UpdateFilters(Filters);
+    }
+
+    private async Task UpdateFilters(IEnumerable<ResultFilterModel> filters)
+    {
+        Filters = filters;
+        if (FiltersChanged.HasDelegate)
+        {
+            await FiltersChanged.InvokeAsync(Filters);
+        }
+    }
+
+    private async Task MoveUpClick(ResultFilterModel filter)
+    {
+        var filtersTmp = Filters.ToList();
+        var index = filtersTmp.IndexOf(filter);
+        if (index <= 0)
+        {
+            return;
+        }
+        filtersTmp[index] = filtersTmp[index - 1];
+        filtersTmp[index - 1] = filter;
+        await UpdateFilters(filtersTmp);
+    }
+
+    private async Task MoveDownClick(ResultFilterModel filter)
+    {
+        var filtersTmp = Filters.ToList();
+        var index = filtersTmp.IndexOf(filter);
+        if (index < 0 || index >= filtersTmp.Count - 1)
+        {
+            return;
+        }
+        filtersTmp[index] = filtersTmp[index + 1];
+        filtersTmp[index + 1] = filter;
+        await UpdateFilters(filtersTmp);
+    }
+}

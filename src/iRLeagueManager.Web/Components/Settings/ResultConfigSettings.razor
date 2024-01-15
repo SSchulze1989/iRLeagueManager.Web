@@ -1,7 +1,110 @@
-﻿@using iRLeagueApiCore.Common.Enums
+﻿@using System.Text
+@using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components.Dialogs
 @inject IDialogService DialogService
 
-@code {
+<SettingsTopSection Header="Options">
+    @if (AllowEditName)
+    {
+        <SettingsItem Label="Name"
+                      Text="@Config.Name"
+                      HelperText="@(string.IsNullOrEmpty(Config.DisplayName) ? "" : Config.DisplayName)"
+                      OnClick="NameClick" />
+    }
 
+    <SettingsSection Text="Finishing Order" HelperText="" @bind-Expanded="finishOrderExpanded">
+        @{
+            var options = Config.Scorings.FirstOrDefault()?.PointRule.PointsSortOptions;
+        }
+        @if (options is not null)
+        {
+            @foreach (var (option, index) in options.WithIndex())
+            {
+                <SettingsItem>
+                    @(index + 1). @option.GetText()
+                </SettingsItem>
+            }
+        }
+    </SettingsSection>
+
+    <SettingsSwitch @bind-Checked="EnableHeatRaces"
+                    Text="Enable Heat Races"
+                    HelperText="Allow multiple races per event" />
+    <MudCollapse Expanded="EnableHeatRaces">
+        <SettingsTextPrompt Value="RaceCount"
+                            ValueChanged="@((int count) => RaceCountChanged(count))"
+                            Label="Number of races"
+                            HelperText="Number of races per event" />
+    </MudCollapse>
+</SettingsTopSection>
+
+<SettingsTopSection Header="Advanced" Class="mt-4">
+    <SettingsSection Text="Conditions for Points"
+                     @bind-Expanded="filtersExpanded"
+                     InitiallyExpanded="false"
+                     HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
+        <FilterTable @bind-Filters="Config.FiltersForPoints" OnRowClick="OnFilterRowClick" />
+        <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary">
+            <MudText Color="Color.Tertiary">Add Filter</MudText>
+        </MudListItem>
+    </SettingsSection>
+</SettingsTopSection>
+
+@code {
+    [CascadingParameter] public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [CascadingParameter] public IEnumerable<TeamModel> Teams { get; set; } = default!;
+    [Parameter, EditorRequired] public ResultConfigViewModel Config { get; set; } = default!;
+    [Parameter] public bool AllowEditName { get; set; } = false;
+
+    private bool EnableHeatRaces { get; set; }
+    private int RaceCount { get; set; }
+
+    private bool finishOrderExpanded = false;
+    private bool filtersExpanded = false;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, Teams, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, Config);
+
+        var raceCount = Config.Scorings.Where(x => x.IsCombinedResult == false).Count();
+        if (RaceCount != raceCount)
+        {
+            RaceCount = raceCount;
+            EnableHeatRaces = RaceCount > 1;
+        }
+    }
+
+    private async Task NameClick()
+    {
+        var parameters = new DialogParameters<DisplayNameDialog>()
+        {
+            { x => x.Value, (Config.Name, Config.DisplayName) },
+        };
+        var result = await DialogService.Show<DisplayNameDialog>("", parameters).Result;
+        if (!result.Canceled)
+        {
+            (Config.Name, Config.DisplayName) = ((string, string))result.Data;
+        }
+    }
+
+    private async Task OnFilterRowClick(ResultFilterModel filter)
+    {
+        var parameters = new DialogParameters<FilterDialog>()
+        {
+            { x => x.Value, ModelHelper.CopyModel(filter) },
+            { x => x.OnSubmit, (x, c) => { filter.Condition = x.Condition; return Task.FromResult(true); } },
+            { x => x.LeagueMembers, LeagueMembers },
+            { x => x.Teams, Teams },
+        };
+        var dialog = await DialogService.Show<FilterDialog>("Edit Condition", parameters).Result;
+    }
+
+    private void RaceCountChanged(int count)
+    {
+
+    }
 }

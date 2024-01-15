@@ -4,7 +4,6 @@ using iRLeagueManager.Web.Shared;
 using iRLeagueManager.Web.ViewModels;
 using Markdig;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using MudBlazor;
 
 namespace iRLeagueManager.Web;
 
@@ -50,6 +49,7 @@ public static class Services
         services.TryAddTransient<UserViewModel>();
         services.TryAddTransient<AddPenaltyViewModel>();
         services.TryAddTransient<AutoPenaltiesCollectionViewModel>();
+        services.TryAddTransient<ResultFilterViewModel>();
         services.TryAddScoped<ResultsPageViewModel>();
         services.TryAddScoped<ResultSettingsViewModel>();
         services.TryAddScoped<ReviewsPageViewModel>();

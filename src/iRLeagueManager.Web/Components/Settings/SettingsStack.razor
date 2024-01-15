@@ -1,0 +1,45 @@
+﻿@using System.Web
+@inject NavigationManager Navigation
+@inject ILogger<SettingsStack> logger
+
+<CascadingValue Value="this">
+    <div class="settings-stack-container">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+@code {
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
+    [Parameter] public int Index { get; set; } = 0;
+    [Parameter] public EventCallback<int> IndexChanged { get; set; }
+    [Parameter] public bool UpdateNavigation { get; set; } = false;
+
+    public List<SettingsStackItem> Items { get; } = new List<SettingsStackItem>();
+    private string slideClass = "";
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, ChildContent);
+    }
+
+    public void NavigateTo(string uri)
+    {
+        var index = Items.FirstOrDefault(x => x.Href == uri)?.ItemIndex ?? 0;
+        if (index != Index)
+        {
+            Index = index;
+            IndexChanged.InvokeAsync(Index);
+            if (UpdateNavigation)
+            {
+                Navigation.NavigateTo(uri, replace: false);
+            }
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void UpdateStack()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+}

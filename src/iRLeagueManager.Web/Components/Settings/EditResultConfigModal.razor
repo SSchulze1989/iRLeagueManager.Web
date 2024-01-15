@@ -54,13 +54,13 @@
             <div class="accordion-collapse collapse show input-group-list m-1" id="collapseFilters">
                 <InputGroup Label="Points Filter">
                     <button class="form-control" type="button" @onclick=PointsFilterClick data-bs-toggle="tooltip" title="Filter rows that can score points. Only rows that fulfill all filter requirements will be given points. Rows are still displayed in the output result set">
-                        @if (Vm.FiltersForPoints.Count == 0)
+                        @if (Vm.FiltersForPoints.Count() == 0)
                         {
                             <span class="text-secondary"><em>Configure</em></span>
                         }
                         else
                         {
-                            <span class="text-secondary">@Vm.FiltersForPoints.Count filters applied</span>
+                            <span class="text-secondary">@Vm.FiltersForPoints.Count() filters applied</span>
                         }
                     </button>
                 </InputGroup>

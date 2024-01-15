@@ -17,7 +17,6 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         : base(loggerFactory, apiService, model)
     {
         scorings ??= new();
-        filtersForPoints ??= new();
         filtersForResult ??= new();
         availableResultConfigs ??= new();
         leagueMembers ??= new();
@@ -62,10 +61,9 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
     }
 
     private ObservableCollection<ScoringViewModel> scorings;
-    public ObservableCollection<ScoringViewModel> Scorings { get => scorings; set => SetP(scorings, value => scorings = value, value); }
+    public ObservableCollection<ScoringViewModel> Scorings { get => scorings; set => Set(ref scorings, value); }
 
-    private ObservableCollection<ResultFilterViewModel> filtersForPoints;
-    public ObservableCollection<ResultFilterViewModel> FiltersForPoints { get => filtersForPoints; set => Set(ref filtersForPoints, value); }
+    public IEnumerable<ResultFilterModel> FiltersForPoints { get => model.FiltersForPoints; set => SetP(model.FiltersForPoints, value => model.FiltersForPoints = value.ToList(), value); }
 
     private ObservableCollection<ResultFilterViewModel> filtersForResult;
     public ObservableCollection<ResultFilterViewModel> FiltersForResult { get => filtersForResult; set => Set(ref filtersForResult, value); }
@@ -83,7 +81,6 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
     {
         base.SetModel(model);
         Scorings = new(model.Scorings.Select(scoringModel => new ScoringViewModel(LoggerFactory, ApiService, scoringModel)));
-        FiltersForPoints = new(model.FiltersForPoints.Select(filter => new ResultFilterViewModel(LoggerFactory, ApiService, filter)));
         FiltersForResult = new(model.FiltersForResult.Select(filter => new ResultFilterViewModel(LoggerFactory, ApiService, filter)));
         ResetChangedState();
     }

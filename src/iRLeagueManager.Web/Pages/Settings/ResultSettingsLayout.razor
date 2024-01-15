@@ -5,10 +5,19 @@
 @layout SettingsLayout
 @implements IDisposable
 
+<MudBreadcrumbs Items="BreadCrumbService.Items" />
 <LoadingHeader Loading="Shared.Loading">
     <HeaderText>
-        <MudText Typo="Typo.h5">Result Settings</MudText>
-        <MudBreadcrumbs Items="BreadCrumbService.Items" />
+        <MudText Typo="Typo.h5">
+            @if (string.IsNullOrEmpty(BreadCrumbService.Items.LastOrDefault()?.Text) == false)
+            {
+                @BreadCrumbService.Items.Last().Text
+            }
+            else
+            {
+                @:Result Settings
+            }
+        </MudText>
     </HeaderText>
 </LoadingHeader>
 @Body

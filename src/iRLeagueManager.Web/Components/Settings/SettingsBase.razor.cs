@@ -13,6 +13,7 @@ public class SettingBase : MudComponentBase
     [Parameter] public string Icon { get; set; } = string.Empty;
     [Parameter] public Size IconSize { get; set; } = Size.Medium;
     [Parameter] public Color IconColor { get; set; } = Color.Inherit;
+    [Parameter] public string EndIcon { get; set; } = string.Empty;
     [Parameter] public bool Disabled { get; set; } = false;
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }

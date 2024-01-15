@@ -1,88 +1,69 @@
 ﻿@using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components.Dialogs
+@inherits UtilityComponentBase
 @inject IDialogService DialogService
 
 <EditForm Model=ChampSeason>
     <StatusResultValidator @ref=ResultValidator />
-    <SettingsTopSection Header="General">
-        <SettingsItem Label="Name"
-                      Text="@ChampSeason.ChampionshipName"
-                      HelperText="@(string.IsNullOrEmpty(ChampSeason.ChampionshipDisplayName) ? "" : ChampSeason.ChampionshipDisplayName)"
-                      OnClick="ChampionshipNameClick" />
-        <SettingsSelectPrompt @bind-Value="ChampSeason.ResultKind" Label="Type" HelperText="Championship type: Member or Team">
-            <MudSelectItem Value="ResultKind.Member" />
-            <MudSelectItem Value="ResultKind.Team" />
-        </SettingsSelectPrompt>
-    </SettingsTopSection>
-    <SettingsTopSection Header="Race Points">
-        @if (multiplePointconfigs)
-        {
-            <SettingsSection Text="Point Settings" Expanded="multiplePointconfigs" InitiallyExpanded="true">
-                @foreach (var config in ChampSeason.ResultConfigs)
-                {
-                    <SettingsItem Text="@config.Name" />
-                }
+    <MudStack Spacing="4">
+        <SettingsTopSection Header="General">
+            <SettingsItem Label="Name"
+                          Text="@ChampSeason.ChampionshipName"
+                          HelperText="@(string.IsNullOrEmpty(ChampSeason.ChampionshipDisplayName) ? "" : ChampSeason.ChampionshipDisplayName)"
+                          OnClick="ChampionshipNameClick" />
+            <SettingsSelectPrompt @bind-Value="ChampSeason.ResultKind" Label="Type" HelperText="Championship type: Member or Team">
+                <MudSelectItem Value="ResultKind.Member" />
+                <MudSelectItem Value="ResultKind.Team" />
+            </SettingsSelectPrompt>
+        </SettingsTopSection>
+        <SettingsTopSection Header="Race Points">
+            @if (multiplePointconfigs)
+            {
+                <SettingsSection Text="Point Settings" Expanded="multiplePointconfigs" InitiallyExpanded="true">
+                    @foreach (var config in ChampSeason.ResultConfigs)
+                    {
+                        <SettingsItem Text="@config.Name"
+                                      HelperText="@(string.IsNullOrEmpty(config.DisplayName) ? "" : config.DisplayName)"
+                                      EndIcon="@Icons.Material.Filled.ArrowForward"
+                                      Href="@($"/{Shared.LeagueName}/Settings/Results/Championships/{ChampSeason.ChampionshipId}/ResultConfigs/{config.ResultConfigId}")" />
+                    }
+                    <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary">
+                        <MudText Color="Color.Tertiary">
+                            Add Result Config
+                        </MudText>
+                    </MudListItem>
+                </SettingsSection>
+            }
+            else if (ChampSeason.ResultConfigs.Count > 0)
+            {
+                <SettingsItem Text="Configure Points"
+                              EndIcon="@Icons.Material.Filled.ArrowForward"
+                              Href="@($"/{Shared.LeagueName}/Settings/Results/Championships/{ChampSeason.ChampionshipId}/ResultConfigs/{ChampSeason.ResultConfigs.First().ResultConfigId}")" />
+            }
+        </SettingsTopSection>
+        <SettingsTopSection Header="Advanced">
+            <SettingsSection Text="Filters" @bind-Expanded="filtersExpanded" HelperText="Limit drivers, teams or classes that will be scored in this championship">
+                <FilterTable @bind-Filters="ChampSeason.Filters" OnRowClick="OnFilterRowClick" />
                 <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary">
-                    <MudText Color="Color.Tertiary">
-                        Add Result Config
-                    </MudText>
+                    <MudText Color="Color.Tertiary">Add Filter</MudText>
                 </MudListItem>
             </SettingsSection>
-        }
-        else
-        {
-            <SettingsItem>
-                <MudStack Row="true">
-                    ConfigurePoints
-                    <MudSpacer/>
-                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ArrowForward"/>
-                </MudStack>
-            </SettingsItem>
-        }
-    </SettingsTopSection>
-    <SettingsTopSection Header="Advanced">
-        <SettingsSection Text="Filters" @bind-Expanded="filtersExpanded" HelperText="Limit drivers, teams or classes that will be scored in this championship">
-            <MudTable Items="ChampSeason.Filters" Breakpoint="Breakpoint.None" Hover="true" Elevation="0">
-                <HeaderContent>
-                    <MudTh Class="ps-8">Type</MudTh>
-                    <MudTh>Action</MudTh>
-                    <MudTh>Condition</MudTh>
-                    <MudTh Style="max-width: 3em"></MudTh>
-                </HeaderContent>
-                <RowTemplate Context="Filter">
-                    @{
-                        var condition = Filter.Condition;
-                    }
-                    <MudTd Class="ps-8">
-                        @condition.ColumnPropertyName
-                    </MudTd>
-                    <MudTd>
-                        @condition.Action
-                    </MudTd>
-                    <MudTd>
-                        @FilterTextUtils.GetConditionText(condition)
-                    </MudTd>
-                    <MudTd Style="max-width: 3em">
-                        <MudIconButton Icon="@Icons.Material.Outlined.Delete" Size="Size.Small" Color="Color.Error" />
-                    </MudTd>
-                </RowTemplate>
-            </MudTable>
-            <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary">
-                <MudText Color="Color.Tertiary">Add Filter</MudText>
-            </MudListItem>
-        </SettingsSection>
-        <SettingsSection Text="More" HelperText="Show more advanced settings" @bind-Expanded="showAdvanced" InitiallyExpanded="false">
-            <SettingsSwitch @bind-Checked="multiplePointconfigs" Text="Multiple point configs" HelperText="Allow different point settings for each event" />
-        </SettingsSection>
-    </SettingsTopSection>
+            <SettingsSection Text="More" HelperText="Show more advanced settings" @bind-Expanded="showAdvanced" InitiallyExpanded="false">
+                <SettingsSwitch @bind-Checked="multiplePointconfigs" Text="Multiple point configs" HelperText="Allow different point settings for each event" />
+            </SettingsSection>
+        </SettingsTopSection>
+    </MudStack>
     <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
 </EditForm>
 
 @code {
-    [Parameter]
-    public ChampSeasonViewModel ChampSeason { get; set; } = default!;
+    [CascadingParameter] public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [CascadingParameter] public IEnumerable<TeamModel> Teams { get; set; } = default!;
+    [Parameter, EditorRequired] public ChampSeasonViewModel ChampSeason { get; set; } = default!;
 
     private StatusResultValidator? ResultValidator { get; set; }
+    private SettingsStack SettingsStack { get; set; } = default!;
 
     private bool showAdvanced = false;
     private bool filtersExpanded = false;
@@ -91,20 +72,34 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, Teams, cascading: true);
         BlazorParameterNullException.ThrowIfNull(this, ChampSeason);
         multiplePointconfigs = ChampSeason.ResultConfigs.Count > 1;
     }
 
     private async Task ChampionshipNameClick()
     {
-        var parameters = new DialogParameters<ChampionshipNameDialog>()
+        var parameters = new DialogParameters<DisplayNameDialog>()
         {
             { x => x.Value, (ChampSeason.ChampionshipName, ChampSeason.ChampionshipDisplayName) },
         };
-        var result = await DialogService.Show<ChampionshipNameDialog>("", parameters).Result;
+        var result = await DialogService.Show<DisplayNameDialog>("", parameters).Result;
         if (!result.Canceled)
         {
             (ChampSeason.ChampionshipName, ChampSeason.ChampionshipDisplayName) = ((string, string))result.Data;
         }
+    }
+
+    private async Task OnFilterRowClick(ResultFilterModel filter)
+    {
+        var parameters = new DialogParameters<FilterDialog>()
+        {
+            { x => x.Value, ModelHelper.CopyModel(filter) },
+            { x => x.OnSubmit, (x, c) => { filter.Condition = x.Condition; return Task.FromResult(true); } },
+            { x => x.LeagueMembers, LeagueMembers },
+            { x => x.Teams, Teams },
+        };
+        var dialog = await DialogService.Show<FilterDialog>("Edit Filter", parameters).Result;
     }
 }

@@ -26,7 +26,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
     public string ChampionshipDisplayName { get => model.ChampionshipDisplayName; set => SetP(model.ChampionshipDisplayName, value => model.ChampionshipDisplayName = value, value); }
     public string SeasonName => model.SeasonName;
     public ResultKind ResultKind { get => model.ResultKind; set => SetP(model.ResultKind, value => model.ResultKind = value, value); }
-    public ICollection<ResultFilterModel> Filters { get => model.Filters; set => SetP(model.Filters, value => model.Filters = value, value); }
+    public IEnumerable<ResultFilterModel> Filters { get => model.Filters; set => SetP(model.Filters, value => model.Filters = value.ToList(), value); }
 
     private StandingConfigurationViewModel? standingConfig;
     public StandingConfigurationViewModel? StandingConfig 

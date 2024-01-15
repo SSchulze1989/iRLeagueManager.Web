@@ -134,34 +134,6 @@
 
     private string GetEnumString(SortValue value)
     {
-        return value switch
-        {
-            SortValue.Pos => "Position",
-            SortValue.PosChg => "Position Change",
-            SortValue.StartPos => "Start Position",
-            SortValue.RacePts => "Race Points",
-            SortValue.PenPts => "Penalty Points",
-            SortValue.BonusPts => "Bonus Points",
-            SortValue.TotalPts => "Total Points",
-            SortValue.TotalPtsNoBonus => "Total Points w/o Bonus",
-            SortValue.TotalPtsNoPenalty => "Total Points w/o Penalty",
-            SortValue.Intvl => "Intervall",
-            SortValue.ComplLaps => "Completed Laps",
-            SortValue.LeadLaps => "Lead Laps",
-            SortValue.Incs => "Incidents",
-            SortValue.FastLap => "Fastest Lap",
-            SortValue.QualLap => "Qualy Lap",
-            SortValue.FinalPos => "Final Position",
-            SortValue.LastRaceOrder => "Last race finish position",
-            SortValue.Wins => "Wins",
-            SortValue.Top3 => "Podiums",
-            SortValue.Top5 => "Top 5",
-            SortValue.Top10 => "Top 10",
-            SortValue.Races => "Races started",
-            SortValue.RacesCounted => "Races counted",
-            SortValue.RacesScored => "Races eligible for points",
-            SortValue.RacesInPoints => "Races with points",
-            _ => string.Empty,
-        };
+        return SortOptionTextUtils.GetText(value);
     }
 }

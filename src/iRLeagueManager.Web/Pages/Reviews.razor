@@ -1,5 +1,4 @@
-﻿
-@page "/{LeagueName}/Reviews/Events/{EventId:long}"
+﻿@page "/{LeagueName}/Reviews/Events/{EventId:long}"
 @page "/{LeagueName}/Reviews/Seasons/{SeasonId:long}"
 @page "/{LeagueName}/Reviews"
 @using iRLeagueManager.Web.Extensions
@@ -13,7 +12,9 @@
 @inject ClientLocalTimeProvider ClientTime
 @inject IDialogService DialogService
 
-<PageTitle>Reviews - @LeagueName</PageTitle>
+<PageTitle>
+    Reviews - @LeagueName
+</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <LoadingHeader Loading=@Bind(ReviewsVm, x => x.Loading)>
@@ -21,118 +22,122 @@
             <MudText Typo="Typo.h5">Reviews</MudText>
         </HeaderText>
         <HeaderActions>
-            <EventSelect/>
+            <EventSelect />
         </HeaderActions>
     </LoadingHeader>
 
-    @if (ReviewsVm.ProtestsEnabled)
-    {
-        <MudTabs Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
-            <MudTabPanel Text="Reviews" OnClick="@(() => NavigateTo(GetTabLink(0)))"/>
-            <MudTabPanel Text="Protests" OnClick="@(() => NavigateTo(GetTabLink(1)))"/>
-        </MudTabs>
-    }
-
-    <CascadingValue Value=@Bind(ReviewsVm, x => x.EventCars)>
-    <CascadingValue Value=ReviewsVm.LeagueUsers>
-    <CascadingValue Value=ReviewsVm.LeagueUsers.AsEnumerable()>
-    <CascadingValue Value=ReviewsVm.VoteCategories.AsEnumerable()>
-
-    <MudStack Spacing="5" Class="py-4">
-        @switch (SelectedTabIndex)
+    <MudElement HtmlTag="div" Class="mt-3">
+        @if (ReviewsVm.ProtestsEnabled)
         {
-            case 0:
-                @if (ReviewsVm.Reviews.Count == 0)
-                {
-                    <p class="results-scoring"><em>No Reviews</em></p>
-                }
-                <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
-                    <Authorized>
-                        @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
-                        {
-                            <ReviewCard Review=review
-                                        Selected=@(review.ReviewId == SelectedReviewId)
-                                        OnEditClick=@(async () => await OnEditClick(review)) 
-                                        OnDeleteClick=@(async () => await OnDeleteClick(review))
-                                        IsSteward=true
-                                        ReadOnly=@ReadOnly
-                                        UserId=@UserId/>
-                        }
-                        @if (ReadOnly == false)
-                        {
-                            <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" ButtonType="ButtonType.Button" OnClick=OnAddClick>Add Review</MudButton>
-                        }
-                    </Authorized>
-                    <NotAuthorized>
-                        @foreach(var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
-                        {
-                            <ReviewCard Review=review Selected=@(review.ReviewId == SelectedReviewId) />
-                        }
-                    </NotAuthorized>
-                </AuthorizeView>
-                break;
-            case 1:
-                @if (ReviewsVm.Protests.Count == 0 && ReviewsVm.ProtestsPublic)
-                {
-                    <p class="results-scoring"><em>No Protests</em></p>
-                }
-                <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
-                    <Authorized>
-                        @foreach(var protest in @Bind(ReviewsVm, x => x.Protests))
-                        {
-                            <ProtestCard class="px-0 mb-2 mx-0" 
-                                Protest=protest 
-                                OnCreateReviewClick="@(() => OnCreateReviewFromProtestClick(protest))"
-                                OnDeleteClick=@(() => OnProtestDeleteClick(protest)) />
-                        }
-                    </Authorized>
-                    <NotAuthorized>
-                        @foreach(var protest in @Bind(ReviewsVm, x => x.Protests))
-                        {
-                            <ProtestCard class="px-0 mb-2 mx-0" Protest=protest />
-                        }
-                    </NotAuthorized>
-                </AuthorizeView>
-                @if (Event is not null && Event.HasResult)
-                {
-                    var protestsOpenAt = Event.End + ReviewsVm.CooldownPeriod;
-                    var protestsCloseAt = Event.End + ReviewsVm.ProtestClosedAfter;
-                    @if (ReviewsVm.CanFileProtest(Event))
-                    {
-                        <button class="btn btn-outline-secondary mb-3" type="button" @onclick=@(() => NavigationManager.NavigateTo($"./{LeagueName}/Protests/Events/{EventId}"))>File Protest</button>
-                        @if (ReviewsVm.ProtestClosedAfter > TimeSpan.Zero)
-                        {
-                            <div class="alert alert-info">
-                                Protests can be filed until @protestsCloseAt.ToString();
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        @if (ClientTime.Now < protestsOpenAt)
-                        {
-                            <div class="alert alert-warning">
-                                Protests can be filed after @protestsOpenAt.ToString();
-                            </div>
-                        }
-                        else if (ClientTime.Now > protestsCloseAt)
-                        {
-                            <div class="alert alert-warning">
-                                    Protest period ended on @protestsCloseAt.ToString();
-                            </div>
-                        }
-                    }
-                }
-                break;
-            default:
-                break;
+            <MudTabs Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
+                <MudTabPanel Text="Reviews" OnClick="@(() => NavigateTo(GetTabLink(0)))" />
+                <MudTabPanel Text="Protests" OnClick="@(() => NavigateTo(GetTabLink(1)))" />
+            </MudTabs>
         }
-    </MudStack>
 
-    </CascadingValue>
-    </CascadingValue>
-    </CascadingValue>
-    </CascadingValue>
+        <CascadingValue Value=@Bind(ReviewsVm, x => x.EventCars)>
+            <CascadingValue Value=ReviewsVm.LeagueUsers>
+                <CascadingValue Value=ReviewsVm.LeagueUsers.AsEnumerable()>
+                    <CascadingValue Value=ReviewsVm.VoteCategories.AsEnumerable()>
+
+                        <MudStack Spacing="5" Class="py-4">
+                            @switch (SelectedTabIndex)
+                            {
+                                case 0:
+                                    @if (ReviewsVm.Reviews.Count == 0)
+                                    {
+                                        <MudPaper Elevation="5" Class="py-4 px-6">
+                                            <MudText Typo="Typo.h5">No Reviews</MudText>
+                                        </MudPaper>
+                                    }
+                                    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
+                                        <Authorized>
+                                            @foreach (var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
+                                            {
+                                                <ReviewCard Review=review
+                                                            Selected=@(review.ReviewId == SelectedReviewId)
+                                                            OnEditClick=@(async () => await OnEditClick(review))
+                                                            OnDeleteClick=@(async () => await OnDeleteClick(review))
+                                                            IsSteward=true
+                                                            ReadOnly=@ReadOnly
+                                                            UserId=@UserId />
+                                            }
+                                            @if (ReadOnly == false)
+                                            {
+                                                <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" ButtonType="ButtonType.Button" OnClick=OnAddClick>Add Review</MudButton>
+                                            }
+                                        </Authorized>
+                                        <NotAuthorized>
+                                            @foreach (var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
+                                            {
+                                                <ReviewCard Review=review Selected=@(review.ReviewId == SelectedReviewId) />
+                                            }
+                                        </NotAuthorized>
+                                    </AuthorizeView>
+                                    break;
+                                case 1:
+                                    @if (ReviewsVm.Protests.Count == 0 && ReviewsVm.ProtestsPublic)
+                                    {
+                                        <p class="results-scoring"><em>No Protests</em></p>
+                                    }
+                                    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
+                                        <Authorized>
+                                            @foreach (var protest in @Bind(ReviewsVm, x => x.Protests))
+                                            {
+                                                <ProtestCard class="px-0 mb-2 mx-0"
+                                                             Protest=protest
+                                                             OnCreateReviewClick="@(() => OnCreateReviewFromProtestClick(protest))"
+                                                             OnDeleteClick=@(() => OnProtestDeleteClick(protest)) />
+                                            }
+                                        </Authorized>
+                                        <NotAuthorized>
+                                            @foreach (var protest in @Bind(ReviewsVm, x => x.Protests))
+                                            {
+                                                <ProtestCard class="px-0 mb-2 mx-0" Protest=protest />
+                                            }
+                                        </NotAuthorized>
+                                    </AuthorizeView>
+                                    @if (Event is not null && Event.HasResult)
+                                    {
+                                        var protestsOpenAt = Event.End + ReviewsVm.CooldownPeriod;
+                                        var protestsCloseAt = Event.End + ReviewsVm.ProtestClosedAfter;
+                                        @if (ReviewsVm.CanFileProtest(Event))
+                                        {
+                                            <button class="btn btn-outline-secondary mb-3" type="button" @onclick=@(() => NavigationManager.NavigateTo($"./{LeagueName}/Protests/Events/{EventId}"))>File Protest</button>
+                                            @if (ReviewsVm.ProtestClosedAfter > TimeSpan.Zero)
+                                            {
+                                                <div class="alert alert-info">
+                                                    Protests can be filed until @protestsCloseAt.ToString();
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            @if (ClientTime.Now < protestsOpenAt)
+                                            {
+                                                <div class="alert alert-warning">
+                                                    Protests can be filed after @protestsOpenAt.ToString();
+                                                </div>
+                                            }
+                                            else if (ClientTime.Now > protestsCloseAt)
+                                            {
+                                                <div class="alert alert-warning">
+                                                    Protest period ended on @protestsCloseAt.ToString();
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        </MudStack>
+
+                    </CascadingValue>
+                </CascadingValue>
+            </CascadingValue>
+        </CascadingValue>
+    </MudElement>
 </MudContainer>
 
 @code {
@@ -152,7 +157,7 @@
     private const string reviewIdParam = "reviewId";
 
     private int selectedTabIndex;
-    private int SelectedTabIndex 
+    private int SelectedTabIndex
     {
         get => selectedTabIndex;
         set
@@ -298,13 +303,13 @@
     private async Task OnCreateReviewFromProtestClick(ProtestViewModel protest)
     {
         var review = new ReviewModel()
-        {
-            SessionId = protest.SessionId,
-            OnLap = protest.OnLap,
-            Corner = protest.Corner,
-            InvolvedMembers = protest.InvolvedMembers.ToList(),
-            FullDescription = protest.FullDescription,
-        };
+            {
+                SessionId = protest.SessionId,
+                OnLap = protest.OnLap,
+                Corner = protest.Corner,
+                InvolvedMembers = protest.InvolvedMembers.ToList(),
+                FullDescription = protest.FullDescription,
+            };
         if (review.InvolvedMembers.Any(x => x.MemberId == protest.Author.MemberId) == false)
         {
             review.InvolvedMembers.Add(protest.Author);

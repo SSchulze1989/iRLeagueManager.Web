@@ -14,7 +14,9 @@
 @inherits LeagueComponentBase
 @inject StandingsPageViewModel vm
 
-<PageTitle>Standings - @LeagueName</PageTitle>
+<PageTitle>
+    Standings - @LeagueName
+</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
     <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
@@ -22,37 +24,39 @@
             <MudText Typo="Typo.h5">Standings</MudText>
         </HeaderText>
         <HeaderActions>
-            <EventSelect/>
+            <EventSelect />
         </HeaderActions>
     </LoadingHeader>
 
-    @if (@Bind(vm, x => x.Standings).Count == 0)
-    {
-        <MudPaper Elevation="1">
-            <MudText Typo="Typo.h5" Class="ma-2 ml-6">No Standings</MudText>
-        </MudPaper>
-    }
-    else
-    {
-        @if (vm.Standings.Count > 1)
+    <MudElement HtmlTag="div" Class="mt-3">
+        @if (@Bind(vm, x => x.Standings).Count == 0)
         {
-            <MudTabs @bind-ActivePanelIndex="@vm.SelectedStandingIndex" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
-                @foreach ((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x, i)))
-                {
-                    <MudTabPanel Text="@standing.Name">
-                        <MudPaper Elevation="4" Class="mt-2">
-                            <DisplayStanding class="px-0 mb-2 mx-0" Standing="standing" />
-                        </MudPaper>
-                    </MudTabPanel>
-                }
-            </MudTabs>
+            <MudPaper Elevation="5" Class="py-4 px-6">
+                <MudText Typo="Typo.h5">No Standings</MudText>
+            </MudPaper>
         }
         else
         {
-            var standing = vm.Standings.First();
-            <DisplayStanding class="px-0 mb-2 mx-0" Standing="standing" />
+            @if (vm.Standings.Count > 1)
+            {
+                <MudTabs @bind-ActivePanelIndex="@vm.SelectedStandingIndex" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
+                    @foreach ((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x, i)))
+                    {
+                        <MudTabPanel Text="@standing.Name">
+                            <MudPaper Elevation="4" Class="mt-2">
+                                <DisplayStanding class="px-0 mb-2 mx-0" Standing="standing" />
+                            </MudPaper>
+                        </MudTabPanel>
+                    }
+                </MudTabs>
+            }
+            else
+            {
+                var standing = vm.Standings.First();
+                <DisplayStanding class="px-0 mb-2 mx-0" Standing="standing" />
+            }
         }
-    }
+    </MudElement>
 </MudContainer>
 
 @code {

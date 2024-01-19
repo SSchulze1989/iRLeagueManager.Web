@@ -13,7 +13,9 @@
 @inherits LeagueComponentBase
 @inject ResultsPageViewModel vm
 
-<PageTitle>Results - @LeagueName</PageTitle>
+<PageTitle>
+    Results - @LeagueName
+</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
     <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
@@ -27,8 +29,8 @@
                 <Authorized>
                     @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
                     {
-                        <MudButton OnClick=TriggerCalculation 
-                                    Variant="Variant.Text">
+                        <MudButton OnClick=TriggerCalculation
+                                   Variant="Variant.Text">
                             Calculate
                         </MudButton>
                         @if (vm.Results.Count > 0)
@@ -37,8 +39,8 @@
                                         Delay="0.5"
                                         Arrow="true">
                                 <MudIconButton Variant="Variant.Text"
-                                                Icon="@Icons.Material.Filled.Delete" 
-                                                Color="@Color.Error" OnClick=DeleteResultsClick/>
+                                               Icon="@Icons.Material.Filled.Delete"
+                                               Color="@Color.Error" OnClick=DeleteResultsClick />
                             </MudTooltip>
                         }
                     }
@@ -47,25 +49,25 @@
         </HeaderActions>
     </LoadingHeader>
 
-
-    @if (@Bind(vm, x => x.Results)?.Count == 0)
-    {
-        <MudPaper Elevation="5" Class="py-4 px-6">
-            <MudText Typo="Typo.h5">No Results</MudText>
-        </MudPaper>
-    }
-    else
-    {
-        @if (vm.Results.Count > 1)
+    <MudElement HtmlTag="div" Class="mt-3">
+        @if (@Bind(vm, x => x.Results)?.Count == 0)
         {
-            <MudTabs @bind-ActivePanelIndex="@SelectedTabIndex" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
-                @foreach ((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x, i)))
-                {
-                    <MudTabPanel Text="@eventResult.Name">
-                        <MudStack Class="gap-2 pt-2">
-                            @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
-                            {
-                                @*<MudPaper Elevation="4" >*@
+            <MudPaper Elevation="5" Class="py-4 px-6">
+                <MudText Typo="Typo.h5">No Results</MudText>
+            </MudPaper>
+        }
+        else
+        {
+            @if (vm.Results.Count > 1)
+            {
+                <MudTabs @bind-ActivePanelIndex="@SelectedTabIndex" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
+                    @foreach ((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x, i)))
+                    {
+                        <MudTabPanel Text="@eventResult.Name">
+                            <MudStack Class="gap-2 pt-2">
+                                @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
+                                {
+                                    @*<MudPaper Elevation="4" >*@
                                     <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
                                         <Authorized>
                                             <DisplayResult Result="result" CanEdit="true" />
@@ -74,20 +76,20 @@
                                             <DisplayResult Result="result" />
                                         </NotAuthorized>
                                     </AuthorizeView>
-                                @*</MudPaper>*@
-                            }
-                        </MudStack>
-                    </MudTabPanel>
-                }
-            </MudTabs>
-        }
-        else
-        {
-            var eventResult = vm.Results.First();
-            <MudStack Class="gap-2">
-                @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
-                {
-                    @*<MudPaper Elevation="2" >*@
+                                    @*</MudPaper>*@
+                                }
+                            </MudStack>
+                        </MudTabPanel>
+                    }
+                </MudTabs>
+            }
+            else
+            {
+                var eventResult = vm.Results.First();
+                <MudStack Class="gap-2">
+                    @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
+                    {
+                        @*<MudPaper Elevation="2" >*@
                         <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
                             <Authorized>
                                 <DisplayResult Result="result" CanEdit="true" />
@@ -96,11 +98,12 @@
                                 <DisplayResult Result="result" />
                             </NotAuthorized>
                         </AuthorizeView>
-                    @*</MudPaper>*@
-                }
-            </MudStack>
+                        @*</MudPaper>*@
+                    }
+                </MudStack>
+            }
         }
-    }
+    </MudElement>
 
     <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
         <Authorized>
@@ -206,7 +209,7 @@
         var result = await ModalService.Show<ConfirmModal>("Delete Results", parameters).Result;
         if (result.Confirmed)
         {
-            await vm.DeleteEventResults();   
+            await vm.DeleteEventResults();
         }
     }
 }

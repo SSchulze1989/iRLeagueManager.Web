@@ -15,6 +15,7 @@ using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using Blazored.Toast;
 using MudBlazor.Services;
+using MudBlazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,7 +63,10 @@ builder.Services.AddAuthorization(config =>
 builder.Services.AddLocalization();
 builder.Services.AddMarkdown();
 
-builder.Services.AddMudServices();
+builder.Services.AddMudServices(config =>
+{
+    config.PopoverOptions.Mode = PopoverMode.Legacy;
+});
 
 var app = builder.Build();
 

@@ -12,10 +12,10 @@
                           Text="@ChampSeason.ChampionshipName"
                           HelperText="@(string.IsNullOrEmpty(ChampSeason.ChampionshipDisplayName) ? "" : ChampSeason.ChampionshipDisplayName)"
                           OnClick="ChampionshipNameClick" />
-            <SettingsSelectPrompt @bind-Value="ChampSeason.ResultKind" Label="Type" HelperText="Championship type: Member or Team">
-                <MudSelectItem Value="ResultKind.Member" />
-                <MudSelectItem Value="ResultKind.Team" />
-            </SettingsSelectPrompt>
+            <SettingsSelectPrompt @bind-Value="ChampSeason.ResultKind"
+                                  Label="Type"
+                                  HelperText="Championship type: Member or Team"
+                                  Items="@(new[] { ResultKind.Member, ResultKind.Team })" />
         </SettingsTopSection>
         <SettingsTopSection Header="Race Points">
             @if (multiplePointconfigs)

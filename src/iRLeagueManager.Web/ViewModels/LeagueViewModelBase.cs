@@ -3,27 +3,26 @@ using iRLeagueApiCore.Client.Endpoints.Seasons;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Shared;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using MvvmBlazor.ViewModel;
 using System.Runtime.CompilerServices;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public abstract class LeagueViewModelBase<T> : ViewModelBase, IModelState, IDisposable
-    where T : LeagueViewModelBase<T>
+public abstract class LeagueViewModelBase : ViewModelBase, IDisposable
 {
     public LeagueViewModelBase(ILoggerFactory loggerFactory, LeagueApiService apiService)
     {
         LoggerFactory = loggerFactory;
-        Logger = loggerFactory.CreateLogger<T>();
-        this.ApiService = apiService;
+        ApiService = apiService;
     }
 
     protected ILoggerFactory LoggerFactory { get; }
-    protected ILogger<T> Logger { get; }
     protected LeagueApiService ApiService { get; }
     protected CancellationTokenSource Cts { get; } = new();
     protected ILeagueByNameEndpoint? CurrentLeague => ApiService.CurrentLeague;
     protected ISeasonByIdEndpoint? CurrentSeason => ApiService.CurrentSeason;
+    internal LeagueViewModelBase? ParentViewModel { get; set; }
 
     private bool loading;
     public bool Loading
@@ -31,7 +30,7 @@ public abstract class LeagueViewModelBase<T> : ViewModelBase, IModelState, IDisp
         get => loading;
         protected set
         {
-            if(Set(ref loading, value))
+            if (Set(ref loading, value))
             {
                 ApiService.Shared.LoadingCount += loading ? 1 : -1;
             }
@@ -84,7 +83,15 @@ public abstract class LeagueViewModelBase<T> : ViewModelBase, IModelState, IDisp
         if (Loading == false)
         {
             HasChanged?.Invoke(this, EventArgs.Empty);
+            ParentViewModel?.OnHasChanged();
         }
+    }
+
+    public void TriggerHasChanged()
+    {
+        HasChanges = true;
+        OnHasChanged();
+        OnPropertyChanged();
     }
 
     protected static StatusResult LeagueNullResult() =>
@@ -107,6 +114,17 @@ public abstract class LeagueViewModelBase<T> : ViewModelBase, IModelState, IDisp
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
+}
+
+public abstract class LeagueViewModelBase<T> : LeagueViewModelBase, IModelState
+    where T : LeagueViewModelBase<T>
+{
+    public LeagueViewModelBase(ILoggerFactory loggerFactory, LeagueApiService apiService) : base(loggerFactory, apiService) 
+    {
+        Logger = loggerFactory.CreateLogger<T>();
+    }
+
+    protected ILogger<T> Logger { get; }
 }
 
 public abstract class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelBase<TViewModel>

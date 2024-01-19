@@ -1,0 +1,133 @@
+﻿@using iRLeagueApiCore.Common.Enums
+@using iRLeagueManager.Web.Components.Dialogs
+@typeparam T
+@inherits SettingBase
+@inject IDialogService DialogService
+
+<SettingsSection Label="@Label"
+                 Text="@Text"
+                 HelperText="@HelperText"
+                 Expanded="Expanded"
+                 ExpandedChanged="ExpandedChanged"
+                 InitiallyExpanded="InitiallyExpanded">
+    @foreach (var (item, index) in itemsList.WithIndex())
+    {
+        <SettingsSelectPrompt Value="item"
+                              ValueChanged="@(async (T value) => { itemsList[index] = value; await ItemsChanged.InvokeAsync(itemsList); })"
+                              DialogHeader="Select sorting condition"
+                              Class="hover-box"
+                              Items="ItemsSource">
+            <ChildContent>
+                <MudStack Row="true" Spacing="0" Class="me-8">
+                    <MudText>
+                        @(index + 1). @ToStringFunc(item)
+                    </MudText>
+                    <MudSpacer />
+                    @if (index > 0)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward"
+                                       Class="opaque hover-box-show"
+                                       Size="Size.Small"
+                                       OnClick="@(() => MoveUp(index))" />
+                    }
+                    @if (index < itemsList.Count - 1)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward"
+                                       Class="opaque hover-box-show"
+                                       Size="Size.Small"
+                                       OnClick="@(() => MoveDown(index))" />
+                    }
+                    <MudIconButton Icon="@Icons.Material.Outlined.Delete"
+                                   Color="Color.Error"
+                                   Class="opaque hover-box-show"
+                                   Size="Size.Small"
+                                   OnClick="@(() => RemoveItemClick(index))" />
+                </MudStack>
+            </ChildContent>
+            <ItemTemplate Context="SelectItem">
+                @ToStringFunc(SelectItem)
+            </ItemTemplate>
+        </SettingsSelectPrompt>
+    }
+    <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary" OnClick="@(() => AddItemClick())">
+        <MudText Color="Color.Tertiary">Add Sort Condition</MudText>
+    </MudListItem>
+</SettingsSection>
+
+@code {
+    [Parameter] public IEnumerable<T> Items { get; set; } = Array.Empty<T>();
+    [Parameter] public EventCallback<IEnumerable<T>> ItemsChanged { get; set; }
+    [Parameter] public IEnumerable<T> ItemsSource { get; set; } = Array.Empty<T>();
+    [Parameter] public bool Expanded { get; set; } = false;
+    [Parameter] public bool InitiallyExpanded { get; set; } = false;
+    [Parameter] public EventCallback<bool> ExpandedChanged { get; set; }
+    [Parameter] public Func<T, string> ToStringFunc { get; set; } = x => x?.ToString() ?? string.Empty;
+
+    private IList<T> itemsList { get; set; } = new List<T>();
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        itemsList = Items is IList<T> list ? list : Items.ToList();
+    }
+
+    private void MoveUp(int index)
+    {
+        if (index < 1 || index >= itemsList.Count)
+        {
+            return;
+        }
+        var tmp = itemsList[index];
+        itemsList[index] = itemsList[index - 1];
+        itemsList[index - 1] = tmp;
+        ItemsChanged.InvokeAsync(itemsList);
+    }
+
+    private void MoveDown(int index)
+    {
+        if (index < 0 || index >= itemsList.Count - 1)
+        {
+            return;
+        }
+        var tmp = itemsList[index];
+        itemsList[index] = itemsList[index + 1];
+        itemsList[index + 1] = tmp;
+        ItemsChanged.InvokeAsync(itemsList);
+    }
+
+    private async Task AddItemClick()
+    {
+        var parameters = new DialogParameters<SelectPromptDialog<T?>>()
+        {
+            { x => x.Label, "Sorting Condition" },
+            { x => x.Items, ItemsSource.Cast<T?>() },
+            { x => x.ToStringFunc, ToStringFunc },
+        };
+        var result = await DialogService.Show<SelectPromptDialog<T?>>("Add Item", parameters).Result;
+        if (result.Canceled || result.Data is T item == false)
+        {
+            return;
+        }
+        itemsList.Add(item);
+        await ItemsChanged.InvokeAsync(itemsList);
+    }
+
+    private async Task RemoveItemClick(int index)
+    {
+        if (index < 0 || index >= itemsList.Count)
+        {
+            return;
+        }
+        var parameters = new DialogParameters<MudConfirmModal>()
+        {
+            { x => x.Text, $"Delete {itemsList[index]}?" },
+        };
+        var result = await DialogService.Show<MudConfirmModal>("Delete item", parameters).Result;
+        if (result.Canceled)
+        {
+            return;
+        }
+        itemsList.RemoveAt(index);
+        await ItemsChanged.InvokeAsync(itemsList);
+    }
+}

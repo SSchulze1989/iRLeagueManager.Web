@@ -462,12 +462,13 @@ a, .btn-link {
 
 }
 
-.hover-box-show {
-    visibility: hidden;
+.opaque {
+    opacity: 25%;
 }
 
 .hover-box:hover .hover-box-show {
-    visibility: visible;
+    visibility: visible !important;
+    opacity: 100% !important;
 }
 
 @media (min-width: 1600px) {

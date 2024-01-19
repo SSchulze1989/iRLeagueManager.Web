@@ -30,7 +30,7 @@
             @FilterTextUtils.GetConditionText(condition, members: LeagueMembers, teams: Teams)
         </MudTd>
         <MudTd Style="max-width: 3em">
-            <MudStack Row="true" Spacing="0" Justify="Justify.FlexEnd" Class="hover-box-show">
+            <MudStack Row="true" Spacing="0" Justify="Justify.Center" Class="opaque hover-box-show">
                 @if (index > 0)
                 {
                     <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" OnClick="@(() => MoveUpClick(filter))" />
@@ -42,7 +42,7 @@
             </MudStack>
         </MudTd>
         <MudTd Style="max-width: 3em">
-            <MudIconButton Icon="@Icons.Material.Outlined.Delete" Size="Size.Small" Color="Color.Error" />
+            <MudIconButton Icon="@Icons.Material.Outlined.Delete" Class="opaque hover-box-show" Size="Size.Small" Color="Color.Error" />
         </MudTd>
     </RowTemplate>
 </MudTable>

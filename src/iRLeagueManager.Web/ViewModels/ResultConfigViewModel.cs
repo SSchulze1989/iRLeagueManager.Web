@@ -80,9 +80,16 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
     public override void SetModel(ResultConfigModel model)
     {
         base.SetModel(model);
-        Scorings = new(model.Scorings.Select(scoringModel => new ScoringViewModel(LoggerFactory, ApiService, scoringModel)));
+        Scorings = new(model.Scorings.Select(NewScoringViewModel));
         FiltersForResult = new(model.FiltersForResult.Select(filter => new ResultFilterViewModel(LoggerFactory, ApiService, filter)));
         ResetChangedState();
+    }
+
+    private ScoringViewModel NewScoringViewModel(ScoringModel model)
+    {
+        var scoringViewModel = new ScoringViewModel(LoggerFactory, ApiService, model);
+        scoringViewModel.ParentViewModel = this;
+        return scoringViewModel;
     }
 
     public async Task<StatusResult> Load(long resultConfigId, CancellationToken cancellationToken = default)
@@ -194,11 +201,13 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         }
     }
 
+    
+
     public ScoringViewModel AddScoring()
     {
         var scoring = new ScoringModel() { Name = "New Scoring" };
         model.Scorings.Add(scoring);
-        var newScoring = new ScoringViewModel(LoggerFactory, ApiService, scoring);
+        var newScoring = NewScoringViewModel(scoring);
         Scorings.Add(newScoring);
         UpdateScoringIndex();
         return newScoring;

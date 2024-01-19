@@ -2,6 +2,7 @@
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.Components.Dialogs
+@inherits UtilityComponentBase
 @inject IDialogService DialogService
 
 <SettingsTopSection Header="Options">
@@ -13,24 +14,24 @@
                       OnClick="NameClick" />
     }
 
-    <SettingsSection Text="Finishing Order" HelperText="" @bind-Expanded="finishOrderExpanded">
-        @{
-            var options = Config.Scorings.FirstOrDefault()?.PointRule.PointsSortOptions;
-        }
-        @if (options is not null)
-        {
-            @foreach (var (option, index) in options.WithIndex())
-            {
-                <SettingsItem>
-                    @(index + 1). @option.GetText()
-                </SettingsItem>
-            }
-        }
-    </SettingsSection>
+    <SettingsListItem @bind-Items="PointsSortOptions"
+                      Text="Finish order before Points"
+                      HelperText="@GetSortingHelperText(PointsSortOptions)"
+                      ItemsSource="Enum.GetValues<SortOptions>()"
+                      ToStringFunc="@(x => x.GetText())"
+                      @bind-Expanded="finishOrderExpanded" />
+
+    <SettingsListItem @bind-Items="FinalSortOptions"
+                      Text="Final order after Points"
+                      HelperText="@GetSortingHelperText(FinalSortOptions)"
+                      ItemsSource="Enum.GetValues<SortOptions>()"
+                      ToStringFunc="@(x => x.GetText())"
+                      @bind-Expanded="finalOrderExpanded" />
 
     <SettingsSwitch @bind-Checked="EnableHeatRaces"
                     Text="Enable Heat Races"
                     HelperText="Allow multiple races per event" />
+
     <MudCollapse Expanded="EnableHeatRaces">
         <SettingsTextPrompt Value="RaceCount"
                             ValueChanged="@((int count) => RaceCountChanged(count))"
@@ -44,7 +45,7 @@
                      @bind-Expanded="filtersExpanded"
                      InitiallyExpanded="false"
                      HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
-        <FilterTable @bind-Filters="Config.FiltersForPoints" OnRowClick="OnFilterRowClick" />
+        <FilterTable Filters="Config.FiltersForPoints" OnRowClick="OnFilterRowClick" />
         <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary">
             <MudText Color="Color.Tertiary">Add Filter</MudText>
         </MudListItem>
@@ -61,7 +62,40 @@
     private int RaceCount { get; set; }
 
     private bool finishOrderExpanded = false;
+    private bool finalOrderExpanded = false;
     private bool filtersExpanded = false;
+
+    private IEnumerable<SortOptions> PointsSortOptions
+    {
+        get => Config.Scorings.FirstOrDefault()?.PointRule.PointsSortOptions ?? Array.Empty<SortOptions>();
+        set
+        {
+            var list = value.ToList();
+            foreach (var scoring in Config.Scorings)
+            {
+                scoring.PointRule.PointsSortOptions = list;
+            }
+        }
+    }
+
+    private IEnumerable<SortOptions> FinalSortOptions
+    {
+        get => Config.Scorings.FirstOrDefault()?.PointRule.FinalSortOptions ?? Array.Empty<SortOptions>();
+        set
+        {
+            var list = value.ToList();
+            foreach (var scoring in Config.Scorings)
+            {
+                scoring.PointRule.FinalSortOptions = list;
+            }
+        }
+    }
+
+    private enum SortOptionsSelect
+    {
+        Points,
+        Final,
+    };
 
     protected override void OnParametersSet()
     {
@@ -106,5 +140,25 @@
     private void RaceCountChanged(int count)
     {
 
+    }
+
+    private string GetSortingHelperText(IEnumerable<SortOptions> sortOptions)
+    {
+        if (sortOptions.Count() == 0)
+        {
+            return "";
+        }
+        var sb = new StringBuilder();
+        if (sortOptions.Count() > 1)
+        {
+            sb.Append("First ");
+        }
+        sb.Append(sortOptions.First().GetText());
+        foreach (var option in sortOptions.Skip(1))
+        {
+            sb.Append(", then ");
+            sb.Append(option.GetText());
+        }
+        return sb.ToString();
     }
 }

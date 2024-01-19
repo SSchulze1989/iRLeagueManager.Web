@@ -149,6 +149,9 @@ else
 
     private async void ViewModelChanged(object? sender, EventArgs e)
     {
+        // Disable sync with database for preview
+        return;
+
         if (sender is ChampSeasonViewModel champSeason)
         {
             await champSeason.SaveChangesAsync(CancellationToken);

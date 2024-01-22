@@ -16,6 +16,12 @@ public static class EnumerableExtensions
         return enumerable.Min();
     }
 
+    /// <summary>
+    /// Returs an enumerable with index for each item
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="enumerable"></param>
+    /// <returns></returns>
     public static IEnumerable<(T item, int index)> WithIndex<T>(this IEnumerable<T> enumerable)
     {
         return enumerable.Select((x, i) => (x, i));

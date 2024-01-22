@@ -16,6 +16,7 @@ public sealed class ScoringViewModel : LeagueViewModelBase<ScoringViewModel, Sco
     public long LeagueId => model.LeagueId;
     [Required]
     public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
+    public int Index { get => model.Index; set => SetP(model.Index, value => model.Index = value, value); }
     public bool ShowResults { get => model.ShowResults; set => SetP(model.ShowResults, value => model.ShowResults = value, value); }
     public bool IsCombinedResult { get => model.IsCombinedResult; set => SetP(model.IsCombinedResult, value => model.IsCombinedResult = value, value); }
     public bool UseResultSetTeam { get => model.UseResultSetTeam; set => SetP(model.UseResultSetTeam, value => model.UseResultSetTeam = value, value); }

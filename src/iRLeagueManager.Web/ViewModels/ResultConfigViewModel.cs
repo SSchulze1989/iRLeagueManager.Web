@@ -77,6 +77,8 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
     private ObservableCollection<TeamModel> teams;
     public ObservableCollection<TeamModel> Teams { get => teams; set => Set(ref teams, value); }
 
+    public int RaceCount { get => Scorings.Where(x => !x.IsCombinedResult).Count(); set => SetRaceCount(value); }
+
     public override void SetModel(ResultConfigModel model)
     {
         base.SetModel(model);
@@ -183,9 +185,11 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         try
         {
             Loading = true;
+
+            UpdateModelScorings();
             var request = ApiService.CurrentLeague.ResultConfigs()
-            .WithId(ResultConfigId)
-            .Put(model, cancellationToken);
+                .WithId(ResultConfigId)
+                .Put(model, cancellationToken);
             var result = await request;
 
             if (result.Success && result.Content is not null)
@@ -201,36 +205,40 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         }
     }
 
-    
-
     public ScoringViewModel AddScoring()
     {
-        var scoring = new ScoringModel() { Name = "New Scoring" };
-        model.Scorings.Add(scoring);
-        var newScoring = NewScoringViewModel(scoring);
-        Scorings.Add(newScoring);
+        var scoring = model.Scorings
+            .Where(x => x.IsCombinedResult == false)
+            .ElementAtOrDefault(RaceCount)
+            ?? new ScoringModel() { Name = $"Race {RaceCount + 1}" };
+        var scoringViewModel = NewScoringViewModel(scoring);
+        Scorings.Insert(RaceCount, (scoringViewModel));
         UpdateScoringIndex();
-        return newScoring;
+        return scoringViewModel;
     }
 
     public void RemoveScoring(ScoringViewModel scoring)
     {
         Scorings.Remove(scoring);
-        model.Scorings.Remove(scoring.GetModel());
         UpdateScoringIndex();
     }
 
     private void UpdateScoringIndex()
     {
-        foreach (var (scoring, index) in model.Scorings.Where(x => x.IsCombinedResult == false).Select((x, i) => (x, i)))
+        foreach (var (scoring, index) in Scorings.Where(x => x.IsCombinedResult == false).WithIndex())
         {
             scoring.Index = index;
         }
-        var combinedScoring = model.Scorings.FirstOrDefault(x => x.IsCombinedResult);
+        var combinedScoring = Scorings.FirstOrDefault(x => x.IsCombinedResult);
         if (combinedScoring != null)
         {
             combinedScoring.Index = 999;
         }
+    }
+
+    private void UpdateModelScorings()
+    {
+        model.Scorings = Scorings.Select(x => x.GetModel()).ToList();
     }
 
     public ResultConfigInfoModel? GetConfigInfoModel(ResultConfigModel? model)
@@ -247,5 +255,17 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
             LeagueId = model.LeagueId,
             ResultConfigId = model.ResultConfigId,
         };
+    }
+
+    private void SetRaceCount(int count)
+    {
+        while (count < RaceCount && RaceCount > 0)
+        {
+            RemoveScoring(Scorings.Last());
+        }
+        while (count > RaceCount)
+        {
+            AddScoring();
+        }
     }
 }

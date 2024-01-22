@@ -1,0 +1,50 @@
+﻿@using System.Text
+@using iRLeagueApiCore.Common.Enums
+<SettingsListItem Items="Scoring.PointRule.PointsSortOptions"
+                  ItemsChanged="@((IEnumerable<SortOptions> options) => Scoring.PointRule.PointsSortOptions = options.ToList())"
+                  Text="Finish order before Points"
+                  HelperText="@GetSortingHelperText(Scoring.PointRule.PointsSortOptions)"
+                  ItemsSource="Enum.GetValues<SortOptions>()"
+                  ToStringFunc="@(x => x.GetText())"
+                  @bind-Expanded="finishOrderExpanded" />
+
+<SettingsListItem Items="Scoring.PointRule.FinalSortOptions"
+                  ItemsChanged="@((IEnumerable<SortOptions> options) => Scoring.PointRule.FinalSortOptions = options.ToList())"
+                  Text="Final order after Points"
+                  HelperText="@GetSortingHelperText(Scoring.PointRule.FinalSortOptions)"
+                  ItemsSource="Enum.GetValues<SortOptions>()"
+                  ToStringFunc="@(x => x.GetText())"
+                  @bind-Expanded="finalOrderExpanded" />
+
+@code {
+    [Parameter] public ScoringViewModel Scoring { get; set; } = default!;
+
+    private bool finishOrderExpanded = false;
+    private bool finalOrderExpanded = false;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, Scoring);
+    }
+
+    private string GetSortingHelperText(IEnumerable<SortOptions> sortOptions)
+    {
+        if (sortOptions.Count() == 0)
+        {
+            return "Keep order";
+        }
+        var sb = new StringBuilder();
+        if (sortOptions.Count() > 1)
+        {
+            sb.Append("Order by ");
+        }
+        sb.Append(sortOptions.First().GetText());
+        foreach (var option in sortOptions.Skip(1))
+        {
+            sb.Append(", then by ");
+            sb.Append(option.GetText());
+        }
+        return sb.ToString();
+    }
+}

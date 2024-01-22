@@ -5,38 +5,54 @@
 @inherits UtilityComponentBase
 @inject IDialogService DialogService
 
-<SettingsTopSection Header="Options">
-    @if (AllowEditName)
-    {
+@if (AllowEditName)
+{
+    <SettingsTopSection Header="Name">
         <SettingsItem Label="Name"
                       Text="@Config.Name"
                       HelperText="@(string.IsNullOrEmpty(Config.DisplayName) ? "" : Config.DisplayName)"
                       OnClick="NameClick" />
+    </SettingsTopSection>
+}
+
+
+<SettingsTopSection Header="Sessions">
+    <MudListSubheader Class="pb-0">
+        Set points and finish order
+    </MudListSubheader>
+
+    @if (Config.Scorings.Count == 1)
+    {
+        <ScoringSettings Scoring="Config.Scorings.First()" />
+    }
+    else
+    {
+        @foreach (var (scoring, index) in Config.Scorings.WithIndex())
+        {
+            <SettingsSection Text="@scoring.Name" HelperText="@(scoring.IsCombinedResult ? "Combined result" : "Heat session result")">
+                <ScoringSettings Scoring="scoring" />
+            </SettingsSection>
+        }
     }
 
-    <SettingsListItem @bind-Items="PointsSortOptions"
-                      Text="Finish order before Points"
-                      HelperText="@GetSortingHelperText(PointsSortOptions)"
-                      ItemsSource="Enum.GetValues<SortOptions>()"
-                      ToStringFunc="@(x => x.GetText())"
-                      @bind-Expanded="finishOrderExpanded" />
+    <MudDivider Class="my-1" />
 
-    <SettingsListItem @bind-Items="FinalSortOptions"
-                      Text="Final order after Points"
-                      HelperText="@GetSortingHelperText(FinalSortOptions)"
-                      ItemsSource="Enum.GetValues<SortOptions>()"
-                      ToStringFunc="@(x => x.GetText())"
-                      @bind-Expanded="finalOrderExpanded" />
+    <MudListSubheader Class="pb-0">
+        More options
+    </MudListSubheader>
 
     <SettingsSwitch @bind-Checked="EnableHeatRaces"
-                    Text="Enable Heat Races"
-                    HelperText="Allow multiple races per event" />
+                    Text="Enable Heat Sessions"
+                    HelperText="Allow multiple race session per event" />
+
 
     <MudCollapse Expanded="EnableHeatRaces">
-        <SettingsTextPrompt Value="RaceCount"
-                            ValueChanged="@((int count) => RaceCountChanged(count))"
+        <SettingsTextPrompt @bind-Value="Config.RaceCount"
                             Label="Number of races"
                             HelperText="Number of races per event" />
+        <SettingsSwitch @bind-Checked="Config.CalculateCombinedResult"
+                        Text="Combined Result"
+                        HelperText="Calculate a combined result from individual heat sessions" />
     </MudCollapse>
 </SettingsTopSection>
 
@@ -59,10 +75,6 @@
     [Parameter] public bool AllowEditName { get; set; } = false;
 
     private bool EnableHeatRaces { get; set; }
-    private int RaceCount { get; set; }
-
-    private bool finishOrderExpanded = false;
-    private bool finalOrderExpanded = false;
     private bool filtersExpanded = false;
 
     private IEnumerable<SortOptions> PointsSortOptions
@@ -104,12 +116,7 @@
         BlazorParameterNullException.ThrowIfNull(this, Teams, cascading: true);
         BlazorParameterNullException.ThrowIfNull(this, Config);
 
-        var raceCount = Config.Scorings.Where(x => x.IsCombinedResult == false).Count();
-        if (RaceCount != raceCount)
-        {
-            RaceCount = raceCount;
-            EnableHeatRaces = RaceCount > 1;
-        }
+        EnableHeatRaces = Config.RaceCount > 1;
     }
 
     private async Task NameClick()
@@ -135,30 +142,5 @@
             { x => x.Teams, Teams },
         };
         var dialog = await DialogService.Show<FilterDialog>("Edit Condition", parameters).Result;
-    }
-
-    private void RaceCountChanged(int count)
-    {
-
-    }
-
-    private string GetSortingHelperText(IEnumerable<SortOptions> sortOptions)
-    {
-        if (sortOptions.Count() == 0)
-        {
-            return "";
-        }
-        var sb = new StringBuilder();
-        if (sortOptions.Count() > 1)
-        {
-            sb.Append("First ");
-        }
-        sb.Append(sortOptions.First().GetText());
-        foreach (var option in sortOptions.Skip(1))
-        {
-            sb.Append(", then ");
-            sb.Append(option.GetText());
-        }
-        return sb.ToString();
     }
 }

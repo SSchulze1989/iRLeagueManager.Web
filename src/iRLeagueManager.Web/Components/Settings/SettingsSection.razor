@@ -48,6 +48,7 @@
         else
         {
             Expanded = InitiallyExpanded;
+            ExpandedChanged = new EventCallback<bool>(this, (bool x) => Expanded = x);
         }
     }
 }

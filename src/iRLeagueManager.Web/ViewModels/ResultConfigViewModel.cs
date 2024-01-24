@@ -43,7 +43,7 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         {
             if (value && CalculateCombinedResult == false)
             {
-                var combined = AddScoring();
+                var combined = AddScoring(combined: true);
                 combined.Name = "Combined";
                 combined.ShowResults = true;
                 combined.IsCombinedResult = true;
@@ -89,8 +89,10 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
 
     private ScoringViewModel NewScoringViewModel(ScoringModel model)
     {
-        var scoringViewModel = new ScoringViewModel(LoggerFactory, ApiService, model);
-        scoringViewModel.ParentViewModel = this;
+        var scoringViewModel = new ScoringViewModel(LoggerFactory, ApiService, model)
+        {
+            ParentViewModel = this
+        };
         return scoringViewModel;
     }
 
@@ -205,21 +207,23 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         }
     }
 
-    public ScoringViewModel AddScoring()
+    public ScoringViewModel AddScoring(bool combined = false)
     {
         var scoring = model.Scorings
-            .Where(x => x.IsCombinedResult == false)
-            .ElementAtOrDefault(RaceCount)
+            .Where(x => x.IsCombinedResult == combined)
+            .ElementAtOrDefault(combined ? 0 : RaceCount)
             ?? new ScoringModel() { Name = $"Race {RaceCount + 1}" };
         var scoringViewModel = NewScoringViewModel(scoring);
         Scorings.Insert(RaceCount, (scoringViewModel));
         UpdateScoringIndex();
+        TriggerHasChanged();
         return scoringViewModel;
     }
 
     public void RemoveScoring(ScoringViewModel scoring)
     {
         Scorings.Remove(scoring);
+        TriggerHasChanged();
         UpdateScoringIndex();
     }
 

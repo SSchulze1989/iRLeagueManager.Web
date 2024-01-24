@@ -37,8 +37,10 @@ public sealed class ScoringViewModel : LeagueViewModelBase<ScoringViewModel, Sco
 
     private PointRuleViewModel NewPointRuleViewModel(PointRuleModel model)
     {
-        var viewModel = new PointRuleViewModel(LoggerFactory, ApiService, model);
-        viewModel.ParentViewModel = this;
+        var viewModel = new PointRuleViewModel(LoggerFactory, ApiService, model)
+        {
+            ParentViewModel = this
+        };
         return viewModel;
     }
 }

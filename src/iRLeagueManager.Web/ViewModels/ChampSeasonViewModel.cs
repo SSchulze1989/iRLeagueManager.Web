@@ -66,6 +66,15 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
     private ICollection<ResultConfigViewModel> resultConfigViewModels;
     public ICollection<ResultConfigViewModel> ResultConfigViewModels { get => resultConfigViewModels; set => Set(ref resultConfigViewModels, value); }
 
+    private ResultConfigViewModel NewResultConfigViewModel(ResultConfigModel model)
+    {
+        var viewModel = new ResultConfigViewModel(LoggerFactory, ApiService, model)
+        {
+            ParentViewModel = this,
+        };
+        return viewModel;
+    }
+
     public async Task<StatusResult> Load(long championshipId, CancellationToken cancellationToken = default)
     {
         if (CurrentLeague is null)
@@ -144,7 +153,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
                 }
                 configModels.Add(result.Content);
             }
-            ResultConfigViewModels = configModels.Select(x => new ResultConfigViewModel(LoggerFactory, ApiService, x)).ToList();
+            ResultConfigViewModels = configModels.Select(NewResultConfigViewModel).ToList();
             return StatusResult.SuccessResult();
         }
         finally

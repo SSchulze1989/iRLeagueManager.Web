@@ -83,7 +83,11 @@ public abstract class LeagueViewModelBase : ViewModelBase, IDisposable
         if (Loading == false)
         {
             HasChanged?.Invoke(this, EventArgs.Empty);
-            ParentViewModel?.OnHasChanged();
+            if (ParentViewModel is not null)
+            {
+                ParentViewModel.HasChanges |= HasChanges;
+                ParentViewModel.OnHasChanged();
+            }
         }
     }
 
@@ -99,6 +103,9 @@ public abstract class LeagueViewModelBase : ViewModelBase, IDisposable
 
     protected static StatusResult SeasonNullResult() =>
         StatusResult.FailedResult("Season Null", $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentSeason)} was null", Array.Empty<object>());
+
+    protected static StatusResult<T> LeagueNullResult<T>(T content) =>
+        StatusResult<T>.FailedResult("League Null", content, $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentSeason)}", Array.Empty<object>());
 
     protected virtual void Dispose(bool disposing)
     {

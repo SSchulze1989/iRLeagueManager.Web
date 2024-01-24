@@ -60,6 +60,7 @@ public static class Services
         services.TryAddScoped<ReviewSettingsViewModel>();
         services.TryAddScoped<TeamsViewModel>();
         services.TryAddScoped<BreadCrumbService>();
+        services.TryAddScoped<MemberServiceViewModel>();
         return services;
     }
 }

@@ -5,68 +5,59 @@
 @inherits UtilityComponentBase
 @inject IDialogService DialogService
 
-@if (AllowEditName)
-{
-    <SettingsTopSection Header="Name">
-        <SettingsItem Label="Name"
-                      Text="@Config.Name"
-                      HelperText="@(string.IsNullOrEmpty(Config.DisplayName) ? "" : Config.DisplayName)"
-                      OnClick="NameClick" />
-    </SettingsTopSection>
-}
-
-
-<SettingsTopSection Header="Sessions">
-    <MudListSubheader Class="pb-0">
-        Set points and finish order
-    </MudListSubheader>
-
-    @if (Config.Scorings.Count == 1)
-    {
-        <ScoringSettings Scoring="Config.Scorings.First()" />
-    }
-    else
-    {
-        @foreach (var (scoring, index) in Config.Scorings.WithIndex())
+<MudStack Spacing="2">
+    <SettingsTopSection Header="Sessions">
+        @if (AllowEditName)
         {
-            <SettingsSection Text="@scoring.Name" HelperText="@(scoring.IsCombinedResult ? "Combined result" : "Heat session result")">
-                <ScoringSettings Scoring="scoring" />
-            </SettingsSection>
+            <SettingsItem Label="Name"
+                          Text="@Config.Name"
+                          HelperText="@(string.IsNullOrEmpty(Config.DisplayName) ? "" : Config.DisplayName)"
+                          OnClick="NameClick" />
         }
-    }
 
-    <MudDivider Class="my-1" />
-
-    <MudListSubheader Class="pb-0">
-        More options
-    </MudListSubheader>
-
-    <SettingsSwitch @bind-Checked="EnableHeatRaces"
-                    Text="Enable Heat Sessions"
-                    HelperText="Allow multiple race session per event" />
+        <SettingsSwitch @bind-Checked="EnableHeatRaces"
+                        Text="Enable Heat Sessions"
+                        HelperText="Allow multiple race session per event" />
 
 
-    <MudCollapse Expanded="EnableHeatRaces">
-        <SettingsTextPrompt @bind-Value="Config.RaceCount"
-                            Label="Number of races"
-                            HelperText="Number of races per event" />
-        <SettingsSwitch @bind-Checked="Config.CalculateCombinedResult"
-                        Text="Combined Result"
-                        HelperText="Calculate a combined result from individual heat sessions" />
-    </MudCollapse>
-</SettingsTopSection>
+        <MudCollapse Expanded="EnableHeatRaces">
+            <SettingsTextPrompt @bind-Value="Config.RaceCount"
+                                Label="Number of races"
+                                HelperText="Number of races per event" />
+            <SettingsSwitch @bind-Checked="Config.CalculateCombinedResult"
+                            Text="Combined Result"
+                            HelperText="Calculate a combined result from individual heat sessions" />
+        </MudCollapse>
+    </SettingsTopSection>
 
-<SettingsTopSection Header="Advanced" Class="mt-4">
-    <SettingsSection Text="Conditions for Points"
-                     @bind-Expanded="filtersExpanded"
-                     InitiallyExpanded="false"
-                     HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
-        <FilterTable Filters="Config.FiltersForPoints" OnRowClick="OnFilterRowClick" />
-        <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary">
-            <MudText Color="Color.Tertiary">Add Filter</MudText>
-        </MudListItem>
-    </SettingsSection>
-</SettingsTopSection>
+    <SettingsTopSection Header="Points & Finish Order">
+        @if (Config.Scorings.Count == 1)
+        {
+            <ScoringSettings Scoring="Config.Scorings.First()" />
+        }
+        else
+        {
+            @foreach (var (scoring, index) in Config.Scorings.WithIndex())
+            {
+                <SettingsSection Text="@scoring.Name" HelperText="@(scoring.IsCombinedResult ? "Combined result" : "Heat session result")">
+                    <ScoringSettings Scoring="scoring" />
+                </SettingsSection>
+            }
+        }
+    </SettingsTopSection>
+
+    <SettingsTopSection Header="Advanced">
+        <SettingsSection Text="Conditions for Points"
+                         @bind-Expanded="filtersExpanded"
+                         InitiallyExpanded="false"
+                         HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
+            <FilterTable Filters="Config.FiltersForPoints" OnRowClick="OnFilterRowClick" />
+            <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary">
+                <MudText Color="Color.Tertiary">Add Filter</MudText>
+            </MudListItem>
+        </SettingsSection>
+    </SettingsTopSection>
+</MudStack>
 
 @code {
     [CascadingParameter] public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
@@ -74,34 +65,22 @@
     [Parameter, EditorRequired] public ResultConfigViewModel Config { get; set; } = default!;
     [Parameter] public bool AllowEditName { get; set; } = false;
 
-    private bool EnableHeatRaces { get; set; }
+    private bool initialized = false;
+
+    private bool enableHeatRaces;
+    private bool EnableHeatRaces
+    {
+        get => enableHeatRaces;
+        set
+        {
+            enableHeatRaces = value;
+            if (!enableHeatRaces)
+            {
+                Config.RaceCount = 1;
+            }
+        }
+    }
     private bool filtersExpanded = false;
-
-    private IEnumerable<SortOptions> PointsSortOptions
-    {
-        get => Config.Scorings.FirstOrDefault()?.PointRule.PointsSortOptions ?? Array.Empty<SortOptions>();
-        set
-        {
-            var list = value.ToList();
-            foreach (var scoring in Config.Scorings)
-            {
-                scoring.PointRule.PointsSortOptions = list;
-            }
-        }
-    }
-
-    private IEnumerable<SortOptions> FinalSortOptions
-    {
-        get => Config.Scorings.FirstOrDefault()?.PointRule.FinalSortOptions ?? Array.Empty<SortOptions>();
-        set
-        {
-            var list = value.ToList();
-            foreach (var scoring in Config.Scorings)
-            {
-                scoring.PointRule.FinalSortOptions = list;
-            }
-        }
-    }
 
     private enum SortOptionsSelect
     {
@@ -116,7 +95,11 @@
         BlazorParameterNullException.ThrowIfNull(this, Teams, cascading: true);
         BlazorParameterNullException.ThrowIfNull(this, Config);
 
-        EnableHeatRaces = Config.RaceCount > 1;
+        if (!initialized)
+        {
+            EnableHeatRaces = Config.RaceCount > 1;
+            initialized = true;
+        }
     }
 
     private async Task NameClick()

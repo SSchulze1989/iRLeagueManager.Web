@@ -4,38 +4,36 @@
 @using iRLeagueManager.Web.Components.Dialogs
 @inject IDialogService DialogService
 
-<SettingsListItem Items="Scoring.PointRule.PointsSortOptions"
-                  ItemsChanged="@((IEnumerable<SortOptions> options) => Scoring.PointRule.PointsSortOptions = options.ToList())"
-                  Label="Finish order before Points"
-                  Text="@GetSortingHelperText(Scoring.PointRule.PointsSortOptions)"
-                  ItemsSource="Enum.GetValues<SortOptions>()"
-                  ToStringFunc="@(x => x.GetText().Capitalize())"
-                  @bind-Expanded="finishOrderExpanded" />
+<SettingsPromptItem Label="Finish order before Points"
+                    T="IList<SortOptions>"
+                    TDialog="SortOptionsDialog"
+                    Value="Scoring.PointRule.PointsSortOptions.ToList()"
+                    ValueChanged="@((IList<SortOptions> value) => Scoring.PointRule.PointsSortOptions = value)"
+                    Text="@GetSortingHelperText(Scoring.PointRule.PointsSortOptions)" />
 
-<SettingsItem Label="Configure Points"
-              OnClick="OnPointSettingsClick"
-              Scroll="true">
+<SettingsPromptItem T="PointRuleModel"
+                    TDialog="PointSettingsDialog"
+                    Value="Scoring.PointRule.GetModel()"
+                    ValueChanged="@((PointRuleModel model) => Scoring.PointRule.SetModel(model, changed: true))"
+                    Label="Configure Points"
+                    Scroll="true">
     @GetPointTypeString()
     <PointTable PointRule="Scoring.PointRule"
                 Elevation="0"
                 Bordered="true"
                 Dense="true"
                 Style="background-color: transparent" />
-</SettingsItem>
+</SettingsPromptItem>
 
-<SettingsListItem Items="Scoring.PointRule.FinalSortOptions"
-                  ItemsChanged="@((IEnumerable<SortOptions> options) => Scoring.PointRule.FinalSortOptions = options.ToList())"
-                  Label="Final order after Points"
-                  Text="@GetSortingHelperText(Scoring.PointRule.FinalSortOptions)"
-                  ItemsSource="Enum.GetValues<SortOptions>()"
-                  ToStringFunc="@(x => x.GetText().Capitalize())"
-                  @bind-Expanded="finalOrderExpanded" />
+<SettingsPromptItem Label="Final order after Points"
+                    T="IList<SortOptions>"
+                    TDialog="SortOptionsDialog"
+                    Value="Scoring.PointRule.FinalSortOptions.ToList()"
+                    ValueChanged="@((IList<SortOptions> value) => Scoring.PointRule.FinalSortOptions = value)"
+                    Text="@GetSortingHelperText(Scoring.PointRule.FinalSortOptions)" />
 
 @code {
     [Parameter] public ScoringViewModel Scoring { get; set; } = default!;
-
-    private bool finishOrderExpanded = false;
-    private bool finalOrderExpanded = false;
 
     protected override void OnParametersSet()
     {

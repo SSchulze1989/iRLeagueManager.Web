@@ -1,0 +1,49 @@
+﻿@using iRLeagueManager.Web.Components.Dialogs
+@inherits SettingsItem
+@typeparam T
+@typeparam TDialog where TDialog : PromptDialog<T>
+@inject IDialogService DialogService
+
+<SettingsItem Class="@Class"
+              Style="@Style"
+              Icon="@Icon"
+              IconSize="IconSize"
+              IconColor="IconColor"
+              OnClick="OnClick"
+              Disabled="Disabled"
+              Href="@Href"
+              Delete="Delete"
+              Scroll="Scroll"
+              Text="@Text"
+              Label="@Label"
+              HelperText="@HelperText"
+              ChildContent="ChildContent!"
+              EndIcon="EndIcon" />
+
+@code {
+    [Parameter] public T Value { get; set; } = default!;
+    [Parameter] public EventCallback<T> ValueChanged { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (!OnClick.HasDelegate)
+        {
+            OnClick = new(this, ShowDialog);
+        }
+    }
+
+    private async Task ShowDialog()
+    {
+        var parameters = new DialogParameters<TDialog>()
+        {
+            { x => x.Value, ModelHelper.CopyModel(Value) },
+        };
+        var result = await DialogService.Show<TDialog>(Label, parameters).Result;
+        if (result.Canceled || result.Data is not T dialogValue)
+        {
+            return;
+        }
+        await ValueChanged.InvokeAsync(dialogValue);
+    }
+}

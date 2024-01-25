@@ -74,7 +74,7 @@ public sealed class LeagueUserViewModel : LeagueViewModelBase<LeagueUserViewMode
         return result.ToStatusResult();
     }
 
-    public override void SetModel(LeagueUserModel model)
+    protected override void SetModel(LeagueUserModel model)
     {
         base.SetModel(model);
     }

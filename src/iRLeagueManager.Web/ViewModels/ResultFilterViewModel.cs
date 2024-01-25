@@ -40,7 +40,7 @@ public sealed class ResultFilterViewModel : LeagueViewModelBase<ResultFilterView
         set => SetP(model.Condition.FilterValues.FirstOrDefault() ?? string.Empty, value => model.Condition.FilterValues = new[] { value }.ToList(), ConvertToValue(value, ColumnPropertyName)); }
     public MatchedValueAction Action { get => model.Condition.Action; set => SetP(model.Condition.Action, value => model.Condition.Action = value, value); }
 
-    public override void SetModel(ResultFilterModel model)
+    protected override void SetModel(ResultFilterModel model)
     {
         base.SetModel(model);
         UpdateFilterType();

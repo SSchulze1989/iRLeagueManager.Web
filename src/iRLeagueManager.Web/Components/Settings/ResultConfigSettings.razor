@@ -37,7 +37,7 @@
         }
         else
         {
-            @foreach (var (scoring, index) in Config.Scorings.WithIndex())
+            @foreach (var scoring in Config.Scorings)
             {
                 <SettingsSection Text="@scoring.Name" HelperText="@(scoring.IsCombinedResult ? "Combined result" : "Heat session result")">
                     <ScoringSettings Scoring="scoring" />

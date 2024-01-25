@@ -27,7 +27,7 @@ public sealed class ScoringViewModel : LeagueViewModelBase<ScoringViewModel, Sco
     private PointRuleViewModel pointRule;
     public PointRuleViewModel PointRule { get => pointRule; set => Set(ref pointRule, value); }
 
-    public override void SetModel(ScoringModel model)
+    protected override void SetModel(ScoringModel model)
     {
         this.model = model;
         model.PointRule ??= new();

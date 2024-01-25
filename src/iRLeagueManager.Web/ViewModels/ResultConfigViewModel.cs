@@ -79,7 +79,7 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
 
     public int RaceCount { get => Scorings.Where(x => !x.IsCombinedResult).Count(); set => SetRaceCount(value); }
 
-    public override void SetModel(ResultConfigModel model)
+    protected override void SetModel(ResultConfigModel model)
     {
         base.SetModel(model);
         Scorings = new(model.Scorings.Select(NewScoringViewModel));
@@ -216,14 +216,14 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         var scoringViewModel = NewScoringViewModel(scoring);
         Scorings.Insert(RaceCount, (scoringViewModel));
         UpdateScoringIndex();
-        TriggerHasChanged();
+        Changed();
         return scoringViewModel;
     }
 
     public void RemoveScoring(ScoringViewModel scoring)
     {
         Scorings.Remove(scoring);
-        TriggerHasChanged();
+        Changed();
         UpdateScoringIndex();
     }
 

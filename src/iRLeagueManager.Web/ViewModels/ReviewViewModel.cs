@@ -349,7 +349,7 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
         }
     }
 
-    public override void SetModel(ReviewModel model)
+    protected override void SetModel(ReviewModel model)
     {
         base.SetModel(model);
         RefreshCommentList();

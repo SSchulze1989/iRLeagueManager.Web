@@ -1,19 +1,34 @@
 ﻿@using System.Text
 @using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components.Dialogs
+@inject IDialogService DialogService
+
 <SettingsListItem Items="Scoring.PointRule.PointsSortOptions"
                   ItemsChanged="@((IEnumerable<SortOptions> options) => Scoring.PointRule.PointsSortOptions = options.ToList())"
-                  Text="Finish order before Points"
-                  HelperText="@GetSortingHelperText(Scoring.PointRule.PointsSortOptions)"
+                  Label="Finish order before Points"
+                  Text="@GetSortingHelperText(Scoring.PointRule.PointsSortOptions)"
                   ItemsSource="Enum.GetValues<SortOptions>()"
-                  ToStringFunc="@(x => x.GetText())"
+                  ToStringFunc="@(x => x.GetText().Capitalize())"
                   @bind-Expanded="finishOrderExpanded" />
+
+<SettingsItem Label="Configure Points"
+              OnClick="OnPointSettingsClick"
+              Scroll="true">
+    @GetPointTypeString()
+    <PointTable PointRule="Scoring.PointRule"
+                Elevation="0"
+                Bordered="true"
+                Dense="true"
+                Style="background-color: transparent" />
+</SettingsItem>
 
 <SettingsListItem Items="Scoring.PointRule.FinalSortOptions"
                   ItemsChanged="@((IEnumerable<SortOptions> options) => Scoring.PointRule.FinalSortOptions = options.ToList())"
-                  Text="Final order after Points"
-                  HelperText="@GetSortingHelperText(Scoring.PointRule.FinalSortOptions)"
+                  Label="Final order after Points"
+                  Text="@GetSortingHelperText(Scoring.PointRule.FinalSortOptions)"
                   ItemsSource="Enum.GetValues<SortOptions>()"
-                  ToStringFunc="@(x => x.GetText())"
+                  ToStringFunc="@(x => x.GetText().Capitalize())"
                   @bind-Expanded="finalOrderExpanded" />
 
 @code {
@@ -35,10 +50,7 @@
             return "Keep order";
         }
         var sb = new StringBuilder();
-        if (sortOptions.Count() > 1)
-        {
-            sb.Append("Order by ");
-        }
+        sb.Append("Order by ");
         sb.Append(sortOptions.First().GetText());
         foreach (var option in sortOptions.Skip(1))
         {
@@ -46,5 +58,37 @@
             sb.Append(option.GetText());
         }
         return sb.ToString();
+    }
+
+    private string GetPointTypeString()
+    {
+        if (Scoring.PointRule.PointsPerPlace.Count() == 0)
+        {
+            return "Keep points";
+        }
+        switch (Scoring.PointRule.RuleType)
+        {
+            case PointRuleViewModel.PointRuleType.PointList:
+                return "Points per place";
+            case PointRuleViewModel.PointRuleType.MaxPoints:
+                return $"Max pts.: {Scoring.PointRule.MaxPoints}; Drop-off: {Scoring.PointRule.PointDropOff}";
+            case PointRuleViewModel.PointRuleType.Formula:
+                return $"Formula";
+        }
+        return "Unknown";
+    }
+
+    private async Task OnPointSettingsClick()
+    {
+        var parameters = new DialogParameters<PointSettingsDialog>()
+        {
+            { x => x.Value, Scoring.PointRule.CopyModel() },
+        };
+        var dialog = await DialogService.Show<PointSettingsDialog>($"Edit {Scoring.Name} Points", parameters).Result;
+        if (dialog.Canceled || dialog.Data is not PointRuleModel model)
+        {
+            return;
+        }
+        Scoring.PointRule.SetModel(model, changed: true);
     }
 }

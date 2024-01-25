@@ -148,7 +148,7 @@
 
         if (Filter.GetModel() != Value)
         {
-            Filter.SetModel(Value);
+            Filter.SetModel(Value ?? new());
         }
     }
 

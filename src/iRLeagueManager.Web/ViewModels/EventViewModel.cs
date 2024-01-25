@@ -393,7 +393,7 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
         }
     }
 
-    public override void SetModel(EventModel model)
+    protected override void SetModel(EventModel model)
     {
         _ = model ?? throw new ArgumentNullException(nameof(model));
         this.model = model;

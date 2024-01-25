@@ -159,18 +159,44 @@ public static class SortOptionTextUtils
         };
     }
 
-    public static string GetText(this SortDirection sortDirection)
+    public static string GetDirectionText(this (SortValue value, SortDirection direction) sortValueDirection)
     {
-        return sortDirection switch
+        var (value, direction) = sortValueDirection;
+        return value switch
         {
-            SortDirection.Ascending => "asc.",
-            SortDirection.Descending => "desc.",
-            _ => "",
+            SortValue.Pos or
+                SortValue.StartPos or
+                SortValue.FinalPos or
+                SortValue.FastLap or
+                SortValue.QualLap 
+                => direction == SortDirection.Ascending ? "best " : "worst",
+            SortValue.PosChg or
+                SortValue.RacePts or
+                SortValue.PenPts or
+                SortValue.BonusPts or
+                SortValue.TotalPts or
+                SortValue.TotalPtsNoBonus or
+                SortValue.TotalPtsNoPenalty or
+                SortValue.ComplLaps or
+                SortValue.LeadLaps or
+                SortValue.Incs or
+                SortValue.Wins or
+                SortValue.Top3 or
+                SortValue.Top5 or
+                SortValue.Top10 or
+                SortValue.Races or
+                SortValue.RacesCounted or
+                SortValue.RacesScored or
+                SortValue.RacesInPoints
+                => direction == SortDirection.Ascending ? "least " : "most ",
+            SortValue.Intvl => direction == SortDirection.Ascending ? "smallest " : "largest ",
+            SortValue.LastRaceOrder or _ => "",
+            
         };
     }
 
     public static string GetText(this (SortValue value, SortDirection direction) sortValueDirection)
     {
-        return $"{sortValueDirection.value.GetText()} {sortValueDirection.direction.GetText()}";
+        return $"{sortValueDirection.GetDirectionText()}{sortValueDirection.value.GetText()}";
     }
 }

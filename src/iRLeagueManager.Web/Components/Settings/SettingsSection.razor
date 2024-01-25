@@ -10,7 +10,11 @@
              IconSize="IconSize"
              Dense="true">
     <ChildContent>
-        <MudText Color="Color">
+        @if (displayLabel)
+        {
+            <label class="mud-input-label mud-input-label-text" style="font-size: 0.75em">@Label</label>
+        }
+        <MudText Color="Color" Style="width: 100%">
             @if (Header is null)
             {
                 @Text

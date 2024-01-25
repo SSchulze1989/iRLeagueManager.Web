@@ -26,7 +26,7 @@ public abstract class ViewModelCollection<TViewModel, TModel, TSelf> : LeagueVie
     /// <returns></returns>
     public abstract TViewModel CreateInstance(TModel model);
 
-    public override void SetModel(IEnumerable<TModel> modelCollection)
+    protected override void SetModel(IEnumerable<TModel> modelCollection)
     {
         ArgumentNullException.ThrowIfNull(modelCollection);
 

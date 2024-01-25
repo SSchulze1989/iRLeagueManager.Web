@@ -91,7 +91,7 @@ public abstract class LeagueViewModelBase : ViewModelBase, IDisposable
         }
     }
 
-    public void TriggerHasChanged()
+    public void Changed()
     {
         HasChanges = true;
         OnHasChanged();
@@ -151,10 +151,17 @@ public abstract class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelB
         return model;
     }
 
-    public virtual void SetModel(TModel model)
+    public void SetModel(TModel model, bool changed = false)
+    {
+        HasChanges = changed;
+        SetModel(model);
+        OnHasChanged();
+        OnPropertyChanged();
+    }
+
+    protected virtual void SetModel(TModel model)
     {
         this.model = model;
-        HasChanges = false;
     }
 
     public virtual TModel CopyModel()

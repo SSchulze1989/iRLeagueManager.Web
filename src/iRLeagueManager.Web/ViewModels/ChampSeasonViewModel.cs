@@ -222,7 +222,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
         }
     }
 
-    public override void SetModel(ChampSeasonModel model)
+    protected override void SetModel(ChampSeasonModel model)
     {
         base.SetModel(model);
         StandingConfig = model.StandingConfig == null ? null : new(LoggerFactory, ApiService, model.StandingConfig);

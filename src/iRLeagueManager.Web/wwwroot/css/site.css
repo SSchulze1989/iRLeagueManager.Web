@@ -261,6 +261,12 @@ a, .btn-link {
     -moz-appearance: textfield;
 }
 
+.table-input {
+    margin: 0;
+    line-height: 2.5em;
+    text-align: center;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;

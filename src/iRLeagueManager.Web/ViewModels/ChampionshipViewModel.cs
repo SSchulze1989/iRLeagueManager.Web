@@ -170,7 +170,7 @@ public sealed class ChampionshipViewModel : LeagueViewModelBase<ChampionshipView
         }
     }
 
-    public override void SetModel(ChampionshipModel model)
+    protected override void SetModel(ChampionshipModel model)
     {
         base.SetModel(model);
         IsActive = IsChampionshipActive();

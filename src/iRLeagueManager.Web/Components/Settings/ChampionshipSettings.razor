@@ -6,7 +6,7 @@
 
 <EditForm Model=ChampSeason>
     <StatusResultValidator @ref=ResultValidator />
-    <MudStack Spacing="2">
+    <MudStack Spacing="1">
         <SettingsTopSection Header="General">
             <SettingsItem Label="Name"
                           Text="@ChampSeason.ChampionshipName"
@@ -17,7 +17,7 @@
                                   HelperText="Championship type: Member or Team"
                                   Items="@(new[] { ResultKind.Member, ResultKind.Team })" />
         </SettingsTopSection>
-        <SettingsTopSection Header="Race Points">
+        <SettingsTopSection Header="Point Settings">
             @if (multiplePointconfigs)
             {
                 <SettingsSection Text="Point Settings" Expanded="multiplePointconfigs" InitiallyExpanded="true">
@@ -37,17 +37,14 @@
             }
             else if (ChampSeason.ResultConfigs.Count > 0)
             {
-                <SettingsItem Text="Configure Points"
+                <SettingsItem Text="Configure Sessions and Points"
                               EndIcon="@Icons.Material.Filled.ArrowForward"
                               Href="@($"/{Shared.LeagueName}/Settings/Results/Championships/{ChampSeason.ChampionshipId}/ResultConfigs/{ChampSeason.ResultConfigs.First().ResultConfigId}")" />
             }
         </SettingsTopSection>
         <SettingsTopSection Header="Advanced">
             <SettingsSection Text="Filters" @bind-Expanded="filtersExpanded" HelperText="Limit drivers, teams or classes that will be scored in this championship">
-                <FilterTable @bind-Filters="ChampSeason.Filters" OnRowClick="OnFilterRowClick" />
-                <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary">
-                    <MudText Color="Color.Tertiary">Add Filter</MudText>
-                </MudListItem>
+                <FilterTable @bind-Filters="ChampSeason.FilterConditions" />
             </SettingsSection>
             <SettingsSection Text="More" HelperText="Show more advanced settings" @bind-Expanded="showAdvanced" InitiallyExpanded="false">
                 <SettingsSwitch @bind-Checked="multiplePointconfigs" Text="Multiple point configs" HelperText="Allow different point settings for each event" />
@@ -89,17 +86,5 @@
         {
             (ChampSeason.ChampionshipName, ChampSeason.ChampionshipDisplayName) = ((string, string))result.Data;
         }
-    }
-
-    private async Task OnFilterRowClick(ResultFilterModel filter)
-    {
-        var parameters = new DialogParameters<FilterDialog>()
-        {
-            { x => x.Value, ModelHelper.CopyModel(filter) },
-            { x => x.OnSubmit, (x, c) => { filter.Condition = x.Condition; return Task.FromResult(true); } },
-            { x => x.LeagueMembers, LeagueMembers },
-            { x => x.Teams, Teams },
-        };
-        var dialog = await DialogService.Show<FilterDialog>("Edit Filter", parameters).Result;
     }
 }

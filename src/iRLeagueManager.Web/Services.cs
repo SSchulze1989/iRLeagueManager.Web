@@ -50,6 +50,7 @@ public static class Services
         services.TryAddTransient<AddPenaltyViewModel>();
         services.TryAddTransient<AutoPenaltiesCollectionViewModel>();
         services.TryAddTransient<ResultFilterViewModel>();
+        services.TryAddTransient<FilterConditionViewModel>();
         services.TryAddScoped<ResultsPageViewModel>();
         services.TryAddScoped<ResultSettingsViewModel>();
         services.TryAddScoped<ReviewsPageViewModel>();

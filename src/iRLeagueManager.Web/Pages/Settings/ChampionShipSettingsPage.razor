@@ -142,8 +142,8 @@
     protected override async ValueTask OnLocationChanging(LocationChangingContext context)
     {
         // Do nothing when viewmodel has no changes or navigation on same page
-        var allowNavigation = HasChanges() == false ||
-            context.TargetLocation.Contains($"/{LeagueName}/Settings/Results/Championships/{ChampionshipId}");
+        var staysOnPage = context.TargetLocation.Contains($"{LeagueName}/Settings/Results/Championships/{ChampionshipId}");
+        var allowNavigation = HasChanges() == false || staysOnPage;
         if (allowNavigation)
         {
             await base.OnLocationChanging(context);
@@ -157,11 +157,6 @@
 
     protected override void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        if (e.Location.Contains($"/{LeagueName}/Settings/Results/Championships/{ChampionshipId}") == false)
-        {
-            return;
-        }
-        SettingsStack.NavigateTo(NavigationManager.ToBaseRelativePath(e.Location));
         UpdateBreadCrumb();
     }
 
@@ -278,14 +273,14 @@
             new BreadcrumbItem("Championships", $"{Shared.LeagueName}/Settings/Results"),
             new BreadcrumbItem(ChampSeason.ChampionshipName, $"{Shared.LeagueName}/Settings/Results/Championships/{ChampionshipId}"),
         };
-        if (SelectedResultConfig is not null)
+        if (ResultConfigId is not null && SelectedResultConfig is not null)
         {
             var name = SelectedResultConfig.Name;
             if (string.IsNullOrEmpty(name) || ChampSeason.ResultConfigs.Count <= 1)
             {
-                name = "Race Points";
+                name = "Point Settings";
             }
-            BreadCrumbService.Add(new BreadcrumbItem(name, $"{Shared.LeagueName}/Settings/Results/Championships/{ChampionshipId}/ResultConfigs/{SelectedResultConfig.ResultConfigId}"));
+            BreadCrumbService.Add(new BreadcrumbItem($"{ChampSeason.ChampionshipName} - {name}", $"{Shared.LeagueName}/Settings/Results/Championships/{ChampionshipId}/ResultConfigs/{SelectedResultConfig.ResultConfigId}"));
         }
         InvokeAsync(StateHasChanged);
     }

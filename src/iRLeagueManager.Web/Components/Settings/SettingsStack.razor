@@ -1,6 +1,7 @@
 ﻿@using System.Web
 @inject NavigationManager Navigation
 @inject ILogger<SettingsStack> logger
+@implements IDisposable
 
 <CascadingValue Value="this">
     <div class="settings-stack-container">
@@ -17,23 +18,24 @@
     public List<SettingsStackItem> Items { get; } = new List<SettingsStackItem>();
     private string slideClass = "";
 
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
         BlazorParameterNullException.ThrowIfNull(this, ChildContent);
     }
 
-    public void NavigateTo(string uri)
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        var index = Items.FirstOrDefault(x => x.Href == uri)?.ItemIndex ?? 0;
-        if (index != Index)
+        var match = Navigation.ToBaseRelativePath(e.Location.Split('&')[0]);
+        var index = Items.FindIndex(x => x.Href == match);
+        if (index != Index && index >= 0)
         {
             Index = index;
-            IndexChanged.InvokeAsync(Index);
-            if (UpdateNavigation)
-            {
-                Navigation.NavigateTo(uri, replace: false);
-            }
             InvokeAsync(StateHasChanged);
         }
     }
@@ -41,5 +43,10 @@
     public void UpdateStack()
     {
         InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 }

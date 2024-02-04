@@ -23,6 +23,10 @@
 @code {
     [Parameter] public T Value { get; set; } = default!;
     [Parameter] public EventCallback<T> ValueChanged { get; set; }
+    /// <summary>
+    /// Additional parameters to be provided to the prompt dialog component
+    /// </summary>
+    [Parameter] public DialogParameters<TDialog>? Parameters { get; set; }
 
     protected override void OnParametersSet()
     {
@@ -39,6 +43,13 @@
         {
             { x => x.Value, ModelHelper.CopyModel(Value) },
         };
+        if (Parameters is not null)
+        {
+            foreach(var parameter in Parameters)
+            {
+                parameters.Add(parameter.Key, parameter.Value);
+            }
+        }
         var result = await DialogService.Show<TDialog>(Label, parameters).Result;
         if (result.Canceled || result.Data is not T dialogValue)
         {

@@ -39,23 +39,17 @@
         }
         else if (ChampSeason.ResultConfigViewModels.Count > 0)
         {
-            @* <SettingsItem Text="Configure Sessions and Points"
-        EndIcon="@Icons.Material.Filled.ArrowForward"
-        Href="@($"/{Shared.LeagueName}/Settings/Results/Championships/{ChampSeason.ChampionshipId}/ResultConfigs/{ChampSeason.ResultConfigs.First().ResultConfigId}")" /> *@
             <ResultConfigSettings Config="ChampSeason.ResultConfigViewModels.First()" ShowAdvancedSettings="false" />
         }
 
         <SettingsTopSection Header="Advanced">
             <SettingsSection Text="Filter Drivers"
-                             @bind-Expanded="filtersExpanded"
                              HelperText="Limit drivers, teams or classes that will be scored in this championship">
                 <FilterTable @bind-Filters="ChampSeason.FilterConditions" />
             </SettingsSection>
             @if (!multiplePointconfigs && ChampSeason.ResultConfigViewModels.Count > 0)
             {
                 <SettingsSection Text="Conditions for Points"
-                                 @bind-Expanded="filtersExpanded"
-                                 InitiallyExpanded="false"
                                  HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
                     <FilterTable @bind-Filters="ChampSeason.ResultConfigViewModels.First().FiltersForPoints" />
                 </SettingsSection>
@@ -76,6 +70,7 @@
 
     private bool showAdvanced = false;
     private bool filtersExpanded = false;
+    private bool pointsConditionsExpanded = false;
     private bool multiplePointconfigs = false;
 
     protected override void OnParametersSet()

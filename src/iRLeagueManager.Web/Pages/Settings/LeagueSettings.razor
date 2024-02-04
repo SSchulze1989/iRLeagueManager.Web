@@ -18,6 +18,12 @@
     Settings - @LeagueName
 </PageTitle>
 
+<LoadingHeader Loading="@Bind(League, x => x.Loading)">
+    <HeaderText>
+        <MudText Typo="Typo.h5">League Settings</MudText>
+    </HeaderText>
+</LoadingHeader>
+
 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin) Context="AuthContext">
     <Authorized>
         @if (League.LeaguePublic != LeaguePublicSetting.PublicListed && showLeagueHiddenAlert)
@@ -27,37 +33,25 @@
                 <MudLink Color="Color.Primary" OnClick="MakePublicListed">Make public</MudLink>
             </MudAlert>
         }
-        <MudPaper Elevation="5" Class="mt-4">
-            <EditForm Model="League" OnValidSubmit="SaveChanges">
-                <StatusResultValidator @ref="ResultValidator" />
-                <MudList Clickable="true">
-                    <MudListSubheader>General</MudListSubheader>
-                    <MudListItem>
-                        <MudTextField Label="Display Name"
-                                      @bind-Value="League.NameFull"
-                                      Immediate="true"
-                                      DebounceInterval="500"
-                                      Adornment="Adornment.End"
-                                      AdornmentIcon="@Icons.Material.Filled.Edit"
-                                      Variant="Variant.Outlined"
-                                      Class="me-4" />
-                    </MudListItem>
+        <EditForm Model="League" OnValidSubmit="SaveChanges">
+            <StatusResultValidator @ref="ResultValidator" />
+            <MudStack Spacing="1">
+                <SettingsTopSection Header="General">
+                    <SettingsTextPrompt Label="Display Name"
+                                        @bind-Value="League.NameFull" />
                     <MudListItem>
                         <MudField Label="Description"
                                   OnAdornmentClick="@(() => EditDescriptionClick(League))"
-                                  Adornment="Adornment.End"
-                                  AdornmentIcon="@Icons.Material.Filled.Edit"
-                                  Variant="Variant.Outlined"
-                                  Class="me-4">
+                                  Variant="Variant.Text"
+                                  DisableUnderLine="true">
                             <div style="overflow-x: clip; overflow-y: auto; min-height: 4em; max-height: 12em;">
                                 @((MarkupString)RenderDescriptionPreview(League.Description))
                             </div>
                         </MudField>
                     </MudListItem>
+                </SettingsTopSection>
 
-                    <MudDivider />
-
-                    <MudListSubheader>Seasons</MudListSubheader>
+                <SettingsTopSection Header="Seasons">
                     @if (League.CurrentSeason != null)
                     {
                         <SettingsItem HelperText="Current Season" OnClick="() => SeasonClick(League.CurrentSeason)">
@@ -88,9 +82,9 @@
                             <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary" Class="ms-4">Add Season</MudButton>
                         </MudListItem>
                     }
-                </MudList>
-            </EditForm>
-        </MudPaper>
+                </SettingsTopSection>
+            </MudStack>
+        </EditForm>
     </Authorized>
     <NotAuthorized>
         <MudPaper Elevation="5" Class="p-4">

@@ -46,14 +46,17 @@
         </MudCollapse>
     </SettingsTopSection>
 
-    <SettingsTopSection Header="Advanced">
-        <SettingsSection Text="Conditions for Points"
-                         @bind-Expanded="filtersExpanded"
-                         InitiallyExpanded="false"
-                         HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
-            <FilterTable @bind-Filters="Config.FiltersForPoints" />
-        </SettingsSection>
-    </SettingsTopSection>
+    @if (ShowAdvancedSettings)
+    {
+        <SettingsTopSection Header="Advanced">
+            <SettingsSection Text="Conditions for Points"
+                             @bind-Expanded="filtersExpanded"
+                             InitiallyExpanded="false"
+                             HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
+                <FilterTable @bind-Filters="Config.FiltersForPoints" />
+            </SettingsSection>
+        </SettingsTopSection>
+    }
 </MudStack>
 
 @code {
@@ -61,6 +64,7 @@
     [CascadingParameter] public IEnumerable<TeamModel> Teams { get; set; } = default!;
     [Parameter, EditorRequired] public ResultConfigViewModel Config { get; set; } = default!;
     [Parameter] public bool AllowEditName { get; set; } = false;
+    [Parameter] public bool ShowAdvancedSettings { get; set; } = true;
 
     private bool initialized = false;
 

@@ -17,9 +17,10 @@
                                   HelperText="Championship type: Member or Team"
                                   Items="@(new[] { ResultKind.Member, ResultKind.Team })" />
         </SettingsTopSection>
-        <SettingsTopSection Header="Point Settings">
-            @if (multiplePointconfigs)
-            {
+
+        @if (multiplePointconfigs)
+        {
+            <SettingsTopSection Header="Point Settings">
                 <SettingsSection Text="Point Settings" Expanded="multiplePointconfigs" InitiallyExpanded="true">
                     @foreach (var config in ChampSeason.ResultConfigs)
                     {
@@ -34,21 +35,32 @@
                         </MudText>
                     </MudListItem>
                 </SettingsSection>
-            }
-            else if (ChampSeason.ResultConfigs.Count > 0)
-            {
-                <SettingsItem Text="Configure Sessions and Points"
-                              EndIcon="@Icons.Material.Filled.ArrowForward"
-                              Href="@($"/{Shared.LeagueName}/Settings/Results/Championships/{ChampSeason.ChampionshipId}/ResultConfigs/{ChampSeason.ResultConfigs.First().ResultConfigId}")" />
-            }
-        </SettingsTopSection>
+            </SettingsTopSection>
+        }
+        else if (ChampSeason.ResultConfigViewModels.Count > 0)
+        {
+            @* <SettingsItem Text="Configure Sessions and Points"
+        EndIcon="@Icons.Material.Filled.ArrowForward"
+        Href="@($"/{Shared.LeagueName}/Settings/Results/Championships/{ChampSeason.ChampionshipId}/ResultConfigs/{ChampSeason.ResultConfigs.First().ResultConfigId}")" /> *@
+            <ResultConfigSettings Config="ChampSeason.ResultConfigViewModels.First()" ShowAdvancedSettings="false" />
+        }
+
         <SettingsTopSection Header="Advanced">
-            <SettingsSection Text="Filters" @bind-Expanded="filtersExpanded" HelperText="Limit drivers, teams or classes that will be scored in this championship">
+            <SettingsSection Text="Filter Drivers"
+                             @bind-Expanded="filtersExpanded"
+                             HelperText="Limit drivers, teams or classes that will be scored in this championship">
                 <FilterTable @bind-Filters="ChampSeason.FilterConditions" />
             </SettingsSection>
-            <SettingsSection Text="More" HelperText="Show more advanced settings" @bind-Expanded="showAdvanced" InitiallyExpanded="false">
-                <SettingsSwitch @bind-Checked="multiplePointconfigs" Text="Multiple point configs" HelperText="Allow different point settings for each event" />
-            </SettingsSection>
+            @if (!multiplePointconfigs && ChampSeason.ResultConfigViewModels.Count > 0)
+            {
+                <SettingsSection Text="Conditions for Points"
+                                 @bind-Expanded="filtersExpanded"
+                                 InitiallyExpanded="false"
+                                 HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
+                    <FilterTable @bind-Filters="ChampSeason.ResultConfigViewModels.First().FiltersForPoints" />
+                </SettingsSection>
+            }
+            <SettingsSwitch @bind-Checked="multiplePointconfigs" Text="Multiple point configs" HelperText="Allow different point settings for each event" />
         </SettingsTopSection>
     </MudStack>
     <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />

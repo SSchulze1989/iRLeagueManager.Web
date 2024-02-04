@@ -71,7 +71,7 @@
             </SettingsTopSection>
         }
 
-        <SettingsTopSection Header="Advanced">
+        <SettingsTopSection Header="Filters">
             <SettingsSection Text="Filter Drivers"
                              HelperText="Limit drivers, teams or classes that will be scored in this championship">
                 <FilterTable @bind-Filters="ChampSeason.FilterConditions" />
@@ -83,6 +83,9 @@
                     <FilterTable @bind-Filters="ChampSeason.ResultConfigViewModels.First().FiltersForPoints" />
                 </SettingsSection>
             }
+        </SettingsTopSection>
+
+        <SettingsTopSection Header="Advanced">
             <SettingsSwitch @bind-Checked="multiplePointconfigs" Text="Multiple point configs" HelperText="Allow different point settings for each event" />
         </SettingsTopSection>
     </MudStack>

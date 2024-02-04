@@ -3,7 +3,7 @@
 @using iRLeagueApiCore.Common.Models
 @inject FilterConditionViewModel ConditionVm
 
-<MudGrid>
+<MudGrid Spacing="1">
     <MudItem xs="6">
         <MudSelect Value="ConditionVm.ColumnPropertyName"
                    ValueChanged="@((string value) => ConditionPropertyChanged(value))"
@@ -21,7 +21,7 @@
     }
 
     <MudItem xs="2">
-        <MudSelect Label="Type" @bind-Value="ConditionVm.Comparator"
+        <MudSelect @bind-Value="ConditionVm.Comparator"
                    Disabled="@(string.IsNullOrEmpty(ConditionVm.ColumnPropertyName))"
                    Variant="Variant.Text">
             @foreach (var compType in Enum.GetValues<ComparatorType>().Where(x => x != ComparatorType.InList))
@@ -79,6 +79,7 @@
 @code {
     [Parameter, EditorRequired] public FilterConditionModel Condition { get; set; } = default!;
     [Parameter] public EventCallback<FilterConditionModel> ConditionChanged { get; set; }
+    [Parameter] public IEnumerable<string> ColumnNames { get; set; } = DefaultColumnNames;
 
     protected override void OnInitialized()
     {
@@ -87,7 +88,7 @@
         ConditionVm.SetModel(Condition);
     }
 
-    public static string[] ColumnNames { get; } = new[]
+    public static string[] DefaultColumnNames { get; } = new[]
     {
         nameof(ResultRowModel.CompletedLaps),
         nameof(ResultRowModel.CompletedPct),

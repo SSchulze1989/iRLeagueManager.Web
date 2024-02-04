@@ -13,9 +13,12 @@
         }
         else
         {
-            @foreach (var scoring in Config.Scorings)
+            @foreach (var (scoring, index) in Config.Scorings.WithIndex())
             {
-                <SettingsSection Text="@scoring.Name" HelperText="@(scoring.IsCombinedResult ? "Combined result" : "Heat session result")">
+                <SettingsSection Text="@scoring.Name"
+                                 HelperText="@(scoring.IsCombinedResult ? "Combined result" : "Heat session result")"
+                                 Expanded="@(index == expandedScoringIndex)"
+                                 ExpandedChanged="@((expanded) => SetExpandedScoringIndex(index, expanded))">
                     <ScoringSettings Scoring="scoring" />
                 </SettingsSection>
             }
@@ -67,6 +70,7 @@
     [Parameter] public bool ShowAdvancedSettings { get; set; } = true;
 
     private bool initialized = false;
+    private int expandedScoringIndex = -1;
 
     private bool enableHeatRaces;
     private bool EnableHeatRaces
@@ -113,6 +117,18 @@
         if (!result.Canceled)
         {
             (Config.Name, Config.DisplayName) = ((string, string))result.Data;
+        }
+    }
+
+    private void SetExpandedScoringIndex(int index, bool expanded)
+    {
+        if (expanded)
+        {
+            expandedScoringIndex = index;
+        }
+        else
+        {
+            expandedScoringIndex = expandedScoringIndex != index ? expandedScoringIndex : -1;
         }
     }
 }

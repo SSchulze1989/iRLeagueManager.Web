@@ -4,8 +4,9 @@
              IconSize="IconSize"
              IconColor="IconColor"
              OnClick="HandleClick">
-    <MudGrid Spacing="0" Justify="Justify.FlexStart">
-        <MudItem xs="10" md="9" Class="d-flex flex-column align-start justify-center">
+
+    <MudElement HtmlTag="div" Class="d-flex flex-column align-start justify-center">
+        <MudStack AlignItems="AlignItems.Center" Row="true" Spacing="6">
             <MudText>
                 @if (ChildContent is null)
                 {
@@ -16,15 +17,13 @@
                     @ChildContent
                 }
             </MudText>
-            @if (displayHelperText)
-            {
-                <p class="mud-input-helper-text">@HelperText</p>
-            }
-        </MudItem>
-        <MudItem xs="2" Class="d-flex align-center justify-end">
             <MudSwitch Checked="Checked" CheckedChanged="CheckedChanged" Color="Color" />
-        </MudItem>
-    </MudGrid>
+        </MudStack>
+        @if (displayHelperText)
+        {
+            <p class="mud-input-helper-text">@HelperText</p>
+        }
+    </MudElement>
 </MudListItem>
 
 @code {

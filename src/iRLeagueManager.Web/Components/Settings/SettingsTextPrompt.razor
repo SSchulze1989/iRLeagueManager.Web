@@ -21,6 +21,8 @@
     [Parameter] public T? Value { get; set; }
     [Parameter] public EventCallback<T> ValueChanged { get; set; }
     [Parameter] public InputType InputType { get; set; } = InputType.Text;
+    [Parameter] public bool Clearable { get; set; } = false;
+    [Parameter] public string? DialogHelperText { get; set; }
 
     private async Task Click()
     {
@@ -28,8 +30,9 @@
         {
             { x => x.Value, Value },
             { x => x.Label, Label },
-            { x => x.HelperText, HelperText },
+            { x => x.HelperText, DialogHelperText ?? HelperText },
             { x => x.InputType, GetInputType() },
+            { x => x.Clearable, Clearable },
         };
 
         var options = new DialogOptions()

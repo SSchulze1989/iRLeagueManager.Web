@@ -1,4 +1,5 @@
-﻿@using iRLeagueApiCore.Common.Enums
+﻿@using System.Text
+@using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.Components.Dialogs
 @inherits UtilityComponentBase
@@ -40,6 +41,34 @@
         else if (ChampSeason.ResultConfigViewModels.Count > 0)
         {
             <ResultConfigSettings Config="ChampSeason.ResultConfigViewModels.First()" ShowAdvancedSettings="false" />
+        }
+
+        @if (ChampSeason.StandingConfig is not null)
+        {
+            var standingConfig = ChampSeason.StandingConfig;
+            <SettingsTopSection Header="Standings">
+                <SettingsTextPrompt Label="Weeks counted"
+                                    @bind-Value="standingConfig.WeeksCounted"
+                                    Clearable="true"
+                                    HelperText="@GetWeeksCountedHelperText(standingConfig.WeeksCounted)"
+                                    DialogHelperText="Set the number of results that count towards the total standing">
+                    @(standingConfig.WeeksCounted > 0 ? standingConfig.WeeksCounted.ToString() : "All")
+                </SettingsTextPrompt>
+                <SettingsPromptItem Label="Define Standings Order"
+                                    T="IList<SortOptions>"
+                                    TDialog="SortOptionsDialog"
+                                    @bind-Value="standingConfig.SortOptions"
+                                    Text="@GetSortingHelperText(standingConfig.SortOptions)" />
+                @if (ChampSeason.ResultConfigViewModels.Any(x => x.Scorings.Count > 1))
+                {
+                    var switchHeatsAsSingleHelperText = standingConfig.UseCombinedResult
+                    ? "Only count one win, podium etc. per evening on multiheader events"
+                    : "Count each win, podium etc. per heat individually";
+                    <SettingsSwitch Text="Treat Heats as individual results"
+                                    @bind-Checked="standingConfig.UseHeatResult"
+                                    HelperText="@switchHeatsAsSingleHelperText" />
+                }
+            </SettingsTopSection>
         }
 
         <SettingsTopSection Header="Advanced">
@@ -93,5 +122,28 @@
         {
             (ChampSeason.ChampionshipName, ChampSeason.ChampionshipDisplayName) = ((string, string))result.Data;
         }
+    }
+
+    private string GetWeeksCountedHelperText(int? weeksCounted) => weeksCounted switch
+    {
+        null or <= 0 => "Count all results in the season - no drop weeks allowed",
+        > 0 or _ => $"Only count the {weeksCounted} best results",
+    };
+
+    private string GetSortingHelperText(IEnumerable<SortOptions> sortOptions)
+    {
+        if (sortOptions.Count() == 0)
+        {
+            return "Default";
+        }
+        var sb = new StringBuilder();
+        sb.Append("Order by ");
+        sb.Append(sortOptions.First().GetText());
+        foreach (var option in sortOptions.Skip(1))
+        {
+            sb.Append(", then by ");
+            sb.Append(option.GetText());
+        }
+        return sb.ToString();
     }
 }

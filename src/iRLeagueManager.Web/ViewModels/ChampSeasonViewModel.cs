@@ -78,14 +78,14 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
 
     private void SetFilterConditions(IEnumerable<FilterConditionModel> conditions)
     {
-        var filtersConditions = Filters.Zip(conditions);
         var updatedFilters = Filters.ToList();
-        foreach (var filterCondition in filtersConditions) 
+        for (int i=0; i<Math.Max(Filters.Count(), conditions.Count()); i++)
         {
-            var (filter, condition) = filterCondition;
+            var filter = Filters.ElementAtOrDefault(i);
+            var condition = conditions.ElementAtOrDefault(i);
             if (condition is null)
             {
-                updatedFilters.Remove(filter);
+                updatedFilters.Remove(filter!);
                 continue;
             }
             if (filter is null)

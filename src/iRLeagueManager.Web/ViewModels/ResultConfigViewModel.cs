@@ -68,7 +68,7 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
     public IEnumerable<FilterConditionModel> FiltersForPoints
     {
         get => model.FiltersForPoints.Select(x => x.Condition);
-        set => SetP(model.FiltersForPoints, value => model.FiltersForResult = value.ToList(), GetFilterConditions(model.FiltersForPoints, value));
+        set => SetP(model.FiltersForPoints, value => model.FiltersForPoints = value, GetFilterConditions(model.FiltersForPoints, value));
     }
 
     private ObservableCollection<ResultFilterViewModel> filtersForResult;
@@ -92,16 +92,16 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         FiltersForResult = new(model.FiltersForResult.Select(filter => new ResultFilterViewModel(LoggerFactory, ApiService, filter)));
         ResetChangedState();
     }
-    private static IEnumerable<ResultFilterModel> GetFilterConditions(IEnumerable<ResultFilterModel> filters, IEnumerable<FilterConditionModel> conditions)
+    private static IList<ResultFilterModel> GetFilterConditions(IEnumerable<ResultFilterModel> filters, IEnumerable<FilterConditionModel> conditions)
     {
-        var filtersConditions = filters.Zip(conditions);
         var updatedFilters = filters.ToList();
-        foreach (var filterCondition in filtersConditions)
+        for (int i = 0; i < Math.Max(filters.Count(), conditions.Count()); i++)
         {
-            var (filter, condition) = filterCondition;
+            var filter = filters.ElementAtOrDefault(i);
+            var condition = conditions.ElementAtOrDefault(i);
             if (condition is null)
             {
-                updatedFilters.Remove(filter);
+                updatedFilters.Remove(filter!);
                 continue;
             }
             if (filter is null)

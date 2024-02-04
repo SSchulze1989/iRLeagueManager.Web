@@ -6,7 +6,7 @@ namespace iRLeagueManager.Web.Helpers;
 internal static class FilterTextUtils
 {
     public static string GetConditionText(
-        FilterConditionModel condition,
+        this FilterConditionModel condition,
         IEnumerable<MemberModel>? members = default,
         IEnumerable<TeamModel>? teams = default)
     {

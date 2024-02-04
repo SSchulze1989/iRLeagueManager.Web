@@ -5,7 +5,23 @@
 @inherits UtilityComponentBase
 @inject IDialogService DialogService
 
-<MudStack Spacing="2">
+<MudStack Spacing="1">
+    <SettingsTopSection Header="Points & Finish Order">
+        @if (Config.Scorings.Count == 1)
+        {
+            <ScoringSettings Scoring="Config.Scorings.First()" />
+        }
+        else
+        {
+            @foreach (var scoring in Config.Scorings)
+            {
+                <SettingsSection Text="@scoring.Name" HelperText="@(scoring.IsCombinedResult ? "Combined result" : "Heat session result")">
+                    <ScoringSettings Scoring="scoring" />
+                </SettingsSection>
+            }
+        }
+    </SettingsTopSection>
+
     <SettingsTopSection Header="Sessions">
         @if (AllowEditName)
         {
@@ -30,31 +46,12 @@
         </MudCollapse>
     </SettingsTopSection>
 
-    <SettingsTopSection Header="Points & Finish Order">
-        @if (Config.Scorings.Count == 1)
-        {
-            <ScoringSettings Scoring="Config.Scorings.First()" />
-        }
-        else
-        {
-            @foreach (var scoring in Config.Scorings)
-            {
-                <SettingsSection Text="@scoring.Name" HelperText="@(scoring.IsCombinedResult ? "Combined result" : "Heat session result")">
-                    <ScoringSettings Scoring="scoring" />
-                </SettingsSection>
-            }
-        }
-    </SettingsTopSection>
-
     <SettingsTopSection Header="Advanced">
         <SettingsSection Text="Conditions for Points"
                          @bind-Expanded="filtersExpanded"
                          InitiallyExpanded="false"
                          HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
-            <FilterTable Filters="Config.FiltersForPoints" OnRowClick="OnFilterRowClick" />
-            <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary">
-                <MudText Color="Color.Tertiary">Add Filter</MudText>
-            </MudListItem>
+            <FilterTable @bind-Filters="Config.FiltersForPoints" />
         </SettingsSection>
     </SettingsTopSection>
 </MudStack>
@@ -113,17 +110,5 @@
         {
             (Config.Name, Config.DisplayName) = ((string, string))result.Data;
         }
-    }
-
-    private async Task OnFilterRowClick(ResultFilterModel filter)
-    {
-        var parameters = new DialogParameters<FilterDialog>()
-        {
-            { x => x.Value, ModelHelper.CopyModel(filter) },
-            { x => x.OnSubmit, (x, c) => { filter.Condition = x.Condition; return Task.FromResult(true); } },
-            { x => x.LeagueMembers, LeagueMembers },
-            { x => x.Teams, Teams },
-        };
-        var dialog = await DialogService.Show<FilterDialog>("Edit Condition", parameters).Result;
     }
 }

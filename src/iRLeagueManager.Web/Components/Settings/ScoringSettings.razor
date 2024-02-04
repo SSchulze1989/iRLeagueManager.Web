@@ -11,10 +11,9 @@
                     ValueChanged="@((IList<SortOptions> value) => Scoring.PointRule.PointsSortOptions = value)"
                     Text="@GetSortingHelperText(Scoring.PointRule.PointsSortOptions)" />
 
-<SettingsPromptItem T="PointRuleModel"
+<SettingsPromptItem @bind-Value="PointRuleModel"
+                    T="PointRuleModel"
                     TDialog="PointSettingsDialog"
-                    Value="Scoring.PointRule.GetModel()"
-                    ValueChanged="@((PointRuleModel model) => Scoring.PointRule.SetModel(model, changed: true))"
                     Label="Configure Points"
                     Scroll="true">
     @GetPointTypeString()
@@ -25,6 +24,18 @@
                 Style="background-color: transparent" />
 </SettingsPromptItem>
 
+<SettingsPromptItem @bind-Value="Scoring.PointRule.BonusPointConfigs"
+                    T="IEnumerable<BonusPointConfig>"
+                    TDialog="BonusSettingsDialog"
+                    Label="Bonus Points"
+                    Parameters="@(new() {
+                        { x => x.LeagueMembers, LeagueMembers},
+                        { x => x.Teams, Teams},
+                    })">
+    @string.Join(";  ", Scoring.PointRule.BonusPointConfigs.Select(x => GetBonusPointText(x)))
+</SettingsPromptItem>
+
+
 <SettingsPromptItem Label="Final order after Points"
                     T="IList<SortOptions>"
                     TDialog="SortOptionsDialog"
@@ -33,12 +44,22 @@
                     Text="@GetSortingHelperText(Scoring.PointRule.FinalSortOptions)" />
 
 @code {
+    [CascadingParameter] public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [CascadingParameter] public IEnumerable<TeamModel> Teams { get; set; } = default!;
     [Parameter] public ScoringViewModel Scoring { get; set; } = default!;
+
+    private PointRuleModel PointRuleModel
+    {
+        get => Scoring.PointRule.GetModel();
+        set => Scoring.PointRule.SetModel(value, changed: true);
+    }
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
         BlazorParameterNullException.ThrowIfNull(this, Scoring);
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, Teams, cascading: true);
     }
 
     private string GetSortingHelperText(IEnumerable<SortOptions> sortOptions)
@@ -89,4 +110,14 @@
         }
         Scoring.PointRule.SetModel(model, changed: true);
     }
+
+    private string GetBonusPointText(BonusPointConfig bonus)
+    {
+        return $"{bonus.Option.Description}{(bonus.Option.HasPosition ? " " + GetPositionString(bonus.Position) : "")}: {bonus.Points}";
+    }
+
+    private string GetPositionString(int position) => position + position switch
+    {
+        _ => ".",
+    };
 }

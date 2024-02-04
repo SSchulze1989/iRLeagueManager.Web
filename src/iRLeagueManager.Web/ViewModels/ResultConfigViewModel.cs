@@ -3,6 +3,8 @@ using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 using Microsoft.Extensions.Configuration.EnvironmentVariables;
+using MudBlazor.Charts;
+using System.Runtime.CompilerServices;
 
 namespace iRLeagueManager.Web.ViewModels;
 
@@ -63,7 +65,11 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
     private ObservableCollection<ScoringViewModel> scorings;
     public ObservableCollection<ScoringViewModel> Scorings { get => scorings; set => Set(ref scorings, value); }
 
-    public IEnumerable<ResultFilterModel> FiltersForPoints { get => model.FiltersForPoints; set => SetP(model.FiltersForPoints, value => model.FiltersForPoints = value.ToList(), value); }
+    public IEnumerable<FilterConditionModel> FiltersForPoints
+    {
+        get => model.FiltersForPoints.Select(x => x.Condition);
+        set => SetP(model.FiltersForPoints, value => model.FiltersForResult = value.ToList(), GetFilterConditions(model.FiltersForPoints, value));
+    }
 
     private ObservableCollection<ResultFilterViewModel> filtersForResult;
     public ObservableCollection<ResultFilterViewModel> FiltersForResult { get => filtersForResult; set => Set(ref filtersForResult, value); }
@@ -85,6 +91,27 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         Scorings = new(model.Scorings.Select(NewScoringViewModel));
         FiltersForResult = new(model.FiltersForResult.Select(filter => new ResultFilterViewModel(LoggerFactory, ApiService, filter)));
         ResetChangedState();
+    }
+    private static IEnumerable<ResultFilterModel> GetFilterConditions(IEnumerable<ResultFilterModel> filters, IEnumerable<FilterConditionModel> conditions)
+    {
+        var filtersConditions = filters.Zip(conditions);
+        var updatedFilters = filters.ToList();
+        foreach (var filterCondition in filtersConditions)
+        {
+            var (filter, condition) = filterCondition;
+            if (condition is null)
+            {
+                updatedFilters.Remove(filter);
+                continue;
+            }
+            if (filter is null)
+            {
+                filter = new();
+                updatedFilters.Add(filter);
+            }
+            filter.Condition = condition;
+        }
+        return updatedFilters;
     }
 
     private ScoringViewModel NewScoringViewModel(ScoringModel model)

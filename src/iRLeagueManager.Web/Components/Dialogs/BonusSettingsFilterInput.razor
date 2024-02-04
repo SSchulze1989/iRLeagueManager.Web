@@ -1,0 +1,119 @@
+﻿@using System.ComponentModel
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@inject FilterConditionViewModel ConditionVm
+
+<MudGrid>
+    <MudItem xs="6">
+        <MudSelect Value="ConditionVm.ColumnPropertyName"
+                   ValueChanged="@((string value) => ConditionPropertyChanged(value))"
+                   Label="Property"
+                   Variant="Variant.Text">
+            @foreach (var name in ColumnNames)
+            {
+                <MudSelectItem Value="@name">@name</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+    @{
+        var valueLabel = ConditionVm.Comparator == ComparatorType.InList ? "Values" : "Value";
+        var propertyType = GetColumnPropertyType(Condition.ColumnPropertyName);
+    }
+
+    <MudItem xs="2">
+        <MudSelect Label="Type" @bind-Value="ConditionVm.Comparator"
+                   Disabled="@(string.IsNullOrEmpty(ConditionVm.ColumnPropertyName))"
+                   Variant="Variant.Text">
+            @foreach (var compType in Enum.GetValues<ComparatorType>().Where(x => x != ComparatorType.InList))
+            {
+                <MudSelectItem Value=@compType>@compType.GetText()</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+
+    <MudItem xs="4">
+        @if (propertyType is null)
+        {
+            <MudField Label="@valueLabel"
+                      Disabled="true"
+                      Variant="Variant.Text" />
+        }
+        else if (Condition.Comparator == ComparatorType.InList)
+        {
+            @*TODO: Fill in Component for values selection from list*@
+        }
+        else if (propertyType == typeof(RaceStatus))
+        {
+            <MudSelect Label="@valueLabel"
+                       @bind-Value="ConditionVm.Value"
+                       Variant="Variant.Text"
+                       Disabled="@(string.IsNullOrEmpty(Condition.ColumnPropertyName))">
+                @foreach (var status in Enum.GetValues(typeof(RaceStatus)))
+                {
+                    <MudSelectItem Value="@(((int)status).ToString())">@status.ToString()</MudSelectItem>
+                }
+            </MudSelect>
+        }
+        else if (propertyType == typeof(string)
+        || propertyType == typeof(double)
+        || propertyType == typeof(double?)
+        || propertyType == typeof(int)
+        || propertyType == typeof(int?))
+        {
+            var isNumeric = propertyType == typeof(double) || propertyType == typeof(double?) || propertyType == typeof(int) || propertyType == typeof(int?);
+            <MudTextField Label="@valueLabel"
+                          @bind-Value="ConditionVm.Value"
+                          InputType="@(isNumeric ? InputType.Number : InputType.Text)"
+                          Variant="Variant.Text"
+                          Disabled="@(string.IsNullOrEmpty(Condition.ColumnPropertyName))" />
+        }
+        else
+        {
+            <MudField Label="@valueLabel"
+                      Disabled="true"
+                      Variant="Variant.Text">Not supported</MudField>
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+    [Parameter, EditorRequired] public FilterConditionModel Condition { get; set; } = default!;
+    [Parameter] public EventCallback<FilterConditionModel> ConditionChanged { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BlazorParameterNullException.ThrowIfNull(this, Condition);
+        ConditionVm.SetModel(Condition);
+    }
+
+    public static string[] ColumnNames { get; } = new[]
+    {
+        nameof(ResultRowModel.CompletedLaps),
+        nameof(ResultRowModel.CompletedPct),
+        nameof(ResultRowModel.FinalPosition),
+        nameof(ResultRowModel.FinalPositionChange),
+        nameof(ResultRowModel.FinishPosition),
+        nameof(ResultRowModel.PositionChange),
+        nameof(ResultRowModel.Incidents),
+        nameof(ResultRowModel.LeadLaps),
+        nameof(ResultRowModel.StartPosition),
+    };
+
+    private void ConditionVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        ConditionChanged.InvokeAsync(Condition);
+    }
+
+    private Type? GetColumnPropertyType(string name)
+    {
+        var property = typeof(ResultRowModel).GetProperty(name);
+        return property?.PropertyType;
+    }
+
+    private void ConditionPropertyChanged(string value)
+    {
+        Condition.ColumnPropertyName = value;
+        ConditionChanged.InvokeAsync(Condition);
+    }
+}

@@ -27,6 +27,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
     public string SeasonName => model.SeasonName;
     public ResultKind ResultKind { get => model.ResultKind; set => SetP(model.ResultKind, value => model.ResultKind = value, value); }
     public IEnumerable<ResultFilterModel> Filters { get => model.Filters; set => SetP(model.Filters, value => model.Filters = value.ToList(), value); }
+    public IEnumerable<FilterConditionModel> FilterConditions { get => model.Filters.Select(x => x.Condition); set => SetFilterConditions(value); }
 
     private StandingConfigurationViewModel? standingConfig;
     public StandingConfigurationViewModel? StandingConfig 
@@ -73,6 +74,28 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
             ParentViewModel = this,
         };
         return viewModel;
+    }
+
+    private void SetFilterConditions(IEnumerable<FilterConditionModel> conditions)
+    {
+        var filtersConditions = Filters.Zip(conditions);
+        var updatedFilters = Filters.ToList();
+        foreach (var filterCondition in filtersConditions) 
+        {
+            var (filter, condition) = filterCondition;
+            if (condition is null)
+            {
+                updatedFilters.Remove(filter);
+                continue;
+            }
+            if (filter is null)
+            {
+                filter = new();
+                updatedFilters.Add(filter);
+            }
+            filter.Condition = condition;
+        }
+        Filters = updatedFilters;
     }
 
     public async Task<StatusResult> Load(long championshipId, CancellationToken cancellationToken = default)

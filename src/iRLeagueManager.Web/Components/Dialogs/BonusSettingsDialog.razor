@@ -7,7 +7,7 @@
     <DialogContent>
         <CascadingValue Value="LeagueMembers">
             <CascadingValue Value="Teams">
-                <MudStack Spacing="4">
+                <MudStack Spacing="2">
                     @foreach (var (bonus, index) in bonusPointConfigs.WithIndex())
                     {
                         <MudField Label="@($"Bonus {index + 1}")"
@@ -16,8 +16,9 @@
                                   Adornment="Adornment.End"
                                   AdornmentIcon="@Icons.Material.Outlined.Delete"
                                   AdornmentColor="Color.Error"
-                                  OnAdornmentClick="@(() => ClearBonus(bonus))">
-                            <MudGrid Spacing="2">
+                                  OnAdornmentClick="@(() => ClearBonus(bonus))"
+                                  InnerPadding="false">
+                            <MudGrid Spacing="1" Class="mb-1">
                                 <MudItem xs="12">
                                     <MudSelect @bind-Value="bonus.Option"
                                                Label="Type"
@@ -40,17 +41,25 @@
                                 </MudItem>
                                 @if (bonus.Option.Type == BonusPointType.Custom)
                                 {
-                                    <MudField Label="Conditions" Variant="Variant.Text" DisableUnderLine="true" Class="ps-2">
-                                        @foreach (var condition in bonus.Conditions)
-                                        {
+                                    <MudField Label="Conditions"
+                                              Variant="Variant.Text"
+                                              DisableUnderLine="true"
+                                              InnerPadding="false"
+                                              Class="mt-2 mb-1">
+                                        <MudElement HtmlTag="div" Class="ps-1">
+                                            @foreach (var condition in bonus.Conditions)
+                                            {
+                                                <MudElement HtmlTag="div" Class="d-flex">
+                                                    <FilterInput Condition="condition" ColumnNames="FilterColumnsAvailable" />
+                                                    <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="@(() => DeleteCondition(bonus, condition))" />
+                                                </MudElement>
+                                            }
                                             <MudElement HtmlTag="div" Class="d-flex">
-                                                <BonusSettingsFilterInput Condition="condition" />
-                                                <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="@(() => DeleteCondition(bonus, condition))" />
+                                                <FilterInput Condition="new()"
+                                                             ConditionChanged="@((FilterConditionModel value) => SelectNewCondition(bonus, value))"
+                                                             ColumnNames="FilterColumnsAvailable" />
+                                                <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Class="invisible" />
                                             </MudElement>
-                                        }
-                                        <MudElement HtmlTag="div" Class="d-flex">
-                                            <BonusSettingsFilterInput Condition="new()" ConditionChanged="@((FilterConditionModel value) => SelectNewCondition(bonus, value))" />
-                                            <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Class="invisible" />
                                         </MudElement>
                                     </MudField>
                                 }

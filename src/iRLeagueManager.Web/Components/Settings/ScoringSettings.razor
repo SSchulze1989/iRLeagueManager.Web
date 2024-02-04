@@ -24,6 +24,13 @@
                 Style="background-color: transparent" />
 </SettingsPromptItem>
 
+<SettingsPromptItem Label="Final order after Points"
+                    T="IList<SortOptions>"
+                    TDialog="SortOptionsDialog"
+                    Value="Scoring.PointRule.FinalSortOptions.ToList()"
+                    ValueChanged="@((IList<SortOptions> value) => Scoring.PointRule.FinalSortOptions = value)"
+                    Text="@GetSortingHelperText(Scoring.PointRule.FinalSortOptions)" />
+
 <SettingsPromptItem @bind-Value="Scoring.PointRule.BonusPointConfigs"
                     T="IEnumerable<BonusPointConfig>"
                     TDialog="BonusSettingsDialog"
@@ -32,16 +39,30 @@
                         { x => x.LeagueMembers, LeagueMembers},
                         { x => x.Teams, Teams},
                     })">
-    @string.Join(";  ", Scoring.PointRule.BonusPointConfigs.Select(x => GetBonusPointText(x)))
+    @if (Scoring.PointRule.BonusPointConfigs.Count() == 0)
+    {
+        @:None
+    }
+    else
+    {
+        @string.Join(" | ", Scoring.PointRule.BonusPointConfigs.Select(GetBonusPointText))
+    }
 </SettingsPromptItem>
 
-
-<SettingsPromptItem Label="Final order after Points"
-                    T="IList<SortOptions>"
-                    TDialog="SortOptionsDialog"
-                    Value="Scoring.PointRule.FinalSortOptions.ToList()"
-                    ValueChanged="@((IList<SortOptions> value) => Scoring.PointRule.FinalSortOptions = value)"
-                    Text="@GetSortingHelperText(Scoring.PointRule.FinalSortOptions)" />
+<SettingsPromptItem Value="Scoring.PointRule.AutoPenalties"
+                    ValueChanged="@((IEnumerable<AutoPenaltyConfiguration> penalties) => Scoring.PointRule.AutoPenalties = penalties.ToList())"
+                    T="IEnumerable<AutoPenaltyConfiguration>"
+                    TDialog="PenaltySettingsDialog"
+                    Label="Automatic Penalties">
+    @if (Scoring.PointRule.AutoPenalties.Count == 0)
+    {
+        @:None
+    }
+    else
+    {
+        @string.Join(" | ", Scoring.PointRule.AutoPenalties.Select(GetPenaltyText))
+    }
+</SettingsPromptItem>
 
 @code {
     [CascadingParameter] public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
@@ -113,7 +134,17 @@
 
     private string GetBonusPointText(BonusPointConfig bonus)
     {
-        return $"{bonus.Option.Description}{(bonus.Option.HasPosition ? " " + GetPositionString(bonus.Position) : "")}: {bonus.Points}";
+        return $"{bonus.Option.Description}{(bonus.Option.HasPosition ? " " + GetPositionString(bonus.Position) : "")} => {bonus.Points}";
+    }
+
+    private string GetPenaltyText(AutoPenaltyConfiguration penalty)
+    {
+        var value = penalty.Type switch
+        {
+            PenaltyType.Disqualification => "DSQ",
+            _ => penalty.Points.ToString(),
+        };
+        return $"{penalty.Description} => {value}";
     }
 
     private string GetPositionString(int position) => position + position switch

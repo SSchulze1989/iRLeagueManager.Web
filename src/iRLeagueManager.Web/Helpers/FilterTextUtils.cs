@@ -73,8 +73,8 @@ internal static class FilterTextUtils
             ComparatorType.IsBiggerOrEqual => ">=",
             ComparatorType.IsBigger => ">",
             ComparatorType.NotEqual => "!=",
-            ComparatorType.InList => "In list",
-            ComparatorType.ForEach => "For each",
+            ComparatorType.InList => "in",
+            ComparatorType.ForEach => "%",
             _ => "",
         };
     }

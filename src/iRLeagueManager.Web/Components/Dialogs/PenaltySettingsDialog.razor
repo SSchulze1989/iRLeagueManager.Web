@@ -1,0 +1,160 @@
+﻿@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components.Settings
+@inherits PromptDialog<IEnumerable<AutoPenaltyConfiguration>>
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="2">
+            @foreach (var (penalty, index) in penaltyConfigs.WithIndex())
+            {
+                <MudField Label="@($"Auto Penalty {index + 1}")"
+                          Variant="Variant.Outlined"
+                          FullWidth="true"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@Icons.Material.Outlined.Delete"
+                          AdornmentColor="Color.Error"
+                          OnAdornmentClick="@(() => ClearPenalty(penalty))"
+                          InnerPadding="false">
+                    <MudGrid Spacing="1" Class="mb-1">
+                        <MudItem xs="6">
+                            <MudSelect Label="Type"
+                                       @bind-Value="penalty.Type"
+                                       Variant="Variant.Text">
+                                @foreach (var penaltyType in Enum.GetValues<PenaltyType>())
+                                {
+                                    <MudSelectItem Value="penaltyType" />
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="6">
+                            @switch (penalty.Type)
+                            {
+                                case PenaltyType.Disqualification:
+                                    <MudField Disabled="true"
+                                              Variant="Variant.Text" />
+                                    break;
+                                case PenaltyType.Points:
+                                    <MudNumericField Label="Points"
+                                                     @bind-Value="penalty.Points"
+                                                     Variant="Variant.Text" />
+                                    break;
+                                case PenaltyType.Position:
+                                    <MudNumericField Label="Positions"
+                                                     @bind-Value="penalty.Positions"
+                                                     Variant="Variant.Text" />
+                                    break;
+                                case PenaltyType.Time:
+                                    <MudNumericField Label="Points"
+                                                     Value="(int)penalty.Time.TotalSeconds"
+                                                     ValueChanged="@((int seconds) => penalty.Time = TimeSpan.FromSeconds(seconds))"
+                                                     Variant="Variant.Text" />
+                                    break;
+                            }
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTextField Label="Description"
+                                          @bind-Value="penalty.Description"
+                                          Variant="Variant.Text" />
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudField Label="Conditions"
+                                      Variant="Variant.Text"
+                                      DisableUnderLine="true"
+                                      InnerPadding="false"
+                                      Class="mt-2">
+                                <MudElement HtmlTag="div" Class="ps-1">
+                                    @foreach (var condition in penalty.Conditions)
+                                    {
+                                        <MudElement HtmlTag="div" Class="d-flex">
+                                            <FilterInput Condition="condition" ColumnNames="FilterColumnsAvailable" />
+                                            <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="@(() => DeleteCondition(penalty, condition))" />
+                                        </MudElement>
+                                    }
+                                    <MudElement HtmlTag="div" Class="d-flex">
+                                        <FilterInput Condition="new()"
+                                                     ConditionChanged="@((FilterConditionModel value) => SelectNewCondition(penalty, value))"
+                                                     ColumnNames="FilterColumnsAvailable" />
+                                        <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Class="invisible" />
+                                    </MudElement>
+                                </MudElement>
+                            </MudField>
+                        </MudItem>
+                    </MudGrid>
+                </MudField>
+            }
+            <MudField Label="@($"Auto Penalty {penaltyConfigs.Count + 1}")"
+                      Variant="Variant.Outlined"
+                      FullWidth="true">
+                <MudSelect Value="null"
+                           ValueChanged="@((PenaltyType? option) => SelectNewPenaltyType(option))"
+                           Label="Type"
+                           Placeholder="Select penalty type ..."
+                           AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var penaltyType in Enum.GetValues<PenaltyType>().Cast<PenaltyType?>())
+                    {
+                        <MudSelectItem Value="penaltyType" />
+                    }
+                </MudSelect>
+            </MudField>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkClick="Submit" CancelClick="Cancel" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private IList<AutoPenaltyConfiguration> penaltyConfigs = new List<AutoPenaltyConfiguration>();
+    private string[] FilterColumnsAvailable = new[]
+    {
+        nameof(ResultRowModel.Incidents),
+        nameof(ResultRowModel.CompletedLaps),
+        nameof(ResultRowModel.CompletedPct),
+        nameof(ResultRowModel.LeadLaps),
+        nameof(ResultRowModel.Interval),
+    };
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        penaltyConfigs = Value as IList<AutoPenaltyConfiguration> ?? Value.ToList();
+    }
+
+    protected override Task Submit()
+    {
+        Value = penaltyConfigs;
+        return base.Submit();
+    }
+
+    private void SelectNewPenaltyType(PenaltyType? type)
+    {
+        if (type is null)
+        {
+            return;
+        }
+        penaltyConfigs.Add(new()
+            {
+                Type = type.Value,
+            });
+    }
+
+    private void SelectNewCondition(AutoPenaltyConfiguration config, FilterConditionModel condition)
+    {
+        config.Conditions.Add(new()
+            {
+                ColumnPropertyName = condition.ColumnPropertyName,
+            });
+        condition.ColumnPropertyName = "";
+    }
+
+    private void DeleteCondition(AutoPenaltyConfiguration config, FilterConditionModel condition)
+    {
+        config.Conditions.Remove(condition);
+    }
+
+    private void ClearPenalty(AutoPenaltyConfiguration penalty)
+    {
+        penaltyConfigs.Remove(penalty);
+    }
+}

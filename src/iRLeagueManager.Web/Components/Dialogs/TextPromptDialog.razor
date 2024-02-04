@@ -7,7 +7,8 @@
                       Label="@Label"
                       HelperText="@HelperText"
                       Variant="Variant"
-                      InputType="InputType" />
+                      InputType="InputType" 
+                      Clearable="Clearable"/>
     </DialogContent>
     <DialogActions>
         <PromptDialogButtons OkClick="Submit" OkText="@OkText" CancelClick="Cancel" CancelText="@CancelText" />
@@ -16,4 +17,5 @@
 
 @code {
     [Parameter] public InputType InputType { get; set; } = InputType.Text;
+    [Parameter] public bool Clearable { get; set; } = false;
 }

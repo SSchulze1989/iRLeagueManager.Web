@@ -23,48 +23,46 @@
 
 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
     <Authorized>
-        <MudPaper Elevation="5" Class="mt-4">
-            <MudList Clickable="true">
-                <SettingsSwitch Text="Enable Protests"
-                                HelperText="@(League.EnableProtests ? "Enabled: Users can submit protests" : "Protest are disabled")"
-                                Color="Color.Primary"
-                                @bind-Checked="League.EnableProtests" />
-                <SettingsItem HelperText="Configure open time, cooldown and public settings" OnClick="ProtestSettingsClick" Disabled="!League.EnableProtests">
-                    Protest Options
+        <SettingsTopSection>
+            <SettingsSwitch Text="Enable Protests"
+                            HelperText="@(League.EnableProtests ? "Enabled: Users can submit protests" : "Protest are disabled")"
+                            Color="Color.Primary"
+                            @bind-Checked="League.EnableProtests" />
+            <SettingsItem HelperText="Configure open time, cooldown and public settings" OnClick="ProtestSettingsClick" Disabled="!League.EnableProtests">
+                Protest Options
+            </SettingsItem>
+            <SettingsSection Text="Incident Categories"
+                             @bind-Expanded=categoriesExpanded
+                             HelperText="@(categoriesExpanded ? "Collapse" : "Expand")"
+                             InitiallyExpanded="false"
+                             Class="me-4 pe-4">
+                <MudTable Items="Bind(Reviews, x => x.VoteCategories)"
+                          Breakpoint="Breakpoint.None"
+                          Hover="true"
+                          OnRowClick="@((TableRowClickEventArgs<VoteCategoryViewModel> e) => OnVoteCategoryClick(e.Item))">
+                    <HeaderContent>
+                        <MudTh Class="ps-4">Text</MudTh>
+                        <MudTh>Penalty/Bonus</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate Context=category>
+                        <MudTd Class="ps-4">
+                            @category.Text
+                        </MudTd>
+                        <MudTd>
+                            @category.DefaultPenalty
+                        </MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="@(() => OnDeleteVoteCategoryClick(category))" Size="Size.Small" />
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+                <SettingsItem Icon="@Icons.Material.Outlined.Add" Text="Add Vote Category" OnClick="OnAddVoteCategoryClick" Color="Color.Tertiary" />
+                <SettingsItem OnClick="() => categoriesExpanded = false">
+                    <MudText Typo="Typo.caption">Collapse Categories</MudText>
                 </SettingsItem>
-                <SettingsSection Text="Incident Categories"
-                                 @bind-Expanded=categoriesExpanded
-                                 HelperText="@(categoriesExpanded ? "Collapse" : "Expand")"
-                                 InitiallyExpanded="false"
-                                 Class="me-4 pe-4">
-                    <MudTable Items="Bind(Reviews, x => x.VoteCategories)"
-                              Breakpoint="Breakpoint.None"
-                              Hover="true"
-                              OnRowClick="@((TableRowClickEventArgs<VoteCategoryViewModel> e) => OnVoteCategoryClick(e.Item))">
-                        <HeaderContent>
-                            <MudTh Class="ps-4">Text</MudTh>
-                            <MudTh>Penalty/Bonus</MudTh>
-                            <MudTh></MudTh>
-                        </HeaderContent>
-                        <RowTemplate Context=category>
-                            <MudTd Class="ps-4">
-                                @category.Text
-                            </MudTd>
-                            <MudTd>
-                                @category.DefaultPenalty
-                            </MudTd>
-                            <MudTd>
-                                <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="@(() => OnDeleteVoteCategoryClick(category))" Size="Size.Small" />
-                            </MudTd>
-                        </RowTemplate>
-                    </MudTable>
-                    <SettingsItem Icon="@Icons.Material.Outlined.Add" Text="Add Vote Category" OnClick="OnAddVoteCategoryClick" Color="Color.Tertiary" />
-                    <SettingsItem OnClick="() => categoriesExpanded = false">
-                        <MudText Typo="Typo.caption">Collapse Categories</MudText>
-                    </SettingsItem>
-                </SettingsSection>
-            </MudList>
-        </MudPaper>
+            </SettingsSection>
+        </SettingsTopSection>
     </Authorized>
     <NotAuthorized>
         You are not allowed here ...

@@ -115,17 +115,21 @@
         {
             ForceNavigateTo($"{Shared.LeagueName}/Results");
         }
-        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Schedules"))
+        else if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Schedules"))
         {
             ForceNavigateTo($"{Shared.LeagueName}/Schedules");
         }
-        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Standings"))
+        else if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Standings"))
         {
             ForceNavigateTo($"{Shared.LeagueName}/Standings");
         }
-        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Reviews"))
+        else if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Reviews"))
         {
             ForceNavigateTo($"{Shared.LeagueName}/Reviews");
+        }
+        else if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Settings/Results"))
+        {
+            ForceNavigateTo($"{Shared.LeagueName}/Settings/Results");
         }
         SeasonExpanded = false;
 

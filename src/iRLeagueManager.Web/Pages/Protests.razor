@@ -6,7 +6,9 @@
 @inject ReviewsPageViewModel ReviewsVm
 @inject ClientLocalTimeProvider ClientTime
 
-<PageTitle>Protests - @LeagueName</PageTitle>
+<PageTitle>
+    Protests - @LeagueName
+</PageTitle>
 
 <div class="container-xxl">
     <h3 class="mb-3">
@@ -73,7 +75,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Session</label>
-                            <InputSelect class="form-select" placeholder="Select Session" aria-label="Select Session" id="incident_session" @bind-Value="SessionId"> 
+                            <InputSelect class="form-select" placeholder="Select Session" aria-label="Select Session" id="incident_session" @bind-Value="SessionId">
                                 @if (EventList.Selected != null)
                                 {
                                     @foreach (var session in EventList.Selected.Sessions.Where(x => x.SessionType == iRLeagueApiCore.Common.Enums.SessionType.Race))

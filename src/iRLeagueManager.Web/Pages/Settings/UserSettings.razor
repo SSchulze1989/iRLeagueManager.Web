@@ -2,70 +2,71 @@
 @using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.Components.Settings
 @using iRLeagueManager.Web.ViewModels
+@layout SettingsLayout
 @inherits LeagueComponentBase
 @inject LeagueUsersViewModel Users
 @inject IDialogService DialogService
 @attribute [Authorize]
 
-<PageTitle>Settings - @LeagueName</PageTitle>
+<PageTitle>
+    Settings - @LeagueName
+</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Medium">
-    <LoadingHeader Loading="@Bind(Users, x => x.Loading)">
-        <HeaderText>
-            <MudText Typo="Typo.h5">User Settings</MudText>
-        </HeaderText>
-    </LoadingHeader>
+<LoadingHeader Loading="@Bind(Users, x => x.Loading)">
+    <HeaderText>
+        <MudText Typo="Typo.h5">User Settings</MudText>
+    </HeaderText>
+</LoadingHeader>
 
-    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin) Context="AuthContext">
-        <Authorized>
-            <MudText Typo="Typo.h6" Class="px-2 pt-2">Members and Roles</MudText>
-            <MudPaper Elevation="5">
-                <MudSimpleTable Striped="true">
-                    <thead>
+<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin) Context="AuthContext">
+    <Authorized>
+        <MudText Typo="Typo.h6" Class="px-2 mt-2">Members and Roles</MudText>
+        <MudPaper Elevation="5">
+            <MudSimpleTable Striped="true">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        @foreach (var role in LeagueRoles.RolesAvailable)
+                        {
+                            <th style="text-align: center">@role</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in @Bind(Users, x => x.LeagueUsers))
+                    {
                         <tr>
-                            <th>Name</th>
+                            <td>
+                                <DisplayUser User=@user.GetModel() ShowUserName=false />
+                            </td>
                             @foreach (var role in LeagueRoles.RolesAvailable)
                             {
-                                <th style="text-align: center">@role</th>
+                                <td>
+                                    @{
+                                        var disabled = user.IsImplicitRole(role) || role == LeagueRoles.Owner;
+                                    }
+                                    <div class="d-flex justify-center">
+                                        <MudCheckBox Checked="@(user.HasRole(role))"
+                                                     CheckedChanged="@((bool active) => SetUserRole(user, role, active))"
+                                                     Disabled="disabled"
+                                                     Dense="true"
+                                                     Color="Color.Primary" />
+                                    </div>
+                                </td>
                             }
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var user in @Bind(Users, x => x.LeagueUsers))
-                        {
-                            <tr>
-                                <td>
-                                    <DisplayUser User=@user.GetModel() ShowUserName=false />
-                                </td>
-                                @foreach (var role in LeagueRoles.RolesAvailable)
-                                {
-                                    <td>
-                                        @{
-                                            var disabled = user.IsImplicitRole(role) || role == LeagueRoles.Owner;
-                                        }
-                                        <div class="d-flex justify-center">
-                                            <MudCheckBox Checked="@(user.HasRole(role))"
-                                                         CheckedChanged="@((bool active) => SetUserRole(user, role, active))"
-                                                         Disabled="disabled"
-                                                         Dense="true"
-                                                         Color="Color.Primary" />
-                                        </div>
-                                    </td>
-                                }
-                            </tr>
-                        }
-                    </tbody>
-                </MudSimpleTable>
-            </MudPaper>
-            <MudButton Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.Add" OnClick=OpenAddUser>Search User</MudButton>
-        </Authorized>
-        <NotAuthorized>
-            <MudPaper Elevation="5" Class="pa-4">
-                You are not allowed here ...
-            </MudPaper>
-        </NotAuthorized>
-    </AuthorizeView>
-</MudContainer>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        </MudPaper>
+        <MudButton Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.Add" OnClick=OpenAddUser>Search User</MudButton>
+    </Authorized>
+    <NotAuthorized>
+        <MudPaper Elevation="5" Class="pa-4">
+            You are not allowed here ...
+        </MudPaper>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }

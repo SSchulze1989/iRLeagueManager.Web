@@ -4,30 +4,43 @@
 @using iRLeagueApiCore.Common.Enums;
 @using iRLeagueApiCore.Common.Models;
 @using iRLeagueManager.Web.Components;
+@layout SettingsLayout
 @inherits LeagueComponentBase
 @inject LeagueViewModel Vm
 @inject IServiceProvider Provider
+@inject IDialogService DialogService
 @attribute [Authorize]
 
-<PageTitle>Select Template - @LeagueName</PageTitle>
+<PageTitle>
+    Select Template - @LeagueName
+</PageTitle>
+
+<LoadingHeader Loading="Loading">
+    <HeaderText>
+        <MudText Typo="Typo.h5">Select Template</MudText>
+    </HeaderText>
+</LoadingHeader>
 
 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
     <Authorized>
-        <h3>Select Template</h3>
-
-        <ol class="list-group list-group-numbered">
-            @foreach (var (template, (title, description)) in TemplatesAvailable)
-            {
-                <li class="list-group-item list-group-item-action d-flex justify-content-start align-items-start gap-2 @(Loading ? "disabled" : "")" type="button" @onclick=@(() => OnTemplateSelect(template))>
-                    <div>
+        <MudPaper Elevation="5" Class="mt-2">
+            <MudList Clickable="true">
+                @foreach (var ((template, (title, description)), index) in TemplatesAvailable.WithIndex())
+                {
+                    @if (index > 0)
+                    {
+                        <MudDivider />
+                    }
+                    <MudListItem Disabled="Loading"
+                                 OnClick="@(() => OnTemplateSelect(template))">
                         <h5>@title</h5>
                         <p>
                             @((MarkupString)description)
                         </p>
-                    </div>
-                </li>
-            }
-        </ol>
+                    </MudListItem>
+                }
+            </MudList>
+        </MudPaper>
     </Authorized>
     <NotAuthorized>
         You are not allowed here ...
@@ -37,7 +50,7 @@
 @if (string.IsNullOrEmpty(Status) == false)
 {
     <label>@Status: @Message</label>
-    @foreach(var error in Errors)
+    @foreach (var error in Errors)
     {
         <p>
             @error
@@ -46,9 +59,6 @@
 }
 
 @code {
-    [CascadingParameter]
-    private IModalService ModalService { get; set; } = default!;
-
     private string Status { get; set; } = string.Empty;
     private string Message { get; set; } = string.Empty;
     private IEnumerable<object> Errors { get; set; } = Array.Empty<object>();
@@ -74,12 +84,6 @@
     [SupplyParameterFromQuery]
     public string ReturnUrl { get; set; } = string.Empty;
 
-    protected override void OnParametersSet()
-    {
-        base.OnParametersSet();
-        BlazorParameterNullException.ThrowIfNull(this, ModalService);
-    }
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
@@ -95,13 +99,14 @@
     {
         var (title, description) = TemplatesAvailable[template];
         Loading = true;
-        var parameters = new ModalParameters<ConfirmModal>()
-            .Add(x => x.Text, $"Apply template <b><u>{title}</u></b> to your league?<br/>You can only apply a template once but of course change all the applied settings later.")
-            .Add(x => x.AllowMarkup, true)
-            .Add(x => x.ButtonTypes, ButtonTypes.YesNo)
-            .Add(x => x.ButtonStyles, ButtonStyles.PrimarySecondaryOutline);
-        var result = await ModalService.Show<ConfirmModal>("Apply Template", parameters).Result;
-        if (result.Confirmed)
+        var parameters = new DialogParameters<MudConfirmModal>()
+        {
+            { x => x.Text, $"Apply template <b><u>{title}</u></b> to your league?<br/>You can only apply a template once but of course change all the applied settings later."},
+            { x => x.AllowMarkup, true},
+            { x => x.ButtonTypes, ButtonTypes.YesNo},
+        };
+        var result = await DialogService.Show<MudConfirmModal>("Apply Template", parameters).Result;
+        if (!result.Canceled)
         {
             await SubmitTemplateSelection(template);
         }
@@ -165,17 +170,17 @@
     private async Task<StatusResult> CreateChampionship(ResultSettingsViewModel resultSettings, string name, ResultKind resultKind, CancellationToken cancellationToken = default)
     {
         var championship = new PutChampSeasonModel()
-        {
-            ChampionshipName = name,
-            ChampionshipDisplayName = name,
-            ResultKind = resultKind,
-            StandingConfig = new()
             {
-                Name = name,
+                ChampionshipName = name,
+                ChampionshipDisplayName = name,
                 ResultKind = resultKind,
-                WeeksCounted = 0,
-            },
-        };
+                StandingConfig = new()
+                {
+                    Name = name,
+                    ResultKind = resultKind,
+                    WeeksCounted = 0,
+                },
+            };
         return await resultSettings.AddChampionship(championship, cancellationToken);
     }
 
@@ -203,17 +208,17 @@
         var champSeasonVm = Provider.GetRequiredService<ChampSeasonViewModel>();
         champSeasonVm.SetModel(champSeason.GetModel());
         var resultConfig = new ResultConfigModel()
-        {
-            Name = "iRacing Points",
-            DisplayName = "iRacing Points",
-            Scorings = new[]
             {
+                Name = "iRacing Points",
+                DisplayName = "iRacing Points",
+                Scorings = new[]
+                                    {
                 new ScoringModel()
                 {
-                    Name = "Race",   
+                    Name = "Race",
                 }
             },
-        };
+            };
         result = await champSeasonVm.AddResultConfig(resultConfig, cancellationToken);
         if (result.IsSuccess == false)
         {
@@ -246,11 +251,11 @@
         var champSeasonVm = Provider.GetRequiredService<ChampSeasonViewModel>();
         champSeasonVm.SetModel(champSeason.GetModel());
         var resultConfig = new ResultConfigModel()
-        {
-            Name = "Custom Points",
-            DisplayName = "Custom Points",
-            Scorings = new[]
             {
+                Name = "Custom Points",
+                DisplayName = "Custom Points",
+                Scorings = new[]
+                                    {
                 new ScoringModel()
                 {
                     Name = "Race",
@@ -262,7 +267,7 @@
                     },
                 }
             },
-        };
+            };
         result = await champSeasonVm.AddResultConfig(resultConfig, cancellationToken);
         if (result.IsSuccess == false)
         {
@@ -305,17 +310,17 @@
         champSeasonVm.SetModel(driverChampSeason.GetModel());
 
         var driverResultConfig = new ResultConfigModel()
-        {
-            Name = "iRacing Points",
-            DisplayName = "iRacing Points",
-            Scorings = new[]
             {
+                Name = "iRacing Points",
+                DisplayName = "iRacing Points",
+                Scorings = new[]
+                                    {
                 new ScoringModel()
                 {
                     Name = "Race",
                 }
             },
-        };
+            };
         result = await champSeasonVm.AddResultConfig(driverResultConfig, cancellationToken);
         if (result.IsSuccess == false)
         {
@@ -330,19 +335,19 @@
 
         champSeasonVm.SetModel(teamChampSeason.GetModel());
         var teamResultConfig = new ResultConfigModel()
-        {
-            Name = "Sum of Driver points",
-            DisplayName = "Sum of Driver points",
-            SourceResultConfig = driverResultConfigInfo,
-            ResultsPerTeam = 2,
-            Scorings = new[]
             {
+                Name = "Sum of Driver points",
+                DisplayName = "Sum of Driver points",
+                SourceResultConfig = driverResultConfigInfo,
+                ResultsPerTeam = 2,
+                Scorings = new[]
+                                    {
                 new ScoringModel()
                 {
                     Name = "Race",
                 }
             },
-        };
+            };
         result = await champSeasonVm.AddResultConfig(teamResultConfig, cancellationToken);
 
         return result;
@@ -381,11 +386,11 @@
         champSeasonVm.SetModel(driverChampSeason.GetModel());
 
         var driverResultConfig = new ResultConfigModel()
-        {
-            Name = "Custom Points",
-            DisplayName = "Custom Points",
-            Scorings = new[]
             {
+                Name = "Custom Points",
+                DisplayName = "Custom Points",
+                Scorings = new[]
+                                    {
                 new ScoringModel()
                 {
                     Name = "Race",
@@ -397,7 +402,7 @@
                     },
                 }
             },
-        };
+            };
         result = await champSeasonVm.AddResultConfig(driverResultConfig, cancellationToken);
         if (result.IsSuccess == false)
         {
@@ -412,19 +417,19 @@
 
         champSeasonVm.SetModel(teamChampSeason.GetModel());
         var teamResultConfig = new ResultConfigModel()
-        {
-            Name = "Sum of Driver points",
-            DisplayName = "Sum of Driver points",
-            SourceResultConfig = driverResultConfigInfo,
-            ResultsPerTeam = 2,
-            Scorings = new[]
             {
+                Name = "Sum of Driver points",
+                DisplayName = "Sum of Driver points",
+                SourceResultConfig = driverResultConfigInfo,
+                ResultsPerTeam = 2,
+                Scorings = new[]
+                                    {
                 new ScoringModel()
                 {
                     Name = "Race",
                 }
             },
-        };
+            };
         result = await champSeasonVm.AddResultConfig(teamResultConfig, cancellationToken);
 
         return result;

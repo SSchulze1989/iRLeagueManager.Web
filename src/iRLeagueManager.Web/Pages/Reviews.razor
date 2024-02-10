@@ -34,12 +34,10 @@
                 <MudTabPanel Text="Protests" OnClick="@(() => NavigateTo(GetTabLink(1)))" />
             </MudTabs>
         }
-
         <CascadingValue Value=@Bind(ReviewsVm, x => x.EventCars)>
             <CascadingValue Value=ReviewsVm.LeagueUsers>
                 <CascadingValue Value=ReviewsVm.LeagueUsers.AsEnumerable()>
                     <CascadingValue Value=ReviewsVm.VoteCategories.AsEnumerable()>
-
                         <MudStack Spacing="5" Class="py-4">
                             @switch (SelectedTabIndex)
                             {
@@ -132,7 +130,6 @@
                                     break;
                             }
                         </MudStack>
-
                     </CascadingValue>
                 </CascadingValue>
             </CascadingValue>

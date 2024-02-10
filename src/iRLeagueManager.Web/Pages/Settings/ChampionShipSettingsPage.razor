@@ -30,7 +30,7 @@
         @{
             var disableSave = !HasChanges();
         }
-        <MudStack Row="true" Justify="Justify.FlexEnd">
+        <MudStack Row="true" Justify="Justify.FlexEnd" Style="margin-top: -2em">
             <MudButton Color="Color.Error" OnClick="Discard" Disabled="disableSave">Discard</MudButton>
             <MudButton Color="Color.Primary" OnClick="Submit" Disabled="disableSave">Save</MudButton>
         </MudStack>
@@ -314,9 +314,9 @@
     }
 
     private ResultConfigModel CreateResultConfig() => new ResultConfigModel()
-    {
-        ChampSeasonId = ChampSeason.ChampSeasonId,
-    };
+        {
+            ChampSeasonId = ChampSeason.ChampSeasonId,
+        };
 
     private void OnHasChanged(object? sender, EventArgs e)
     {

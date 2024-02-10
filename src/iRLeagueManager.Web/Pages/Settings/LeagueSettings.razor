@@ -35,7 +35,7 @@
         }
         <EditForm Model="League" OnValidSubmit="SaveChanges">
             <StatusResultValidator @ref="ResultValidator" />
-            <MudStack Spacing="1">
+            <MudStack Spacing="1" Class="mt-2">
                 <SettingsTopSection Header="General">
                     <SettingsTextPrompt Label="Display Name"
                                         @bind-Value="League.NameFull" />

@@ -23,7 +23,7 @@
 
 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
     <Authorized>
-        <SettingsTopSection>
+        <SettingsTopSection Class="mt-2">
             <SettingsSwitch Text="Enable Protests"
                             HelperText="@(League.EnableProtests ? "Enabled: Users can submit protests" : "Protest are disabled")"
                             Color="Color.Primary"

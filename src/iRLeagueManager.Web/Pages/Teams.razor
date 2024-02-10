@@ -10,7 +10,9 @@
 @inject LeagueApiService apiService
 @inject IDialogService DialogService
 
-<PageTitle>Settings - @LeagueName</PageTitle>
+<PageTitle>
+    Settings - @LeagueName
+</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudStack Spacing="4">
@@ -20,26 +22,25 @@
                 <MudSpacer />
                 <MudSpacer />
                 <MudSpacer />
-                <MudTextField
-                    Class="object-right"
-                    Label="Search Team or Driver"
-                    Margin="Margin.Dense"
-                    @bind-Value="TeamFilter"
-                    Adornment="Adornment.End"
-                    AdornmentIcon="@Icons.Material.Filled.Search"
-                    Variant="Variant.Outlined"
-                    Immediate="true"
-                    Clearable="true"
-                    DebounceInterval="300"/>
+                <MudTextField Class="object-right"
+                              Label="Search Team or Driver"
+                              Margin="Margin.Dense"
+                              @bind-Value="TeamFilter"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Variant="Variant.Outlined"
+                              Immediate="true"
+                              Clearable="true"
+                              DebounceInterval="300" />
             </HeaderActions>
         </LoadingHeader>
-        @foreach(var team in Bind(vm, x => x.Teams).Where(FilterTeams).OrderBy(x => x.Name))
+        @foreach (var team in Bind(vm, x => x.Teams).Where(FilterTeams).OrderBy(x => x.Name))
         {
             <MudCard Elevation="5">
                 <MudCardHeader Style="@($"color: {team.TeamColor}")">
                     <CardHeaderContent>
                         <MudText Typo="Typo.h6" Style="">
-                            <MudHighlighter Text="@team.Name" HighlightedText="@TeamFilter"/>
+                            <MudHighlighter Text="@team.Name" HighlightedText="@TeamFilter" />
                         </MudText>
                     </CardHeaderContent>
                     <CardHeaderActions>
@@ -57,7 +58,7 @@
                         @foreach (var member in team.MemberList.OrderBy(x => x.LastName).ThenBy(x => x.FirstName))
                         {
                             <MudChip Icon="@Icons.Material.Filled.Person" Label="true" Variant="Variant.Outlined">
-                                <MudHighlighter Text="@($"{member.FirstName} {member.LastName}")" HighlightedText="@TeamFilter"/>
+                                <MudHighlighter Text="@($"{member.FirstName} {member.LastName}")" HighlightedText="@TeamFilter" />
                             </MudChip>
                         }
                         @if (team.MemberList.Any() == false)
@@ -79,14 +80,14 @@
 </MudContainer>
 
 @code {
-    [Parameter(CaptureUnmatchedValues = true)] 
+    [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
     private string? teamFilter;
-    private string? TeamFilter 
+    private string? TeamFilter
     {
         get => teamFilter;
-        set  
+        set
         {
             if (teamFilter != value)
             {
@@ -125,10 +126,10 @@
             {x => x.OnSubmit, async (team, cancellation) => await vm.AddTeam(team.GetModel(), cancellation)},
         };
         var options = new DialogOptions()
-        {
+            {
                 FullWidth = true,
-            DisableBackdropClick = true,
-        };
+                DisableBackdropClick = true,
+            };
         var result = await DialogService.Show<EditTeamModal>("Add new Team", parameters, options).Result;
     }
 
@@ -149,14 +150,14 @@
         var result = await DialogService.Show<MudConfirmModal>("Delete Result Config", parameters).Result;
         if (result.Canceled == false)
         {
-            await vm.DeleteTeam(team.GetModel());   
+            await vm.DeleteTeam(team.GetModel());
         }
     }
 
     private bool FilterTeams(TeamViewModel team)
     {
         var searchString = TeamFilter ?? string.Empty;
-        return team.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase) 
+        return team.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)
             || team.MemberList.Any(x => $"{x.FirstName} {x.LastName}".Contains(searchString, StringComparison.OrdinalIgnoreCase));
     }
 

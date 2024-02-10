@@ -8,29 +8,28 @@
 @inherits MudComponentBase
 
 <div style="width: 45em; max-width: 100%">
-    <MudSelect
-        @bind-Value="EventList.Selected" 
-        Variant="Variant.Outlined" 
-        AnchorOrigin="Origin.BottomLeft" 
-        TransformOrigin="Origin.TopLeft"
-        Margin="Margin.Dense">
-        @foreach(var (index, @event) in EventList.EventList.Select((x, i) => (i, x)))
+    <MudSelect @bind-Value="EventList.Selected"
+               Variant="Variant.Outlined"
+               AnchorOrigin="Origin.BottomLeft"
+               TransformOrigin="Origin.TopLeft"
+               Margin="Margin.Dense">
+        @foreach (var (index, @event) in EventList.EventList.Select((x, i) => (i, x)))
         {
             <MudSelectItem Value="@(@event)">
                 <div class="d-flex align-center">
-                    @GetEventText(@event, index) 
+                    @GetEventText(@event, index)
                     @if (@event.HasResult)
                     {
-                        <MudIcon Class="ms-2" Color="Color.Tertiary" Icon="@Icons.Material.Filled.FlagCircle" Size="Size.Small"/>
+                        <MudIcon Class="ms-2" Color="Color.Tertiary" Icon="@Icons.Material.Filled.FlagCircle" Size="Size.Small" />
                     }
                 </div>
             </MudSelectItem>
         }
     </MudSelect>
 </div>
-<MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowLeft" OnClick="EventMovePrevious" Variant="Variant.Text" Disabled="!CanMovePrevious"/>
-<MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowRight" OnClick="EventMoveNext" Variant="Variant.Text" Disabled="!CanMoveNext"/>
-<MudIconButton Icon="@Icons.Material.Filled.KeyboardDoubleArrowRight" OnClick="EventMoveLastWithResult" Variant="Variant.Text" Disabled="!CanMoveLast"/>
+<MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowLeft" OnClick="EventMovePrevious" Variant="Variant.Text" Disabled="!CanMovePrevious" />
+<MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowRight" OnClick="EventMoveNext" Variant="Variant.Text" Disabled="!CanMoveNext" />
+<MudIconButton Icon="@Icons.Material.Filled.KeyboardDoubleArrowRight" OnClick="EventMoveLastWithResult" Variant="Variant.Text" Disabled="!CanMoveLast" />
 
 @code {
     [CascadingParameter]
@@ -42,8 +41,8 @@
 
     private List<EventViewModel> Events => EventList.EventList;
 
-    private EventViewModel? Selected 
-    { 
+    private EventViewModel? Selected
+    {
         get => EventList.Selected;
         set
         {
@@ -120,7 +119,7 @@
 
     private void EventMoveNext()
     {
-        if (SelectedIndex < Events.Count-1)
+        if (SelectedIndex < Events.Count - 1)
         {
             SelectedIndex++;
         }

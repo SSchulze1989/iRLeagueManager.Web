@@ -9,7 +9,9 @@
 @inject SchedulesPageViewModel vm
 @inject JsonSerializerOptions jsonOptions
 
-<PageTitle>Schedules - @LeagueName</PageTitle>
+<PageTitle>
+    Schedules - @LeagueName
+</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudStack Spacing="2">
@@ -21,15 +23,15 @@
 
         <AuthorizeView Roles=@(GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer))>
             <Authorized>
-                @foreach(var schedule in @Bind(vm, x => x.Schedules))
+                @foreach (var schedule in @Bind(vm, x => x.Schedules))
                 {
-                    <DisplaySchedule Schedule="schedule" ReadOnly=Shared.SeasonFinished DisplayHeader="@(vm.Schedules.Count > 1)"/>
+                    <DisplaySchedule Schedule="schedule" ReadOnly=Shared.SeasonFinished DisplayHeader="@(vm.Schedules.Count > 1)" />
                 }
             </Authorized>
             <NotAuthorized>
-                @foreach(var schedule in @Bind(vm, x => x.Schedules))
+                @foreach (var schedule in @Bind(vm, x => x.Schedules))
                 {
-                    <DisplaySchedule Schedule="schedule" ReadOnly="true" DisplayHeader="@(vm.Schedules.Count > 1)"/>
+                    <DisplaySchedule Schedule="schedule" ReadOnly="true" DisplayHeader="@(vm.Schedules.Count > 1)" />
                 }
             </NotAuthorized>
         </AuthorizeView>

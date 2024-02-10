@@ -11,7 +11,7 @@
         <MudText Typo="Typo.h5">
             @if (string.IsNullOrEmpty(BreadCrumbService.Items.LastOrDefault()?.Text) == false)
             {
-                @BreadCrumbService.Items.Last().Text
+                @:@BreadCrumbService.Items.Last().Text
             }
             else
             {

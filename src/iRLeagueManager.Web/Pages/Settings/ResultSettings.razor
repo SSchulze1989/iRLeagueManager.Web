@@ -12,7 +12,9 @@
 @inject ILogger<ResultSettings> logger
 @attribute [Authorize]
 
-<PageTitle>Settings - @LeagueName</PageTitle>
+<PageTitle>
+    Settings - @LeagueName
+</PageTitle>
 
 <LoadingHeader>
     <HeaderText>
@@ -22,29 +24,70 @@
 
 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
     <Authorized>
-        <MudText Typo="Typo.h6" Class="mt-4 px-2">Championships</MudText>
-        <MudPaper Elevation="5">
-            <MudTable Items="Vm.Championships" Striped="true" Hover="true" Elevation="0" Breakpoint="Breakpoint.None">
-                <HeaderContent>
-                    <MudTh>Name</MudTh>
-                    <MudTh>Type</MudTh>
-                    <MudTh>Point Configs</MudTh>
-                </HeaderContent>
-                <RowTemplate Context=row>
-                    @{var champSeason = Vm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipId == row.ChampionshipId);}
-                    <MudTd DataLabel="Name">
-                        <MudLink Href="@($"{LeagueName}/Settings/Results/Championships/{row.ChampionshipId}")">@row.Name</MudLink>
-                    </MudTd>
-                    <MudTd DataLabel="Type">@champSeason?.ResultKind</MudTd>
-                    <MudTd DataLabel="Point Configs">
-                        @if (champSeason is not null)
-                        {
-                            @:@string.Join(", ", champSeason.ResultConfigs.Select(x => x.Name))
+        <MudText Typo="Typo.h6" Class="mt-2 px-2">Championships</MudText>
+        <MudStack Spacing="5">
+            <MudPaper Elevation="5">
+
+                <MudTable Items="Vm.Championships.Where(x => x.IsActive)" Striped="true" Hover="true" Elevation="0" Breakpoint="Breakpoint.None">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Type</MudTh>
+                        <MudTh>Point Configs</MudTh>
+                    </HeaderContent>
+                    <RowTemplate Context=row>
+                        @{
+                            var champSeason = Vm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipId == row.ChampionshipId);
                         }
-                    </MudTd>
-                </RowTemplate>
-            </MudTable>
-        </MudPaper>
+                        <MudTd DataLabel="Name">
+                            <MudLink Href="@($"{LeagueName}/Settings/Results/Championships/{row.ChampionshipId}")">
+                                @row.Name
+                            </MudLink>
+                        </MudTd>
+                        <MudTd DataLabel="Type">
+                            @champSeason?.ResultKind
+                        </MudTd>
+                        <MudTd DataLabel="Point Configs">
+                            @if (champSeason is not null)
+                            {
+                                @:@string.Join(", ", champSeason.ResultConfigs.Select(x => x.Name))
+                            }
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+
+            @if (Vm.Championships.Any(x => !x.IsActive))
+            {
+                <MudExpansionPanel Text="Archived Championships">
+                    <MudTable Items="Vm.Championships.Where(x => !x.IsActive)" Elevation="0" Breakpoint="Breakpoint.None">
+                        <HeaderContent>
+                            <MudTh>Name</MudTh>
+                            <MudTh>Type</MudTh>
+                            <MudTh>Point Configs</MudTh>
+                        </HeaderContent>
+                        <RowTemplate Context=row>
+                            @{
+                                var champSeason = Vm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipId == row.ChampionshipId);
+                            }
+                            <MudTd DataLabel="Name">
+                                <MudLink Href="@($"{LeagueName}/Settings/Results/Championships/{row.ChampionshipId}")">
+                                    @row.Name
+                                </MudLink>
+                            </MudTd>
+                            <MudTd DataLabel="Type">
+                                @champSeason?.ResultKind
+                            </MudTd>
+                            <MudTd DataLabel="Point Configs">
+                                @if (champSeason is not null)
+                                {
+                                    @:@string.Join(", ", champSeason.ResultConfigs.Select(x => x.Name))
+                                }
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudExpansionPanel>
+            }
+        </MudStack>
     </Authorized>
     <NotAuthorized>
         You are not allowed here ...
@@ -55,7 +98,7 @@
     [CascadingParameter]
     public IModalService ModalService { get; set; } = default!;
 
-    [Parameter(CaptureUnmatchedValues = true)] 
+    [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
     private async Task HandleSubmit()
@@ -75,10 +118,10 @@
             .Add(x => x.Model, config.CopyModel())
             .Add(x => x.OnSubmit, new(async (vm, ct) => await vm.SaveChangesAsync(ct)));
         var options = new ModalOptions()
-        {
-            DisableBackgroundCancel = true,
-            Size = ModalSize.Large,
-        };
+            {
+                DisableBackgroundCancel = true,
+                Size = ModalSize.Large,
+            };
         var result = await ModalService.Show<EditResultConfigModal>("Edit Result Config", parameters, options).Result;
         if (result.Confirmed && result.Data is ResultConfigModel model)
         {
@@ -132,10 +175,10 @@
     private ResultConfigModel CreateConfigFromTemplate()
     {
         return new()
-        {
-            Name = "New Config",
-            DisplayName = "New Config",
-            Scorings = new List<ScoringModel>()
+            {
+                Name = "New Config",
+                DisplayName = "New Config",
+                Scorings = new List<ScoringModel>()
             {
                 new()
                 {
@@ -147,17 +190,17 @@
                     }
                 }
             },
-        };
+            };
     }
 
     private ChampSeasonModel CreateChampionshipFromTemplate()
     {
         return new()
-        {
-            ChampionshipName = "",
-            ChampionshipDisplayName = "",
-            StandingConfig = new(),
-        };
+            {
+                ChampionshipName = "",
+                ChampionshipDisplayName = "",
+                StandingConfig = new(),
+            };
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

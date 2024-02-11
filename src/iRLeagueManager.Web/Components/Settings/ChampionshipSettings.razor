@@ -22,7 +22,7 @@
         @if (multiplePointconfigs)
         {
             <SettingsTopSection Header="Point Settings">
-                <SettingsSection Text="Point Settings" Expanded="multiplePointconfigs" InitiallyExpanded="true">
+                <SettingsSection Text="Point Settings" InitiallyExpanded="multiplePointconfigs">
                     @foreach (var config in ChampSeason.ResultConfigs)
                     {
                         <SettingsItem Text="@config.Name"

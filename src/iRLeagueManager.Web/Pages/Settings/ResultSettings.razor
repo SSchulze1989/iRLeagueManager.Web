@@ -1,15 +1,15 @@
 ﻿@page "/{LeagueName}/Settings/Results"
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components.Dialogs
 @using iRLeagueManager.Web.Components.Settings
 @using iRLeagueManager.Web.Components;
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
 @layout SettingsLayout
 @inject ResultSettingsViewModel Vm
-@inject LeagueApiService apiService
-@inject SharedStateService sharedState
-@inject ILogger<ResultSettings> logger
+@inject ILogger<ResultSettings> Logger
+@inject IDialogService DialogService
 @attribute [Authorize]
 
 <PageTitle>
@@ -33,6 +33,7 @@
                         <MudTh>Name</MudTh>
                         <MudTh>Type</MudTh>
                         <MudTh>Point Configs</MudTh>
+                        <MudTh></MudTh>
                     </HeaderContent>
                     <RowTemplate Context=row>
                         @{
@@ -52,9 +53,15 @@
                                 @:@string.Join(", ", champSeason.ResultConfigs.Select(x => x.Name))
                             }
                         </MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Outlined.Archive" Color="Color.Default" OnClick="@(() => ArchiveChampionshipClick(row))"/>
+                        </MudTd>
                     </RowTemplate>
                 </MudTable>
             </MudPaper>
+            <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="OnAddChampionshipClick">
+                Add Championship
+            </MudButton>
 
             @if (Vm.Championships.Any(x => !x.IsActive))
             {
@@ -64,6 +71,8 @@
                             <MudTh>Name</MudTh>
                             <MudTh>Type</MudTh>
                             <MudTh>Point Configs</MudTh>
+                            <MudTh></MudTh>
+                            <MudTh></MudTh>
                         </HeaderContent>
                         <RowTemplate Context=row>
                             @{
@@ -83,6 +92,10 @@
                                     @:@string.Join(", ", champSeason.ResultConfigs.Select(x => x.Name))
                                 }
                             </MudTd>
+                            <MudTd>
+                                <MudIconButton Icon="@Icons.Material.Outlined.Unarchive" Color="Color.Default" OnClick="@(() => UnArchiveChampionshipClick(row))" />
+                                <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="@(() => OnDeleteChampionshipClick(row))" />
+                            </MudTd>
                         </RowTemplate>
                     </MudTable>
                 </MudExpansionPanel>
@@ -95,38 +108,14 @@
 </AuthorizeView>
 
 @code {
-    [CascadingParameter]
-    public IModalService ModalService { get; set; } = default!;
-
-    [Parameter(CaptureUnmatchedValues = true)]
-    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
-
     private async Task HandleSubmit()
     {
-        logger.LogInformation("Handle submit called!");
+        Logger.LogInformation("Handle submit called!");
         if (Vm.Selected == null)
         {
             return;
         }
-        //await vm.Selected.SaveCurrentModelAsync();
         await Task.FromResult(true);
-    }
-
-    private async Task OnResultConfigClick(ResultConfigViewModel config)
-    {
-        var parameters = new ModalParameters<EditResultConfigModal>()
-            .Add(x => x.Model, config.CopyModel())
-            .Add(x => x.OnSubmit, new(async (vm, ct) => await vm.SaveChangesAsync(ct)));
-        var options = new ModalOptions()
-            {
-                DisableBackgroundCancel = true,
-                Size = ModalSize.Large,
-            };
-        var result = await ModalService.Show<EditResultConfigModal>("Edit Result Config", parameters, options).Result;
-        if (result.Confirmed && result.Data is ResultConfigModel model)
-        {
-            config.SetModel(model);
-        }
     }
 
     private async Task OnChampionshipClick(ChampSeasonViewModel champSeason)
@@ -137,39 +126,31 @@
 
     private async Task OnDeleteChampionshipClick(ChampionshipViewModel championship)
     {
-        var parameters = new ModalParameters<ConfirmModal>()
-            .Add(x => x.Text, $"Really delete championship {championship.Name}? This will also remove all settings from previous seasons but it will still keep the results.")
-            .Add(x => x.ButtonTypes, ButtonTypes.YesNo);
-        var result = await ModalService.Show<ConfirmModal>("Delete Championship", parameters).Result;
-        if (result.Confirmed)
+        var parameters = new DialogParameters<MudConfirmModal>()
         {
-            await Vm.DeleteChampionship(championship.GetModel());
+            { x => x.Text, $"Really delete championship {championship.Name}? This will also remove all settings from previous seasons but it will still keep the results." },
+            { x => x.ButtonTypes, ButtonTypes.YesNo },
+        };
+        var result = await DialogService.Show<MudConfirmModal>("Delete Championship", parameters).Result;
+        if (!result.Canceled)
+        {
+            await Vm.DeleteChampionship(championship.GetModel(), CancellationToken);
         }
     }
 
     private async Task OnAddChampionshipClick()
     {
-        var parameters = new ModalParameters<EditChampSeasonModal>()
-            .Add(x => x.Model, CreateChampionshipFromTemplate())
-            .Add(x => x.OnSubmit, (x, c) => Vm.AddChampionship(x.GetModel(), c));
-        var result = await ModalService.Show<EditChampSeasonModal>("Create Championship", parameters).Result;
-        if (result.Confirmed)
+        var championship = CreateChampionshipFromTemplate();
+        var parameters = new DialogParameters<DisplayNameDialog>();
+        var result = await DialogService.Show<DisplayNameDialog>("Create Championship", parameters).Result;
+        if (result.Canceled || result.Data is not (string name, string displayName))
         {
-            await Vm.LoadFromCurrentSeasonAsync();
+            return;
         }
-    }
-
-    private async Task ToggleChampionshipActive(ChampionshipViewModel championship)
-    {
-        if (championship.IsActive)
-        {
-            await championship.DeactivateForCurrentSeasonAsync();
-        }
-        else
-        {
-            await championship.ActivateForSeasonAsync();
-        }
-        await Vm.LoadFromCurrentSeasonAsync();
+        championship.ChampionshipName = name;
+        championship.ChampionshipDisplayName = displayName;
+        await Vm.AddChampionship(championship, CancellationToken);
+        await Vm.LoadFromCurrentSeasonAsync(CancellationToken);
     }
 
     private ResultConfigModel CreateConfigFromTemplate()
@@ -210,7 +191,17 @@
         {
             return;
         }
-        await Vm.LoadFromCurrentSeasonAsync();
+        await Vm.LoadFromCurrentSeasonAsync(CancellationToken);
         await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ArchiveChampionshipClick(ChampionshipViewModel championship)
+    {
+        await championship.DeactivateForCurrentSeasonAsync(cancellationToken: CancellationToken);
+    }
+
+    private async Task UnArchiveChampionshipClick(ChampionshipViewModel championship)
+    {
+        await championship.ActivateForSeasonAsync(cancellationToken: CancellationToken);
     }
 }

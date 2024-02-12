@@ -1,6 +1,7 @@
 ﻿@using iRLeagueApiCore.Common.Models;
 @using iRLeagueApiCore.Common.Enums;
-@inherits EditMudModalBase<AddPenaltyViewModel, PenaltyModel>
+@using iRLeagueManager.Web.Components.Dialogs;
+@inherits EditDialogBase<AddPenaltyViewModel, PenaltyModel>
 
 <EditForm Model=@Model>
     <MudDialog>

@@ -1,7 +1,8 @@
 ﻿@using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components.Dialogs
 @using iRLeagueManager.Web.ViewModels
-@inherits EditMudModalBase<SeasonViewModel, SeasonModel>
+@inherits EditDialogBase<SeasonViewModel, SeasonModel>
 
 <EditForm Model=Vm OnValidSubmit=Submit>
     <StatusResultValidator @ref=ResultValidator />

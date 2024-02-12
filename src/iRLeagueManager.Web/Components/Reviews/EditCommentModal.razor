@@ -2,8 +2,9 @@
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueApiCore.Common.Models.Results;
 @using iRLeagueApiCore.Common.Models.Reviews
+@using iRLeagueManager.Web.Components.Dialogs
 @using iRLeagueManager.Web.ViewModels
-@inherits EditMudModalBase<ReviewCommentViewModel, ReviewCommentModel>
+@inherits EditDialogBase<ReviewCommentViewModel, ReviewCommentModel>
 @inject LeagueApiService ApiService
 
 <EditForm Model=Vm OnValidSubmit=Submit>

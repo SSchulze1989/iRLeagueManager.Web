@@ -163,20 +163,6 @@
         }
     }
 
-    private async Task EditLeagueNameClick(LeagueViewModel league)
-    {
-        var parameters = new DialogParameters<EditLeagueNameModal>()
-        {
-            {x => x.Model, league.CopyModel()},
-            {x => x.OnSubmit, (vm, cancellation) => vm.SaveChangesAsync(cancellation)},
-        };
-        var result = await DialogService.Show<EditLeagueNameModal>("Edit league name", parameters).Result;
-        if (result.Canceled == false && result.Data is LeagueModel model)
-        {
-            league.SetModel(model);
-        }
-    }
-
     private async Task EditDescriptionClick(LeagueViewModel league)
     {
         var parameters = new DialogParameters<EditLeagueDescriptionModal>()

@@ -194,78 +194,6 @@
         DisplayLeaveWarning = false;
     }
 
-    private async Task FiltersClick()
-    {
-        if (ApiService.CurrentLeague is null)
-        {
-            return;
-        }
-        var members = (await ApiService.CurrentLeague.Members().Get()).Content!;
-        var teams = (await ApiService.CurrentLeague.Teams().Get()).Content!;
-        var parameters = new DialogParameters<EditResultFilterModal>()
-        {
-            { x => x.Model, ChampSeason.CopyModel().Filters },
-            { x => x.LeagueMembers, members },
-            { x => x.Teams, teams }
-        };
-        var result = await DialogService.Show<EditResultFilterModal>("Championship Filter", parameters).Result;
-        if (!result.Canceled && result.Data is IEnumerable<ResultFilterModel> model)
-        {
-            ChampSeason.Filters = model.ToList();
-        }
-    }
-
-    private async Task OnResultConfigClick(ResultConfigViewModel config)
-    {
-        var parameters = new DialogParameters<EditResultConfigModal>()
-        {
-            { x => x.Model, config.CopyModel() },
-            { x => x.ResultKind, ChampSeason.ResultKind },
-            { x => x.OnSubmit, (configChampSeason, cancellationToken) => configChampSeason.SaveChangesAsync(cancellationToken) },
-        };
-        var result = await DialogService.Show<EditResultConfigModal>("Edit Point System", parameters).Result;
-        if (!result.Canceled && result.Data is ResultConfigModel model)
-        {
-            config.SetModel(model);
-        }
-    }
-
-    private async Task OnAddResultConfigClick()
-    {
-        var parameters = new DialogParameters<EditResultConfigModal>()
-        {
-            { x => x.Model, CreateResultConfig() },
-            { x => x.ResultKind, ChampSeason.ResultKind },
-            { x => x.OnSubmit, (x, c) => ChampSeason.AddResultConfig(x.GetModel(), c) },
-        };
-        await DialogService.Show<EditResultConfigModal>("Add new Point System", parameters).Result;
-    }
-
-    private async Task OnDeleteResultConfigClick(ResultConfigViewModel config)
-    {
-        var parameters = new DialogParameters<ConfirmModal>()
-        {
-            { x => x.Text, $"Really delete Point System \"{config.Name}\"?" },
-            { x => x.ButtonTypes, ButtonTypes.YesNo },
-        };
-        var result = await DialogService.Show<ConfirmModal>("Delete Point System", parameters).Result;
-        if (!result.Canceled)
-        {
-            await ChampSeason.DeleteResultConfig(config.GetModel());
-        }
-    }
-
-    private void DefaultResultConfigClick(ResultConfigViewModel resultConfig)
-    {
-        var configInfo = ChampSeason.ResultConfigs.FirstOrDefault(x => x.ResultConfigId == resultConfig.ResultConfigId);
-        if (ChampSeason.DefaultResultConfig?.ResultConfigId != configInfo?.ResultConfigId)
-        {
-            ChampSeason.DefaultResultConfig = configInfo;
-            return;
-        }
-        ChampSeason.DefaultResultConfig = null;
-    }
-
     private void UpdateBreadCrumb()
     {
         BreadCrumbService.Items = new()
@@ -284,39 +212,6 @@
         }
         InvokeAsync(StateHasChanged);
     }
-
-    private async Task EditSortOptionsClick(StandingConfigurationViewModel standingConfig)
-    {
-        var parameters = new DialogParameters<EditSortOptionsModal>()
-        {
-            { x => x.Model, standingConfig.SortOptions.ToList() },
-            { x => x.AvailableSortValues, new[]
-            {
-                SortValue.TotalPts,
-                SortValue.PenPts,
-                SortValue.Incs,
-                SortValue.Wins,
-                SortValue.Top3,
-                SortValue.Top5,
-                SortValue.Top10,
-                SortValue.LastRaceOrder,
-                SortValue.Races,
-                SortValue.RacesCounted,
-                SortValue.RacesScored,
-                SortValue.RacesInPoints,
-            } },
-        };
-        var result = await DialogService.Show<EditSortOptionsModal>("Edit Standing Sorting", parameters).Result;
-        if (!result.Canceled && result.Data is IList<SortOptions> model)
-        {
-            standingConfig.SortOptions = model.ToList();
-        }
-    }
-
-    private ResultConfigModel CreateResultConfig() => new ResultConfigModel()
-        {
-            ChampSeasonId = ChampSeason.ChampSeasonId,
-        };
 
     private void OnHasChanged(object? sender, EventArgs e)
     {

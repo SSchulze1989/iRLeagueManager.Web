@@ -1,18 +1,14 @@
-﻿using Blazored.Modal;
-using Blazored.Modal.Services;
-using iRLeagueManager.Web.Data;
+﻿using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Exceptions;
 using iRLeagueManager.Web.Shared;
 using iRLeagueManager.Web.ViewModels;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 using MudBlazor;
 using MvvmBlazor.Components;
-using Newtonsoft.Json.Linq;
 
-namespace iRLeagueManager.Web.Components;
+namespace iRLeagueManager.Web.Components.Dialogs;
 
-public class EditMudModalBase<TViewModel, TModel> : MvvmComponentBase where TViewModel : LeagueViewModelBase<TViewModel, TModel> where TModel : class
+public class EditDialogBase<TViewModel, TModel> : MvvmComponentBase where TViewModel : LeagueViewModelBase<TViewModel, TModel> where TModel : class
 {
     [Inject]
     protected TViewModel Vm { get; set; } = default!;

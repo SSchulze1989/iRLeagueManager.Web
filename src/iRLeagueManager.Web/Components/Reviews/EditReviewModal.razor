@@ -2,8 +2,9 @@
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueApiCore.Common.Models.Results;
 @using iRLeagueApiCore.Common.Models.Reviews
+@using iRLeagueManager.Web.Components.Dialogs
 @using iRLeagueManager.Web.ViewModels
-@inherits EditMudModalBase<ReviewViewModel, ReviewModel>
+@inherits EditDialogBase<ReviewViewModel, ReviewModel>
 
 <EditForm Model=Vm OnValidSubmit=Submit>
     <StatusResultValidator @ref=ResultValidator />

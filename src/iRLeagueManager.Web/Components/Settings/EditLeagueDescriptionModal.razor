@@ -1,6 +1,7 @@
 ﻿@using Ganss.Xss;
 @using iRLeagueApiCore.Common.Models;
-@inherits EditModalBase<LeagueViewModel, LeagueModel>
+@using iRLeagueManager.Web.Components.Dialogs
+@inherits EditDialogBase<LeagueViewModel, LeagueModel>
 @inject HtmlSanitizer Sanitizer
 
 <EditForm Model=Vm>

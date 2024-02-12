@@ -1,7 +1,8 @@
 ﻿@using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components.Dialogs
 @using iRLeagueManager.Web.ViewModels
-@inherits EditMudModalBase<TeamViewModel, TeamModel>
+@inherits EditDialogBase<TeamViewModel, TeamModel>
 
 
 <MudDialog>
@@ -9,22 +10,20 @@
         <EditForm Model=Vm OnValidSubmit=Submit>
             <StatusResultValidator @ref=ResultValidator />
             <MudStack Spacing="2">
-                <MudTextField Label="Name" @bind-Value="Vm.Name" For="@(() => Vm.Name)" Variant="Variant.Outlined"/>
-                <MudColorPicker 
-                    Label="Color" 
-                    @bind-Text="Vm.TeamColor" 
-                    style="@($"color: {Vm.TeamColor}")" 
-                    ColorPickerMode="ColorPickerMode.HEX" 
-                    DisableAlpha="true"
-                    DisableToolbar="false"
-                    PickerVariant="PickerVariant.Inline"
-                    Variant="Variant.Outlined" />
-                <MultiSelectAutoComplete
-                    Label="Members"
-                    @bind-Values=Vm.Members
-                    SearchFunc="SearchMembers"
-                    ToStringFunc="@(member => member is null ? string.Empty : $"{member.FirstName} {member.LastName}")"
-                    Variant="Variant.Outlined" />
+                <MudTextField Label="Name" @bind-Value="Vm.Name" For="@(() => Vm.Name)" Variant="Variant.Outlined" />
+                <MudColorPicker Label="Color"
+                                @bind-Text="Vm.TeamColor"
+                                style="@($"color: {Vm.TeamColor}")"
+                                ColorPickerMode="ColorPickerMode.HEX"
+                                DisableAlpha="true"
+                                DisableToolbar="false"
+                                PickerVariant="PickerVariant.Inline"
+                                Variant="Variant.Outlined" />
+                <MultiSelectAutoComplete Label="Members"
+                                         @bind-Values=Vm.Members
+                                         SearchFunc="SearchMembers"
+                                         ToStringFunc="@(member => member is null ? string.Empty : $"{member.FirstName} {member.LastName}")"
+                                         Variant="Variant.Outlined" />
                 <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
             </MudStack>
         </EditForm>

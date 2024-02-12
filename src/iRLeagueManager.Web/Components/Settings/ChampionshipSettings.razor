@@ -40,7 +40,7 @@
         }
         else if (ChampSeason.ResultConfigViewModels.Count > 0)
         {
-            <ResultConfigSettings Config="ChampSeason.ResultConfigViewModels.First()" ShowAdvancedSettings="false" />
+            <ResultConfigSettings Config="ChampSeason.ResultConfigViewModels.First()" ChampSeason="ChampSeason" ShowAdvancedSettings="false" />
         }
 
         @if (ChampSeason.StandingConfig is not null)

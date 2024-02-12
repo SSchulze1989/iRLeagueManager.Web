@@ -38,7 +38,6 @@
                         Text="Enable Heat Sessions"
                         HelperText="Allow multiple race session per event" />
 
-
         <MudCollapse Expanded="EnableHeatRaces">
             <SettingsTextPrompt @bind-Value="Config.RaceCount"
                                 Label="Number of races"
@@ -52,6 +51,9 @@
     @if (ShowAdvancedSettings)
     {
         <SettingsTopSection Header="Advanced">
+            <SettingsSwitch Text="Set as default"
+                            Checked="@(ChampSeason.DefaultResultConfig?.ResultConfigId == Config.ResultConfigId)"
+                            CheckedChanged="SetAsDefaultConfig" />
             <SettingsSection Text="Conditions for Points"
                              @bind-Expanded="filtersExpanded"
                              InitiallyExpanded="false"
@@ -68,6 +70,7 @@
     [Parameter, EditorRequired] public ResultConfigViewModel Config { get; set; } = default!;
     [Parameter] public bool AllowEditName { get; set; } = false;
     [Parameter] public bool ShowAdvancedSettings { get; set; } = true;
+    [Parameter, EditorRequired] public ChampSeasonViewModel ChampSeason { get; set; } = default!;
 
     private bool initialized = false;
     private int expandedScoringIndex = -1;
@@ -99,6 +102,7 @@
         BlazorParameterNullException.ThrowIfNull(this, LeagueMembers, cascading: true);
         BlazorParameterNullException.ThrowIfNull(this, Teams, cascading: true);
         BlazorParameterNullException.ThrowIfNull(this, Config);
+        BlazorParameterNullException.ThrowIfNull(this, ChampSeason);
 
         if (!initialized)
         {
@@ -129,6 +133,18 @@
         else
         {
             expandedScoringIndex = expandedScoringIndex != index ? expandedScoringIndex : -1;
+        }
+    }
+
+    private void SetAsDefaultConfig(bool isDefault)
+    {
+        if (!isDefault && ChampSeason.DefaultResultConfig?.ResultConfigId == Config.ResultConfigId)
+        {
+            ChampSeason.DefaultResultConfig = null;
+        }
+        else if (isDefault && ChampSeason.DefaultResultConfig?.ResultConfigId != Config.ResultConfigId)
+        {
+            ChampSeason.DefaultResultConfig = Config.GetConfigInfoModel(Config.GetModel());
         }
     }
 }

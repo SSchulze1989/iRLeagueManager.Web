@@ -73,13 +73,13 @@
                                     </MudElement>
                                 </MudListItem>
                             }
-                            <SettingsItem Icon="@Icons.Material.Filled.Add" Color="Color.Tertiary">Add Season</SettingsItem>
+                            <SettingsItem Icon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="AddSeasonClick">Add Season</SettingsItem>
                         </SettingsSection>
                     }
                     else
                     {
                         <MudListItem>
-                            <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary" Class="ms-4">Add Season</MudButton>
+                            <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="AddSeasonClick" Class="ms-4">Add Season</MudButton>
                         </MudListItem>
                     }
                 </SettingsTopSection>

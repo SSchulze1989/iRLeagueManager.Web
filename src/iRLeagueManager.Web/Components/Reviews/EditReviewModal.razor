@@ -60,14 +60,17 @@
     [Parameter]
     public CarListModel EventCars { get; set; } = new();
 
-    private IEnumerable<EventCarInfoModel> InvolvedCars { get; set; } = Array.Empty<EventCarInfoModel>();
+    private IEnumerable<EventCarInfoModel> InvolvedCars
+    {
+        get => GetInvolvedCars();
+        set => SetInvolvedCars(value);
+    }
     private bool IsTeamEvent => EventCars.IsTeamEvent;
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
         BlazorParameterNullException.ThrowIfNull(this, EventCars);
-        InvolvedCars = GetInvolvedCars();
     }
 
     private async Task<IEnumerable<EventCarInfoModel>> SearchCars(string searchString)
@@ -103,6 +106,30 @@
             .OrderBy(x => x.Number);
     }
 
+    private void SetInvolvedCars(IEnumerable<EventCarInfoModel> involvedCars)
+    {
+        if (IsTeamEvent)
+        {
+            var involvedTeamIds = involvedCars.Select(x => x.Team).NotNull().Select(x => x.TeamId).ToList();
+            bool isTeamsDifferent = Vm.InvolvedTeams.Count() != involvedTeamIds.Count || Vm.InvolvedTeams.ExceptBy(involvedTeamIds, x => x.TeamId).Any();
+            if (!isTeamsDifferent)
+            {
+                return;
+            }
+            Vm.InvolvedTeams = involvedCars.Select(x => x.Team).NotNull();
+            Vm.InvolvedMembers = Array.Empty<MemberInfoModel>();
+            return;
+        }
+        var involvedMemberIds = involvedCars.SelectMany(x => x.Members).Select(x => x.MemberId).ToList();
+        bool isMembersDifferent = Vm.InvolvedMembers.Count() != involvedMemberIds.Count || Vm.InvolvedMembers.ExceptBy(involvedMemberIds, x => x.MemberId).Any();
+        if (!isMembersDifferent)
+        {
+            return;
+        }
+        Vm.InvolvedMembers = involvedCars.SelectMany(x => x.Members);
+        Vm.InvolvedTeams = Array.Empty<TeamInfoModel>();
+    }
+
     private string CarToStringFunc(EventCarInfoModel? car)
     {
         if (car is null)
@@ -117,21 +144,8 @@
         return $"#{car.Number} {member.FirstName} {member.LastName}";
     }
 
-    private void UpdateInvolved()
-    {
-        if (IsTeamEvent)
-        {
-            Vm.InvolvedTeams = InvolvedCars.Select(x => x.Team).NotNull().ToList();
-            Vm.InvolvedMembers = Array.Empty<MemberInfoModel>();
-            return;
-        }
-        Vm.InvolvedMembers = InvolvedCars.SelectMany(x => x.Members).ToList();
-        Vm.InvolvedTeams = Array.Empty<TeamInfoModel>();
-    }
-
     protected override Task Submit()
     {
-        UpdateInvolved();
         return base.Submit();
     }
 }

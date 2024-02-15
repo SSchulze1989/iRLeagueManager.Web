@@ -28,9 +28,11 @@
         }
     </MudSelect>
 </div>
-<MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowLeft" OnClick="EventMovePrevious" Variant="Variant.Text" Disabled="!CanMovePrevious" />
-<MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowRight" OnClick="EventMoveNext" Variant="Variant.Text" Disabled="!CanMoveNext" />
-<MudIconButton Icon="@Icons.Material.Filled.KeyboardDoubleArrowRight" OnClick="EventMoveLastWithResult" Variant="Variant.Text" Disabled="!CanMoveLast" />
+<MudStack Row="true">
+    <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowLeft" OnClick="EventMovePrevious" Variant="Variant.Text" Disabled="!CanMovePrevious" />
+    <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowRight" OnClick="EventMoveNext" Variant="Variant.Text" Disabled="!CanMoveNext" />
+    <MudIconButton Icon="@Icons.Material.Filled.KeyboardDoubleArrowRight" OnClick="EventMoveLastWithResult" Variant="Variant.Text" Disabled="!CanMoveLast" />
+</MudStack>
 
 @code {
     [CascadingParameter]

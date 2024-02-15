@@ -25,26 +25,28 @@
         </HeaderText>
         <HeaderActions>
             <EventSelect />
-            <MudSpacer />
             <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
                 <Authorized>
-                    @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
-                    {
-                        <MudButton OnClick=TriggerCalculation
-                                   Variant="Variant.Text">
-                            Calculate
-                        </MudButton>
-                        @if (vm.Results.Count > 0)
+                    <MudStack Row="true" Justify="Justify.FlexEnd" Style="flex-grow: 1">
+                        @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
                         {
-                            <MudTooltip Text="Delete Results"
-                                        Delay="0.5"
-                                        Arrow="true">
-                                <MudIconButton Variant="Variant.Text"
-                                               Icon="@Icons.Material.Filled.Delete"
-                                               Color="@Color.Error" OnClick=DeleteResultsClick />
-                            </MudTooltip>
+                            <MudButton OnClick=TriggerCalculation
+                                       Variant="Variant.Outlined"
+                                       StartIcon="@Icons.Material.Filled.Loop">
+                                Calculate
+                            </MudButton>
+                            @if (vm.Results.Count > 0)
+                            {
+                                <MudTooltip Text="Delete Results"
+                                            Delay="0.5"
+                                            Arrow="true">
+                                    <MudIconButton Variant="Variant.Outlined"
+                                                   Icon="@Icons.Material.Filled.Delete"
+                                                   Color="@Color.Error" OnClick=DeleteResultsClick />
+                                </MudTooltip>
+                            }
                         }
-                    }
+                    </MudStack>
                 </Authorized>
             </AuthorizeView>
         </HeaderActions>

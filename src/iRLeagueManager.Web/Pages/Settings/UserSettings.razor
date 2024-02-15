@@ -1,6 +1,5 @@
 ﻿@page "/{LeagueName}/Settings/Users"
 @using iRLeagueManager.Web.Components
-@using iRLeagueManager.Web.Components.Settings
 @using iRLeagueManager.Web.ViewModels
 @layout SettingsLayout
 @inherits LeagueComponentBase
@@ -99,12 +98,12 @@
 
     private async Task<bool> ConfirmRemoveRole(LeagueUserViewModel user, LeagueRoleValue role)
     {
-        var parameters = new DialogParameters<MudConfirmModal>()
+        var parameters = new DialogParameters<ConfirmModal>()
         {
             {x => x.Text, $"Remove role \"{role}\" from user \"{user.UserName}\""},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var confirm = await DialogService.Show<MudConfirmModal>("Confirm Remove Role", parameters).Result;
+        var confirm = await DialogService.Show<ConfirmModal>("Confirm Remove Role", parameters).Result;
         if (confirm.Canceled)
         {
             return false;
@@ -114,12 +113,12 @@
 
     private async Task<bool> ConfirmAddRole(LeagueUserViewModel user, LeagueRoleValue role)
     {
-        var parameters = new DialogParameters<MudConfirmModal>()
+        var parameters = new DialogParameters<ConfirmModal>()
         {
             {x => x.Text, $"Add role \"{role}\" to user \"{user.UserName}\""},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var confirm = await DialogService.Show<MudConfirmModal>("Confirm Add Role", parameters).Result;
+        var confirm = await DialogService.Show<ConfirmModal>("Confirm Add Role", parameters).Result;
         if (confirm.Canceled)
         {
             return false;
@@ -129,10 +128,10 @@
 
     private async Task OpenAddUser()
     {
-        var parameters = new DialogParameters<SearchUserModal>()
+        var parameters = new DialogParameters<SearchUserDialog>()
         {
             {x => x.LeagueUsers, Users},
         };
-        await DialogService.Show<SearchUserModal>("Search User", parameters).Result;
+        await DialogService.Show<SearchUserDialog>("Search User", parameters).Result;
     }
 }

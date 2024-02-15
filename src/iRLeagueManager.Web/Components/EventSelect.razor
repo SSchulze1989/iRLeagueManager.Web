@@ -1,4 +1,4 @@
-﻿@implements IDisposable
+﻿@namespace iRLeagueManager.Web.Components
 @using System.Collections.Specialized
 @using System.Globalization
 @using System.Collections.ObjectModel
@@ -6,6 +6,7 @@
 @using iRLeagueManager.Web.ViewModels
 @using System.Linq
 @inherits MudComponentBase
+@implements IDisposable
 
 <div style="width: 45em; max-width: 100%">
     <MudSelect @bind-Value="EventList.Selected"

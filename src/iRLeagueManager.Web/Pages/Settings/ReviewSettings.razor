@@ -1,9 +1,8 @@
 ﻿@page "/{LeagueName}/Settings/Reviews"
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
-@using iRLeagueApiCore.Common.Models.Reviews;
-@using iRLeagueManager.Web.Components.Settings;
-@using iRLeagueManager.Web.Components;
+@using iRLeagueApiCore.Common.Models.Reviews
+@using iRLeagueManager.Web.Components
 @inherits LeagueComponentBase
 @layout SettingsLayout
 @inject LeagueViewModel League
@@ -98,7 +97,7 @@
 
     private async Task ProtestSettingsClick()
     {
-        var parameters = new DialogParameters<EditProtestSettingsModal>()
+        var parameters = new DialogParameters<EditProtestSettingsDialog>()
         {
             {x => x.Model, League.CopyModel()},
             {x => x.OnSubmit, async (league, cancellation) => await league.SaveChangesAsync(cancellation)},
@@ -108,7 +107,7 @@
                 FullWidth = false,
                 MaxWidth = MaxWidth.ExtraSmall,
             };
-        var result = await DialogService.Show<EditProtestSettingsModal>("Edit Protest Settings", parameters, options).Result;
+        var result = await DialogService.Show<EditProtestSettingsDialog>("Edit Protest Settings", parameters, options).Result;
         if (result.Canceled == false && result.Data is LeagueModel leagueModel)
         {
             League.SetModel(leagueModel);
@@ -117,12 +116,12 @@
 
     private async Task OnVoteCategoryClick(VoteCategoryViewModel voteCategory)
     {
-        var parameters = new DialogParameters<EditVoteCategoryModal>()
+        var parameters = new DialogParameters<EditVoteCategoryDialog>()
         {
             {x => x.Model, voteCategory.CopyModel()},
             {x => x.OnSubmit, new(async (category, cancellation) => await category.SaveChangesAsync(cancellation))},
         };
-        var result = await DialogService.Show<EditVoteCategoryModal>("Edit Vote Category", parameters).Result;
+        var result = await DialogService.Show<EditVoteCategoryDialog>("Edit Vote Category", parameters).Result;
         if (result.Canceled == false && result.Data is VoteCategoryModel model)
         {
             voteCategory.SetModel(model);
@@ -131,22 +130,22 @@
 
     private async Task OnAddVoteCategoryClick()
     {
-        var parameters = new DialogParameters<EditVoteCategoryModal>()
+        var parameters = new DialogParameters<EditVoteCategoryDialog>()
         {
             {x => x.Model, CreateVoteCategoryTemplate()},
             {x => x.OnSubmit, new(async (category, cancellation) => await Reviews.AddVoteCategory(category.GetModel(), cancellation))},
         };
-        await DialogService.Show<EditVoteCategoryModal>("Add Vote Category", parameters).Result;
+        await DialogService.Show<EditVoteCategoryDialog>("Add Vote Category", parameters).Result;
     }
 
     private async Task OnDeleteVoteCategoryClick(VoteCategoryViewModel voteCategory)
     {
-        var parameters = new DialogParameters<MudConfirmModal>()
+        var parameters = new DialogParameters<ConfirmModal>()
         {
             {x => x.Text, $"Really delete vote category \"{voteCategory.Text}\"?"},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var result = await DialogService.Show<MudConfirmModal>("Delete Vote Category", parameters).Result;
+        var result = await DialogService.Show<ConfirmModal>("Delete Vote Category", parameters).Result;
         if (result.Canceled == false)
         {
             await Reviews.DeleteVoteCategory(voteCategory.GetModel());

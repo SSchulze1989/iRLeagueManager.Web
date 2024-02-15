@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor;
 
-namespace iRLeagueManager.Web.Components.Settings;
+namespace iRLeagueManager.Web.Components;
 
 public class SettingBase : MudComponentBase
 {

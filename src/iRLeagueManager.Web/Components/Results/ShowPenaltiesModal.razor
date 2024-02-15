@@ -1,4 +1,5 @@
-﻿@using iRLeagueApiCore.Common.Enums;
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Enums;
 @using iRLeagueApiCore.Common.Models;
 @inherits UtilityComponentBase
 @inject AddPenaltyViewModel Vm
@@ -138,12 +139,12 @@
 
     private async Task DeleteAddPenaltyAsync(PenaltyModel penalty)
     {
-        var parameters = new DialogParameters<MudConfirmModal>()
+        var parameters = new DialogParameters<ConfirmModal>()
         {
             {x => x.Text, $"Really delete this penalty for {penalty.Member?.FirstName} {penalty.Member?.LastName}?"},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var confirmed = await DialogService.Show<MudConfirmModal>("Delete penalty", parameters).Result;
+        var confirmed = await DialogService.Show<ConfirmModal>("Delete penalty", parameters).Result;
         if (confirmed.Canceled)
         {
             return;

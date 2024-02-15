@@ -1,9 +1,7 @@
 ﻿@page "/{LeagueName}/Settings/Results"
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
-@using iRLeagueManager.Web.Components.Dialogs
-@using iRLeagueManager.Web.Components.Settings
-@using iRLeagueManager.Web.Components;
+@using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
 @layout SettingsLayout
@@ -126,12 +124,12 @@
 
     private async Task OnDeleteChampionshipClick(ChampionshipViewModel championship)
     {
-        var parameters = new DialogParameters<MudConfirmModal>()
+        var parameters = new DialogParameters<ConfirmModal>()
         {
             { x => x.Text, $"Really delete championship {championship.Name}? This will also remove all settings from previous seasons but it will still keep the results." },
             { x => x.ButtonTypes, ButtonTypes.YesNo },
         };
-        var result = await DialogService.Show<MudConfirmModal>("Delete Championship", parameters).Result;
+        var result = await DialogService.Show<ConfirmModal>("Delete Championship", parameters).Result;
         if (!result.Canceled)
         {
             await Vm.DeleteChampionship(championship.GetModel(), CancellationToken);

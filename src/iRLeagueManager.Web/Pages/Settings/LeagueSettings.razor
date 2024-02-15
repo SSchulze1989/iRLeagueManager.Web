@@ -4,7 +4,6 @@
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueManager.Web.Components
-@using iRLeagueManager.Web.Components.Settings
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
 @layout SettingsLayout
@@ -127,22 +126,22 @@
 
     private async Task AddSeasonClick()
     {
-        var parameters = new DialogParameters<EditSeasonModal>()
+        var parameters = new DialogParameters<EditSeasonDialog>()
         {
             {x => x.Model, new()},
             {x => x.OnSubmit, async (season, cancellation) => await League.AddSeason(season.GetModel(), cancellation)},
         };
-        var result = await DialogService.Show<EditSeasonModal>("Add Season", parameters).Result;
+        var result = await DialogService.Show<EditSeasonDialog>("Add Season", parameters).Result;
     }
 
     private async Task SeasonClick(SeasonViewModel season)
     {
-        var parameters = new DialogParameters<EditSeasonModal>()
+        var parameters = new DialogParameters<EditSeasonDialog>()
         {
             {x => x.Model, season.CopyModel()},
             {x => x.OnSubmit, async (season, cancellation) => await season.SaveChangesAsync(cancellation)},
         };
-        var result = await DialogService.Show<EditSeasonModal>("Edit Season", parameters).Result;
+        var result = await DialogService.Show<EditSeasonDialog>("Edit Season", parameters).Result;
         if (result.Canceled == false && result.Data is SeasonModel seasonModel)
         {
             season.SetModel(seasonModel);
@@ -151,12 +150,12 @@
 
     private async Task DeleteSeasonClick(SeasonViewModel season)
     {
-        var parameters = new DialogParameters<MudConfirmModal>()
+        var parameters = new DialogParameters<ConfirmModal>()
         {
             {x => x.Text, $"Really delete season \"{season.Name}\"?"},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var result = await DialogService.Show<MudConfirmModal>("Delete Season", parameters).Result;
+        var result = await DialogService.Show<ConfirmModal>("Delete Season", parameters).Result;
         if (result.Canceled == false)
         {
             await League.DeleteSeason(season.GetModel());
@@ -165,12 +164,12 @@
 
     private async Task EditDescriptionClick(LeagueViewModel league)
     {
-        var parameters = new DialogParameters<EditLeagueDescriptionModal>()
+        var parameters = new DialogParameters<EditLeagueDescriptionDialog>()
         {
             {x => x.Model, league.CopyModel()},
             {x => x.OnSubmit, (vm, cancellation) => vm.SaveChangesAsync(cancellation)},
         };
-        var result = await DialogService.Show<EditLeagueDescriptionModal>("Edit description", parameters).Result;
+        var result = await DialogService.Show<EditLeagueDescriptionDialog>("Edit description", parameters).Result;
         if (result.Canceled == false && result.Data is LeagueModel model)
         {
             league.SetModel(model);
@@ -184,14 +183,14 @@
 
     private async Task ShowApplyTemplatesModal()
     {
-        var parameters = new DialogParameters<MudConfirmModal>()
+        var parameters = new DialogParameters<ConfirmModal>()
         {
             {x => x.Text, "Welcome to your new league. To speed up your setup process you can select the basic settings from a template"},
             {x => x.ButtonTypes, ButtonTypes.OkCancel},
             {x => x.OkButtonText, "Yes, select template"},
             {x => x.CancelButtonText, "No, start with empty league"},
         };
-        var result = await DialogService.Show<MudConfirmModal>("Select league template", parameters).Result;
+        var result = await DialogService.Show<ConfirmModal>("Select league template", parameters).Result;
         if (result.Canceled == false)
         {
             // forward to select template page

@@ -1,4 +1,5 @@
-﻿@page "/{LeagueName}/Results/Events/{EventId:long}"
+﻿@namespace iRLeagueManager.Web.Pages
+@page "/{LeagueName}/Results/Events/{EventId:long}"
 @page "/{LeagueName}/Results/Seasons/{SeasonId:long}"
 @page "/{LeagueName}/Results"
 @using System.ComponentModel
@@ -8,10 +9,10 @@
 @using System.Linq.Expressions
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.Components
-@using iRLeagueManager.Web.Components.Results
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
 @inject ResultsPageViewModel vm
+@inject IDialogService DialogService
 
 <PageTitle>
     Results - @LeagueName
@@ -178,9 +179,11 @@
         {
             return;
         }
-        var parameters = new ModalParameters()
-            .Add(nameof(UploadResultPrompt.Event), @event);
-        await ModalService.Show<UploadResultPrompt>("Upload json result", parameters).Result;
+        var parameters = new DialogParameters<UploadResultPrompt>()
+        {
+            { x => x.Event, @event },
+        };
+        await DialogService.Show<UploadResultPrompt>("Upload json result", parameters).Result;
     }
 
     private async Task TriggerCalculation()
@@ -199,11 +202,13 @@
         {
             return;
         }
-        var parameters = new ModalParameters()
-            .Add(nameof(ConfirmModal.Text), $"Really delete result for event \"{@event.Name} - {@event.Date.GetValueOrDefault().ToString(@"dd.MM.yyyy")}\"?")
-            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
-        var result = await ModalService.Show<ConfirmModal>("Delete Results", parameters).Result;
-        if (result.Confirmed)
+        var parameters = new DialogParameters<ConfirmModal>()
+        {
+            { x => x.Text, $"Really delete result for event \"{@event.Name} - {@event.Date.GetValueOrDefault().ToString(@"dd.MM.yyyy")}\"?" },
+            { x => x.ButtonTypes, ButtonTypes.YesNo },
+        };
+        var result = await DialogService.Show<ConfirmModal>("Delete Results", parameters).Result;
+        if (result.Canceled == false)
         {
             await vm.DeleteEventResults();
         }

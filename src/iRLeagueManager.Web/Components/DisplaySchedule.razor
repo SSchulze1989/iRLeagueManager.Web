@@ -1,4 +1,5 @@
-﻿@using iRLeagueApiCore.Common.Models
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
 @inject ClientLocalTimeProvider ClientTime
@@ -201,12 +202,12 @@
             return;
         }
         //navigationManager.NavigateTo($"{LeagueName}/Results/Session/{sessionId}");
-        var parameters = new DialogParameters<EditEventModal>()
+        var parameters = new DialogParameters<EditEventDialog>()
         {
             {x => x.Model, eventViewModel.CopyModel()},
             {x => x.OnSubmit, async (@event, cancellation) => await @event.SaveChangesAsync(cancellation)},
         };
-        var modal = DialogService.Show<EditEventModal>("Edit Event", parameters);
+        var modal = DialogService.Show<EditEventDialog>("Edit Event", parameters);
         var result = await modal.Result;
         if (result.Canceled == false && result.Data is EventModel eventModel)
         {
@@ -220,12 +221,12 @@
         {
             return;
         }
-        var parameters = new DialogParameters<EditEventModal>()
+        var parameters = new DialogParameters<EditEventDialog>()
         {
             {x => x.Model, await GetNewEvent()},
             {x => x.OnSubmit, async (@event, cancellationToken) => await Schedule.AddEvent(@event)},
         };
-        var result = await DialogService.Show<EditEventModal>("Add Event", parameters).Result;
+        var result = await DialogService.Show<EditEventDialog>("Add Event", parameters).Result;
     }
 
     private async Task<EventModel> GetNewEvent()

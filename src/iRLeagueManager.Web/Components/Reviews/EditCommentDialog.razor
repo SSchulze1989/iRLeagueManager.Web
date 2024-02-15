@@ -1,26 +1,22 @@
-﻿@using iRLeagueApiCore.Common.Enums
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
-@using iRLeagueApiCore.Common.Models.Results;
+@using iRLeagueApiCore.Common.Models.Results
 @using iRLeagueApiCore.Common.Models.Reviews
-@using iRLeagueManager.Web.Components.Dialogs
 @using iRLeagueManager.Web.ViewModels
-@inherits EditDialogBase<ReviewViewModel, ReviewModel>
+@inherits EditDialogBase<ReviewCommentViewModel, ReviewCommentModel>
 @inject LeagueApiService ApiService
 
 <EditForm Model=Vm OnValidSubmit=Submit>
     <MudDialog>
         <DialogContent>
             <MudStack Spacing="2">
-                <MudTextField Label="Text" @bind-Value="Vm.ResultText" Lines="6" Variant="Variant.Outlined"/>
-                <MudGrid Spacing="1" Style="width: 100%">
-                    @foreach (var vote in Vm.Votes)
+                <MudTextField Label="Text" FullWidth="true" Lines="6" @bind-Value="Vm.Text" Variant="Variant.Outlined"/>
+                <MudGrid Spacing="1">
+                    @foreach(var vote in Vm.Votes)
                     {
                         <MudItem xs="5">
-                            <MudSelect Label="Vote"
-                                   @bind-Value="vote.VoteCategoryId"
-                                   Variant="Variant.Outlined"
-                                   AnchorOrigin="Origin.BottomLeft"
-                                   TransformOrigin="Origin.TopLeft">
+                            <MudSelect Label="Vote" @bind-Value="vote.VoteCategoryId" Variant="Variant.Outlined">
                                 @foreach (var cat in VoteCategories)
                                 {
                                     <MudSelectItem Value=@((long?)cat.CatId)>@cat.Text</MudSelectItem>
@@ -31,29 +27,25 @@
                             @if (IsTeamEvent)
                             {
                                 <MudSelect Label="Team at fault"
-                                       Placeholder="No Team Selected"
-                                       @bind-Value="vote.TeamAtFault"
-                                       Variant="Variant.Outlined"
-                                       ToStringFunc="@(team => team?.Name)"
-                                       AnchorOrigin="Origin.BottomLeft"
-                                       TransformOrigin="Origin.TopLeft"
-                                       Clearable="true">
+                                           @bind-Value="vote.TeamAtFault"
+                                           Variant="Variant.Outlined"
+                                           ToStringFunc="@(team => team?.Name)"
+                                           Clearable="true">
+                                    <MudSelectItem Value="default(MemberInfoModel)"></MudSelectItem>
                                     @foreach (var car in InvolvedCars)
                                     {
                                         <MudSelectItem Value="@car.Team">#@car.Number @car.Team?.Name</MudSelectItem>
                                     }
                                 </MudSelect>
                             }
-                            else
+                            else 
                             {
-                                <MudSelect Label="Driver at fault"
-                                       Placeholder="No Driver Selected"
-                                       @bind-Value="vote.MemberAtFault"
-                                       Variant="Variant.Outlined"
-                                       ToStringFunc="@(member => member != null ? $"{member.FirstName} {member.LastName}" : string.Empty)"
-                                       AnchorOrigin="Origin.BottomLeft"
-                                       TransformOrigin="Origin.TopLeft"
-                                       Clearable="true">
+                                <MudSelect Label="Driver at fault" 
+                                           @bind-Value="vote.MemberAtFault" 
+                                           Variant="Variant.Outlined" 
+                                           ToStringFunc="@(member => member != null ? $"{member.FirstName} {member.LastName}" : string.Empty)"
+                                           Clearable="true">
+                                    <MudSelectItem Value="default(MemberInfoModel)"></MudSelectItem>
                                     @foreach (var car in InvolvedCars)
                                     {
                                         var member = car.Members.FirstOrDefault() ?? new();
@@ -63,16 +55,11 @@
                             }
                         </MudItem>
                         <MudItem xs="1" Class="d-flex align-center">
-                            <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Error" OnClick="@(() => Vm.RemoveVote(vote))" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Error" OnClick="@(() => Vm.RemoveVote(vote))"/>
                         </MudItem>
                     }
                     <MudItem xs="5">
-                        <MudSelect Label="Vote"
-                                   @bind-Value="NewValue"
-                                   Variant="Variant.Outlined"
-                                   AnchorOrigin="Origin.BottomLeft"
-                                   TransformOrigin="Origin.TopLeft"
-                                   @ref=@NewValueInput>
+                        <MudSelect Label="Vote" @bind-Value="NewValue" Variant="Variant.Outlined" @ref=@NewValueInput>
                             @foreach (var cat in VoteCategories)
                             {
                                 <MudSelectItem Value=@((long?)cat.CatId)>@cat.Text</MudSelectItem>
@@ -84,7 +71,7 @@
         </DialogContent>
         <DialogActions>
             <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
-            <ProgressButton Color="Color.Primary" ButtonType="ButtonType.Submit" Loading="Vm.Loading">Save</ProgressButton>
+            <MudButton Color="Color.Primary" OnClick="Submit">Submit</MudButton>
         </DialogActions>
     </MudDialog>
 </EditForm>
@@ -93,8 +80,7 @@
     [Parameter]
     public IEnumerable<EventCarInfoModel> InvolvedCars { get; set; } = Array.Empty<EventCarInfoModel>();
     [Parameter]
-    public IEnumerable<VoteCategoryViewModel> VoteCategories { get; set; } = Array.Empty<VoteCategoryViewModel>();
-
+    public IEnumerable<VoteCategoryViewModel> VoteCategories { get; set; } = default!;
     [Parameter]
     public bool IsTeamEvent { get; set; } = false;
 
@@ -112,6 +98,28 @@
 
     private MudSelect<long?> NewValueInput { get; set; } = default!;
 
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, VoteCategories);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+
+        await InvokeAsync(StateHasChanged);
+        foreach (var vote in Vm.Votes)
+        {
+            var tmp = vote.VoteCategoryId;
+            vote.VoteCategoryId = 0;
+            vote.VoteCategoryId = tmp;
+        }
+    }
+
     private async Task SetNewValue(long? value)
     {
         var voteCat = VoteCategories.FirstOrDefault(x => x.CatId == value);
@@ -119,7 +127,7 @@
         {
             var vote = new VoteModel()
             {
-                    VoteCategoryId = voteCat.CatId,
+                VoteCategoryId = voteCat.CatId,
                 VoteCategoryText = voteCat.Text,
             };
             Vm.AddVote(vote);
@@ -141,7 +149,7 @@
         }
         vote.MemberAtFault = new MemberInfoModel()
         {
-            MemberId = member.MemberId,
+            MemberId = memberId.Value,
             FirstName = member.FirstName,
             LastName = member.LastName,
         };

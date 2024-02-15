@@ -1,11 +1,12 @@
-﻿@inherits MvvmComponentBase
-@inject IJSRuntime JsRuntime
+﻿@namespace iRLeagueManager.Web.Components
 @using System.ComponentModel
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueApiCore.Common.Models.Results;
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueApiCore.Common.Models.Users;
 @using iRLeagueManager.Web.ViewModels
+@inherits MvvmComponentBase
+@inject IJSRuntime JsRuntime
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 
@@ -333,7 +334,7 @@
 
     private async Task EditResultClick()
     {
-        var parameters = new DialogParameters<EditReviewResultModal>()
+        var parameters = new DialogParameters<EditReviewResultDialog>()
         {
             {x => x.Model, Review.CopyModel()},
             {x => x.InvolvedCars, InvolvedCars},
@@ -341,7 +342,7 @@
             {x => x.IsTeamEvent, IsTeamEvent},
             {x => x.OnSubmit, async (review, cancellation) => await review.SaveChangesAsync(cancellation)},
         };
-        var result = await DialogService.Show<EditReviewResultModal>("Edit Result", parameters).Result;
+        var result = await DialogService.Show<EditReviewResultDialog>("Edit Result", parameters).Result;
         if (result.Canceled == false && result.Data is ReviewModel reviewModel)
         {
             Review.SetModel(reviewModel);
@@ -350,7 +351,7 @@
 
     private async Task AddCommentClick()
     {
-        var parameters = new DialogParameters<EditCommentModal>()
+        var parameters = new DialogParameters<EditCommentDialog>()
         {
             {x => x.Model, new ReviewCommentModel() { Votes = new List<VoteModel>() }},
             {x => x.InvolvedCars, InvolvedCars},
@@ -358,13 +359,13 @@
             {x => x.IsTeamEvent, IsTeamEvent },
             {x => x.OnSubmit, async (comment, cancellation) => await Review.AddComment(comment.GetModel(), cancellation)},
         };
-        await DialogService.Show<EditCommentModal>("Add Comment", parameters).Result;
+        await DialogService.Show<EditCommentDialog>("Add Comment", parameters).Result;
         await InvokeAsync(StateHasChanged);
     }
 
     private async Task DeleteCommentClick(ReviewCommentViewModel comment)
     {
-        var parameters = new DialogParameters<MudConfirmModal>()
+        var parameters = new DialogParameters<ConfirmModal>()
         {
             {x => x.Text, "Are you sure you want to delete this comment?"},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
@@ -373,7 +374,7 @@
         {
             DisableBackdropClick = false,
         };
-        var confirm = await DialogService.Show<MudConfirmModal>("Delete Comment", parameters, options).Result;
+        var confirm = await DialogService.Show<ConfirmModal>("Delete Comment", parameters, options).Result;
         if (confirm.Canceled == false)
         {
             await Review.RemoveComment(comment);

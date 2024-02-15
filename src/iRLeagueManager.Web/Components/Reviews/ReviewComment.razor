@@ -1,9 +1,10 @@
-﻿@inherits MvvmComponentBase
+﻿@namespace iRLeagueManager.Web.Components
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueApiCore.Common.Models.Results;
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueApiCore.Common.Models.Users;
 @using iRLeagueManager.Web.ViewModels
+@inherits MvvmComponentBase
 @inject IDialogService DialogService
 
 <MudStack Spacing="2" Class="px-4 py-2">
@@ -97,7 +98,7 @@
 
     private async Task EditClick()
     {
-        var parameters = new DialogParameters<EditCommentModal>()
+        var parameters = new DialogParameters<EditCommentDialog>()
         {
             {x => x.Model, Comment.CopyModel()},
             {x => x.InvolvedCars, InvolvedCars},
@@ -105,7 +106,7 @@
             {x => x.IsTeamEvent, IsTeamEvent },
             {x => x.OnSubmit, async (comment, cancellation) => await comment.SaveChangesAsync(cancellation)},
         };
-        var result = await DialogService.Show<EditCommentModal>("Edit Comment", parameters).Result;
+        var result = await DialogService.Show<EditCommentDialog>("Edit Comment", parameters).Result;
         if (result.Canceled == false && result.Data is ReviewCommentModel comment)
         {
             Comment.SetModel(comment);

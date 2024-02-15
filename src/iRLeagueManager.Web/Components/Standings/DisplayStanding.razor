@@ -1,4 +1,6 @@
-﻿@using iRLeagueApiCore.Common.Models.Standings
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Models.Standings
+
 <div @attributes=AdditionalAttributes>
     @{
         var showDriver = HasDriver(Standing.StandingRows) && Standing.IsTeamStanding == false;

@@ -3,7 +3,7 @@ using iRLeagueManager.Web.Shared;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
-namespace iRLeagueManager.Web.Components.Dialogs;
+namespace iRLeagueManager.Web.Components;
 
 public class PromptDialog<T> : ComponentBase
 {

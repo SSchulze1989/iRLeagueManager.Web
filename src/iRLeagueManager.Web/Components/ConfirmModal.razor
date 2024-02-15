@@ -1,51 +1,44 @@
-﻿<div class="container justify-content-center preserve-format">
-    @if (AllowMarkup)
-    {
-        @((MarkupString)Text)
-    }
-    else
-    {
-        @Text
-    }
-</div>
-<div class="pt-2 pb-2">
-    <div class="row">
+﻿<MudDialog>
+    <DialogContent>
+        @if (AllowMarkup)
+        {
+            @((MarkupString)Text)
+        }
+        else
+        {
+            @Text
+        }
+    </DialogContent>
+    <DialogActions>
         @switch (ButtonTypes)
         {
             case ButtonTypes.Ok:
-                <div class="col d-flex justify-content-center">
-                    <button class="btn @GetButtonStyleClass().primary" @onclick=OkClick>@OkButtonText</button>
-                </div>
+                <MudButton Color="Color.Primary" OnClick=OkClick>@OkButtonText</MudButton>
                 break;
             case ButtonTypes.OkCancel:
-                <div class="col d-flex justify-content-center">
-                    <button class="btn @GetButtonStyleClass().primary" @onclick=OkClick>@OkButtonText</button>
-                </div>
-                <div class="col d-flex justify-content-center">
-                    <button class="btn @GetButtonStyleClass().secondary" @onclick=CancelClick>@CancelButtonText</button>
-                </div>
+                <MudButton Color="Color.Secondary" OnClick=CancelClick>@CancelButtonText</MudButton>    
+                <MudButton Color="Color.Primary" OnClick=OkClick>@OkButtonText</MudButton>
                 break;
             case ButtonTypes.YesNo:
-                <div class="col d-flex justify-content-center">
-                    <button class="btn @GetButtonStyleClass().primary" @onclick=OkClick>Yes</button>
-                </div>
-                <div class="col d-flex justify-content-center">
-                    <button class="btn @GetButtonStyleClass().secondary" @onclick=CancelClick>No</button>
-                </div>
+                <MudButton Color="Color.Secondary" OnClick=NoClick>No</MudButton>
+                <MudButton Color="Color.Primary" OnClick=OkClick>Yes</MudButton>
+                break;
+            case ButtonTypes.YesNoCancel:
+                <MudButton OnClick="CancelClick">Cancel</MudButton>
+                <MudButton Color="Color.Secondary" OnClick=NoClick>No</MudButton>
+                <MudButton Color="Color.Primary" OnClick=OkClick>Yes</MudButton>
                 break;
         }
-    </div>
-</div>
+    </DialogActions>
+</MudDialog>
 
 @code {
-    [CascadingParameter]
-    public BlazoredModalInstance ModalInstance { get; set; } = default!;
+    [CascadingParameter] 
+    MudDialogInstance ModalInstance { get; set; } = default!;
     [Parameter]
     public string Text { get; set; } = string.Empty;
     [Parameter]
     public ButtonTypes ButtonTypes { get; set; } = ButtonTypes.Ok;
-    [Parameter]
-    public ButtonStyles ButtonStyles { get; set; } = ButtonStyles.PrimarySecondary;
     [Parameter]
     public bool AllowMarkup { get; set; } = false;
     [Parameter]
@@ -53,22 +46,28 @@
     [Parameter]
     public string CancelButtonText { get; set; } = "Cancel";
 
+    protected override void OnParametersSet()
+    {
+        BlazorParameterNullException.ThrowIfNull(this, ModalInstance);
+    }
+
     private void OkClick()
     {
-        ModalInstance.CloseAsync(ModalResult.Ok());
+        ModalInstance.Close(true);
+    }
+
+    private void NoClick()
+    {
+        if (ButtonTypes == ButtonTypes.YesNoCancel)
+        {
+            ModalInstance.Close(false);
+            return;
+        }
+        ModalInstance.Cancel();
     }
 
     private void CancelClick()
     {
-        ModalInstance.CancelAsync();
+        ModalInstance.Cancel();
     }
-
-    private (string primary, string secondary) GetButtonStyleClass() => ButtonStyles switch
-    {
-        ButtonStyles.PrimarySecondary => ("btn-primary", "btn-secondary"),
-        ButtonStyles.PrimaryOutlineSecondary => ("btn-outline-primary", "btn-secondary"),
-        ButtonStyles.PrimarySecondaryOutline => ("btn-primary", "btn-outline-secondary"),
-        ButtonStyles.PrimaryOutlineSecondaryOutline => ("btn-outline-primary", "btn-outline-secondary"),
-        _ => ("btn-primary", "btn-secondary")
-    };
 }

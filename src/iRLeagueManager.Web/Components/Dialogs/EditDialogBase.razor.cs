@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using MvvmBlazor.Components;
 
-namespace iRLeagueManager.Web.Components.Dialogs;
+namespace iRLeagueManager.Web.Components;
 
 public class EditDialogBase<TViewModel, TModel> : MvvmComponentBase where TViewModel : LeagueViewModelBase<TViewModel, TModel> where TModel : class
 {

@@ -1,5 +1,5 @@
-﻿@using iRLeagueApiCore.Common.Enums
-@using iRLeagueManager.Web.Components.Dialogs
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Enums
 @typeparam T
 @inherits SettingBase
 @inject IDialogService DialogService
@@ -118,11 +118,11 @@
         {
             return;
         }
-        var parameters = new DialogParameters<MudConfirmModal>()
+        var parameters = new DialogParameters<ConfirmModal>()
         {
             { x => x.Text, $"Delete {itemsList[index]}?" },
         };
-        var result = await DialogService.Show<MudConfirmModal>("Delete item", parameters).Result;
+        var result = await DialogService.Show<ConfirmModal>("Delete item", parameters).Result;
         if (result.Canceled)
         {
             return;

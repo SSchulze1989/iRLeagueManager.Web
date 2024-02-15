@@ -1,8 +1,7 @@
 ﻿@page "/{LeagueName}/Teams"
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
-@using iRLeagueManager.Web.Components.Settings
-@using iRLeagueManager.Web.Components;
+@using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
 @layout MainLayout
@@ -99,7 +98,7 @@
 
     private async Task OnTeamClick(TeamViewModel config)
     {
-        var parameters = new DialogParameters<EditTeamModal>()
+        var parameters = new DialogParameters<EditTeamDialog>()
         {
             {x => x.Model, config.CopyModel()},
             {x => x.LeagueMembers, GetMembersWithoutTeam(vm.Members)},
@@ -110,7 +109,7 @@
                 FullWidth = true,
                 DisableBackdropClick = true,
             };
-        var result = await DialogService.Show<EditTeamModal>("Edit Team", parameters, options).Result;
+        var result = await DialogService.Show<EditTeamDialog>("Edit Team", parameters, options).Result;
         if (result.Canceled == false && result.Data is TeamModel model)
         {
             config.SetModel(model);
@@ -119,7 +118,7 @@
 
     private async Task OnAddTeamClick()
     {
-        var parameters = new DialogParameters<EditTeamModal>()
+        var parameters = new DialogParameters<EditTeamDialog>()
         {
             {x => x.Model, new()},
             {x => x.LeagueMembers, GetMembersWithoutTeam(vm.Members)},
@@ -130,7 +129,7 @@
                 FullWidth = true,
                 DisableBackdropClick = true,
             };
-        var result = await DialogService.Show<EditTeamModal>("Add new Team", parameters, options).Result;
+        var result = await DialogService.Show<EditTeamDialog>("Add new Team", parameters, options).Result;
     }
 
     private IEnumerable<MemberInfoModel> GetMembersWithoutTeam(IEnumerable<MemberInfoModel> members)
@@ -142,12 +141,12 @@
 
     private async Task OnDeleteTeamClick(TeamViewModel team)
     {
-        var parameters = new DialogParameters<MudConfirmModal>()
+        var parameters = new DialogParameters<ConfirmModal>()
         {
             {x => x.Text,  $"Really delete Team \"{team.Name}\"?"},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var result = await DialogService.Show<MudConfirmModal>("Delete Result Config", parameters).Result;
+        var result = await DialogService.Show<ConfirmModal>("Delete Result Config", parameters).Result;
         if (result.Canceled == false)
         {
             await vm.DeleteTeam(team.GetModel());

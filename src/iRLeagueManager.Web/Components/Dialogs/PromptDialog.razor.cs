@@ -5,8 +5,10 @@ using MudBlazor;
 
 namespace iRLeagueManager.Web.Components;
 
-public class PromptDialog<T> : ComponentBase
+public class PromptDialog<T> : ComponentBase, IDisposable
 {
+    private bool disposedValue;
+
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
     [Parameter] public T Value { get; set; } = default!;
     [Parameter] public Func<T?, CancellationToken, Task<bool>>? OnSubmit { get; set; }
@@ -17,7 +19,8 @@ public class PromptDialog<T> : ComponentBase
     [Parameter] public string? HelperText { get; set; }
     [Parameter] public Variant Variant { get; set; } = Variant.Outlined;
 
-    protected CancellationTokenSource Cts { get; } = new();
+    private CancellationTokenSource Cts { get; } = new();
+    protected CancellationToken CancellationToken => Cts.Token;
     protected StatusResultValidator? ResultValidator { get; set; }
 
     protected override void OnParametersSet()
@@ -37,5 +40,26 @@ public class PromptDialog<T> : ComponentBase
     protected virtual void Cancel()
     {
         MudDialog.Cancel();
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                Cts.Cancel();
+                Cts.Dispose();
+            }
+
+            disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Ändern Sie diesen Code nicht. Fügen Sie Bereinigungscode in der Methode "Dispose(bool disposing)" ein.
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

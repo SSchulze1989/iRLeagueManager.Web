@@ -8,7 +8,7 @@
 }
 @if (OkClick.HasDelegate)
 {
-    <MudButton Color="Color.Primary" OnClick="OkClick">
+    <MudButton Color="Color.Primary" OnClick="OkClick" Disabled="DisableOkClick">
         @OkText
     </MudButton>
 }
@@ -18,6 +18,8 @@
     public string OkText { get; set; } = "Ok";
     [Parameter]
     public string CancelText { get; set; } = "Cancel";
+    [Parameter]
+    public bool DisableOkClick { get; set; } = false;
     [Parameter]
     public EventCallback OkClick { get; set; }
     [Parameter]

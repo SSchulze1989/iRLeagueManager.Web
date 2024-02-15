@@ -179,11 +179,16 @@
         {
             return;
         }
-        var parameters = new DialogParameters<UploadResultPrompt>()
+        var parameters = new DialogParameters<UploadResultDialog>()
         {
             { x => x.Event, @event },
         };
-        await DialogService.Show<UploadResultPrompt>("Upload json result", parameters).Result;
+        var result = await DialogService.Show<UploadResultDialog>("Upload json result", parameters).Result;
+        if (result.Canceled == false)
+        {
+            await Task.Delay(2000);
+            await vm.LoadFromEventAsync(@event.Id);
+        }
     }
 
     private async Task TriggerCalculation()

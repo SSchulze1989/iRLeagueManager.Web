@@ -61,7 +61,10 @@
                                             }
                                             @if (ReadOnly == false)
                                             {
-                                                <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" ButtonType="ButtonType.Button" OnClick=OnAddClick>Add Review</MudButton>
+                                                <MudButton StartIcon="@Icons.Material.Filled.Add"
+                                                           Color="Color.Tertiary"
+                                                           ButtonType="ButtonType.Button"
+                                                           OnClick=OnAddClick>Add Review</MudButton>
                                             }
                                         </Authorized>
                                         <NotAuthorized>
@@ -75,7 +78,9 @@
                                 case 1:
                                     @if (ReviewsVm.Protests.Count == 0 && ReviewsVm.ProtestsPublic)
                                     {
-                                        <p class="results-scoring"><em>No Protests</em></p>
+                                        <MudPaper Elevation="5" Class="py-4 px-6">
+                                            <MudText Typo="Typo.h5">No Protests</MudText>
+                                        </MudPaper>
                                     }
                                     <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
                                         <Authorized>
@@ -100,27 +105,31 @@
                                         var protestsCloseAt = Event.End + ReviewsVm.ProtestClosedAfter;
                                         @if (ReviewsVm.CanFileProtest(Event))
                                         {
-                                            <button class="btn btn-outline-secondary mb-3" type="button" @onclick=@(() => NavigationManager.NavigateTo($"./{LeagueName}/Protests/Events/{EventId}"))>File Protest</button>
+                                            <MudButton Href=@($"./{LeagueName}/Protests/Events/{EventId}")
+                                                       StartIcon="@Icons.Material.Outlined.Campaign"
+                                                       Color="Color.Primary">
+                                                File Protest
+                                            </MudButton>
                                             @if (ReviewsVm.ProtestClosedAfter > TimeSpan.Zero)
                                             {
-                                                <div class="alert alert-info">
-                                                    Protests can be filed until @protestsCloseAt.ToString();
-                                                </div>
+                                                <MudAlert Severity="Severity.Info">
+                                                    Protests can be filed until @protestsCloseAt.ToString()
+                                                </MudAlert>
                                             }
                                         }
                                         else
                                         {
                                             @if (ClientTime.Now < protestsOpenAt)
                                             {
-                                                <div class="alert alert-warning">
-                                                    Protests can be filed after @protestsOpenAt.ToString();
-                                                </div>
+                                                <MudAlert Severity="Severity.Warning">
+                                                    Protests can be filed after @protestsOpenAt.ToString()
+                                                </MudAlert>
                                             }
                                             else if (ClientTime.Now > protestsCloseAt)
                                             {
-                                                <div class="alert alert-warning">
-                                                    Protest period ended on @protestsCloseAt.ToString();
-                                                </div>
+                                                <MudAlert Severity="Severity.Warning">
+                                                    Protest period ended on @protestsCloseAt.ToString()
+                                                </MudAlert>
                                             }
                                         }
                                     }

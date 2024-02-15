@@ -216,7 +216,9 @@
                             }
                             @if (IsSteward && Bind(Review, x => x.Comments).Any(x => x.AuthorUserId == UserId) == false)
                             {
-                                <MudButton StartIcon="@Icons.Material.Outlined.AddComment" Color="Color.Primary" Class="ma-2" OnClick="AddCommentClick">Add Comment</MudButton>
+                                <MudButton StartIcon="@Icons.Material.Outlined.AddComment"
+                                           Color="Color.Tertiary" Class="ma-2"
+                                           OnClick="AddCommentClick">Add Comment</MudButton>
                             }
                         </MudStack>
                     </MudCard>

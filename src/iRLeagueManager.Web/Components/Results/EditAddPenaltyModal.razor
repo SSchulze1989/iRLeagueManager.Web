@@ -39,7 +39,7 @@
                     @AtFaultToString()
                 }
                 <MudTextField Label="Reason" @bind-Value="Vm.Reason" Variant="Variant.Outlined" Lines="2"/>
-                <MudSelect Label="Penalty Type" @bind-Value="Vm.Type" Variant="Variant.Outlined">
+                <MudSelect Label="Type" @bind-Value="Vm.Type" Variant="Variant.Outlined">
                     @foreach(var penaltyType in Enum.GetValues<PenaltyType>())
                     {
                         <MudSelectItem Value="@penaltyType" />

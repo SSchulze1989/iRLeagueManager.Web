@@ -8,7 +8,7 @@
 <MudDialog>
     <DialogContent>
         <MudStack Spacing="2">
-            @foreach(var penalty in penalties)
+            @foreach (var penalty in penalties)
             {
                 <MudCard Outlined="true">
                     <MudCardHeader>
@@ -22,15 +22,15 @@
                             @if (penalty.ReviewId != null)
                             {
                                 <MudTooltip Text="Open Review">
-                                    <MudIconButton OnClick="@(() => NavigateTo($"/{Shared.LeagueName}/Reviews/Events/{penalty.EventId}?reviewId={penalty.ReviewId}"))" 
-                                        Icon="@Icons.Material.Filled.Reviews"
-                                        Size="Size.Small" />
+                                    <MudIconButton OnClick="@(() => NavigateTo($"/{Shared.LeagueName}/Reviews/Events/{penalty.EventId}?reviewId={penalty.ReviewId}"))"
+                                                   Icon="@Icons.Material.Filled.Reviews"
+                                                   Size="Size.Small" />
                                 </MudTooltip>
                             }
                             @if (penalty.AddPenaltyId != null && CanEdit)
                             {
                                 <MudTooltip Text="Edit">
-                                    <MudIconButton OnClick="@(() => EditAddPenaltyAsync(penalty))" Icon="@Icons.Material.Filled.Edit" Size="Size.Small"/>
+                                    <MudIconButton OnClick="@(() => EditAddPenaltyAsync(penalty))" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" />
                                 </MudTooltip>
                                 <MudTooltip Text="Delete">
                                     <MudIconButton OnClick="@(() => DeleteAddPenaltyAsync(penalty))" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" />
@@ -43,9 +43,9 @@
                             <MudItem xs="6">
                                 <MudText Typo="Typo.caption">Driver</MudText>
                                 <MudText>@penalty.Member?.FirstName @penalty.Member?.LastName</MudText>
-                            </MudItem>
-                            <MudItem xs="3">
-                                @if (string.IsNullOrWhiteSpace(penalty.Lap) == false)
+                                </MudItem>
+                                <MudItem xs="3">
+                                    @if (string.IsNullOrWhiteSpace(penalty.Lap) == false)
                                 {
                                     <MudText Typo="Typo.caption">Lap</MudText>
                                     <MudText>@penalty.Lap</MudText>
@@ -59,14 +59,36 @@
                                 }
                             </MudItem>
                             <MudItem xs="6">
-                                <MudText Style="@($"color: {GetPenaltyColor(penalty)}")">@GetPenaltyValueString(penalty)</MudText>
+                                <MudText Style="@($"color: {GetPenaltyColor(penalty)}")">
+                                    @switch (penalty)
+                                    {
+                                        case { Type: PenaltyType.Points, Points: >= 0 }:
+                                            @:@(-penalty.Points) pt@(penalty.Points != 1 ? "s" : "")
+                                            break;
+                                        case { Type: PenaltyType.Points, Points: < 0 }:
+                                            @:+@(-penalty.Points) pt@(penalty.Points != 1 ? "s" : "")
+                                            break;
+                                        case { Type: PenaltyType.Position }:
+                                            @:+ @penalty.Positions position@(penalty.Positions != 1 ? "s" : "")
+                                            break;
+                                        case { Type: PenaltyType.Time }:
+                                            @:+ @penalty.Time
+                                            break;
+                                        case { Type: PenaltyType.Disqualification }:
+                                            <MudStack Row="true" AlignItems="AlignItems.Center">
+                                                <MudText>DSQ</MudText>
+                                                <MudIcon Icon="@Icons.Material.Filled.Flag" Style="color: black;" Size="Size.Small"/>
+                                            </MudStack>
+                                            break;
+                                    }
+                                </MudText>
                             </MudItem>
                             <MudItem xs="6">
                                 <MudText>@penalty.Reason</MudText>
-                            </MudItem>
-                        </MudGrid>
-                    </MudCardContent>
-                </MudCard>
+                                </MudItem>
+                            </MudGrid>
+                        </MudCardContent>
+                    </MudCard>
             }
         </MudStack>
     </DialogContent>
@@ -108,20 +130,9 @@
         _ => string.Empty,
     };
 
-    private string GetPenaltyValueString(PenaltyModel penalty) => penalty.Type switch
-    {
-        { Type: PenaltyType.Points, Points: >= 0 } => $"{-penalty.Points} pt{(penalty.Points != 1 ? "s" : "")}",
-        { Type: PenaltyType.Points, Points: < 0 } => $"+{-penalty.Points} pt{(penalty.Points != 1 ? "s" : "")}",
-        { Type: PenaltyType.Position } => $"+ {penalty.Positions.ToString()} position{(penalty.Positions != 1 ? "s" : "")}",
-        { Type: PenaltyType.Time } => $"+ {penalty.Time.ToString()}",
-        { Type: PenaltyType.Disqualification } => """DSQ <span class="bi bi-flag-fill" style="color: black"/>""",
-        _ => string.Empty,
-    };
-
     private string GetPenaltyColor(PenaltyModel penalty) => penalty switch
     {
-        { Type: PenaltyType.Position, Positions: >= 0 } or {Type: PenaltyType.Points, Points: >= 0}  => "red",
-        { Type: PenaltyType.Position, Positions: < 0 } or { Type: PenaltyType.Points, Points: < 0 } => "green",
+        { Type: PenaltyType.Points, Points: >= 0 } or { Type: PenaltyType.Position} => "red", 
         _ => "inherit",
     };
 

@@ -49,7 +49,7 @@
                             @category.Text
                         </MudTd>
                         <MudTd>
-                            @category.DefaultPenalty
+                            @(category.DefaultPenalty > 0 ? "+" : "")@category.DefaultPenalty
                         </MudTd>
                         <MudTd>
                             <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="@(() => OnDeleteVoteCategoryClick(category))" Size="Size.Small" />

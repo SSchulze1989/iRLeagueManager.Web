@@ -10,7 +10,7 @@
     <MudStack Class="px-2 pt-2" AlignItems="AlignItems.Center" Row="true">
         <MudText Typo="Typo.h6">@Result.SessionName</MudText>
         <MudSpacer/>
-        <MudIconButton Icon="@Icons.Material.Filled.Info" Title="Show penalties" OnClick=ShowPenaltiesClick/>
+        <MudIconButton Icon="@Icons.Material.Filled.Info" Title="Show penalties" OnClick=ShowBonusesPenaltiesClick/>
     </MudStack>
     @{
         var resultRows = Result.ResultRows;
@@ -90,7 +90,7 @@
                 <td class="px-1 py-1">@Row.BonusPoints</td>
             }
             <td class="px-1 py-1" style="@(@Row.PenaltyPoints != 0 ? "color:red" : "")">
-                @(Row.PenaltyPoints != 0 ? $"-{Row.PenaltyPoints}" : "")
+                @(Row.PenaltyPoints != 0 ? -Row.PenaltyPoints : "")
             </td>
             <td class="px-1 py-1">@Row.TotalPoints</td>
             @if (isTeamResult == false)
@@ -104,7 +104,8 @@
             {
                 <td class="pa-0">
                     <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true" Size="Size.Small">
-                        <MudMenuItem OnClick="() => OnRowOptionsClick(Row)">Add Penalty</MudMenuItem>
+                        <MudMenuItem OnClick="() => AddBonusPentalyClick(Row)">Add Bonus/Penalty</MudMenuItem>
+                        <MudMenuItem OnClick="() => ShowBonusesPenaltiesClick(Row)">Show Bonuses/Penalties</MudMenuItem>
                     </MudMenu>
                 </td>
             }
@@ -155,7 +156,7 @@
         return result.EventResult?.StrengthOfField ?? 0;
     }
 
-    private async Task OnRowOptionsClick(ResultRowModel row)
+    private async Task AddBonusPentalyClick(ResultRowModel row)
     {
         var parameters = new DialogParameters<EditAddPenaltyModal>()
         {
@@ -168,10 +169,15 @@
             {x => x.IsTeamResult, isTeamResult},
         };
 
-        var result = await DialogService.Show<EditAddPenaltyModal>("Add Penalty", parameters).Result;
+        var result = await DialogService.Show<EditAddPenaltyModal>("Add Bonus/Penalty", parameters).Result;
     }
 
-    private async Task ShowPenaltiesClick()
+    private Task ShowBonusesPenaltiesClick()
+    {
+        return ShowBonusesPenaltiesClick(null);
+    }
+
+    private async Task ShowBonusesPenaltiesClick(ResultRowModel? row)
     {
         if (Result.EventResult is null)
         {
@@ -183,7 +189,12 @@
             {
                 return Array.Empty<PenaltyModel>();
             }
-            return penalties.Content.Where(x => Result.SessionNr == 999 || x.SessionNr == Result.SessionNr);
+            var getPenalties = penalties.Content.Where(x => Result.SessionNr == 999 || x.SessionNr == Result.SessionNr);
+            if (row is not null)
+            {
+                getPenalties = getPenalties.Where(x => isTeamResult ? x.Team?.TeamId == row.TeamId : x.Member?.MemberId == row.MemberId);
+            }
+            return getPenalties;
         }
         var parameters = new DialogParameters<ShowPenaltiesModal>()
         {
@@ -198,6 +209,6 @@
             FullWidth = true,
             CloseButton = true,
         };
-        await DialogService.Show<ShowPenaltiesModal>("Penalties", parameters, options).Result;
+        await DialogService.Show<ShowPenaltiesModal>("Bonuses/Penalties", parameters, options).Result;
     }
 }

@@ -8,10 +8,18 @@
             <StatusResultValidator @ref=ResultValidator />
             <MudGrid Spacing="2">
                 <MudItem xs="8">
-                    <MudTextField @bind-Value="Vm.Text" Label="Name" For="() => Vm.Text" Variant="Variant.Outlined" />
+                    <MudTextField @bind-Value="Vm.Text"
+                                  Label="Name"
+                                  For="() => Vm.Text"
+                                  Variant="Variant.Outlined" />
                 </MudItem>
                 <MudItem xs="4">
-                    <MudTextField @bind-Value="Vm.DefaultPenalty" Label="DefaultPenalty" For="() => Vm.DefaultPenalty" InputMode="InputMode.numeric" InputType="InputType.Number" Variant="Variant.Outlined" />
+                    <MudTextField @bind-Value="Vm.DefaultPenalty"
+                                  Label="@GetPointLabel(Vm.DefaultPenalty)"
+                                  For="() => Vm.DefaultPenalty"
+                                  InputMode="InputMode.numeric"
+                                  InputType="InputType.Number"
+                                  Variant="Variant.Outlined" />
                 </MudItem>
             </MudGrid>
             <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />

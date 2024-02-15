@@ -118,11 +118,11 @@
         {
             return;
         }
-        var parameters = new DialogParameters<ConfirmModal>()
+        var parameters = new DialogParameters<ConfirmDialog>()
         {
             { x => x.Text, $"Delete {itemsList[index]}?" },
         };
-        var result = await DialogService.Show<ConfirmModal>("Delete item", parameters).Result;
+        var result = await DialogService.Show<ConfirmDialog>("Delete item", parameters).Result;
         if (result.Canceled)
         {
             return;

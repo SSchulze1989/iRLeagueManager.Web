@@ -180,9 +180,9 @@
     private async Task Submit()
     {
         var parameters = new ModalParameters()
-            .Add(nameof(ConfirmModal.Text), "Please make sure you have filled out this protest correctly.\nOnce you submit it you can not delete or change it anymore.")
-            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
-        var confirm = await ModalService.Show<ConfirmModal>("Confirm Protest", parameters).Result;
+            .Add(nameof(ConfirmDialog.Text), "Please make sure you have filled out this protest correctly.\nOnce you submit it you can not delete or change it anymore.")
+            .Add(nameof(ConfirmDialog.ButtonTypes), ButtonTypes.YesNo);
+        var confirm = await ModalService.Show<ConfirmDialog>("Confirm Protest", parameters).Result;
         if (confirm.Confirmed == false)
         {
             return;

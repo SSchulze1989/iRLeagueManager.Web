@@ -365,7 +365,7 @@
 
     private async Task DeleteCommentClick(ReviewCommentViewModel comment)
     {
-        var parameters = new DialogParameters<ConfirmModal>()
+        var parameters = new DialogParameters<ConfirmDialog>()
         {
             {x => x.Text, "Are you sure you want to delete this comment?"},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
@@ -374,7 +374,7 @@
         {
             DisableBackdropClick = false,
         };
-        var confirm = await DialogService.Show<ConfirmModal>("Delete Comment", parameters, options).Result;
+        var confirm = await DialogService.Show<ConfirmDialog>("Delete Comment", parameters, options).Result;
         if (confirm.Canceled == false)
         {
             await Review.RemoveComment(comment);

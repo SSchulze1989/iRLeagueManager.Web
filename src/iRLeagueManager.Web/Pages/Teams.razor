@@ -141,12 +141,12 @@
 
     private async Task OnDeleteTeamClick(TeamViewModel team)
     {
-        var parameters = new DialogParameters<ConfirmModal>()
+        var parameters = new DialogParameters<ConfirmDialog>()
         {
             {x => x.Text,  $"Really delete Team \"{team.Name}\"?"},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var result = await DialogService.Show<ConfirmModal>("Delete Result Config", parameters).Result;
+        var result = await DialogService.Show<ConfirmDialog>("Delete Result Config", parameters).Result;
         if (result.Canceled == false)
         {
             await vm.DeleteTeam(team.GetModel());

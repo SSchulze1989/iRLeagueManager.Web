@@ -124,12 +124,12 @@
 
     private async Task OnDeleteChampionshipClick(ChampionshipViewModel championship)
     {
-        var parameters = new DialogParameters<ConfirmModal>()
+        var parameters = new DialogParameters<ConfirmDialog>()
         {
             { x => x.Text, $"Really delete championship {championship.Name}? This will also remove all settings from previous seasons but it will still keep the results." },
             { x => x.ButtonTypes, ButtonTypes.YesNo },
         };
-        var result = await DialogService.Show<ConfirmModal>("Delete Championship", parameters).Result;
+        var result = await DialogService.Show<ConfirmDialog>("Delete Championship", parameters).Result;
         if (!result.Canceled)
         {
             await Vm.DeleteChampionship(championship.GetModel(), CancellationToken);

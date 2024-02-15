@@ -140,12 +140,12 @@
 
     private async Task OnDeleteVoteCategoryClick(VoteCategoryViewModel voteCategory)
     {
-        var parameters = new DialogParameters<ConfirmModal>()
+        var parameters = new DialogParameters<ConfirmDialog>()
         {
             {x => x.Text, $"Really delete vote category \"{voteCategory.Text}\"?"},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var result = await DialogService.Show<ConfirmModal>("Delete Vote Category", parameters).Result;
+        var result = await DialogService.Show<ConfirmDialog>("Delete Vote Category", parameters).Result;
         if (result.Canceled == false)
         {
             await Reviews.DeleteVoteCategory(voteCategory.GetModel());

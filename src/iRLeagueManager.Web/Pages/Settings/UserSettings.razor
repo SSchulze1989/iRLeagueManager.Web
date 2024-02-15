@@ -98,12 +98,12 @@
 
     private async Task<bool> ConfirmRemoveRole(LeagueUserViewModel user, LeagueRoleValue role)
     {
-        var parameters = new DialogParameters<ConfirmModal>()
+        var parameters = new DialogParameters<ConfirmDialog>()
         {
             {x => x.Text, $"Remove role \"{role}\" from user \"{user.UserName}\""},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var confirm = await DialogService.Show<ConfirmModal>("Confirm Remove Role", parameters).Result;
+        var confirm = await DialogService.Show<ConfirmDialog>("Confirm Remove Role", parameters).Result;
         if (confirm.Canceled)
         {
             return false;
@@ -113,12 +113,12 @@
 
     private async Task<bool> ConfirmAddRole(LeagueUserViewModel user, LeagueRoleValue role)
     {
-        var parameters = new DialogParameters<ConfirmModal>()
+        var parameters = new DialogParameters<ConfirmDialog>()
         {
             {x => x.Text, $"Add role \"{role}\" to user \"{user.UserName}\""},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var confirm = await DialogService.Show<ConfirmModal>("Confirm Add Role", parameters).Result;
+        var confirm = await DialogService.Show<ConfirmDialog>("Confirm Add Role", parameters).Result;
         if (confirm.Canceled)
         {
             return false;

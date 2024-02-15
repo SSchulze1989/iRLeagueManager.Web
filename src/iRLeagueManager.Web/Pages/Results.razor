@@ -202,12 +202,12 @@
         {
             return;
         }
-        var parameters = new DialogParameters<ConfirmModal>()
+        var parameters = new DialogParameters<ConfirmDialog>()
         {
             { x => x.Text, $"Really delete result for event \"{@event.Name} - {@event.Date.GetValueOrDefault().ToString(@"dd.MM.yyyy")}\"?" },
             { x => x.ButtonTypes, ButtonTypes.YesNo },
         };
-        var result = await DialogService.Show<ConfirmModal>("Delete Results", parameters).Result;
+        var result = await DialogService.Show<ConfirmDialog>("Delete Results", parameters).Result;
         if (result.Canceled == false)
         {
             await vm.DeleteEventResults();

@@ -262,9 +262,9 @@
     private async Task RemoveEventClick(EventViewModel @event)
     {
         var parameters = new ModalParameters()
-            .Add(nameof(ConfirmModal.Text), $"Are you sure you want to delete this Event? {@event.Name} - {@event.Date.GetValueOrDefault().ToString(@"dd.MM.yyyy")}")
-            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
-        var confirm = await ModalService.Show<ConfirmModal>("Delete Event", parameters).Result;
+            .Add(nameof(ConfirmDialog.Text), $"Are you sure you want to delete this Event? {@event.Name} - {@event.Date.GetValueOrDefault().ToString(@"dd.MM.yyyy")}")
+            .Add(nameof(ConfirmDialog.ButtonTypes), ButtonTypes.YesNo);
+        var confirm = await ModalService.Show<ConfirmDialog>("Delete Event", parameters).Result;
         if (confirm.Cancelled)
         {
             return;

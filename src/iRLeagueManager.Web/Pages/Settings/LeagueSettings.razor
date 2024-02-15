@@ -150,12 +150,12 @@
 
     private async Task DeleteSeasonClick(SeasonViewModel season)
     {
-        var parameters = new DialogParameters<ConfirmModal>()
+        var parameters = new DialogParameters<ConfirmDialog>()
         {
             {x => x.Text, $"Really delete season \"{season.Name}\"?"},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var result = await DialogService.Show<ConfirmModal>("Delete Season", parameters).Result;
+        var result = await DialogService.Show<ConfirmDialog>("Delete Season", parameters).Result;
         if (result.Canceled == false)
         {
             await League.DeleteSeason(season.GetModel());
@@ -183,14 +183,14 @@
 
     private async Task ShowApplyTemplatesModal()
     {
-        var parameters = new DialogParameters<ConfirmModal>()
+        var parameters = new DialogParameters<ConfirmDialog>()
         {
             {x => x.Text, "Welcome to your new league. To speed up your setup process you can select the basic settings from a template"},
             {x => x.ButtonTypes, ButtonTypes.OkCancel},
             {x => x.OkButtonText, "Yes, select template"},
             {x => x.CancelButtonText, "No, start with empty league"},
         };
-        var result = await DialogService.Show<ConfirmModal>("Select league template", parameters).Result;
+        var result = await DialogService.Show<ConfirmDialog>("Select league template", parameters).Result;
         if (result.Canceled == false)
         {
             // forward to select template page

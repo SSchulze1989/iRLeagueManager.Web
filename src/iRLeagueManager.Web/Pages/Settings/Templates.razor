@@ -99,13 +99,13 @@
     {
         var (title, description) = TemplatesAvailable[template];
         Loading = true;
-        var parameters = new DialogParameters<ConfirmModal>()
+        var parameters = new DialogParameters<ConfirmDialog>()
         {
             { x => x.Text, $"Apply template <b><u>{title}</u></b> to your league?<br/>You can only apply a template once but of course change all the applied settings later."},
             { x => x.AllowMarkup, true},
             { x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var result = await DialogService.Show<ConfirmModal>("Apply Template", parameters).Result;
+        var result = await DialogService.Show<ConfirmDialog>("Apply Template", parameters).Result;
         if (!result.Canceled)
         {
             await SubmitTemplateSelection(template);

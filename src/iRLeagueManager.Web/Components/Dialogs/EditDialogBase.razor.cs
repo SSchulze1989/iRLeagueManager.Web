@@ -23,11 +23,14 @@ public class EditDialogBase<TViewModel, TModel> : MvvmComponentBase where TViewM
     public Func<TViewModel, CancellationToken, Task<StatusResult>>? OnSubmit { get; set; }
     [Parameter]
     public Func<TViewModel, CancellationToken, Task>? OnCancel { get; set; }
+    [Parameter]
+    public bool AllowSafeUnchanged { get; set; } = false;
 
     protected CancellationTokenSource Cts { get; } = new();
     protected StatusResultValidator? ResultValidator { get; set; }
     protected bool Loading => Vm.Loading;
     protected bool HasChanged => Vm.HasChanges;
+    protected virtual bool DisableSave => !AllowSafeUnchanged && !HasChanged;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -58,6 +61,7 @@ public class EditDialogBase<TViewModel, TModel> : MvvmComponentBase where TViewM
         {
             MudDialog.Close(Vm.GetModel());
         }
+        await InvokeAsync(StateHasChanged);
     }
 
     protected virtual async Task Cancel()

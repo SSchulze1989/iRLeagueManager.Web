@@ -81,8 +81,8 @@
                                         <Authorized>
                                             @foreach (var protest in @Bind(ReviewsVm, x => x.Protests))
                                             {
-                                                <ProtestCard class="px-0 mb-2 mx-0"
-                                                             Protest=protest
+                                                <ProtestCard Protest=protest
+                                                             ReadOnly=@ReadOnly
                                                              OnCreateReviewClick="@(() => OnCreateReviewFromProtestClick(protest))"
                                                              OnDeleteClick=@(() => OnProtestDeleteClick(protest)) />
                                             }
@@ -90,7 +90,7 @@
                                         <NotAuthorized>
                                             @foreach (var protest in @Bind(ReviewsVm, x => x.Protests))
                                             {
-                                                <ProtestCard class="px-0 mb-2 mx-0" Protest=protest />
+                                                <ProtestCard Protest=protest />
                                             }
                                         </NotAuthorized>
                                     </AuthorizeView>
@@ -310,7 +310,7 @@
         {
             review.InvolvedMembers.Add(protest.Author);
         }
-        await OpenAddReviewModal(review);
+        await OpenAddReviewModal(review, allowSafeUnchanged: true);
     }
 
     private async Task OnAddClick()
@@ -318,7 +318,7 @@
         await OpenAddReviewModal(new());
     }
 
-    private async Task OpenAddReviewModal(ReviewModel review)
+    private async Task OpenAddReviewModal(ReviewModel review, bool allowSafeUnchanged = false)
     {
         var parameters = new DialogParameters<EditReviewDialog>()
         {
@@ -326,6 +326,7 @@
             {x => x.EventList, EventList},
             {x => x.EventCars, ReviewsVm.EventCars},
             {x => x.OnSubmit, async (reviewVm, cancellation) => await reviewVm.AddToSessionAsync(reviewVm.SessionId.GetValueOrDefault(), cancellation)},
+            {x => x.AllowSafeUnchanged, allowSafeUnchanged},
         };
         var modal = DialogService.Show<EditReviewDialog>("Add Review", parameters);
         await modal.Result;

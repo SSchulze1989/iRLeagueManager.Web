@@ -39,6 +39,7 @@ public sealed class StatusResultValidator : ComponentBase
         {
             messageStore.Clear();
             ErrorMessage = string.Empty;
+            CurrentEditContext.NotifyValidationStateChanged();
             return;
         }
 
@@ -58,6 +59,8 @@ public sealed class StatusResultValidator : ComponentBase
                 DisplayErrorMessage(result);
                 break;
         }
+
+        CurrentEditContext.NotifyValidationStateChanged();
     }
 
     private void DisplayErrorMessage(StatusResult result)

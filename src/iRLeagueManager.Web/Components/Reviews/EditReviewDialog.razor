@@ -23,33 +23,37 @@
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="4">
-                    <MudTextField Label="Incident Nr." @bind-Value="Vm.IncidentNr" Variant="Variant.Outlined"/>
+                    <MudTextField Label="Incident Nr." @bind-Value="Vm.IncidentNr" For="@(() => Vm.IncidentNr)" Variant="Variant.Outlined" />
                 </MudItem>
                 <MudItem xs="4">
-                    <MudTextField Label="Lap" @bind-Value="Vm.OnLap" Variant="Variant.Outlined" />
+                    <MudTextField Label="Lap" @bind-Value="Vm.OnLap" For="@(() => Vm.OnLap)" Variant="Variant.Outlined" />
                 </MudItem>
                 <MudItem xs="4">
-                    <MudTextField Label="Corner" @bind-Value="Vm.Corner" Variant="Variant.Outlined" />
+                    <MudTextField Label="Corner" @bind-Value="Vm.Corner" For="@(() => Vm.Corner)" Variant="Variant.Outlined" />
                 </MudItem>
                 <MudItem xs="12">
-                    <MudTextField Label="Incident Kind" @bind-Value="Vm.IncidentKind" For="@(() => Vm.IncidentKind)" Variant="Variant.Outlined" id="incident_kind"/>
+                    <MudTextField Label="Incident Kind" @bind-Value="Vm.IncidentKind" For="@(() => Vm.IncidentKind)" Variant="Variant.Outlined" id="incident_kind" />
                 </MudItem>
                 <MudItem xs="12">
                     <MudTextField Label="Description" @bind-Value="Vm.FullDescription" Lines="4" Variant="Variant.Outlined" />
                 </MudItem>
                 <MudItem xs="12">
-                    <MultiSelectAutoComplete Label="Members"
-                                             @bind-Values=InvolvedCars
-                                             SearchFunc="SearchCars"
-                                             ToStringFunc="CarToStringFunc"
-                                             Variant="Variant.Outlined"/>
+                    <Validation For="@(() => Vm.InvolvedTeams)" Context="validation">
+                        <MultiSelectAutoComplete Label="Members"
+                                                 @bind-Values=InvolvedCars
+                                                 SearchFunc="SearchCars"
+                                                 ToStringFunc="CarToStringFunc"
+                                                 Variant="Variant.Outlined"
+                                                 Error="validation.HasError"
+                                                 ErrorText="@validation.ErrorText" />
+                    </Validation>
                 </MudItem>
             </MudGrid>
             <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
         </DialogContent>
         <DialogActions>
             <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
-            <ProgressButton Color="Color.Primary" OnClick="Submit" Loading="Loading" Disabled="!HasChanged">Save</ProgressButton>
+            <ProgressButton Color="Color.Primary" ButtonType="ButtonType.Submit" Loading="Loading">Save</ProgressButton>
         </DialogActions>
     </MudDialog>
 </EditForm>
@@ -142,10 +146,5 @@
         }
         var member = car.Members.FirstOrDefault() ?? new();
         return $"#{car.Number} {member.FirstName} {member.LastName}";
-    }
-
-    protected override Task Submit()
-    {
-        return base.Submit();
     }
 }

@@ -13,6 +13,9 @@
                      CoerceValue="true"           
                      ToStringFunc="ToStringFunc"
                      Variant="@Variant"
+                     Validation="Validation"
+                     Error="Error"
+                     ErrorText="@ErrorText"
                      @ref=Autocomplete/>
     <MudChipSet Class="mt-1" AllClosable=true OnClose="RemoveValue">
         @foreach (var val in selectedValues)
@@ -52,6 +55,15 @@
 
     [Parameter]
     public int DebounceInterval { get; set; } = 400;
+
+    [Parameter]
+    public object? Validation { get; set; }
+
+    [Parameter]
+    public bool Error { get; set; } = false;
+
+    [Parameter]
+    public string ErrorText { get; set; } = string.Empty;
 
     private HashSet<T> selectedValues = new HashSet<T>();
 

@@ -1,0 +1,67 @@
+﻿@using System.Linq.Expressions
+@typeparam T
+@implements IDisposable
+
+@ChildContent(Context)
+
+@code {
+    public class ValidationContext
+    {
+        public bool HasError => Errors.Any();
+        public string ErrorText => string.Join("\n", Errors);
+        public IEnumerable<string> Errors { get; set; } = Array.Empty<string>();
+    }
+
+    [CascadingParameter] EditContext CurrentEditContext { get; set; } = default!;
+    [Parameter, EditorRequired] public Expression<Func<T>> For { get; set; } = default!;
+    [Parameter, EditorRequired] public RenderFragment<ValidationContext> ChildContent { get; set; } = default!;
+
+
+    private readonly EventHandler<ValidationStateChangedEventArgs>? _validationStateChangedHandler;
+
+    private EditContext _previousEditContext = default!;
+
+    private Expression<Func<T>> _previousFor = default!;
+
+    private FieldIdentifier _fieldIdentifier;
+
+    private ValidationContext Context => new() { Errors = CurrentEditContext.GetValidationMessages(_fieldIdentifier) };
+
+    public Validation()
+    {
+        _validationStateChangedHandler = (sender, eventArgs) => StateHasChanged();
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, CurrentEditContext, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, For);
+
+        if (For != _previousFor)
+        {
+            _fieldIdentifier = FieldIdentifier.Create(For);
+            _previousFor = For;
+        }
+
+        if (CurrentEditContext != _previousEditContext)
+        {
+            DetachValidationStateChangedListener();
+            CurrentEditContext.OnValidationStateChanged += _validationStateChangedHandler;
+            _previousEditContext = CurrentEditContext;
+        }
+    }
+
+    void IDisposable.Dispose()
+    {
+        DetachValidationStateChangedListener();
+    }
+
+    private void DetachValidationStateChangedListener()
+    {
+        if (_previousEditContext != null)
+        {
+            _previousEditContext.OnValidationStateChanged -= _validationStateChangedHandler;
+        }
+    }
+}

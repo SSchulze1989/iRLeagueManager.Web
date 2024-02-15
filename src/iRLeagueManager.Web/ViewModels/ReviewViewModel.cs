@@ -5,6 +5,7 @@ using iRLeagueApiCore.Common.Models.Reviews;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 using iRLeagueManager.Web.Shared;
+using System.ComponentModel.DataAnnotations;
 using System.IO.IsolatedStorage;
 
 namespace iRLeagueManager.Web.ViewModels;

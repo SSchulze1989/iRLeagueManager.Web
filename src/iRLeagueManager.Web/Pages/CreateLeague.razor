@@ -45,8 +45,6 @@
 </div>
 
 @code {
-    [CascadingParameter]
-    private IModalService ModalService { get; set; } = default!;
     private StatusResultValidator? ResultValidator { get; set; }
 
     private PostLeagueModel Model { get; set; } = CreateLeagueModel();
@@ -92,7 +90,6 @@
 
     protected override void OnParametersSet()
     {
-        BlazorParameterNullException.ThrowIfNull(this, ModalService);
     }
 
     private string GetShortNameFromFullName(string fullName)

@@ -1,5 +1,4 @@
-﻿@using Blazored.Modal
-@using System.Globalization;
+﻿@using System.Globalization;
 @using iRLeagueManager.Web.ViewModels
 @inject EventListViewModel EventList
 @inject LeagueApiService ApiService
@@ -13,28 +12,26 @@
 <MudBreakpointProvider>
     <CascadingValue Value="EventList">
         <CascadingValue Value="SharedState">
-            <CascadingBlazoredModal DisableBackgroundCancel="true" Size="ModalSize.Large">
-                <CascadingAuthenticationState>
-                    <Router AppAssembly="@typeof(App).Assembly">
-                        <Found Context="routeData">
-                            <CascadingValue Value="routeData">
-                                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-                                    <NotAuthorized>
-                                        <LoginRedirect />
-                                    </NotAuthorized>
-                                </AuthorizeRouteView>
-                                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-                            </CascadingValue>
-                        </Found>
-                        <NotFound>
-                            <PageTitle>Not found</PageTitle>
-                            <LayoutView Layout="@typeof(MainLayout)">
-                                <p role="alert">Sorry, there's nothing at this address.</p>
-                            </LayoutView>
-                        </NotFound>
-                    </Router>
-                </CascadingAuthenticationState>
-            </CascadingBlazoredModal>
+            <CascadingAuthenticationState>
+                <Router AppAssembly="@typeof(App).Assembly">
+                    <Found Context="routeData">
+                        <CascadingValue Value="routeData">
+                            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                                <NotAuthorized>
+                                    <LoginRedirect />
+                                </NotAuthorized>
+                            </AuthorizeRouteView>
+                            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+                        </CascadingValue>
+                    </Found>
+                    <NotFound>
+                        <PageTitle>Not found</PageTitle>
+                        <LayoutView Layout="@typeof(MainLayout)">
+                            <p role="alert">Sorry, there's nothing at this address.</p>
+                        </LayoutView>
+                    </NotFound>
+                </Router>
+            </CascadingAuthenticationState>
         </CascadingValue>
     </CascadingValue>
 </MudBreakpointProvider>

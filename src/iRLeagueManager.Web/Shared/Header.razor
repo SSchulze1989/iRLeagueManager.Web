@@ -4,9 +4,8 @@
 <MudAppBar Elevation="0">
     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
                    OnClick="@((e) => DrawerToggle())" />
-
     <MudSpacer />
-    <MudText Typo="Typo.h4"><DisplayLeague League="Shared.LeagueInfo"/></MudText>
+    <MudText Typo="Typo.h4"><DisplayLeague League="Shared.LeagueInfo" /></MudText>
     <MudSpacer />
     <AuthorizeView>
         <Authorized Context="auth">
@@ -27,7 +26,9 @@
 </MudAppBar>
 <MudDrawer @bind-Open="_drawerOpen" Elevation="1" Breakpoint="Breakpoint.Lg" ClipMode="DrawerClipMode.Always">
     <MudDrawerHeader>
-        <MudText Typo="Typo.h6">iRLeagueManager</MudText>
+        <MudLink Href="/" Color="Color.Default" Typo="Typo.h6" Underline="Underline.None">
+            iRLeagueManager
+        </MudLink>
     </MudDrawerHeader>
     <NavMenu />
 </MudDrawer>

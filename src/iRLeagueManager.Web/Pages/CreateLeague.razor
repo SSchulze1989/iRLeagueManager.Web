@@ -30,7 +30,9 @@
                                   HelperText="@($@" Pick a short and unique indentifiying name of the league. This will later be used as part of html routes and shareable links
                                   e.g: https://irleaguemanager.net/{Model.Name}/results")"
                                   @bind-Value="Model.Name"
+                                  For="@(() => Model.Name)"
                                   Variant="Variant.Outlined" />
+                    <ValidationMessage For="@(() => Model.User)" />
                 </MudStack>
             </MudCardContent>
             <MudCardActions>
@@ -45,7 +47,15 @@
 @code {
     private StatusResultValidator? ResultValidator { get; set; }
 
-    private PostLeagueModel Model { get; set; } = CreateLeagueModel();
+    private class CreateLeagueModel : PostLeagueModel
+    {
+        public object? User { get; set; }
+    }
+
+    private CreateLeagueModel Model { get; set; } = new()
+        {
+            LeaguePublic = iRLeagueApiCore.Common.Enums.LeaguePublicSetting.PublicHidden,
+        };
 
     private PropertyChangedEventHandler
     _vmChangedHandler;
@@ -121,13 +131,6 @@
         // forward to new league settings page
         NavigationManager.NavigateTo($"{league.Name}/Settings/League", forceLoad: true);
     }
-
-    private static PostLeagueModel CreateLeagueModel() => new()
-        {
-            LeaguePublic = iRLeagueApiCore.Common.Enums.LeaguePublicSetting.PublicHidden,
-            EnableProtests = false,
-        };
-
 
     protected override void Dispose(bool disposing)
     {

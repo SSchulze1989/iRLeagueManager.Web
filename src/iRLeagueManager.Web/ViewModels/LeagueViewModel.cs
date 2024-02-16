@@ -103,6 +103,10 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
             {
                 CurrentSeason = Seasons.FirstOrDefault(x => x.SeasonId == season.SeasonId);
             }
+            if (CurrentSeason is null)
+            {
+                CurrentSeason = Seasons.LastOrDefault();
+            }
             return result.ToStatusResult();
         }
         finally

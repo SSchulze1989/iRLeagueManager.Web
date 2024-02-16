@@ -147,7 +147,7 @@
         }
         championship.ChampionshipName = name;
         championship.ChampionshipDisplayName = displayName;
-        await Vm.AddChampionship(championship, CancellationToken);
+        await Vm.AddChampionship(championship, cancellationToken: CancellationToken);
         await Vm.LoadFromCurrentSeasonAsync(CancellationToken);
     }
 

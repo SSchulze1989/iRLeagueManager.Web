@@ -27,7 +27,7 @@ public sealed class StatusResultValidator : ComponentBase
         CurrentEditContext.OnValidationRequested += (sender, args) => ClearErrors();
     }
 
-    private void ClearErrors()
+    public void ClearErrors()
     {
         messageStore.Clear();
         ErrorMessage = string.Empty;
@@ -35,14 +35,14 @@ public sealed class StatusResultValidator : ComponentBase
 
     public void ValidateResult(StatusResult result)
     {
+        ClearErrors();
+
         if (result.IsSuccess)
         {
-            messageStore.Clear();
             ErrorMessage = string.Empty;
             CurrentEditContext.NotifyValidationStateChanged();
             return;
         }
-
 
         switch (result.Status)
         {

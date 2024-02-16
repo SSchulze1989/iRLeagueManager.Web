@@ -53,7 +53,7 @@
                             Variant="Variant.Outlined" />
                         <MudDivider Class="my-2"/>
                         <MudStack Row="true" AlignItems="AlignItems.Center">
-                            <MudCheckBox @bind-Checked="Model.PrivacyPolicyAgreeed" 
+                            <MudCheckBox @bind-Value="Model.PrivacyPolicyAgreeed" 
                                 Label="I have read and understood the" 
                                 Color="Color.Primary" 
                                 Dense="true" 
@@ -62,7 +62,7 @@
                             <MudLink Href="privacy" target="_blank">privacy policy</MudLink>
                         </MudStack>
                         <MudStack Row="true" AlignItems="AlignItems.Center">
-                            <MudCheckBox @bind-Checked="Model.TermsConditionsAgreed" 
+                            <MudCheckBox @bind-Value="Model.TermsConditionsAgreed" 
                                 Label="I have read and accept the" 
                                 Color="Color.Primary" Dense="true" 
                                 LabelPosition=" LabelPosition.End" 

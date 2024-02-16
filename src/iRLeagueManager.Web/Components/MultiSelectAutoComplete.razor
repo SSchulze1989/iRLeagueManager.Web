@@ -8,6 +8,7 @@
                      DebounceInterval="DebounceInterval"        
                      Label="@Label" 
                      HelperText="@HelperText"
+                     Placeholder="@Placeholder"
                      Clearable="true" 
                      Immediate="false"           
                      CoerceValue="true"           
@@ -16,6 +17,7 @@
                      Validation="Validation"
                      Error="Error"
                      ErrorText="@ErrorText"
+                     @attributes="AdditionalAttributes"
                      @ref=Autocomplete/>
     <MudChipSet Class="mt-1" AllClosable=true OnClose="RemoveValue">
         @foreach (var val in selectedValues)
@@ -26,6 +28,9 @@
 </div>
 
 @code {
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IDictionary<string, object>? AdditionalAttributes { get; set; }
+
     [Parameter]
     public IEnumerable<T>? Values { get; set; }
 
@@ -38,6 +43,9 @@
     [Parameter]
     public string HelperText { get; set; } = string.Empty;
 
+    [Parameter]
+    public string Placeholder { get; set; } = string.Empty;
+
     [Parameter, EditorRequired]
     public Func<string, Task<IEnumerable<T>>> SearchFunc { get; set; } = default!;
 
@@ -46,9 +54,6 @@
 
     [Parameter]
     public Variant Variant { get; set; }
-
-    [Parameter]
-    public System.Linq.Expressions.Expression<Func<IEnumerable<T>>>? For { get; set; }
 
     [Parameter]
     public Size ChipSize { get; set; } = Size.Medium;

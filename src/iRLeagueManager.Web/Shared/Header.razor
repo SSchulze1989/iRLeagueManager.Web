@@ -9,13 +9,19 @@
     <MudSpacer />
     <AuthorizeView>
         <Authorized Context="auth">
-            <MudMenu Icon="@Icons.Material.Filled.Person" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
-                <MudMenuItem Href="@($"members/{auth.User.GetUserId()}/profile")">My Profile</MudMenuItem>
-                <MudMenuItem Href="@($"members/logout?returnUrl={GetReturnUrl()}")">Logout</MudMenuItem>
+            <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                <ActivatorContent>
+                    <MudAvatar Color="Color.Secondary" Variant="Variant.Filled">@GetUserInitials(auth.User, "??")</MudAvatar>
+                </ActivatorContent>
+                <ChildContent>
+                    <MudMenuItem Disabled="true">User: @GetFullUserName(auth.User)</MudMenuItem>
+                    <MudMenuItem Href="@($"members/{auth.User.GetUserId()}/profile")">My Profile</MudMenuItem>
+                    <MudMenuItem Href="@($"members/logout?returnUrl={GetReturnUrl()}")">Logout</MudMenuItem>
+                </ChildContent>
             </MudMenu>
         </Authorized>
         <NotAuthorized>
-            <MudMenu Icon="@Icons.Material.Filled.Person" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+            <MudMenu Icon="@Icons.Material.Filled.Person" Color="Color.Inherit" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
                 <MudMenuItem Href="members/register">Sign Up</MudMenuItem>
                 <MudMenuItem Href="@($"members/login?returnUrl={GetReturnUrl()}")">Login</MudMenuItem>
             </MudMenu>
@@ -34,7 +40,7 @@
 </MudDrawer>
 
 @code
-{
+    {
     bool _drawerOpen = true;
 
     void DrawerToggle()
@@ -50,5 +56,15 @@
         }
 
         return user.Identity.Name;
+    }
+
+    private string GetUserInitials(ClaimsPrincipal? user, string fallback)
+    {
+        if (user?.Identity?.Name is null)
+        {
+            return fallback;
+        }
+            
+        return user.Identity.Name.Substring(0, 2);
     }
 }

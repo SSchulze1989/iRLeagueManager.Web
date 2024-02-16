@@ -82,7 +82,7 @@ public sealed class ReviewCommentViewModel : LeagueViewModelBase<ReviewCommentVi
         }
     }
 
-    public override void SetModel(ReviewCommentModel model)
+    protected override void SetModel(ReviewCommentModel model)
     {
         base.SetModel(model);
         RefreshVoteList();

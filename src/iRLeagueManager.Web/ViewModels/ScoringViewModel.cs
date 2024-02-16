@@ -16,6 +16,7 @@ public sealed class ScoringViewModel : LeagueViewModelBase<ScoringViewModel, Sco
     public long LeagueId => model.LeagueId;
     [Required]
     public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
+    public int Index { get => model.Index; set => SetP(model.Index, value => model.Index = value, value); }
     public bool ShowResults { get => model.ShowResults; set => SetP(model.ShowResults, value => model.ShowResults = value, value); }
     public bool IsCombinedResult { get => model.IsCombinedResult; set => SetP(model.IsCombinedResult, value => model.IsCombinedResult = value, value); }
     public bool UseResultSetTeam { get => model.UseResultSetTeam; set => SetP(model.UseResultSetTeam, value => model.UseResultSetTeam = value, value); }
@@ -26,11 +27,20 @@ public sealed class ScoringViewModel : LeagueViewModelBase<ScoringViewModel, Sco
     private PointRuleViewModel pointRule;
     public PointRuleViewModel PointRule { get => pointRule; set => Set(ref pointRule, value); }
 
-    public override void SetModel(ScoringModel model)
+    protected override void SetModel(ScoringModel model)
     {
         this.model = model;
         model.PointRule ??= new();
-        PointRule = new(LoggerFactory, ApiService, model.PointRule);
+        PointRule = NewPointRuleViewModel(model.PointRule);
         OnPropertyChanged();
+    }
+
+    private PointRuleViewModel NewPointRuleViewModel(PointRuleModel model)
+    {
+        var viewModel = new PointRuleViewModel(LoggerFactory, ApiService, model)
+        {
+            ParentViewModel = this
+        };
+        return viewModel;
     }
 }

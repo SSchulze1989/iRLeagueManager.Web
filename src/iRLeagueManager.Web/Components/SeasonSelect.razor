@@ -1,14 +1,15 @@
-﻿@using iRLeagueApiCore.Common.Models;
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Models;
 @implements IDisposable
 @inject LeagueApiService ApiService
 @inject SharedStateService Shared
 
-<select @bind="SelectedSeasonId" class="form-select" @attributes=AdditionalAttributes @onclick:stopPropagation>
+<MudSelect Value="SelectedSeasonId" @attributes=AdditionalAttributes @onclick:stopPropagation>
     @foreach (var season in Shared.SeasonList)
     {
-        <option value="@season.SeasonId" class="nav-option">@season.SeasonName</option>
+        <MudSelectItem Value="@season.SeasonId">@season.SeasonName</MudSelectItem>
     }
-</select>
+</MudSelect>
 
 @code {
     [Parameter(CaptureUnmatchedValues = true)]

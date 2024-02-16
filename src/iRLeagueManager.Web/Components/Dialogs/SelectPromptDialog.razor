@@ -1,0 +1,46 @@
+﻿@namespace iRLeagueManager.Web.Components
+@typeparam T
+@inherits PromptDialog<T>
+
+<MudDialog>
+    <DialogContent>
+        <MudSelect @bind-Value="Value"
+                   Label="@Label"
+                   HelperText="@HelperText"
+                   Variant="Variant"
+                   AnchorOrigin="Origin.BottomCenter">
+            @if (ItemTemplate is not null)
+            {
+                @foreach (var item in Items)
+                {
+                    <MudSelectItem Value="item">
+                        @ItemTemplate(item)
+                    </MudSelectItem>
+                }
+            }
+            else
+            {
+                @foreach (var item in Items)
+                {
+                    <MudSelectItem Value="item">
+                        @ToStringFunc(item)
+                    </MudSelectItem>
+                }
+            }
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkClick="Submit" OkText="@OkText" CancelClick="Cancel" CancelText="@CancelText" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public IEnumerable<T> Items { get; set; } = Array.Empty<T>();
+    [Parameter] public Func<T, string> ToStringFunc { get; set; } = x => x?.ToString() ?? string.Empty;
+    [Parameter] public RenderFragment<T>? ItemTemplate { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+    }
+}

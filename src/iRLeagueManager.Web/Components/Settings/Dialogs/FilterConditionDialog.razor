@@ -1,0 +1,223 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@inherits PromptDialog<FilterConditionModel>
+@inject FilterConditionViewModel Condition
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="Condition">
+            <MudStack Spacing="2">
+                <MudSelect @bind-Value="Condition.ColumnPropertyName"
+                           Label="Property"
+                           HelperText="Filter result rows using the selected property value"
+                           Variant="Variant.Outlined">
+                    @foreach (var name in ColumnNames)
+                    {
+                        <MudSelectItem Value="@name">@name</MudSelectItem>
+                    }
+                </MudSelect>
+                @if (Actions.Count() > 1)
+                {
+                    <MudSelect @bind-Value="Condition.Action"
+                               Label="Action"
+                               HelperText="@((Condition.Action == MatchedValueAction.Keep ? "Keep" : "Remove") + "rows matching this filter")"
+                               Variant="Variant.Outlined">
+                        @foreach (var action in Actions)
+                        {
+                            <MudSelectItem Value="@action">@action</MudSelectItem>
+                        }
+                    </MudSelect>
+                }
+                @switch (Condition.FilterType)
+                {
+                    case FilterType.Member:
+                        <MultiSelectAutoComplete @bind-Values="Condition.FilterValues"
+                                                 Label="Members"
+                                                 HelperText="@("Select members to " + (Condition.Action == MatchedValueAction.Keep ? "keep" : "remove"))"
+                                                 SearchFunc="SearchMembers"
+                                                 ToStringFunc="GetMemberNameById"
+                                                 Variant="Variant.Outlined" />
+                        break;
+                    case FilterType.Team:
+                        <MultiSelectAutoComplete @bind-Values="Condition.FilterValues"
+                                                 Label="Teams"
+                                                 HelperText="@("Select teams to " + (Condition.Action == MatchedValueAction.Keep ? "keep" : "remove"))"
+                                                 SearchFunc="SearchTeams"
+                                                 ToStringFunc="GetTeamNameById"
+                                                 Variant="Variant.Outlined" />
+                        break;
+                    case FilterType.ColumnProperty:
+                        var valueLabel = Condition.Comparator == ComparatorType.InList ? "Values" : "Value";
+                        var propertyType = GetColumnPropertyType(Condition.ColumnPropertyName);
+
+                        <MudSelect Label="Type" @bind-Value="Condition.Comparator"
+                                   HelperText="Select how to compare values"
+                                   Variant="Variant.Outlined">
+                            @foreach (var compType in Enum.GetValues<ComparatorType>().Where(x => x != ComparatorType.InList))
+                            {
+                                if (AllowForEach == false && compType == ComparatorType.ForEach)
+                                {
+                                    continue;
+                                }
+                                <MudSelectItem Value=@compType>@compType.GetText()</MudSelectItem>
+                            }
+                        </MudSelect>
+
+                        @if (propertyType is null)
+                        {
+                            <MudField Label="@valueLabel" Disabled="true" Variant="Variant.Outlined" />
+                        }
+                        else if (Condition.Comparator == ComparatorType.InList)
+                        {
+                            @*TODO: Fill in Component for values selection from list*@
+                        }
+                        else if (propertyType == typeof(RaceStatus))
+                        {
+                            <MudSelect Label="@valueLabel" @bind-Value="Condition.Value" Variant="Variant.Outlined">
+                                @foreach (var status in Enum.GetValues(typeof(RaceStatus)))
+                                {
+                                    <MudSelectItem Value="@(((int)status).ToString())">@status.ToString()</MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
+                        else if (propertyType == typeof(string)
+                            || propertyType == typeof(double)
+                            || propertyType == typeof(double?)
+                            || propertyType == typeof(int)
+                            || propertyType == typeof(int?))
+                        {
+                            var isNumeric = propertyType == typeof(double) || propertyType == typeof(double?) || propertyType == typeof(int) || propertyType == typeof(int?);
+                            <MudTextField Label="@valueLabel" @bind-Value="Condition.Value" InputType="@(isNumeric ? InputType.Number : InputType.Text)" Variant="Variant.Outlined" />
+                        }
+                        else
+                        {
+                            <MudField Label="@valueLabel" Disabled="true" Variant="Variant.Outlined">Not supported</MudField>
+                        }
+                        break;
+                }
+            </MudStack>
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkClick="Submit" CancelClick="Cancel" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [Parameter] public IEnumerable<TeamModel> Teams { get; set; } = default!;
+
+    [Parameter]
+    public bool AllowForEach { get; set; } = false;
+
+    [Parameter] public IEnumerable<string> ColumnNames { get; set; } = DefaultColumnNames;
+
+    [Parameter] public IEnumerable<MatchedValueAction> Actions { get; set; } = DefaultActions;
+
+    public static string[] DefaultColumnNames { get; } = new[]
+    {
+        nameof(ResultRowModel.Car),
+        nameof(ResultRowModel.CarClass),
+        nameof(ResultRowModel.ClassId),
+        nameof(ResultRowModel.CompletedLaps),
+        nameof(ResultRowModel.CompletedPct),
+        nameof(ResultRowModel.SeasonStartIrating),
+        nameof(ResultRowModel.Division),
+        nameof(ResultRowModel.OldIrating),
+        nameof(ResultRowModel.NewIrating),
+        nameof(ResultRowModel.OldSafetyRating),
+        nameof(ResultRowModel.NewSafetyRating),
+        nameof(ResultRowModel.Incidents),
+        nameof(ResultRowModel.Status),
+        "Member",
+        "Team",
+    };
+
+    public static MatchedValueAction[] DefaultActions { get; } = new[]
+    {
+        MatchedValueAction.Keep,
+        MatchedValueAction.Remove,
+    };
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, Value);
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers);
+        BlazorParameterNullException.ThrowIfNull(this, Teams);
+
+        if (Condition.GetModel() != Value)
+        {
+            Condition.SetModel(Value ?? new());
+        }
+    }
+
+    private string GetMemberNameById(string memberId)
+    {
+        var member = LeagueMembers.FirstOrDefault(x => x.MemberId.ToString() == memberId);
+        return member != null ? $"{member.FirstName} {member.LastName} ({member.IRacingId})" : memberId;
+    }
+
+    private string GetTeamNameById(string teamId)
+    {
+        var team = Teams.FirstOrDefault(x => x.TeamId.ToString() == teamId);
+        return team != null ? $"{team.Name} ({team.IRacingTeamId})" : teamId;
+    }
+
+    private async Task<IEnumerable<string>> SearchMembers(string searchString)
+    {
+        if (string.IsNullOrEmpty(searchString))
+        {
+            return await Task.FromResult(LeagueMembers.Select(x => x.MemberId.ToString()));
+        }
+
+        var terms = searchString.ToLower().Split(',', ' ', ';')
+        .Where(x => string.IsNullOrWhiteSpace(x) == false)
+        .ToArray();
+        return await Task.FromResult(LeagueMembers
+        .Where(x => MatchMemberSearchTerms(x, terms))
+        .Select(x => x.MemberId.ToString()));
+    }
+
+    private async Task<IEnumerable<string>> SearchTeams(string searchstring)
+    {
+        if (string.IsNullOrWhiteSpace(searchstring))
+        {
+            return await Task.FromResult(Teams.Select(x => x.TeamId.ToString()));
+        }
+
+        var terms = searchstring.ToLower().Split(',', ' ', ';')
+        .Where(x => string.IsNullOrWhiteSpace(x) == false)
+        .ToArray();
+        return await Task.FromResult(Teams.
+        Where(x => MatchTeamSearchTerms(x, terms))
+        .Select(x => x.TeamId.ToString()));
+    }
+
+    private bool MatchMemberSearchTerms(MemberModel member, params string[] terms)
+    {
+        var searchName = member.FirstName + member.LastName;
+        var iracingId = member.IRacingId.ToString();
+        return terms
+        .Any(x => searchName.Contains(x, StringComparison.OrdinalIgnoreCase) ||
+          iracingId.Contains(x)
+        );
+    }
+
+    private bool MatchTeamSearchTerms(TeamModel team, params string[] terms)
+    {
+        var searchName = team.Name;
+        var iracingId = team.IRacingTeamId.GetValueOrDefault().ToString();
+        return terms
+        .Any(x => searchName.Contains(x, StringComparison.OrdinalIgnoreCase) ||
+          iracingId.Contains(x)
+        );
+    }
+
+    private Type? GetColumnPropertyType(string name)
+    {
+        var property = typeof(ResultRowModel).GetProperty(name);
+        return property?.PropertyType;
+    }
+}

@@ -19,7 +19,7 @@ internal sealed class AppRouteView : RouteView
         if (authorize && ApiClient.IsLoggedIn == false)
         {
             var returnUrl = WebUtility.UrlEncode(new Uri(NavigationManager.Uri).PathAndQuery);
-            NavigationManager.NavigateTo($"member/login?returnUrl={returnUrl}");
+            NavigationManager.NavigateTo($"members/login?returnUrl={returnUrl}");
         }
         else
         {

@@ -33,14 +33,14 @@ public sealed class ResultFilterViewModel : LeagueViewModelBase<ResultFilterView
     }
     public ComparatorType Comparator { get => model.Condition.Comparator; set => SetP(model.Condition.Comparator, value => model.Condition.Comparator = value, value); }
     public FilterType FilterType { get => model.Condition.FilterType; private set => SetP(model.Condition.FilterType, value => model.Condition.FilterType = value, value); }
-    public IList<string> FilterValues { get => (IList<string>)model.Condition.FilterValues; set => SetP(model.Condition.FilterValues, value => model.Condition.FilterValues = value, value); }
+    public IEnumerable<string> FilterValues { get => model.Condition.FilterValues; set => SetP(model.Condition.FilterValues, value => model.Condition.FilterValues = value.ToList(), value); }
     public string Value 
     { 
         get => ConvertFromValue(model.Condition.FilterValues.FirstOrDefault() ?? string.Empty, ColumnPropertyName); 
         set => SetP(model.Condition.FilterValues.FirstOrDefault() ?? string.Empty, value => model.Condition.FilterValues = new[] { value }.ToList(), ConvertToValue(value, ColumnPropertyName)); }
     public MatchedValueAction Action { get => model.Condition.Action; set => SetP(model.Condition.Action, value => model.Condition.Action = value, value); }
 
-    public override void SetModel(ResultFilterModel model)
+    protected override void SetModel(ResultFilterModel model)
     {
         base.SetModel(model);
         UpdateFilterType();

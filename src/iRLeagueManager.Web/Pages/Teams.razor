@@ -1,0 +1,176 @@
+﻿@page "/{LeagueName}/Teams"
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.ViewModels
+@inherits LeagueComponentBase
+@layout MainLayout
+@inject TeamsViewModel vm
+@inject LeagueApiService apiService
+@inject IDialogService DialogService
+
+<PageTitle>
+    Settings - @LeagueName
+</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudStack Spacing="4">
+        <LoadingHeader Loading="vm.Loading" Row="true">
+            <HeaderActions>
+                <MudText Typo="Typo.h5">Teams</MudText>
+                <MudSpacer />
+                <MudSpacer />
+                <MudSpacer />
+                <MudTextField Class="object-right"
+                              Label="Search Team or Driver"
+                              Margin="Margin.Dense"
+                              @bind-Value="TeamFilter"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Variant="Variant.Outlined"
+                              Immediate="true"
+                              Clearable="true"
+                              DebounceInterval="300" />
+            </HeaderActions>
+        </LoadingHeader>
+        @foreach (var team in Bind(vm, x => x.Teams).Where(FilterTeams).OrderBy(x => x.Name))
+        {
+            <MudCard Elevation="5">
+                <MudCardHeader Style="@($"color: {team.TeamColor}")">
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6" Style="">
+                            <MudHighlighter Text="@team.Name" HighlightedText="@TeamFilter" />
+                        </MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
+                            <Authorized>
+                                <MudSpacer />
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@(() => OnTeamClick(team))" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => OnDeleteTeamClick(team))" Color="Color.Error" />
+                            </Authorized>
+                        </AuthorizeView>
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudChipSet ReadOnly="true">
+                        @foreach (var member in team.MemberList.OrderBy(x => x.LastName).ThenBy(x => x.FirstName))
+                        {
+                            <MudChip Icon="@Icons.Material.Filled.Person" Label="true" Variant="Variant.Outlined">
+                                <MudHighlighter Text="@($"{member.FirstName} {member.LastName}")" HighlightedText="@TeamFilter" />
+                            </MudChip>
+                        }
+                        @if (team.MemberList.Any() == false)
+                        {
+                            <MudChip Disabled="true" Label="true" Variant="Variant.Outlined">
+                                <MudIcon Icon="@Icons.Material.Filled.PersonOff" />
+                            </MudChip>
+                        }
+                    </MudChipSet>
+                </MudCardContent>
+            </MudCard>
+        }
+        @if (vm.Teams.Any(FilterTeams) == false && TeamFilter is not null)
+        {
+            <MudText Align="Align.Center">No teams found ...</MudText>
+        }
+        <MudButton StartIcon="@Icons.Material.Filled.GroupAdd" OnClick="OnAddTeamClick" Color="Color.Primary">Add Team</MudButton>
+    </MudStack>
+</MudContainer>
+
+@code {
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string? teamFilter;
+    private string? TeamFilter
+    {
+        get => teamFilter;
+        set
+        {
+            if (teamFilter != value)
+            {
+                teamFilter = value;
+                InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+
+    private async Task OnTeamClick(TeamViewModel config)
+    {
+        var parameters = new DialogParameters<EditTeamDialog>()
+        {
+            {x => x.Model, config.CopyModel()},
+            {x => x.LeagueMembers, GetMembersWithoutTeam(vm.Members)},
+            {x => x.OnSubmit, async (team, cancellationToken) => await team.SaveChangesAsync(cancellationToken)},
+        };
+        var options = new DialogOptions()
+            {
+                FullWidth = true,
+                DisableBackdropClick = true,
+            };
+        var result = await DialogService.Show<EditTeamDialog>("Edit Team", parameters, options).Result;
+        if (result.Canceled == false && result.Data is TeamModel model)
+        {
+            config.SetModel(model);
+        }
+    }
+
+    private async Task OnAddTeamClick()
+    {
+        var parameters = new DialogParameters<EditTeamDialog>()
+        {
+            {x => x.Model, new()},
+            {x => x.LeagueMembers, GetMembersWithoutTeam(vm.Members)},
+            {x => x.OnSubmit, async (team, cancellation) => await vm.AddTeam(team.GetModel(), cancellation)},
+        };
+        var options = new DialogOptions()
+            {
+                FullWidth = true,
+                DisableBackdropClick = true,
+            };
+        var result = await DialogService.Show<EditTeamDialog>("Add new Team", parameters, options).Result;
+    }
+
+    private IEnumerable<MemberInfoModel> GetMembersWithoutTeam(IEnumerable<MemberInfoModel> members)
+    {
+        return members
+            .Where(member => vm.Teams.Any(team => team.MemberList.Any(teamMember => member.MemberId == teamMember.MemberId)) == false)
+            .ToList();
+    }
+
+    private async Task OnDeleteTeamClick(TeamViewModel team)
+    {
+        var parameters = new DialogParameters<ConfirmDialog>()
+        {
+            {x => x.Text,  $"Really delete Team \"{team.Name}\"?"},
+            {x => x.ButtonTypes, ButtonTypes.YesNo},
+        };
+        var result = await DialogService.Show<ConfirmDialog>("Delete Result Config", parameters).Result;
+        if (result.Canceled == false)
+        {
+            await vm.DeleteTeam(team.GetModel());
+        }
+    }
+
+    private bool FilterTeams(TeamViewModel team)
+    {
+        var searchString = TeamFilter ?? string.Empty;
+        return team.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+            || team.MemberList.Any(x => $"{x.FirstName} {x.LastName}".Contains(searchString, StringComparison.OrdinalIgnoreCase));
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        if (apiService.CurrentLeague != null)
+        {
+            await vm.LoadFromLeagueAsync();
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+}

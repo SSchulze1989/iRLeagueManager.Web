@@ -1,198 +1,56 @@
 ﻿@using System.Security.Claims;
-@using iRLeagueApiCore.Client.Http;
-@using iRLeagueApiCore.Common.Models;
-@using iRLeagueManager.Web.Components
-@inherits LeagueComponentBase
-@inject LeaguesViewModel Vm
+@inherits UtilityComponentBase
 
-<header class="page-header fixed-top p-0">
-    <nav class="navbar navbar-expand-md navbar-dark p-1 pe-2 ps-2">
-        <div class="container-fluid">
-            <div class="navbar-brand d-flex align-items-center gap-2">
-                <figure class="logo">
-                    <img src="logo/iRLM_Logo_17_darkbg.png" title="iRLeagueManager v@(VersionString)"/>
-                </figure>
-            </div>
-            <div class="d-md-none text-nowrap overflow-hidden me-2" style="flex-basis: 0px; flex-grow: 1">
-                <h4><DisplayLeague League=@Shared.LeagueInfo /></h4>
-            </div>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#headerNavbarContent" aria-controls="headerNavbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div id="headerNavbarContent" class="collapse navbar-collapse gap-5 justify-content-md-between">
-                <ul class="navbar-nav flex-lg-grow-1 gap-md-2">
-                    <li class="nav-item">
-                        <div class="btn-group">
-                            <NavLink class="nav-link dropdown-toggle" type="button"
-                                    id="navLeaguesDropdown"
-                                    role="button"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false"
-                                    href="@($"/{CurrentLeagueTarget}")">
-                                <DisplayLeague League=Shared.LeagueInfo Fallback="Leagues" />
-                            </NavLink>
-                            <ul class="dropdown-menu" aria-labelledby="navLeaguesDropdown">
-                                <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
-                                    <Authorized>
-                                        <li><h6 class="dropdown-header">League Admin</h6></li>
-                                        <li>
-                                            <NavLink class="dropdown-item" title="Settings" href="@($"./{Shared.LeagueName}/Settings/League")">
-                                                    <span class="oi oi-cog" /> Settings
-                                            </NavLink>
-                                        </li>
-                                        <li><hr class="dropdown-divider"/></li>
-                                    </Authorized>
-                                </AuthorizeView>
-                                <li>
-                                    <h6 class="dropdown-header">Switch League</h6>
-                                </li>
-                                @foreach(var league in Bind(Vm, x => x.Leagues))
-                                {
-                                    <li>
-                                        <NavLink class="dropdown-item" href="@($"/{league.LeagueName}")" 
-                                                 @onclick=@(() => ForceNavigateTo($"/{league.LeagueName}", fullReload: true))
-                                                 Match="NavLinkMatch.Prefix">
-                                            <DisplayLeague League=league.GetModel() />
-                                        </NavLink>
-                                    </li>
-                                }
-                                <AuthorizeView>
-                                    <Authorized>
-                                        <li><hr class="dropdown-divider"/></li>
-                                        <li><NavLink class="dropdown-item" title="Create League" href="/CreateLeague">
-                                            <span class="bi bi-folder-plus" /> Create League
-                                        </NavLink></li>
-                                    </Authorized>
-                                </AuthorizeView>
-                            </ul>
-                        </div>
-                    </li>
-                    @if (string.IsNullOrEmpty(Shared.LeagueName) == false)
-                    {
-                        <li class="nav-item">
-                            <NavLink class="nav-link" href="@($"./{Shared.LeagueName}/Schedules")"
-                                 Match="NavLinkMatch.Prefix">
-                                Schedule
-                            </NavLink>
-                        </li>
-                        <li class="nav-item">
-                            <NavLink class="nav-link" href="@($"./{Shared.LeagueName}/Results")"
-                                     Match="NavLinkMatch.Prefix">
-                                Results
-                            </NavLink>
-                        </li>
-                        <li class="nav-item">
-                            <NavLink class="nav-link" href="@($"./{Shared.LeagueName}/Standings")"
-                                 Match="NavLinkMatch.Prefix">
-                                Standings
-                            </NavLink>
-                        </li>
-                        <li class="nav-item">
-                            <NavLink class="nav-link" href="@($"./{Shared.LeagueName}/Reviews")"
-                                 Match="NavLinkMatch.Prefix">
-                                Reviews
-                            </NavLink>
-                        </li>
-                    }
-                    @if (string.IsNullOrEmpty(Shared.LeagueName) == false)
-                    {
-                        <li class="nav-item flex-fill">
-                            <SeasonSelect SeasonChanged=OnSeasonChanged style="max-width: 240px"/>
-                        </li>
-                    }
-                </ul>
-                <ul class="navbar-nav gap-2 mt-2 mb-2">
-                    <li class="d-flex gap-2 align-items-center flex-nowrap flex-md-row-reverse">
-                        <div class="dropdown">
-                            <button class="btn btn-outline-light" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Account">
-                                <span class="oi oi-person" />
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-md-end" aria-labelledby="userMenuDropdown" style="width: 220px">
-                                <AuthorizeView>
-                                    <Authorized>
-                                        <li><NavLink class="dropdown-item" href=@($"/member/{context.User.GetUserId()}/profile")>User: @GetFullUserName(context.User)</NavLink></li>
-                                        @{var leagueRoles = GetCurrentLeagueRoles(context.User);}
-                                        @if (leagueRoles.Count() > 0)
-                                        {
-                                            <li class="dropdown-item-text">&nbsp;&nbsp;@string.Join(", ", leagueRoles)</li>
-                                        }
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><NavLink class="dropdown-item" href="/member/logout" @onclick=@(() => NavigateTo($"/member/logout?returnUrl={GetReturnUrl()}"))>Logout</NavLink></li>
-                                    </Authorized>
-                                    <NotAuthorized>
-                                        <li><NavLink class="dropdown-item" href="/member/login" @onclick=@(() => NavigateTo($"/member/login?returnUrl={GetReturnUrl()}"))>Login</NavLink></li>
-                                    </NotAuthorized>
-                                </AuthorizeView>
-                            </ul>
-                        </div>
-                        <AuthorizeView>
-                            <Authorized>
-                                <label class="d-md-none d-lg-block">@GetFullUserName(context.User)</label>
-                            </Authorized>
-                        </AuthorizeView>
-                    </li>
-                    <li>
-                        <a class="btn btn-outline-light" type="button" title="Help / Documentation" href="https://sschulze1989.github.io/iRLeagueManager.Web/" target="_blank">
-                            <span class="oi oi-question-mark" />
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-</header>
+<MudAppBar Elevation="0">
+    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
+                   OnClick="@((e) => DrawerToggle())" />
+    <MudSpacer />
+    <MudText Typo="Typo.h4"><DisplayLeague League="Shared.LeagueInfo" /></MudText>
+    <MudSpacer />
+    <AuthorizeView>
+        <Authorized Context="auth">
+            <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                <ActivatorContent>
+                    <MudAvatar Color="Color.Secondary" Variant="Variant.Filled">@GetUserInitials(auth.User, "??")</MudAvatar>
+                </ActivatorContent>
+                <ChildContent>
+                    <MudMenuItem Disabled="true">User: @GetFullUserName(auth.User)</MudMenuItem>
+                    <MudMenuItem Href="@($"members/{auth.User.GetUserId()}/profile")">My Profile</MudMenuItem>
+                    <MudMenuItem Href="@($"members/logout?returnUrl={GetReturnUrl()}")">Logout</MudMenuItem>
+                </ChildContent>
+            </MudMenu>
+        </Authorized>
+        <NotAuthorized>
+            <MudMenu Icon="@Icons.Material.Filled.Person" Color="Color.Inherit" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                <MudMenuItem Href="members/register">Sign Up</MudMenuItem>
+                <MudMenuItem Href="@($"members/login?returnUrl={GetReturnUrl()}")">Login</MudMenuItem>
+            </MudMenu>
+        </NotAuthorized>
+    </AuthorizeView>
+    <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit"
+                   Href="https://github.com/SSchulze1989/iRLeaguemanager.web" Target="_blank" />
+</MudAppBar>
+<MudDrawer @bind-Open="_drawerOpen" Elevation="1" Breakpoint="Breakpoint.Lg" ClipMode="DrawerClipMode.Always">
+    <MudDrawerHeader>
+        <MudLink Href="/" Color="Color.Default" Typo="Typo.h6" Underline="Underline.None">
+            iRLeagueManager
+        </MudLink>
+    </MudDrawerHeader>
+    <NavMenu />
+</MudDrawer>
 
-@code {
-    private static string VersionString { get; } = $"{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.Major}.{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.Minor}.{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version!.Build}";
-
-    private string CurrentLeagueTarget => Shared.LeagueName ?? "Leagues";
-
-    private string UserName => Shared.Username ?? string.Empty;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+@code
     {
-        await base.OnAfterRenderAsync(firstRender);
-        if (firstRender == false)
-        {
-            return;
-        }
-        if (Vm.Leagues.Count > 0)
-        {
-            return;
-        }
-        try
-        {
-            await Vm.OnAfterRenderAsync(firstRender);
-        }
-        catch (ApiServiceUnavailableException)
-        {
-        }
-    }
+    bool _drawerOpen = true;
 
-    private async Task OnSeasonChanged(SeasonModel? season)
+    void DrawerToggle()
     {
-        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Results"))
-        {
-            ForceNavigateTo($"{Shared.LeagueName}/Results");
-        }
-        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Schedules"))
-        {
-            ForceNavigateTo($"{Shared.LeagueName}/Schedules");
-        }
-        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Standings"))
-        {
-            ForceNavigateTo($"{Shared.LeagueName}/Standings");
-        }
-        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Reviews"))
-        {
-            ForceNavigateTo($"{Shared.LeagueName}/Reviews");
-        }
-        await InvokeAsync(StateHasChanged);
+        _drawerOpen = !_drawerOpen;
     }
 
     private string GetFullUserName(ClaimsPrincipal user)
     {
-        if (user.Identity?.Name is null)
+        if (user.Identity?.IsAuthenticated != true || user.Identity?.Name is null)
         {
             return string.Empty;
         }
@@ -200,13 +58,13 @@
         return user.Identity.Name;
     }
 
-    private IEnumerable<string> GetCurrentLeagueRoles(ClaimsPrincipal user)
+    private string GetUserInitials(ClaimsPrincipal? user, string fallback)
     {
-        var roles = user.Claims
-            .Where(x => x.Type == ClaimTypes.Role)
-            .Where(x => LeagueRoles.IsLeagueRoleName(Shared.LeagueName ?? string.Empty, x.Value))
-            .Select(x => LeagueRoles.GetRoleName(x.Value))
-            .NotNull();
-        return roles.ToList();
+        if (user?.Identity?.Name is null)
+        {
+            return fallback;
+        }
+            
+        return user.Identity.Name.Substring(0, 2);
     }
 }

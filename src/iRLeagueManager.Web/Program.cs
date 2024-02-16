@@ -1,10 +1,7 @@
 using Blazored.LocalStorage;
-using Blazored.Modal;
-using iRLeagueApiCore.Client.Http;
 using iRLeagueApiCore.Common.Converters;
 using iRLeagueManager.Web;
 using iRLeagueManager.Web.Data;
-using iRLeagueManager.Web.Server.Data;
 using iRLeagueManager.Web.Shared;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
@@ -13,7 +10,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
-using Blazored.Toast;
+using MudBlazor.Services;
+using MudBlazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,8 +27,6 @@ builder.Services.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName,
     config.DefaultRequestHeaders.UserAgent.ParseAdd($"iRLeagueManager/{Assembly.GetEntryAssembly()!.GetName().Version!.Major}.{Assembly.GetEntryAssembly()!.GetName().Version!.Minor}.{Assembly.GetEntryAssembly()!.GetName().Version!.Build} (iRLeaguemanager Web App)");
 });
 builder.Services.AddBlazoredLocalStorage();
-builder.Services.AddBlazoredModal();
-builder.Services.AddBlazoredToast();
 builder.Services.AddMvvm();
 builder.Services.AddLeagueApiService();
 
@@ -60,6 +56,11 @@ builder.Services.AddAuthorization(config =>
 
 builder.Services.AddLocalization();
 builder.Services.AddMarkdown();
+
+builder.Services.AddMudServices(config =>
+{
+    config.PopoverOptions.Mode = PopoverMode.Legacy;
+});
 
 var app = builder.Build();
 

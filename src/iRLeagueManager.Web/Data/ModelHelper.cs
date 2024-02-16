@@ -5,14 +5,19 @@ namespace iRLeagueManager.Web.Data;
 
 internal static class ModelHelper
 {
-    public static T? CopyModel<T>(T? model) where T : class
+    [return: NotNullIfNotNull(nameof(model))]
+    public static T? CopyModel<T>(T? model)
     {
         if (model is null)
         {
             return default;
         }
+        if (model.GetType().IsClass == false)
+        {
+            return model;
+        }
 
-        return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(model))
+        return (T?)JsonSerializer.Deserialize(JsonSerializer.Serialize(model), typeof(T))
             ?? throw new InvalidOperationException("Could not copy model");
     }
 }

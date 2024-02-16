@@ -1,64 +1,66 @@
-﻿@inherits MvvmComponentBase
+﻿@namespace iRLeagueManager.Web.Components
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueApiCore.Common.Models.Results;
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueApiCore.Common.Models.Users;
 @using iRLeagueManager.Web.ViewModels
+@inherits MvvmComponentBase
+@inject IDialogService DialogService
 
-<div class="d-flex justify-content-between align-items-start">
-    <div>
-        <h6 class="fw-bold"><DisplayUser User=@GetUser(Comment.AuthorUserId) FallbackName=@Comment.AuthorName /></h6>
-        <div class="m-1 preserve-format">
-            @Bind(Comment, x=> x.Text)
-        </div>
-        <div>
-            @foreach(var vote in @Bind(Comment, x => x.Votes))
+<MudStack Spacing="2" Class="px-4 py-2">
+    <div class="d-flex align-center ps-2 gap-2">
+        <MudAvatar Color="Color.Secondary" Variant="Variant.Outlined">@GetAuthorInitials(GetUser(Comment.AuthorUserId), Comment.AuthorName)</MudAvatar>
+        <MudStack Spacing="0">
+            <MudText Typo="Typo.subtitle1"><DisplayUser User="Author" ShowUserName="false" FallbackName="@Comment.AuthorName"/></MudText>
+            @if (string.IsNullOrEmpty(Author?.Firstname) == false || string.IsNullOrEmpty(Author?.Lastname) == false)
             {
-                var carAtFault = IsTeamEvent
-                    ? InvolvedCars.FirstOrDefault(x => x.Team?.TeamId == vote.TeamAtFaultId)
-                    : InvolvedCars.FirstOrDefault(x => x.Members.Any(y => y.MemberId == vote.MemberAtFaultId));
-                var atFault = IsTeamEvent
-                    ? vote.TeamAtFault?.Name
-                    : vote.MemberAtFault == null ? null : $"{vote.MemberAtFault.FirstName} {vote.MemberAtFault.LastName}";
-                <span class="badge bg-warning">
-                    @Bind(vote, x => x.VoteCategoryText)@((atFault != null && carAtFault != null) ? $": #{carAtFault.Number} {atFault}" : string.Empty)
-                </span>
+                <MudText Typo="Typo.caption" GutterBottom="false">@Comment.AuthorName</MudText>
             }
-        </div>
+        </MudStack>
+        <MudSpacer/>
+        @if (UserCanEdit)
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" OnClick="EditClick"/>
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="OnDeleteClick"/>
+        }
     </div>
-    @if (UserCanEdit)
-    {
-        <button class="btn btn-outline-danger" @onclick=@OnDeleteClick>
-            <span class="oi oi-trash" />
-        </button>
-    }
-</div>
-@if (UserCanEdit)
-{
-    <div class="mt-2">
-        <button class="btn btn-outline-secondary py-0" @onclick=EditClick>Edit</button>
-    </div>
-}
+    <MudText Style="white-space: pre-wrap" Typo="Typo.body2" Class="ps-2">
+        @Bind(Comment, x=> x.Text)
+    </MudText>
+    <MudChipSet ReadOnly="true">
+        @foreach (var vote in Bind(Comment, x => x.Votes))
+        {
+            var atFault = VoteAtFaultToString(vote);
+            <MudChip Label="true" Size="ChipSize" Color="Color.Warning">
+                @vote.VoteCategoryText@(string.IsNullOrEmpty(atFault) == false ? ": " : "")@VoteAtFaultToString(vote)
+            </MudChip>
+        }
+    </MudChipSet>
+</MudStack>
 
 @code {
-    [CascadingParameter]
-    public IModalService ModalService { get; set; } = default!;
     [CascadingParameter]
     public IEnumerable<EventCarInfoModel> InvolvedCars { get; set; } = Array.Empty<EventCarInfoModel>();
     [CascadingParameter]
     public IEnumerable<UserModel> LeagueUsers { get; set; } = Array.Empty<UserModel>();
+    [CascadingParameter]
+    public IEnumerable<VoteCategoryViewModel> VoteCategories { get; set; } = Array.Empty<VoteCategoryViewModel>();
     [Parameter, EditorRequired]
     public ReviewCommentViewModel Comment { get; set; } = default!;
     [Parameter, EditorRequired]
     public bool IsTeamEvent { get; set; }
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+    [CascadingParameter(Name = "ChipSize")]
+    public Size ChipSize { get; set; }
     [Parameter]
     public EventCallback OnStateHasChanged { get; set; }
     [Parameter]
     public EventCallback OnDeleteClick { get; set; }
 
     private bool UserCanEdit;
+
+    private UserModel? Author { get; set; }
 
     //[Parameter]
     //public EventCallback<MouseEventArgs> EditClick { get; set; }
@@ -67,6 +69,9 @@
     {
         _ = Comment ?? throw BlazorParameterNullException.New(this, Comment);
         _ = AuthenticationStateTask ?? throw BlazorParameterNullException.New(this, AuthenticationStateTask);
+        BlazorParameterNullException.ThrowIfNull(this, LeagueUsers);
+        BlazorParameterNullException.ThrowIfNull(this, Comment);
+        Author = GetUser(Comment.AuthorUserId);
         UserCanEdit = await GetUserCanEdit();
         base.OnParametersSet();
     }
@@ -93,15 +98,16 @@
 
     private async Task EditClick()
     {
-        var parameters = new ModalParameters<EditCommentModal>()
+        var parameters = new DialogParameters<EditCommentDialog>()
         {
-            { x => x.Model, Comment.CopyModel() },
-            { x => x.InvolvedCars, InvolvedCars },
-            { x => x.IsTeamEvent, IsTeamEvent },
-            { x => x.OnSubmit, async (comment, cancellation) => await comment.SaveChangesAsync(cancellation) },
+            {x => x.Model, Comment.CopyModel()},
+            {x => x.InvolvedCars, InvolvedCars},
+            {x => x.VoteCategories, VoteCategories},
+            {x => x.IsTeamEvent, IsTeamEvent },
+            {x => x.OnSubmit, async (comment, cancellation) => await comment.SaveChangesAsync(cancellation)},
         };
-        var result = await ModalService.Show<EditCommentModal>("Edit Comment", parameters).Result;
-        if (result.Confirmed && result.Data is ReviewCommentModel comment)
+        var result = await DialogService.Show<EditCommentDialog>("Edit Comment", parameters).Result;
+        if (result.Canceled == false && result.Data is ReviewCommentModel comment)
         {
             Comment.SetModel(comment);
         }
@@ -119,5 +125,48 @@
     private UserModel? GetUser(string userId)
     {
         return LeagueUsers.FirstOrDefault(x => x.UserId == userId);
+    }
+
+    private string GetAuthorInitials(UserModel? user, string fallback)
+    {
+        if (user is null)
+        {
+            var parts = fallback.Split(' ');
+            if (parts.Length == 1)
+            {
+                return parts[0].Substring(0, 2);
+            }
+            return string.Join("", parts.Take(3).Select(x => x.Substring(0, 1)));
+        }
+
+        if (string.IsNullOrEmpty(user.Firstname) && string.IsNullOrEmpty(user.Lastname))
+        {
+            return user.UserName.Substring(0, 1);
+        }
+
+        return user.Firstname.Substring(0, 1) + user.Lastname.Substring(0, 1);
+    }
+
+    private EventCarInfoModel? GetCarAtFault(VoteViewModel vote)
+    {
+        if (IsTeamEvent)
+        {
+            return InvolvedCars.FirstOrDefault(car => car.Team?.TeamId == vote.TeamAtFaultId);
+        }
+        return InvolvedCars.FirstOrDefault(car => car.Members.Any(member => member.MemberId == vote.MemberAtFaultId));
+    }
+
+    private string VoteAtFaultToString(VoteViewModel vote)
+    {
+        var carAtFault = GetCarAtFault(vote);
+        if (carAtFault is null)
+        {
+            return string.Empty;
+        }
+        if (IsTeamEvent)
+        {
+            return $"#{carAtFault.Number} {vote.TeamAtFault?.Name}";
+        }
+        return $"#{carAtFault.Number} {vote.MemberAtFault?.FirstName} {vote.MemberAtFault?.LastName}";
     }
 }

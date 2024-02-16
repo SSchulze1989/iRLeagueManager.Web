@@ -1,0 +1,122 @@
+﻿@page "/members/login"
+@using System.ComponentModel.DataAnnotations
+@using iRLeagueApiCore.Client
+@using iRLeagueApiCore.Client.Http
+@using iRLeagueApiCore.Common.Responses;
+@using iRLeagueManager.Web.Extensions
+@inject IConfiguration configuration
+@inject ILeagueApiClient ApiClient
+@inject NavigationManager NavigationManager
+@attribute [AllowAnonymous]
+
+<MudContainer MaxWidth="MaxWidth.Small">
+    <MudCard Elevation="5">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Login</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudDivider Class=""/>
+        <MudCardContent>
+            <EditForm Model=@model OnValidSubmit="OnValidSubmit">
+                <DataAnnotationsValidator />
+                <StatusResultValidator @ref=ResultValidator />
+                <MudStack Row="false" Spacing="2" AlignItems="AlignItems.Start">
+                    <MudTextField Label="Username" @bind-Value="model.Username" For="@(() => model.Username)" Variant="Variant.Outlined" FullWidth="true"/>
+                    <MudTextField Label="Password" @bind-Value="model.Password" For="@(() => model.Password)" Variant="Variant.Outlined" FullWidth="true" InputType="PasswordType" AdornmentIcon="@PasswordIcon" Adornment="Adornment.End" OnAdornmentClick="ToggleShowPassword"/>
+                    <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+                    @if (ResendConfirmation)
+                    {
+                        <MudLink Href="./members/resend-confirmation"><p>Resend confirmation Email</p></MudLink>
+                    }
+                    <MudButton Disabled="@(Loading)" Color="Color.Primary" Variant="Variant.Filled" ButtonType="ButtonType.Submit" FullWidth="true">
+                        @if (Loading)
+                        {
+                            <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" Class="me-2"/>
+                        }
+                        Login
+                    </MudButton>
+                    <MudLink Href="./members/PasswordReset">Forgot password</MudLink>
+                </MudStack>
+                <MudDivider Class="my-2" />
+                <MudText Typo="Typo.subtitle2">
+                    Not a member yet?
+                </MudText>
+                <MudLink Href="/members/register" Color="Color.Secondary">
+                    Sign Up
+                </MudLink>
+            </EditForm>
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
+
+@code {
+    public record User
+    {
+        [Required]
+        public string Username { get; set; } = string.Empty;
+        [Required]
+        public string Password { get; set; } = string.Empty;
+    }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthTask { get; set; } = default!;
+
+    private bool Loading { get; set; }
+
+    private bool ResendConfirmation { get; set; } = false;
+
+    private StatusResultValidator? ResultValidator { get; set; }
+
+    public User model = new User();
+
+    private bool showPassword = false;
+    private InputType PasswordType => showPassword ? InputType.Text : InputType.Password;
+    private string PasswordIcon => showPassword ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        BlazorParameterNullException.ThrowIfNull(this, AuthTask);
+
+        var authState = await AuthTask;
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";
+            NavigationManager.NavigateTo(returnUrl);
+        }
+    }
+
+    public async Task OnValidSubmit()
+    {
+        if (ApiClient.IsLoggedIn == false)
+        {
+            try 
+            {
+                Loading = true;
+                ResendConfirmation = false;
+                var result = await ApiClient.LogIn(model.Username, model.Password);
+                if (result.Success == false)
+                {
+                    ResultValidator?.ValidateResult(result.ToStatusResult());
+                    if (result.ToStatusResult().Message == "MailConfirm")
+                    {
+                        ResendConfirmation = true;
+                    }
+                    return;
+                }
+                var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";
+                NavigationManager.NavigateTo(returnUrl, forceLoad: true);
+            }
+            finally
+            {
+                Loading = false;
+            }
+        }
+    }
+
+    private void ToggleShowPassword()
+    {
+        showPassword = !showPassword;
+        InvokeAsync(StateHasChanged);
+    }
+}

@@ -1,0 +1,150 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Results
+@using iRLeagueApiCore.Common.Models.Reviews
+@using iRLeagueManager.Web.ViewModels
+@inherits EditDialogBase<ReviewViewModel, ReviewModel>
+
+<EditForm Model=Vm OnValidSubmit=Submit>
+    <StatusResultValidator @ref=ResultValidator />
+    <MudDialog>
+        <DialogContent>
+            <MudGrid Spacing="1">
+                <MudItem xs=12>
+                    <MudSelect Label="Session" @bind-Value="Vm.SessionId" For="@(() => Vm.SessionId)" Variant="Variant.Outlined">
+                        @if (EventList.Selected != null)
+                        {
+                            @foreach (var session in EventList.Selected.Sessions)
+                            {
+                                <MudSelectItem Value=@((long?)session.SessionId)>@session.Name</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="4">
+                    <MudTextField Label="Incident Nr." @bind-Value="Vm.IncidentNr" For="@(() => Vm.IncidentNr)" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudTextField Label="Lap" @bind-Value="Vm.OnLap" For="@(() => Vm.OnLap)" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudTextField Label="Corner" @bind-Value="Vm.Corner" For="@(() => Vm.Corner)" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField Label="Incident Kind" @bind-Value="Vm.IncidentKind" For="@(() => Vm.IncidentKind)" Variant="Variant.Outlined" id="incident_kind" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField Label="Description" @bind-Value="Vm.FullDescription" Lines="4" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12">
+                    <Validation For="@(() => Vm.InvolvedTeams)" Context="validation">
+                        <MultiSelectAutoComplete Label="Members"
+                                                 @bind-Values=InvolvedCars
+                                                 SearchFunc="SearchCars"
+                                                 ToStringFunc="CarToStringFunc"
+                                                 Variant="Variant.Outlined"
+                                                 Error="validation.HasError"
+                                                 ErrorText="@validation.ErrorText" />
+                    </Validation>
+                </MudItem>
+            </MudGrid>
+            <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+        </DialogContent>
+        <DialogActions>
+            <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+            <ProgressButton Color="Color.Primary" ButtonType="ButtonType.Submit" Loading="Loading">Save</ProgressButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [Parameter]
+    public EventListViewModel EventList { get; set; } = default!;
+    [Parameter]
+    public CarListModel EventCars { get; set; } = new();
+
+    private IEnumerable<EventCarInfoModel> InvolvedCars
+    {
+        get => GetInvolvedCars();
+        set => SetInvolvedCars(value);
+    }
+    private bool IsTeamEvent => EventCars.IsTeamEvent;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, EventCars);
+    }
+
+    private async Task<IEnumerable<EventCarInfoModel>> SearchCars(string searchString)
+    {
+        var filteredCars = await Task.FromResult(EventCars.Cars
+            .Where(x => InvolvedCars.Contains(x) == false));
+        if (string.IsNullOrEmpty(searchString))
+        {
+            return filteredCars;
+        }
+
+        var terms = searchString.ToLower().Split(',', ' ', ';');
+        return filteredCars
+            .Where(x => MatchCarSearchTerms(x, terms));
+    }
+
+    private bool MatchCarSearchTerms(EventCarInfoModel car, params string[] terms)
+    {
+        var carMatchString = $"#{car.Number} {car.Team?.Name ?? ""} {string.Join(" ", car.Members.Select(member => member.FirstName + " " + member.LastName))}";
+        return terms.Any(x => carMatchString.Contains(x, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private IEnumerable<EventCarInfoModel> GetInvolvedCars()
+    {
+        if (IsTeamEvent)
+        {
+            return EventCars.Cars
+                .Where(car => Vm.InvolvedTeams.Any(team => team.TeamId == car.Team?.TeamId))
+                .OrderBy(x => x.Number);
+        }
+        return EventCars.Cars
+            .Where(car => Vm.InvolvedMembers.Any(member => car.Members.Any(carMember => carMember.MemberId == member.MemberId)))
+            .OrderBy(x => x.Number);
+    }
+
+    private void SetInvolvedCars(IEnumerable<EventCarInfoModel> involvedCars)
+    {
+        if (IsTeamEvent)
+        {
+            var involvedTeamIds = involvedCars.Select(x => x.Team).NotNull().Select(x => x.TeamId).ToList();
+            bool isTeamsDifferent = Vm.InvolvedTeams.Count() != involvedTeamIds.Count || Vm.InvolvedTeams.ExceptBy(involvedTeamIds, x => x.TeamId).Any();
+            if (!isTeamsDifferent)
+            {
+                return;
+            }
+            Vm.InvolvedTeams = involvedCars.Select(x => x.Team).NotNull();
+            Vm.InvolvedMembers = Array.Empty<MemberInfoModel>();
+            return;
+        }
+        var involvedMemberIds = involvedCars.SelectMany(x => x.Members).Select(x => x.MemberId).ToList();
+        bool isMembersDifferent = Vm.InvolvedMembers.Count() != involvedMemberIds.Count || Vm.InvolvedMembers.ExceptBy(involvedMemberIds, x => x.MemberId).Any();
+        if (!isMembersDifferent)
+        {
+            return;
+        }
+        Vm.InvolvedMembers = involvedCars.SelectMany(x => x.Members);
+        Vm.InvolvedTeams = Array.Empty<TeamInfoModel>();
+    }
+
+    private string CarToStringFunc(EventCarInfoModel? car)
+    {
+        if (car is null)
+        {
+            return string.Empty;
+        }
+        if (IsTeamEvent)
+        {
+            return $"#{car.Number} {car.Team?.Name}";
+        }
+        var member = car.Members.FirstOrDefault() ?? new();
+        return $"#{car.Number} {member.FirstName} {member.LastName}";
+    }
+}

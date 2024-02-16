@@ -1,0 +1,160 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Models
+@inject IDialogService DialogService
+
+@{
+    var filtersWithIndex = Filters.WithIndex();
+}
+<MudStack Spacing="1">
+    <MudTable Items="filtersWithIndex"
+              Breakpoint="Breakpoint.None"
+              Hover="true"
+              Elevation="0"
+              OnRowClick="@((TableRowClickEventArgs<(FilterConditionModel filter, int index)> e) => RowClick(e.Item.index))"
+              RowClass="hover-box">
+        <HeaderContent>
+            <MudTh Class="ps-8">Type</MudTh>
+            <MudTh>Action</MudTh>
+            <MudTh>Value</MudTh>
+            <MudTh Style="max-width: 6em"></MudTh>
+            <MudTh Style="max-width: 3em"></MudTh>
+        </HeaderContent>
+        <RowTemplate Context="RowContext">
+            @{
+                var (condition, index) = RowContext;
+            }
+            <MudTd Class="ps-8">
+                @condition.ColumnPropertyName
+            </MudTd>
+            <MudTd>
+                @condition.Action
+            </MudTd>
+            <MudTd>
+                @condition.GetConditionText(members: LeagueMembers, teams: Teams)
+            </MudTd>
+            <MudTd Style="max-width: 3em">
+                <MudStack Row="true" Spacing="0" Justify="Justify.Center" Class="opaque hover-box-show">
+                    @if (index > 0)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" OnClick="@(() => MoveUpClick(index))" />
+                    }
+                    @if (index < Filters.Count() - 1)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" OnClick="@(() => MoveDownClick(index))" />
+                    }
+                </MudStack>
+            </MudTd>
+            <MudTd Style="max-width: 3em">
+                <MudIconButton Icon="@Icons.Material.Outlined.Delete" Class="opaque hover-box-show" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteClick(index))" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+    <MudButton StartIcon="@Icons.Material.Filled.Add"
+               Color="Color.Tertiary"
+               FullWidth="true"
+               Class="d-flex justify-start"
+               OnClick="AddClick">
+        Add Filter
+    </MudButton>
+</MudStack>
+
+@code {
+    [CascadingParameter] public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [CascadingParameter] public IEnumerable<TeamModel> Teams { get; set; } = default!;
+
+    [Parameter, EditorRequired] public IEnumerable<FilterConditionModel> Filters { get; set; } = default!;
+    [Parameter] public EventCallback<IEnumerable<FilterConditionModel>> FiltersChanged { get; set; }
+
+    private IList<FilterConditionModel> filtersList = new List<FilterConditionModel>();
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, Teams, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, Filters);
+
+        if (Filters != filtersList)
+        {
+            filtersList = Filters as IList<FilterConditionModel> ?? Filters.ToList();
+        }
+    }
+
+    private async Task RowClick(int index)
+    {
+        var condition = filtersList.ElementAtOrDefault(index);
+        if (condition is null)
+        {
+            return;
+        }
+        var parameters = new DialogParameters<FilterConditionDialog>()
+        {
+            { x => x.Value, ModelHelper.CopyModel(condition) },
+            { x => x.LeagueMembers, LeagueMembers },
+            { x => x.Teams, Teams },
+        };
+        var dialog = await DialogService.Show<FilterConditionDialog>("Edit Filter", parameters).Result;
+        if (dialog.Canceled || dialog.Data is not FilterConditionModel model)
+        {
+            return;
+        }
+        filtersList[index] = model;
+        await UpdateFilters(filtersList);
+    }
+
+    private async Task UpdateFilters(IEnumerable<FilterConditionModel> filters)
+    {
+        Filters = filters;
+        if (FiltersChanged.HasDelegate)
+        {
+            await FiltersChanged.InvokeAsync(Filters);
+        }
+    }
+
+    private async Task MoveUpClick(int index)
+    {
+        if (index <= 0 || index >= filtersList.Count)
+        {
+            return;
+        }
+        var swapCondition = filtersList[index];
+        filtersList[index] = filtersList[index - 1];
+        filtersList[index - 1] = swapCondition;
+        await UpdateFilters(filtersList);
+    }
+
+    private async Task MoveDownClick(int index)
+    {
+        if (index < 0 || index >= filtersList.Count - 1)
+        {
+            return;
+        }
+        var swapCondition = filtersList[index];
+        filtersList[index] = filtersList[index + 1];
+        filtersList[index + 1] = swapCondition;
+        await UpdateFilters(filtersList);
+    }
+
+    private async Task AddClick()
+    {
+        var parameters = new DialogParameters<FilterConditionDialog>()
+        {
+            { x => x.Value, new() },
+            { x => x.LeagueMembers, LeagueMembers },
+            { x => x.Teams, Teams },
+        };
+        var dialog = await DialogService.Show<FilterConditionDialog>("Edit Filter", parameters).Result;
+        if (dialog.Canceled || dialog.Data is not FilterConditionModel model)
+        {
+            return;
+        }
+        filtersList.Add(model);
+        await UpdateFilters(filtersList);
+    }
+
+    private async Task DeleteClick(int index)
+    {
+        filtersList.RemoveAt(index);
+        await UpdateFilters(filtersList);
+    }
+}

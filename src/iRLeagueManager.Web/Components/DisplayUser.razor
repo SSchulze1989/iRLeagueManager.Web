@@ -1,4 +1,5 @@
-﻿@using iRLeagueApiCore.Common.Models.Users;
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Models.Users
 
 <div title="@@@FallbackName" class="d-flex gap-2">
     @if (User is null || (string.IsNullOrEmpty(User.Firstname) && string.IsNullOrEmpty(User.Firstname)))

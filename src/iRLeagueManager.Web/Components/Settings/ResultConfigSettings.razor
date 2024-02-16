@@ -1,0 +1,150 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using System.Text
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@inherits UtilityComponentBase
+@inject IDialogService DialogService
+
+<MudStack Spacing="1">
+    <SettingsTopSection Header="Points & Finish Order">
+        @if (Config.Scorings.Count == 1)
+        {
+            <ScoringSettings Scoring="Config.Scorings.First()" />
+        }
+        else
+        {
+            @foreach (var (scoring, index) in Config.Scorings.WithIndex())
+            {
+                <SettingsSection Text="@scoring.Name"
+                                 HelperText="@(scoring.IsCombinedResult ? "Combined result" : "Heat session result")"
+                                 Expanded="@(index == expandedScoringIndex)"
+                                 ExpandedChanged="@((expanded) => SetExpandedScoringIndex(index, expanded))">
+                    <ScoringSettings Scoring="scoring" />
+                </SettingsSection>
+            }
+        }
+    </SettingsTopSection>
+
+    <SettingsTopSection Header="Sessions">
+        @if (AllowEditName)
+        {
+            <SettingsItem Label="Name"
+                          Text="@Config.Name"
+                          HelperText="@(string.IsNullOrEmpty(Config.DisplayName) ? "" : Config.DisplayName)"
+                          OnClick="NameClick" />
+        }
+
+        <SettingsSwitch @bind-Checked="EnableHeatRaces"
+                        Text="Enable Heat Sessions"
+                        HelperText="Allow multiple race session per event" />
+
+        <MudCollapse Expanded="EnableHeatRaces">
+            <SettingsTextPrompt @bind-Value="Config.RaceCount"
+                                Label="Number of races"
+                                HelperText="Number of races per event" />
+            <SettingsSwitch @bind-Checked="Config.CalculateCombinedResult"
+                            Text="Combined Result"
+                            HelperText="Calculate a combined result from individual heat sessions" />
+        </MudCollapse>
+    </SettingsTopSection>
+
+    @if (ShowAdvancedSettings)
+    {
+        <SettingsTopSection Header="Advanced">
+            <SettingsSwitch Text="Set as default"
+                            Checked="@(ChampSeason.DefaultResultConfig?.ResultConfigId == Config.ResultConfigId)"
+                            CheckedChanged="SetAsDefaultConfig" />
+            <SettingsSection Text="Conditions for Points"
+                             @bind-Expanded="filtersExpanded"
+                             InitiallyExpanded="false"
+                             HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
+                <FilterTable @bind-Filters="Config.FiltersForPoints" />
+            </SettingsSection>
+        </SettingsTopSection>
+    }
+</MudStack>
+
+@code {
+    [CascadingParameter] public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [CascadingParameter] public IEnumerable<TeamModel> Teams { get; set; } = default!;
+    [Parameter, EditorRequired] public ResultConfigViewModel Config { get; set; } = default!;
+    [Parameter] public bool AllowEditName { get; set; } = false;
+    [Parameter] public bool ShowAdvancedSettings { get; set; } = true;
+    [Parameter, EditorRequired] public ChampSeasonViewModel ChampSeason { get; set; } = default!;
+
+    private bool initialized = false;
+    private int expandedScoringIndex = -1;
+
+    private bool enableHeatRaces;
+    private bool EnableHeatRaces
+    {
+        get => enableHeatRaces;
+        set
+        {
+            enableHeatRaces = value;
+            if (!enableHeatRaces)
+            {
+                Config.RaceCount = 1;
+            }
+        }
+    }
+    private bool filtersExpanded = false;
+
+    private enum SortOptionsSelect
+    {
+        Points,
+        Final,
+    };
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, Teams, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, Config);
+        BlazorParameterNullException.ThrowIfNull(this, ChampSeason);
+
+        if (!initialized)
+        {
+            EnableHeatRaces = Config.RaceCount > 1;
+            initialized = true;
+        }
+    }
+
+    private async Task NameClick()
+    {
+        var parameters = new DialogParameters<DisplayNameDialog>()
+        {
+            { x => x.Value, (Config.Name, Config.DisplayName) },
+        };
+        var result = await DialogService.Show<DisplayNameDialog>("", parameters).Result;
+        if (!result.Canceled)
+        {
+            (Config.Name, Config.DisplayName) = ((string, string))result.Data;
+        }
+    }
+
+    private void SetExpandedScoringIndex(int index, bool expanded)
+    {
+        if (expanded)
+        {
+            expandedScoringIndex = index;
+        }
+        else
+        {
+            expandedScoringIndex = expandedScoringIndex != index ? expandedScoringIndex : -1;
+        }
+    }
+
+    private void SetAsDefaultConfig(bool isDefault)
+    {
+        if (!isDefault && ChampSeason.DefaultResultConfig?.ResultConfigId == Config.ResultConfigId)
+        {
+            ChampSeason.DefaultResultConfig = null;
+        }
+        else if (isDefault && ChampSeason.DefaultResultConfig?.ResultConfigId != Config.ResultConfigId)
+        {
+            ChampSeason.DefaultResultConfig = Config.GetConfigInfoModel(Config.GetModel());
+        }
+    }
+}

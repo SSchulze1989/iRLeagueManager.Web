@@ -1,20 +1,17 @@
-﻿@using iRLeagueManager.Web.ViewModels
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.ViewModels
 
-<div @attributes=AdditionalAttributes>
-    <div>
-        <h5>@Season.Name</h5>
-    </div>
-    <h6>Finished</h6> 
-    <small>
-        @if (Season.Finished)
-        {
-            <span class="oi oi-check text-success" />
-        }
-        else
-        {
-            <span class="oi oi-delete text-danger" />
-        }
-    </small>
+<div class="@Class" @attributes=AdditionalAttributes>
+    <MudText Typo="Typo.h6">@Season.Name</MudText>
+    @if (Season.Finished)
+    {
+        <MudText Typo="Typo.subtitle1">Finished</MudText>
+        <MudIcon Icon="@Icons.Material.Outlined.CheckCircle" />
+    }
+    else
+    {
+        <MudText Typo="Typo.subtitle1">Running</MudText>
+    }
 </div>
 
 
@@ -24,6 +21,9 @@
 
     [Parameter, EditorRequired]
     public SeasonViewModel Season { get; set; } = default!;
+
+    [Parameter]
+    public string Class { get; set; } = "";
 
     protected override void OnParametersSet()
     {

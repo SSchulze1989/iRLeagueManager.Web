@@ -1,0 +1,157 @@
+﻿@page "/members/Register"
+@inject LeagueApiService ApiService
+@inject NavigationManager NavigationManager
+@using System.ComponentModel.DataAnnotations;
+@using iRLeagueApiCore.Client.Endpoints;
+
+<MudContainer MaxWidth="MaxWidth.Small">
+    @if (Success)
+    {
+        <MudPaper Elevation="5" Class="pa-4">
+            <MudText Class="mb-2">Thank you for your registration!</MudText>
+            <MudText>
+                An email with a confirmation link has been send to the given email address. Please make sure to check your spam folder if you cannot find any mail from us.<br/>
+                Please click the link in the email to finish up your registration and activate your account.
+            </MudText>
+        </MudPaper>
+    }
+    else
+    {
+        <EditForm Model="Model" OnValidSubmit=Submit>
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Register new User</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <DataAnnotationsValidator />
+                    <StatusResultValidator @ref=ResultValidator />
+                    <MudStack Spacing="2">
+                        <MudTextField Label="Username" @bind-Value="@Model.Username" For="@(() => Model.Username)" Variant="Variant.Outlined" />
+                        <MudTextField Label="Firstname" @bind-Value="@Model.Firstname" For="@(() => Model.Firstname)" Variant="Variant.Outlined" />
+                        <MudTextField Label="Lastname" @bind-Value="@Model.Lastname" For="@(() => Model.Lastname)" Variant="Variant.Outlined" />
+                        <MudTextField Label="Email" 
+                            @bind-Value="@Model.Email" 
+                            For="@(() => Model.Email)" 
+                            InputType="InputType.Email" 
+                            Variant="Variant.Outlined"
+                            Adornment="Adornment.End"
+                            AdornmentIcon="@Icons.Material.Filled.AlternateEmail" />
+                        <MudTextField Label="Password" 
+                            @bind-Value="@Model.Password" 
+                            For="@(() => Model.Password)"
+                            InputType="PasswordType" 
+                            Adornment="Adornment.End"
+                            AdornmentIcon="@PasswordIcon"
+                            OnAdornmentClick="ToggleShowPassword"
+                            Variant="Variant.Outlined" />
+                        <MudTextField Label="Confirm Password"
+                            @bind-Value="@Model.PasswordConfirm"
+                            For="@(() => Model.PasswordConfirm)"
+                            InputType="PasswordType"
+                            Variant="Variant.Outlined" />
+                        <MudDivider Class="my-2"/>
+                        <MudStack Row="true" AlignItems="AlignItems.Center">
+                            <MudCheckBox @bind-Value="Model.PrivacyPolicyAgreeed" 
+                                Label="I have read and understood the" 
+                                Color="Color.Primary" 
+                                Dense="true" 
+                                LabelPosition="LabelPosition.End"
+                                For="@(() => Model.PrivacyPolicyAgreeed)"/>
+                            <MudLink Href="privacy" target="_blank">privacy policy</MudLink>
+                        </MudStack>
+                        <MudStack Row="true" AlignItems="AlignItems.Center">
+                            <MudCheckBox @bind-Value="Model.TermsConditionsAgreed" 
+                                Label="I have read and accept the" 
+                                Color="Color.Primary" Dense="true" 
+                                LabelPosition=" LabelPosition.End" 
+                                For="@(() => Model.TermsConditionsAgreed)"/>
+                            <MudLink Href="terms" target="_blank">terms and conditions</MudLink>
+                        </MudStack>
+                    </MudStack>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Disabled="@Loading">
+                        @if (Loading)
+                        {
+                            <MudProgressCircular Size="Size.Small" Class="me-2" Indeterminate="true" />
+                        }
+                        Submit
+                    </MudButton>
+                    <MudButton ButtonType="ButtonType.Reset" Color="Color.Secondary">
+                        Clear
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </EditForm>
+    }
+</MudContainer>
+
+@code {
+    private StatusResultValidator? ResultValidator { get; set; }
+
+    private bool Loading { get; set; } = false;
+
+    private bool Success { get; set; } = false;
+
+    private bool showPassword = false;
+    private InputType PasswordType => showPassword ? InputType.Text : InputType.Password;
+    private string PasswordIcon => showPassword ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
+
+    private class RegisterModel : iRLeagueApiCore.Common.Models.Users.RegisterModel
+    {
+        [Required]
+        [MinLength(4)]
+        [RegularExpression("^[a-zA-Z0-9_-]{4,}$", ErrorMessage = "Username can only contain following characters: \"a-zA-Z0-9_-\"")]
+        public new string Username { get => base.Username; set => base.Username = value; }
+
+        [Required]
+        [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])?(?=.*[#$^+=!*()@%&]).{8,255}$", ErrorMessage = @"Password must be at leas 8 characters long, contain upper and lowercase letters and at least one special character (#$^+=!*()@%&)")]
+        public new string Password { get => base.Password; set => base.Password = value; }
+
+        [Required(ErrorMessage = "Password confirmation is required")]
+        [Compare(nameof(Password), ErrorMessage = "Confirmed passsword does not match")]
+        public string PasswordConfirm { get; set; } = string.Empty;
+
+        [Required]
+        [Range(typeof(bool), "true", "true", ErrorMessage = "Please accept the privacy policy")]
+        public bool PrivacyPolicyAgreeed { get; set; } = false;
+
+        [Required]
+        [Range(typeof(bool), "true", "true", ErrorMessage = "Please accept the terms and conditions")]
+        public bool TermsConditionsAgreed { get; set; } = false;
+    }
+
+    private RegisterModel Model { get; set; } = new();
+
+    private async Task Submit()
+    {
+        try
+        {
+            Loading = true;
+            Success = false;
+            var linkTemplate = $$"""{{NavigationManager.BaseUri}}members/{userId}/confirm/{token}""";
+            var result = await ApiService.Client
+                .Authenticate()
+                .Register()
+                .AddQueryParameter(x => x.Add("linkTemplate", linkTemplate))
+                .Post(Model);
+            if (result.Success)
+            {
+                Success = true;
+            }
+            ResultValidator?.ValidateResult(result.ToStatusResult());
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private void ToggleShowPassword()
+    {
+        showPassword = !showPassword;
+        InvokeAsync(StateHasChanged);
+    }
+}

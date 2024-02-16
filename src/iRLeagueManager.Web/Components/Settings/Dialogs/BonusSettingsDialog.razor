@@ -1,0 +1,152 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@inherits PromptDialog<IEnumerable<BonusPointConfig>>
+
+<MudDialog>
+    <DialogContent>
+        <CascadingValue Value="LeagueMembers">
+            <CascadingValue Value="Teams">
+                <MudStack Spacing="2">
+                    @foreach (var (bonus, index) in bonusPointConfigs.WithIndex())
+                    {
+                        <MudField Label="@($"Bonus {index + 1}")"
+                                  Variant="Variant.Outlined"
+                                  FullWidth="true"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Material.Outlined.Delete"
+                                  AdornmentColor="Color.Error"
+                                  OnAdornmentClick="@(() => ClearBonus(bonus))"
+                                  InnerPadding="false">
+                            <MudGrid Spacing="1" Class="mb-1">
+                                <MudItem xs="12">
+                                    <MudSelect @bind-Value="bonus.Option"
+                                               Label="Type"
+                                               Placeholder="Select bonus type"
+                                               AnchorOrigin="Origin.BottomCenter">
+                                        @foreach (var option in BonusPointOption.Available)
+                                        {
+                                            <MudSelectItem Value="option">@option.Description</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+                                @if (bonus.Option.HasPosition)
+                                {
+                                    <MudItem xs="6">
+                                        <MudNumericField @bind-Value="bonus.Position" Label="Position" />
+                                    </MudItem>
+                                }
+                                <MudItem xs="@(bonus.Option.HasPosition ? 6 : 12)">
+                                    <MudNumericField @bind-Value="bonus.Points" Label="Points" />
+                                </MudItem>
+                                @if (bonus.Option.Type == BonusPointType.Custom)
+                                {
+                                    <MudField Label="Conditions"
+                                              Variant="Variant.Text"
+                                              DisableUnderLine="true"
+                                              InnerPadding="false"
+                                              Class="mt-2 mb-1">
+                                        <MudElement HtmlTag="div" Class="ps-1">
+                                            @foreach (var condition in bonus.Conditions)
+                                            {
+                                                <MudElement HtmlTag="div" Class="d-flex">
+                                                    <FilterInput Condition="condition" ColumnNames="FilterColumnsAvailable" />
+                                                    <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="@(() => DeleteCondition(bonus, condition))" />
+                                                </MudElement>
+                                            }
+                                            <MudElement HtmlTag="div" Class="d-flex">
+                                                <FilterInput Condition="new()"
+                                                             ConditionChanged="@((FilterConditionModel value) => SelectNewCondition(bonus, value))"
+                                                             ColumnNames="FilterColumnsAvailable" />
+                                                <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Class="invisible" />
+                                            </MudElement>
+                                        </MudElement>
+                                    </MudField>
+                                }
+                            </MudGrid>
+                        </MudField>
+                    }
+                    <MudField Label="@($"Bonus {bonusPointConfigs.Count + 1}")"
+                              Variant="Variant.Outlined"
+                              FullWidth="true">
+                        <MudSelect Value="null"
+                                   ValueChanged="@((BonusPointOption option) => SelectNewBonusOption(option))"
+                                   Label="Type"
+                                   Placeholder="Select bonus type"
+                                   AnchorOrigin="Origin.BottomCenter">
+                            @foreach (var option in BonusPointOption.Available)
+                            {
+                                <MudSelectItem Value="option">@option.Description</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudField>
+                </MudStack>
+            </CascadingValue>
+        </CascadingValue>
+
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkClick="Submit" CancelClick="Cancel" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [Parameter] public IEnumerable<TeamModel> Teams { get; set; } = default!;
+
+    private IList<BonusPointConfig> bonusPointConfigs = new List<BonusPointConfig>();
+    private string[] FilterColumnsAvailable = new[]
+    {
+        nameof(ResultRowModel.CompletedLaps),
+        nameof(ResultRowModel.CompletedPct),
+        nameof(ResultRowModel.FinalPosition),
+        nameof(ResultRowModel.FinalPositionChange),
+        nameof(ResultRowModel.FinishPosition),
+        nameof(ResultRowModel.PositionChange),
+        nameof(ResultRowModel.Incidents),
+        nameof(ResultRowModel.Interval),
+        nameof(ResultRowModel.LeadLaps),
+        nameof(ResultRowModel.StartPosition),
+    };
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, Teams, cascading: true);
+        bonusPointConfigs = Value as IList<BonusPointConfig> ?? Value.ToList();
+    }
+
+    protected override Task Submit()
+    {
+        Value = bonusPointConfigs;
+        return base.Submit();
+    }
+
+    private void SelectNewBonusOption(BonusPointOption option)
+    {
+        bonusPointConfigs.Add(new()
+            {
+                Option = option,
+            });
+    }
+
+    private void SelectNewCondition(BonusPointConfig config, FilterConditionModel condition)
+    {
+        config.Conditions.Add(new()
+            {
+                ColumnPropertyName = condition.ColumnPropertyName,
+            });
+        condition.ColumnPropertyName = "";
+    }
+
+    private void DeleteCondition(BonusPointConfig config, FilterConditionModel condition)
+    {
+        config.Conditions.Remove(condition);
+    }
+
+    private void ClearBonus(BonusPointConfig bonus)
+    {
+        bonusPointConfigs.Remove(bonus);
+    }
+}

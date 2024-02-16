@@ -1,0 +1,26 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.ViewModels
+@inherits EditDialogBase<SeasonViewModel, SeasonModel>
+
+<EditForm Model=Vm OnValidSubmit=Submit>
+    <StatusResultValidator @ref=ResultValidator />
+    <MudDialog>
+        <DialogContent>
+            <MudStack Spacing="2">
+                <MudTextField Label="Name" @bind-Value="Vm.Name" For="@(() => Vm.Name)" Variant="Variant.Outlined"/>
+                <MudSwitch Label="Finished" @bind-Checked="Vm.Finished" Color="Color.Primary" Class="ms-4"/>
+                <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+            </MudStack>
+        </DialogContent>
+        <DialogActions>
+            <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+            <ProgressButton Color="Color.Primary" Loading="Vm.Loading" ButtonType="ButtonType.Submit">Save</ProgressButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+
+}

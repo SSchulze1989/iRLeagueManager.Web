@@ -1,17 +1,32 @@
-﻿@using System.ComponentModel
+﻿@namespace iRLeagueManager.Web.Components
+@using System.ComponentModel
 
-<div @attributes=@AdditionalAttributes>
-    <div class="d-flex flex-nowrap gap-2">
-        @ChildContent
-        <div class="spinner-border" style="height:1.5rem; width:1.5rem; @(Loading == false ? "visibility:hidden" : "")" role="status" />
-    </div>
-</div>
+<MudStack Class="mt-2 px-2">
+    @if (HeaderText is not null)
+    {
+        @HeaderText
+    }
+    @if (HeaderActions is not null)
+    {
+        @* <MudPaper Elevation="@Elevation" Style="background-color: var(--mud-palette-background-grey)"> *@
+        <MudToolBar Class="gap-2 px-0" Dense="true" WrapContent="true">
+            @HeaderActions
+        </MudToolBar>
+        @* </MudPaper> *@
+    }
+</MudStack>
+<MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@(Loading ? "" : "invisible" + " my-0")" />
+
 
 @code {
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter]
-    public RenderFragment ChildContent { get; set; } = default!;
+    public RenderFragment? HeaderText { get; set; }
+    [Parameter]
+    public RenderFragment? HeaderActions { get; set; }
     [Parameter]
     public bool Loading { get; set; }
+    [Parameter]
+    public int Elevation { get; set; } = 10;
 }

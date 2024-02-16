@@ -1,0 +1,41 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Models.Reviews
+@inherits EditDialogBase<VoteCategoryViewModel, VoteCategoryModel>
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="Vm" OnValidSubmit=Submit>
+            <StatusResultValidator @ref=ResultValidator />
+            <MudGrid Spacing="2">
+                <MudItem xs="8">
+                    <MudTextField @bind-Value="Vm.Text"
+                                  Label="Name"
+                                  For="() => Vm.Text"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudTextField @bind-Value="Vm.DefaultPenalty"
+                                  Label="@GetPointLabel(Vm.DefaultPenalty)"
+                                  For="() => Vm.DefaultPenalty"
+                                  InputMode="InputMode.numeric"
+                                  InputType="InputType.Number"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+            </MudGrid>
+            <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+        <ProgressButton Color="Color.Primary" OnClick="Submit" Loading="Bind(Vm, x => x.Loading)" Indeterminate="true">Save</ProgressButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private string GetPointLabel(int defaultPenalty) => defaultPenalty switch
+    {
+        > 0 => "Bonus",
+        < 0 => "Penalty",
+        _ => "Penalty/Bonus",
+    };
+}

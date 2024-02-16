@@ -1,31 +1,43 @@
 ﻿@using Blazored.LocalStorage;
 @using System.Text.Json;
-@using iRLeagueManager.Web.Components.Legal;
 @implements IDisposable
 @inject SharedStateService SharedState
 @inject ILocalStorageService LocalStorage
+@inject IDialogService DialogService
 
-<footer class="d-flex flex-wrap justify-content-center font-monospace ms-2 me-2 mt-0 mb-0 fw-light small">
-    <p class="">&copy; 2022-2023 Simon Schulze</p>&nbsp;|&nbsp;
-    <a class="link-light" href="show-cookie-banner" @onclick=OnCookieBannerClick @onclick:preventDefault title="Cookie Policy">Cookies</a>&nbsp;|&nbsp;
-    <a class="link-light" href="privacy" title="Privacy Polic">Privacy</a>&nbsp;|&nbsp;
-    <a class="link-light" href="terms" title="Terms and Conditions">Terms</a>&nbsp;|&nbsp;
-    <a class="link-light" href="mailto:simon@irleaguemanager.net" title="Mail to: simon@irleaguemanager.net">Contact</a>&nbsp;|&nbsp;
-    <p class="">Tz: @TimeZone.Id</p>
-</footer>
+<MudElement HtmlTag="footer">
+    <MudPaper Elevation="0" Class="px-4 py-0">
+        <MudGrid Spacing="2" Justify="Justify.Center" Class="ma-0 pa-0">
+            <MudItem>
+                <MudText>&copy; 2022-2023 Simon Schulze</MudText>
+            </MudItem>
+            <MudItem>
+                <MudLink OnClick=OnCookieBannerClick title="Cookie Policy">Cookies</MudLink>
+            </MudItem>
+            <MudItem>
+                <MudLink Href="privacy" title="Privacy Polic">Privacy</MudLink>
+            </MudItem>
+            <MudItem>
+                <MudLink Href="terms" title="Terms and Conditions">Terms</MudLink>
+            </MudItem>
+            <MudItem>
+                <MudLink Href="mailto:simon@irleaguemanager.net" title="Mail to: simon@irleaguemanager.net">Contact</MudLink>
+            </MudItem>
+            <MudItem>
+                <MudText>Tz: @TimeZone.Id</MudText>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudElement>
 
 @code {
     private TimeZoneInfo TimeZone { get; set; } = TimeZoneInfo.Local;
     private const string cookieSettingsKey = "allowEssentialCookies";
     private DateTime cookiePolicyValidFrom = new DateTime(2023, 01, 28);
 
-    [CascadingParameter]
-    private IModalService ModalService { get; set; } = default!;
-
     protected override void OnInitialized()
     {
         SharedState.StateChanged += OnSharedStateChanged;
-        BlazorParameterNullException.ThrowIfNull(this, ModalService);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -71,14 +83,13 @@
 
     private async Task<bool> OnCookieBannerClick()
     {
-        var options = new ModalOptions()
+        var options = new DialogOptions()
         {
-            DisableBackgroundCancel = true,
-            HideCloseButton = true,
-            HideHeader = true,
+            DisableBackdropClick= true,
+            NoHeader = true,
         };
-        var result = await ModalService.Show<CookieBannerModal>("", options).Result;
-        return result.Confirmed;
+        var result = await DialogService.Show<CookieBannerModal>("", options).Result;
+        return result.Canceled == false;
     }
 
     public virtual void Dispose()

@@ -1,5 +1,6 @@
 ﻿using Ganss.Xss;
 using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Shared;
 using iRLeagueManager.Web.ViewModels;
 using Markdig;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -48,6 +49,8 @@ public static class Services
         services.TryAddTransient<UserViewModel>();
         services.TryAddTransient<AddPenaltyViewModel>();
         services.TryAddTransient<AutoPenaltiesCollectionViewModel>();
+        services.TryAddTransient<ResultFilterViewModel>();
+        services.TryAddTransient<FilterConditionViewModel>();
         services.TryAddScoped<ResultsPageViewModel>();
         services.TryAddScoped<ResultSettingsViewModel>();
         services.TryAddScoped<ReviewsPageViewModel>();
@@ -57,6 +60,8 @@ public static class Services
         services.TryAddScoped<ResultSettingsViewModel>();
         services.TryAddScoped<ReviewSettingsViewModel>();
         services.TryAddScoped<TeamsViewModel>();
+        services.TryAddScoped<BreadCrumbService>();
+        services.TryAddScoped<MemberServiceViewModel>();
         return services;
     }
 }

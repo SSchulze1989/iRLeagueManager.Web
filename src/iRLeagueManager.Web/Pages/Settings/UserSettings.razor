@@ -1,70 +1,73 @@
 ﻿@page "/{LeagueName}/Settings/Users"
 @using iRLeagueManager.Web.Components
-@using iRLeagueManager.Web.Components.Settings
 @using iRLeagueManager.Web.ViewModels
-@inherits LeagueComponentBase
 @layout SettingsLayout
+@inherits LeagueComponentBase
 @inject LeagueUsersViewModel Users
+@inject IDialogService DialogService
 @attribute [Authorize]
 
-<PageTitle>Settings - @LeagueName</PageTitle>
+<PageTitle>
+    Settings - @LeagueName
+</PageTitle>
+
+<LoadingHeader Loading="@Bind(Users, x => x.Loading)">
+    <HeaderText>
+        <MudText Typo="Typo.h5">User Settings</MudText>
+    </HeaderText>
+</LoadingHeader>
 
 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin) Context="AuthContext">
     <Authorized>
-        <section @attributes=AdditionalAttributes id="league_member_section">
-            <div class="card my-2 pb-0">
-                <div class="card-header">
-                    Members and Roles
-                </div>
-                <div class="card-body overflow-scroll">
-                    <table class="table table-sm table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                @foreach (var role in LeagueRoles.RolesAvailable)
-                                {
-                                    <th>@role</th>
-                                }
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var user in @Bind(Users, x => x.LeagueUsers))
+        <MudText Typo="Typo.h6" Class="px-2 mt-2">Members and Roles</MudText>
+        <MudPaper Elevation="5">
+            <MudSimpleTable Striped="true">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        @foreach (var role in LeagueRoles.RolesAvailable)
+                        {
+                            <th style="text-align: center">@role</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in @Bind(Users, x => x.LeagueUsers))
+                    {
+                        <tr>
+                            <td>
+                                <DisplayUser User=@user.GetModel() ShowUserName=false />
+                            </td>
+                            @foreach (var role in LeagueRoles.RolesAvailable)
                             {
-                                <tr>
-                                    <th>
-                                        <DisplayUser User=@user.GetModel() ShowUserName=false />
-                                    </th>
-                                    @foreach (var role in LeagueRoles.RolesAvailable)
-                                    {
-                                        <th>
-                                            @{
-                                                var disabled = user.IsImplicitRole(role) || role == LeagueRoles.Owner;
-                                            }
-                                            <input class="form-check-input @(disabled ? "disabled" : "")"
-                                                   type="checkbox"
-                                                   checked="@(user.HasRole(role))"
-                                           @onclick=@(() => ToggleRole(user, role))
-                                            @onclick:preventDefault
-                                                   disabled="@disabled" />
-                                        </th>
+                                <td>
+                                    @{
+                                        var disabled = user.IsImplicitRole(role) || role == LeagueRoles.Owner;
                                     }
-                                </tr>
+                                    <div class="d-flex justify-center">
+                                        <MudCheckBox Checked="@(user.HasRole(role))"
+                                                     CheckedChanged="@((bool active) => SetUserRole(user, role, active))"
+                                                     Disabled="disabled"
+                                                     Dense="true"
+                                                     Color="Color.Primary" />
+                                    </div>
+                                </td>
                             }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <button class="btn btn-outline-secondary" type="button" @onclick=OpenAddUser>Search User</button>
-        </section>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        </MudPaper>
+        <MudButton Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.Add" OnClick=OpenAddUser>Search User</MudButton>
     </Authorized>
     <NotAuthorized>
-        You are not allowed here ...
+        <MudPaper Elevation="5" Class="pa-4">
+            You are not allowed here ...
+        </MudPaper>
     </NotAuthorized>
 </AuthorizeView>
 
 @code {
-    [CascadingParameter] IModalService ModalService { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -77,9 +80,9 @@
         await Users.LoadAsync();
     }
 
-    private async Task ToggleRole(LeagueUserViewModel user, LeagueRoleValue role)
+    private async Task SetUserRole(LeagueUserViewModel user, LeagueRoleValue role, bool active)
     {
-        if (user.HasRole(role))
+        if (active == false)
         {
             if (await ConfirmRemoveRole(user, role))
             {
@@ -95,11 +98,13 @@
 
     private async Task<bool> ConfirmRemoveRole(LeagueUserViewModel user, LeagueRoleValue role)
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(ConfirmModal.Text), $"Confirm: Remove role \"{role}\" from user \"{user.UserName}\"")
-            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
-        var confirm = await ModalService.Show<ConfirmModal>("Remove Role", parameters).Result;
-        if (confirm.Cancelled)
+        var parameters = new DialogParameters<ConfirmDialog>()
+        {
+            {x => x.Text, $"Remove role \"{role}\" from user \"{user.UserName}\""},
+            {x => x.ButtonTypes, ButtonTypes.YesNo},
+        };
+        var confirm = await DialogService.Show<ConfirmDialog>("Confirm Remove Role", parameters).Result;
+        if (confirm.Canceled)
         {
             return false;
         }
@@ -108,11 +113,13 @@
 
     private async Task<bool> ConfirmAddRole(LeagueUserViewModel user, LeagueRoleValue role)
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(ConfirmModal.Text), $"Confirm: Add role \"{role}\" to user \"{user.UserName}\"")
-            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
-        var confirm = await ModalService.Show<ConfirmModal>("Add Role", parameters).Result;
-        if (confirm.Cancelled)
+        var parameters = new DialogParameters<ConfirmDialog>()
+        {
+            {x => x.Text, $"Add role \"{role}\" to user \"{user.UserName}\""},
+            {x => x.ButtonTypes, ButtonTypes.YesNo},
+        };
+        var confirm = await DialogService.Show<ConfirmDialog>("Confirm Add Role", parameters).Result;
+        if (confirm.Canceled)
         {
             return false;
         }
@@ -121,8 +128,10 @@
 
     private async Task OpenAddUser()
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(SearchUserModal.LeagueUsers), Users);
-        await ModalService.Show<SearchUserModal>("Search User", parameters).Result;
+        var parameters = new DialogParameters<SearchUserDialog>()
+        {
+            {x => x.LeagueUsers, Users},
+        };
+        await DialogService.Show<SearchUserDialog>("Search User", parameters).Result;
     }
 }

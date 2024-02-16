@@ -5,27 +5,34 @@
 @inherits LeagueComponentBase
 @inject ReviewsPageViewModel ReviewsVm
 @inject ClientLocalTimeProvider ClientTime
+@inject IDialogService DialogService
 
-<PageTitle>Protests - @LeagueName</PageTitle>
+<PageTitle>
+    Protests - @LeagueName
+</PageTitle>
 
-<div class="container-xxl">
-    <h3 class="mb-3">
-        File Protest
-    </h3>
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <LoadingHeader>
+        <HeaderText>
+            <MudText Typo="Typo.h5">
+                File Protest
+            </MudText>
+        </HeaderText>
+    </LoadingHeader>
 
     @if (Event is not null)
     {
-        <h5 class="mb-3">
-            Event: @(Event.Date.ToString("dd.MM.yy")): @(Event.TrackName)@(Event.ConfigName == "-" ? "" : $" - {Event.ConfigName}")
-        </h5>
+        <MudText Typo="Typo.h5" Class="mb-3">
+            Event: @(Event.Date.GetValueOrDefault().ToString("dd.MM.yy")): @(Event.TrackName)@(Event.ConfigName == "-" ? "" : $" - {Event.ConfigName}")
+        </MudText>
     }
 
     @if (Success)
     {
-        <div>
+        <MudPaper Elevation="5" Class="pa-4">
             Protest was successfully submitted!
             <a href="@($"./{LeagueName}/Reviews/Events/{EventId}?tabIndex=1")">Back to Reviews</a>
-        </div>
+        </MudPaper>
     }
     else if (Event is not null && ReviewsVm.ProtestsEnabled)
     {
@@ -35,135 +42,123 @@
         {
             @if (ClientTime.Now < protestsOpenAt)
             {
-                <div class="alert alert-warning">
+                <MudAlert Severity="Severity.Warning">
                     Protests can be filed after @protestsOpenAt.ToString();
-                </div>
+                </MudAlert>
             }
             else if (ClientTime.Now > protestsCloseAt)
             {
-                <div class="alert alert-warning">
+                <MudAlert Severity="Severity.Warning">
                     Protest period ended on @protestsCloseAt.ToString();
-                </div>
+                </MudAlert>
             }
         }
         else
         {
             @if (ReviewsVm.ProtestClosedAfter > TimeSpan.Zero)
             {
-                <div class="alert alert-info">
+                <MudAlert Severity="Severity.Info">
                     Protests can be filed until @protestsCloseAt.ToString();
-                </div>
+                </MudAlert>
             }
             <EditForm Model=Protest OnValidSubmit=Submit>
                 <DataAnnotationsValidator />
                 <StatusResultValidator @ref=ResultValidator />
-                <div class="card">
-                    <div class="card-body">
-                        <div class="mb-1">
-                            <label class="form-label">Protester</label>
-                            <BlazoredTypeahead
-                                @bind-Value=Protest.AuthorMemberId
-                                ConvertMethod=@(member => member.MemberId)
-                                class="form-control p-0"
-                                EnableDropDown=true  
-                                SearchMethod=SearchMembers 
-                                MinimumLength=1
-                                MaximumSuggestions=100
-                                DeleteItemsOnBackspace=false
-                                placeholder="Search driver by name...">
-
-                                <SelectedTemplate Context=memberId>
-                                    @{
-                                        var member = EventMembers.FirstOrDefault(x => x.MemberId == memberId);
-                                    }
-                                    @member?.FirstName @member?.LastName
-                                </SelectedTemplate>
-                                <ResultTemplate Context=member>
-                                    @member.FirstName @member.LastName
-                                </ResultTemplate>
-                                <NotFoundTemplate Context=name>
-                                    <span>Driver <b>@name</b> Not found!</span>
-                                </NotFoundTemplate>
-                            </BlazoredTypeahead>
-                            <div class="form-text">Who is filing this protest?</div>
-                            <ValidationMessage For="@(() => Protest.AuthorMemberId)" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Confirm IRacing Id</label>
-                            <InputText class="form-control" @bind-Value=Protest.ConfirmIRacingId />
-                            <div class="form-text">Enter your iracing user id to confirm identity</div>
-                            <ValidationMessage For="@(() => Protest.ConfirmIRacingId)" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Session</label>
-                            <InputSelect class="form-select" placeholder="Select Session" aria-label="Select Session" id="incident_session" @bind-Value="SessionId"> 
+                <MudCard Elevation="5" Class="mt-2">
+                    <MudCardContent>
+                        <MudStack Spacing="2">
+                            <Validation For="@(() => Protest.AuthorMemberId)" Context="validation">
+                                <MudAutocomplete Label="Protester"
+                                                 HelperText="Who is filing this protest?"
+                                                 @bind-Value="ProtestAuthor"
+                                                 Clearable="true"
+                                                 DebounceInterval="200"
+                                                 SearchFunc="SearchMembers"
+                                                 ToStringFunc="@(member => member != null ? $"{member.FirstName} {member.LastName}" : null)"
+                                                 Placeholder="Search driver by name..."
+                                                 Error="validation.HasError"
+                                                 ErrorText="@validation.ErrorText"
+                                                 Variant="Variant.Outlined"
+                                                 id="protest_incident_author" />
+                            </Validation>
+                            <MudTextField Label="Confirm IRacing Id"
+                                          HelperText="Enter your iracing user id to confirm identity"
+                                          @bind-Value="Protest.ConfirmIRacingId"
+                                          For="@(() => Protest.ConfirmIRacingId)"
+                                          Variant="Variant.Outlined"
+                                          id="protest_incident_confirmIracingId" />
+                            <MudSelect Label="Session"
+                                       HelperText="In which session did the incident happen?"
+                                       @bind-Value="SessionId"
+                                       Variant="Variant.Outlined"
+                                       id="protest_incident_session">
                                 @if (EventList.Selected != null)
                                 {
                                     @foreach (var session in EventList.Selected.Sessions.Where(x => x.SessionType == iRLeagueApiCore.Common.Enums.SessionType.Race))
                                     {
-                                        <option value=@session.SessionId>@session.Name</option>
+                                        <MudSelectItem Value=@((long?)session.SessionId)>@session.Name</MudSelectItem>
                                     }
                                 }
-                            </InputSelect>
-                            <div class="form-text">In which session did the incident happen?</div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label class="form-label">Lap</label>
-                                <InputText class="form-control" @bind-Value=Protest.OnLap />
-                                <ValidationMessage For="@(() => Protest.OnLap)" />
-                            </div>
-                            <div class="col">
-                                <label class="form-label">Turn</label>
-                                <InputText class="form-control" @bind-Value=Protest.Corner />
-                                <ValidationMessage For="@(() => Protest.Corner)" />
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <InputTextArea class="form-control" style="height: 140px" @bind-Value=Protest.FullDescription />
-                            <div class="form-text">Describe what happened in the incident</div>
-                            <ValidationMessage For="@(() => Protest.FullDescription)" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Involved Drivers</label>
-                            <BlazoredTypeahead
-                                @bind-Values=Protest.InvolvedMembers
-                                class="form-control p-0"
-                                EnableDropDown=true  
-                                SearchMethod=SearchMembers 
-                                MinimumLength=1
-                                MaximumSuggestions=100
-                                DeleteItemsOnBackspace=false
-                                placeholder="Search driver by name...">
-
-                                <SelectedTemplate Context=member>
-                                    @member?.FirstName @member?.LastName
-                                </SelectedTemplate>
-                                <ResultTemplate Context=member>
-                                    @member.FirstName @member.LastName
-                                </ResultTemplate>
-                                <NotFoundTemplate Context=name>
-                                    <span>Driver <b>@name</b> Not found!</span>
-                                </NotFoundTemplate>
-                            </BlazoredTypeahead>
-                            <div class="form-text">Who was involved in this incident?</div>
-                            <ValidationMessage For="@(() => Protest.InvolvedMembers)" />
-                        </div>
-                        <button class="btn btn-primary mb-3">
-                            Submit
-                        </button>
-                    </div>
-                </div>
+                            </MudSelect>
+                            <MudGrid Spacing="2">
+                                <MudItem xs="6">
+                                    <MudTextField Label="Lap"
+                                                  @bind-Value="Protest.OnLap"
+                                                  For="@(() => Protest.OnLap)"
+                                                  Variant="Variant.Outlined"
+                                                  id="protest_incident_lap" />
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudTextField Label="Turn"
+                                                  @bind-Value="Protest.Corner"
+                                                  For="@(() => Protest.Corner)"
+                                                  Variant="Variant.Outlined"
+                                                  id="protest_incident_turn" />
+                                </MudItem>
+                            </MudGrid>
+                            <MudTextField Label="Description"
+                                          HelperText="Describe what happened in the incident"
+                                          @bind-Value="Protest.FullDescription"
+                                          For="@(() => Protest.FullDescription)"
+                                          Lines="4"
+                                          AutoGrow="true"
+                                          MaxLines="12"
+                                          Variant="Variant.Outlined"
+                                          id="protest_incident_description" />
+                            <Validation For="@(() => Protest.InvolvedMembers)" Context="validation">
+                                <MultiSelectAutoComplete Label="Involved Drivers"
+                                                         HelperText="Who was involved in this incident?"
+                                                         Placeholder="Search driver by name..."
+                                                         T="MemberInfoModel"
+                                                         Values="Protest.InvolvedMembers"
+                                                         ValuesChanged="@((IEnumerable<MemberInfoModel> values) => Protest.InvolvedMembers = values.ToList())"
+                                                         SearchFunc="SearchMembers"
+                                                         ToStringFunc="@(member => member != null ? $"{member.FirstName} {member.LastName}" : null)"
+                                                         Variant="Variant.Outlined"
+                                                         Error="validation.HasError"
+                                                         ErrorText="@validation.ErrorText"
+                                                         id="protest_incident_involvedMembers" />
+                            </Validation>
+                        </MudStack>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton OnClick=Submit Color="Color.Primary">
+                            <MudStack Row="true">
+                                @if (Bind(ReviewsVm, x => x.Loading))
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                }
+                                Submit Protest
+                            </MudStack>
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
             </EditForm>
         }
     }
-</div>
+</MudContainer>
 
 @code {
-    [CascadingParameter]
-    public IModalService ModalService { get; set; } = default!;
-
     private StatusResultValidator? ResultValidator { get; set; } = default!;
 
     private PostProtestModel Protest { get; } = new();
@@ -173,6 +168,12 @@
     private bool Success { get; set; } = false;
 
     private IEnumerable<MemberInfoModel> EventMembers { get; set; } = Array.Empty<MemberInfoModel>();
+
+    private MemberInfoModel? ProtestAuthor
+    {
+        get => EventMembers.FirstOrDefault(x => x.MemberId == Protest.AuthorMemberId);
+        set => Protest.AuthorMemberId = value?.MemberId ?? -1;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -185,7 +186,7 @@
         EventMembers = ReviewsVm.EventCars.Cars.SelectMany(x => x.Members);
     }
 
-    private async Task<IEnumerable<MemberInfoModel>> SearchMembers(string searchString)
+    private async Task<IEnumerable<MemberInfoModel?>> SearchMembers(string searchString)
     {
         if (string.IsNullOrEmpty(searchString))
         {
@@ -207,7 +208,7 @@
             NavigationManager.NavigateTo(navUrl, replace: true);
             await ReviewsVm.LoadFromEventAsync(@event.EventId);
         }
-        SessionId = @event?.Sessions.FirstOrDefault()?.SessionId;
+        SessionId = @event?.Sessions.FirstOrDefault(x => x.SessionType == iRLeagueApiCore.Common.Enums.SessionType.Race)?.SessionId;
         await InvokeAsync(StateHasChanged);
     }
 
@@ -219,11 +220,13 @@
 
     private async Task Submit()
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(ConfirmModal.Text), "Please make sure you have filled out this protest correctly.\nOnce you submit it you can not delete or change it anymore.")
-            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
-        var confirm = await ModalService.Show<ConfirmModal>("Confirm Protest", parameters).Result;
-        if (confirm.Confirmed == false)
+        var parameters = new DialogParameters<ConfirmDialog>()
+        {
+            { x => x.Text, "Please make sure you have filled out this protest correctly.\nOnce you submit it you can not delete or change it anymore." },
+            { x => x.ButtonTypes, ButtonTypes.YesNo },
+        };
+        var confirm = await DialogService.Show<ConfirmDialog>("Confirm Protest", parameters).Result;
+        if (confirm.Canceled)
         {
             return;
         }

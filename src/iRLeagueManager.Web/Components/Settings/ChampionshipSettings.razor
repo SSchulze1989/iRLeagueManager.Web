@@ -1,0 +1,149 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using System.Text
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@inherits UtilityComponentBase
+@inject IDialogService DialogService
+
+<EditForm Model=ChampSeason>
+    <StatusResultValidator @ref=ResultValidator />
+    <MudStack Spacing="1">
+        <SettingsTopSection Header="General">
+            <SettingsItem Label="Name"
+                          Text="@ChampSeason.ChampionshipName"
+                          HelperText="@(string.IsNullOrEmpty(ChampSeason.ChampionshipDisplayName) ? "" : ChampSeason.ChampionshipDisplayName)"
+                          OnClick="ChampionshipNameClick" />
+            <SettingsSelectPrompt @bind-Value="ChampSeason.ResultKind"
+                                  Label="Type"
+                                  HelperText="Championship type: Member or Team"
+                                  Items="@(new[] { ResultKind.Member, ResultKind.Team })" />
+        </SettingsTopSection>
+
+        @if (multiplePointconfigs)
+        {
+            <SettingsTopSection Header="Point Settings">
+                <SettingsSection Text="Point Settings" InitiallyExpanded="multiplePointconfigs">
+                    @foreach (var config in ChampSeason.ResultConfigs)
+                    {
+                        <SettingsItem Text="@config.Name"
+                                      HelperText="@(string.IsNullOrEmpty(config.DisplayName) ? "" : config.DisplayName)"
+                                      EndIcon="@Icons.Material.Filled.ArrowForward"
+                                      Href="@($"/{Shared.LeagueName}/Settings/Results/Championships/{ChampSeason.ChampionshipId}/ResultConfigs/{config.ResultConfigId}")" />
+                    }
+                    <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary">
+                        <MudText Color="Color.Tertiary">
+                            Add Result Config
+                        </MudText>
+                    </MudListItem>
+                </SettingsSection>
+            </SettingsTopSection>
+        }
+        else if (ChampSeason.ResultConfigViewModels.Count > 0)
+        {
+            <ResultConfigSettings Config="ChampSeason.ResultConfigViewModels.First()" ChampSeason="ChampSeason" ShowAdvancedSettings="false" />
+        }
+
+        @if (ChampSeason.StandingConfig is not null)
+        {
+            var standingConfig = ChampSeason.StandingConfig;
+            <SettingsTopSection Header="Standings">
+                <SettingsTextPrompt Label="Weeks counted"
+                                    @bind-Value="standingConfig.WeeksCounted"
+                                    Clearable="true"
+                                    HelperText="@GetWeeksCountedHelperText(standingConfig.WeeksCounted)"
+                                    DialogHelperText="Set the number of results that count towards the total standing">
+                    @(standingConfig.WeeksCounted > 0 ? standingConfig.WeeksCounted.ToString() : "All")
+                </SettingsTextPrompt>
+                <SettingsPromptItem Label="Define Standings Order"
+                                    T="IList<SortOptions>"
+                                    TDialog="SortOptionsDialog"
+                                    @bind-Value="standingConfig.SortOptions"
+                                    Text="@GetSortingHelperText(standingConfig.SortOptions)" />
+                @if (ChampSeason.ResultConfigViewModels.Any(x => x.Scorings.Count > 1))
+                {
+                    var switchHeatsAsSingleHelperText = standingConfig.UseCombinedResult
+                    ? "Only count one win, podium etc. per evening on multiheader events"
+                    : "Count each win, podium etc. per heat individually";
+                    <SettingsSwitch Text="Treat Heats as individual results"
+                                    @bind-Checked="standingConfig.UseHeatResult"
+                                    HelperText="@switchHeatsAsSingleHelperText" />
+                }
+            </SettingsTopSection>
+        }
+
+        <SettingsTopSection Header="Filters">
+            <SettingsSection Text="Filter Drivers"
+                             HelperText="Limit drivers, teams or classes that will be scored in this championship">
+                <FilterTable @bind-Filters="ChampSeason.FilterConditions" />
+            </SettingsSection>
+            @if (!multiplePointconfigs && ChampSeason.ResultConfigViewModels.Count > 0)
+            {
+                <SettingsSection Text="Conditions for Points"
+                                 HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
+                    <FilterTable @bind-Filters="ChampSeason.ResultConfigViewModels.First().FiltersForPoints" />
+                </SettingsSection>
+            }
+        </SettingsTopSection>
+
+        <SettingsTopSection Header="Advanced">
+            <SettingsSwitch @bind-Checked="multiplePointconfigs" Text="Multiple point configs" HelperText="Allow different point settings for each event" />
+        </SettingsTopSection>
+    </MudStack>
+    <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+</EditForm>
+
+@code {
+    [CascadingParameter] public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [CascadingParameter] public IEnumerable<TeamModel> Teams { get; set; } = default!;
+    [Parameter, EditorRequired] public ChampSeasonViewModel ChampSeason { get; set; } = default!;
+
+    private StatusResultValidator? ResultValidator { get; set; }
+    private SettingsStack SettingsStack { get; set; } = default!;
+
+    private bool multiplePointconfigs = false;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, Teams, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, ChampSeason);
+        multiplePointconfigs = ChampSeason.ResultConfigs.Count > 1;
+    }
+
+    private async Task ChampionshipNameClick()
+    {
+        var parameters = new DialogParameters<DisplayNameDialog>()
+        {
+            { x => x.Value, (ChampSeason.ChampionshipName, ChampSeason.ChampionshipDisplayName) },
+        };
+        var result = await DialogService.Show<DisplayNameDialog>("", parameters).Result;
+        if (!result.Canceled)
+        {
+            (ChampSeason.ChampionshipName, ChampSeason.ChampionshipDisplayName) = ((string, string))result.Data;
+        }
+    }
+
+    private string GetWeeksCountedHelperText(int? weeksCounted) => weeksCounted switch
+    {
+        null or <= 0 => "Count all results in the season - no drop weeks allowed",
+        > 0 or _ => $"Only count the {weeksCounted} best results",
+    };
+
+    private string GetSortingHelperText(IEnumerable<SortOptions> sortOptions)
+    {
+        if (sortOptions.Count() == 0)
+        {
+            return "Default";
+        }
+        var sb = new StringBuilder();
+        sb.Append("Order by ");
+        sb.Append(sortOptions.First().GetText());
+        foreach (var option in sortOptions.Skip(1))
+        {
+            sb.Append(", then by ");
+            sb.Append(option.GetText());
+        }
+        return sb.ToString();
+    }
+}

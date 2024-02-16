@@ -1,45 +1,18 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Security.Claims;
+@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 
 <PageTitle>iRLeagueManager.Web</PageTitle>
 
-<Header />
-
-<div class="page">
-    <main>
-        <article class="content px-2 pb-2 mb-2">
-            <ErrorBoundary @ref=ErrorBoundary Context="Ex" MaximumErrorCount="5">
-                <ChildContent>
-                    @Body
-                </ChildContent>
-                <ErrorContent>
-                    @if (Ex is iRLeagueApiCore.Client.Http.ApiServiceUnavailableException)
-                    {
-                        <h4 class="d-flex justify-content-center align-items-center bg-danger p-2 gap-2">
-                            <span class="oi oi-warning text-warning"/> This service is currently unavailable. Please try again later!
-                            <button class="btn btn-outline-light" @onclick=Reload>
-                                Reload
-                            </button>
-                        </h4>
-                    }
-                    else
-                    {
-                        throw Ex;
-                    }
-                </ErrorContent>
-            </ErrorBoundary>
-        </article>
-    </main>
-</div>
-
-<div class="page-footer">
+<MudLayout>
+    <Header />
+    <MudMainContent Class="page">
+        <div class="my-2 pt-2">
+            @Body
+        </div>
+    </MudMainContent>
     <Footer />
-</div>
-
-<BlazoredToasts 
-    Timeout=100
-    Position=Blazored.Toast.Configuration.ToastPosition.BottomRight
-    WarningClass="alert alert-warning"/>
+</MudLayout>
 
 @code {
     [CascadingParameter]

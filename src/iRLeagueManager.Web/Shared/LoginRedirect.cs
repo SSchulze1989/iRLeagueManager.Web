@@ -11,12 +11,8 @@ public sealed class LoginRedirect : ComponentBase
     [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender == false)
-        {
-            return;
-        }
         var loadState = await AuthStateTask;
 
         if (loadState?.User.Identity?.IsAuthenticated == true)
@@ -27,6 +23,6 @@ public sealed class LoginRedirect : ComponentBase
 
         // redirect to login page
         var returnUrl = WebUtility.UrlEncode(new Uri(NavigationManager.Uri).PathAndQuery);
-        NavigationManager.NavigateTo($"member/login?returnUrl={returnUrl}");
+        NavigationManager.NavigateTo($"members/login?returnUrl={returnUrl}");
     }
 }

@@ -1,0 +1,154 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using System.Text
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@inject IDialogService DialogService
+
+<SettingsPromptItem Label="Finish order before Points"
+                    T="IList<SortOptions>"
+                    TDialog="SortOptionsDialog"
+                    Value="Scoring.PointRule.PointsSortOptions.ToList()"
+                    ValueChanged="@((IList<SortOptions> value) => Scoring.PointRule.PointsSortOptions = value)"
+                    Text="@GetSortingHelperText(Scoring.PointRule.PointsSortOptions)" />
+
+<SettingsPromptItem @bind-Value="PointRuleModel"
+                    T="PointRuleModel"
+                    TDialog="PointSettingsDialog"
+                    Label="Configure Points"
+                    Scroll="true">
+    @GetPointTypeString()
+    <PointTable PointRule="Scoring.PointRule"
+                Elevation="0"
+                Bordered="true"
+                Dense="true"
+                Style="background-color: transparent" />
+</SettingsPromptItem>
+
+<SettingsPromptItem Label="Final order after Points"
+                    T="IList<SortOptions>"
+                    TDialog="SortOptionsDialog"
+                    Value="Scoring.PointRule.FinalSortOptions.ToList()"
+                    ValueChanged="@((IList<SortOptions> value) => Scoring.PointRule.FinalSortOptions = value)"
+                    Text="@GetSortingHelperText(Scoring.PointRule.FinalSortOptions)" />
+
+<SettingsPromptItem @bind-Value="Scoring.PointRule.BonusPointConfigs"
+                    T="IEnumerable<BonusPointConfig>"
+                    TDialog="BonusSettingsDialog"
+                    Label="Bonus Points"
+                    Parameters="@(new() {
+                        { x => x.LeagueMembers, LeagueMembers},
+                        { x => x.Teams, Teams},
+                    })">
+    @if (Scoring.PointRule.BonusPointConfigs.Count() == 0)
+    {
+        @:None
+    }
+    else
+    {
+        @string.Join(" | ", Scoring.PointRule.BonusPointConfigs.Select(GetBonusPointText))
+    }
+</SettingsPromptItem>
+
+<SettingsPromptItem Value="Scoring.PointRule.AutoPenalties"
+                    ValueChanged="@((IEnumerable<AutoPenaltyConfiguration> penalties) => Scoring.PointRule.AutoPenalties = penalties.ToList())"
+                    T="IEnumerable<AutoPenaltyConfiguration>"
+                    TDialog="PenaltySettingsDialog"
+                    Label="Automatic Penalties">
+    @if (Scoring.PointRule.AutoPenalties.Count == 0)
+    {
+        @:None
+    }
+    else
+    {
+        @string.Join(" | ", Scoring.PointRule.AutoPenalties.Select(GetPenaltyText))
+    }
+</SettingsPromptItem>
+
+@code {
+    [CascadingParameter] public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [CascadingParameter] public IEnumerable<TeamModel> Teams { get; set; } = default!;
+    [Parameter] public ScoringViewModel Scoring { get; set; } = default!;
+
+    private PointRuleModel PointRuleModel
+    {
+        get => Scoring.PointRule.GetModel();
+        set => Scoring.PointRule.SetModel(value, changed: true);
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, Scoring);
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, Teams, cascading: true);
+    }
+
+    private string GetSortingHelperText(IEnumerable<SortOptions> sortOptions)
+    {
+        if (sortOptions.Count() == 0)
+        {
+            return "Keep order";
+        }
+        var sb = new StringBuilder();
+        sb.Append("Order by ");
+        sb.Append(sortOptions.First().GetText());
+        foreach (var option in sortOptions.Skip(1))
+        {
+            sb.Append(", then by ");
+            sb.Append(option.GetText());
+        }
+        return sb.ToString();
+    }
+
+    private string GetPointTypeString()
+    {
+        if (Scoring.PointRule.PointsPerPlace.Count() == 0)
+        {
+            return "Keep points";
+        }
+        switch (Scoring.PointRule.RuleType)
+        {
+            case PointRuleViewModel.PointRuleType.PointList:
+                return "Points per place";
+            case PointRuleViewModel.PointRuleType.MaxPoints:
+                return $"Max pts.: {Scoring.PointRule.MaxPoints}; Drop-off: {Scoring.PointRule.PointDropOff}";
+            case PointRuleViewModel.PointRuleType.Formula:
+                return $"Formula";
+        }
+        return "Unknown";
+    }
+
+    private async Task OnPointSettingsClick()
+    {
+        var parameters = new DialogParameters<PointSettingsDialog>()
+        {
+            { x => x.Value, Scoring.PointRule.CopyModel() },
+        };
+        var dialog = await DialogService.Show<PointSettingsDialog>($"Edit {Scoring.Name} Points", parameters).Result;
+        if (dialog.Canceled || dialog.Data is not PointRuleModel model)
+        {
+            return;
+        }
+        Scoring.PointRule.SetModel(model, changed: true);
+    }
+
+    private string GetBonusPointText(BonusPointConfig bonus)
+    {
+        return $"{bonus.Option.Description}{(bonus.Option.HasPosition ? " " + GetPositionString(bonus.Position) : "")} => {bonus.Points}";
+    }
+
+    private string GetPenaltyText(AutoPenaltyConfiguration penalty)
+    {
+        var value = penalty.Type switch
+        {
+            PenaltyType.Disqualification => "DSQ",
+            _ => penalty.Points.ToString(),
+        };
+        return $"{penalty.Description} => {value}";
+    }
+
+    private string GetPositionString(int position) => position + position switch
+    {
+        _ => ".",
+    };
+}

@@ -1,0 +1,21 @@
+﻿@namespace iRLeagueManager.Web.Components
+
+<MudPaper Elevation="5" Class="@Class">
+    <MudList Clickable="true">
+        @if (string.IsNullOrEmpty(Header) == false)
+        {
+            <MudListSubheader>
+                <MudText Color="Color.Info">
+                    @Header
+                </MudText>
+            </MudListSubheader>
+        }
+        @ChildContent
+    </MudList>
+</MudPaper>
+
+@code {
+    [Parameter] public string Header { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string Class { get; set; } = string.Empty;
+}

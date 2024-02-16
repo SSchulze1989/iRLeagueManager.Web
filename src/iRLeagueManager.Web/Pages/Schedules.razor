@@ -9,39 +9,36 @@
 @inject SchedulesPageViewModel vm
 @inject JsonSerializerOptions jsonOptions
 
-<PageTitle>Schedules - @LeagueName</PageTitle>
+<PageTitle>
+    Schedules - @LeagueName
+</PageTitle>
 
-<div class="container-xxl">
-    <div class="sticky-header">
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudStack Spacing="2">
         <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
-            <h3>Schedules</h3>
+            <HeaderText>
+                <MudText Typo="Typo.h5">Schedule</MudText>
+            </HeaderText>
         </LoadingHeader>
-    </div>
 
-    <AuthorizeView Roles=@(GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer))>
-        <Authorized>
-            <div>
-                @foreach(var schedule in @Bind(vm, x => x.Schedules))
+        <AuthorizeView Roles=@(GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer))>
+            <Authorized>
+                @foreach (var schedule in @Bind(vm, x => x.Schedules))
                 {
-                    <DisplaySchedule class="px-0 mb-2 mx-0" Schedule=schedule ReadOnly=SharedState.SeasonFinished/>
+                    <DisplaySchedule Schedule="schedule" ReadOnly=Shared.SeasonFinished DisplayHeader="@(vm.Schedules.Count > 1)" />
                 }
-            </div>
-        </Authorized>
-        <NotAuthorized>
-            <div>
-                @foreach(var schedule in @Bind(vm, x => x.Schedules))
+            </Authorized>
+            <NotAuthorized>
+                @foreach (var schedule in @Bind(vm, x => x.Schedules))
                 {
-                    <DisplaySchedule class="px-0 mb-2 mx-0" Schedule=schedule ReadOnly=true/>
+                    <DisplaySchedule Schedule="schedule" ReadOnly="true" DisplayHeader="@(vm.Schedules.Count > 1)" />
                 }
-            </div>
-        </NotAuthorized>
-    </AuthorizeView>
-</div>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudStack>
+</MudContainer>
 
 @code {
-    [CascadingParameter]
-    public SharedStateService SharedState { get; set; } = default!;
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);

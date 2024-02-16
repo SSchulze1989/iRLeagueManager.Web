@@ -1,0 +1,63 @@
+﻿@namespace iRLeagueManager.Web.Components
+@inherits SettingBase
+
+<MudListItem Class="@Class"
+             Icon="@Icon"
+             IconSize="IconSize"
+             IconColor="IconColor"
+             OnClick="OnClick"
+             Disabled="Disabled"
+             Href="@Href"
+             Style="@Style">
+    <MudElement HtmlTag="div" Class="d-flex align-center gap-2" Style="@(Scroll ? "overflow-x: auto" : "")">
+        <MudElement HtmlTag="div" Class="d-flex flex-column align-start justify-center flex-grow-1 flex-shrink-1">
+            @if (displayLabel)
+            {
+                <label class="mud-input-label mud-input-label-text" style="font-size: 0.75em">@Label</label>
+            }
+            @* <MudText Color="Color"> *@
+                @if (ChildContent is null)
+                {
+                    @Text
+                }
+                else
+                {
+                    @ChildContent
+                }
+            @* </MudText> *@
+            @if (displayHelperText)
+            {
+                <p class="mud-input-helper-text">@HelperText</p>
+            }
+        </MudElement>
+        @if (string.IsNullOrEmpty(EndIcon) == false)
+        {
+            <MudIconButton Icon="@EndIcon" />
+        }
+        @if (displayDeleteButton)
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="Delete" />
+        }
+    </MudElement>
+</MudListItem>
+
+@code {
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public EventCallback Delete { get; set; }
+    [Parameter] public bool Scroll { get; set; } = false;
+
+    private bool displayDeleteButton = false;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (Delete.HasDelegate)
+        {
+            displayDeleteButton = true;
+        }
+        if (IconColor == Color.Inherit)
+        {
+            IconColor = Color;
+        }
+    }
+}

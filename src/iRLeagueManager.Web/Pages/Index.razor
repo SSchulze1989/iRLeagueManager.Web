@@ -5,41 +5,50 @@
 @using iRLeagueApiCore.Client.Http
 @using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.ViewModels;
-@inherits MvvmBlazor.Components.MvvmComponentBase
+@inherits LeagueComponentBase
 @inject LeaguesViewModel vm
 @inject ILeagueApiClient apiClient
 
-<PageTitle>Leagues</PageTitle>
+<PageTitle>
+    Leagues
+</PageTitle>
 
-<div class="container-xxl">
-    <div class="sticky-header">
-        <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
-            <h3>Leagues</h3>
-        </LoadingHeader>
-    </div>
+<MudContainer MaxWidth="MaxWidth.Large">
+    <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+        <HeaderText>
+            <MudText Typo="Typo.h5">Leagues</MudText>
+        </HeaderText>
+    </LoadingHeader>
 
-    <table class="table table-striped table-hover">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var league in @Bind(vm, x => x.Leagues))
-            {
+    <MudPaper Elevation="1">
+        <MudSimpleTable Dense="true" Hover="true">
+            <thead>
                 <tr>
-                    <td>@Bind(league, x => x.LeagueId)</td>
-                    <td class="pointer">
-                        <NavLink class="nav-link" href="@($"./{@Bind(league, x => x.LeagueName)}")">
-                            <DisplayLeague League=league.GetModel() />
-                        </NavLink>
-                    </td>
+                    <th>Id</th>
+                    <th>Name</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+                @foreach (var league in @Bind(vm, x => x.Leagues))
+                {
+                    <tr>
+                        <td class="pa-0">
+                            <MudLink Class="d-block ma-0 py-2 px-4" Href="@league.LeagueName" tabindex="-1">
+                                @Bind(league, x => x.LeagueId)
+                            </MudLink>
+                        </td>
+                        <td class="pa-0">
+                            <MudLink Class="d-block ma-0 py-2 px-4" Href="@league.LeagueName">
+                                <DisplayLeague League=league.GetModel() />
+                            </MudLink>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+    </MudPaper>
+    <MudButton StartIcon="@Icons.Material.Filled.Add" Href="/createleague" FullWidth="true">Create League</MudButton>
+</MudContainer>
 
 @code {
     protected override Task OnAfterRenderAsync(bool firstRender)

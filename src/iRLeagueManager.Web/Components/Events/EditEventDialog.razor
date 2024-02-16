@@ -1,0 +1,202 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using System.Text.Json
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Tracks
+@using iRLeagueManager.Web.ViewModels
+@inherits EditDialogBase<EventViewModel, EventModel>
+@inject JsonSerializerOptions jsonOptions
+@inject TrackListService trackListService
+
+<EditForm Model=Vm OnValidSubmit=Submit>
+    <StatusResultValidator @ref=ResultValidator TrimPrefix="Event."/>
+    <MudDialog>
+        <DialogContent>
+            <MudGrid Spacing="1">
+                <MudItem xs="12">
+                    <MudTextField Label="Event Name" @bind-Value="Vm.Name" For="@(() => Vm.Name)" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudDatePicker Label="Date" @bind-Date="Vm.Date" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudTimePicker Label="Start Time" @bind-Time="Vm.StartTime" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudAutocomplete Label="Track"
+                                     @bind-Value="SelectedTrack"
+                                     SearchFunc="SearchTracks"
+                                     MinCharacters="0"
+                                     MaxItems="100"
+                                     ToStringFunc="@(track => track?.TrackName)"
+                                     Variant="Variant.Outlined">
+                        <ItemTemplate Context="Track">
+                            @Track?.TrackName
+                        </ItemTemplate>
+                        <ItemSelectedTemplate Context="Track">
+                            @Track?.TrackName
+                        </ItemSelectedTemplate>
+                    </MudAutocomplete>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudSelect Label="Config" @bind-Value="Vm.TrackId" Disabled="@(SelectedTrack is null)" Variant="Variant.Outlined" ToStringFunc="@(id => SelectedTrack?.Configs.FirstOrDefault(x => x.TrackId == id)?.ConfigName)">
+                        @if (SelectedTrack is not null)
+                        {
+                            @foreach (var config in SelectedTrack.Configs)
+                            {
+                                <MudSelectItem Value="@((long?)config.TrackId)">@config.ConfigName</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudField Label="Practice" Variant="Variant.Outlined">
+                        <MudCheckBox Label="Has Practice" @bind-Checked="Vm.HasPractice" />
+                        <EditSession Session=Vm.Practice />
+                    </MudField>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudField Label="Qualifying" Variant="Variant.Outlined">
+                        <MudCheckBox Label="Has Qualifying" @bind-Checked="Vm.HasQualifying" />
+                        <EditSession Session=Vm.Qualifying />
+                    </MudField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudField Label="Race Sessions" Variant="Variant.Outlined" HelperText="@SessionHelperText">
+                        <MudStack Spacing="2" AlignItems="AlignItems.Center">
+                            @foreach (var session in Bind(Vm, x => x.Races))
+                            {
+                                <div class="d-flex align-end">
+                                    <MudGrid>
+                                        <MudItem xs="4">
+                                            <MudTextField Label="Session Name" @bind-Value="session.Name" Variant="Variant.Text"/>
+                                        </MudItem>
+                                        <MudItem xs="4">
+                                            <MudTextField Label="Duration" @bind-Value="session.Duration" InputType="InputType.Time" Variant="Variant.Text"/>
+                                        </MudItem>
+                                        <MudItem xs="4">
+                                            <MudNumericField Label="Laps" @bind-Value="session.Laps" Variant="Variant.Text" />
+                                        </MudItem>
+                                    </MudGrid>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Error" OnClick="@(() => Vm.Sessions.Remove(session))"/>
+                                </div>
+                                @if (@Vm.CanMoveSessionDown(session))
+                                {
+                                    <MudButton OnClick="@(() => Vm.MoveSessionDown(session))" Color="Color.Secondary">&uarr; &darr;</MudButton>
+                                }
+                            }
+                            <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="@(() => Vm.AddSession("Race", SessionType.Race, onlyOnce: false))">Add Race</MudButton>
+                        </MudStack>
+                    </MudField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MultiSelectAutoComplete Label="Point Systems"
+                                             @bind-Values="Vm.ResultConfigs"
+                                             SearchFunc="SearchResultConfigs"
+                                             ToStringFunc="GetReferencedResultConfigName"
+                                             Variant="Variant.Outlined" />
+                </MudItem>
+            </MudGrid>
+            <FormValidationMessage For="() => Vm.ResultConfigs" />
+            <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="Cancel" Color="Color.Secondary">Cancel</MudButton>
+            <ProgressButton ButtonType="ButtonType.Submit" Color="Color.Primary" Loading="Loading">Save</ProgressButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    public MudDialogInstance DialogInstance { get; set; } = default!;
+
+    private IList<TrackGroupModel> TrackList { get; set; } = Array.Empty<TrackGroupModel>();
+
+    private TrackGroupModel? selectedTrack;
+    private TrackGroupModel? SelectedTrack
+    {
+        get => selectedTrack;
+        set
+        {
+            if (selectedTrack != value)
+            {
+                SetSelectedTrack(value);
+            }
+        }
+    }
+
+    private IEnumerable<ResultConfigInfoModel> ResultConfigs { get; set; } = Array.Empty<ResultConfigInfoModel>();
+
+    private string SessionHelperText => Vm.RaceCount switch
+    {
+        0 => "No race configured - add a race to create a single header event",
+        1 => "This is a single header event - add a race to create a multi header event",
+        >= 2 => "This is a multi header event",
+        _ => "",
+    };
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, DialogInstance);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        TrackList = await trackListService.GetTracks();
+        SelectedTrack = TrackList.FirstOrDefault(x => x.Configs.Any(y => y.TrackId == Vm.TrackId));
+        await Vm.LoadAvailableResultConfigs();
+        ResultConfigs = Vm.AvailableResultConfigs;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void SetSelectedTrack(TrackGroupModel? track)
+    {
+        if (track == null)
+        {
+            selectedTrack = null;
+            Vm.TrackId = null;
+            return;
+        }
+
+        selectedTrack = track;
+        var trackGroup = track.Configs.FirstOrDefault(x => x.TrackId == Vm.TrackId)
+            ?? track.Configs.FirstOrDefault();
+        Vm.TrackId = trackGroup?.TrackId;
+    }
+
+    private async Task<IEnumerable<TrackGroupModel?>> SearchTracks(string search)
+    {
+        if (string.IsNullOrEmpty(search))
+        {
+            return TrackList;
+        }
+        return await Task.FromResult(TrackList.Where(x => x.TrackName.Contains(search, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private async Task<IEnumerable<ResultConfigInfoModel>> SearchResultConfigs(string name)
+    {
+        return await Task.FromResult(ResultConfigs
+            .Where(x => Vm.ResultConfigs.Any(y => y.ResultConfigId == x.ResultConfigId) == false)
+            .Where(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase) || x.DisplayName.Contains(name, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private string GetReferencedResultConfigName(ResultConfigInfoModel? config)
+    {
+        if (config is null)
+        {
+            return string.Empty;
+        }
+        if (string.IsNullOrEmpty(config.ChampionshipName))
+        {
+            return config.Name;
+        }
+        return $"{config.ChampionshipName} - {config.Name}";
+    }
+}

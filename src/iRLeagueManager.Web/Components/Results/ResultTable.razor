@@ -1,0 +1,38 @@
+﻿@namespace iRLeagueManager.Web.Components
+@typeparam TRow
+@attribute [CascadingTypeParameter(nameof(TRow))]
+
+<MudSimpleTable Elevation=5 Dense="true" Hover="true" Striped="true" Bordered="true">
+    <thead>
+        <tr>
+            <CascadingValue Value=@SortState>
+                @HeaderTemplate
+            </CascadingValue>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var rowData in GetOrderedData(Data, SortState))
+        {
+            <tr>
+                @RowTemplate(rowData)
+            </tr>
+        }
+    </tbody>
+</MudSimpleTable>
+
+@code {
+    private static IEnumerable<TRow> GetOrderedData(IEnumerable<TRow> data, SortState<TRow> sortState)
+    {
+        if (sortState.SortFunc is null)
+        {
+            return data;
+        }
+
+        return sortState.Direction switch
+        {
+            SortDirection.Ascending => data.OrderBy(sortState.SortFunc),
+            SortDirection.Descending => data.OrderByDescending(sortState.SortFunc),
+            _ => data
+        };
+    }
+}

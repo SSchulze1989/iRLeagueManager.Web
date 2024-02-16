@@ -1,61 +1,67 @@
 ﻿@page "/{LeagueName}/Settings/Reviews"
-@using iRLeagueApiCore.Common.Models.Reviews;
-@using iRLeagueManager.Web.Components.Settings;
-@using iRLeagueManager.Web.Components;
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Reviews
+@using iRLeagueManager.Web.Components
 @inherits LeagueComponentBase
 @layout SettingsLayout
-@inject ReviewSettingsViewModel Vm
+@inject LeagueViewModel League
+@inject ReviewSettingsViewModel Reviews
+@inject IDialogService DialogService
 @attribute [Authorize]
 
-<PageTitle>Settings - @LeagueName</PageTitle>
+<PageTitle>
+    Settings - @LeagueName
+</PageTitle>
+
+<LoadingHeader Loading="Loading">
+    <HeaderText>
+        <MudText Typo="Typo.h5">Review Settings</MudText>
+    </HeaderText>
+</LoadingHeader>
 
 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
     <Authorized>
-        <div @attributes=AdditionalAttributes>
-            <div class="card my-2 pb-0">
-                <div class="card-header">
-                    Vote Categories
-                </div>
-                <div class="list-group list-group-flush">
-                    @foreach (var voteCategory in Vm.VoteCategories)
-                    {
-                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button" @onclick=@(() => OnVoteCategoryClick(voteCategory))>
-                            <div class="w-75">
-                                <div class="row">
-                                    <div class="col">
-                                        <h5>Text</h5>
-                                    </div>
-                                    <div class="col">
-                                        <h5>
-                                            @if (voteCategory.DefaultPenalty > 0)
-                                            {
-                                                @:Bonus
-                                            }
-                                            else
-                                            {
-                                                @:Penalty
-                                            }
-                                        </h5>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col">
-                                        @voteCategory.Text
-                                    </div>
-                                    <div class="col">
-                                        @(voteCategory.DefaultPenalty > 0 ? "+" : "")@voteCategory.DefaultPenalty
-                                    </div>
-                                </div>
-                            </div>
-                            <button class="btn btn-outline-danger" @onclick=@(() => OnDeleteVoteCategoryClick(voteCategory)) @onclick:stopPropagation>
-                                <span class="oi oi-trash" />
-                            </button>
-                        </div>
-                    }
-                </div>
-            </div>
-            <button class="btn btn-outline-secondary" @onclick=OnAddVoteCategoryClick>Add Vote Category</button>
-        </div>
+        <SettingsTopSection Class="mt-2">
+            <SettingsSwitch Text="Enable Protests"
+                            HelperText="@(League.EnableProtests ? "Enabled: Users can submit protests" : "Protest are disabled")"
+                            Color="Color.Primary"
+                            @bind-Checked="League.EnableProtests" />
+            <SettingsItem HelperText="Configure open time, cooldown and public settings" OnClick="ProtestSettingsClick" Disabled="!League.EnableProtests">
+                Protest Options
+            </SettingsItem>
+            <SettingsSection Text="Incident Categories"
+                             @bind-Expanded=categoriesExpanded
+                             HelperText="@(categoriesExpanded ? "Collapse" : "Expand")"
+                             InitiallyExpanded="false"
+                             Class="me-4 pe-4">
+                <MudTable Items="Bind(Reviews, x => x.VoteCategories)"
+                          Breakpoint="Breakpoint.None"
+                          Hover="true"
+                          OnRowClick="@((TableRowClickEventArgs<VoteCategoryViewModel> e) => OnVoteCategoryClick(e.Item))">
+                    <HeaderContent>
+                        <MudTh Class="ps-4">Text</MudTh>
+                        <MudTh>Penalty/Bonus</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate Context=category>
+                        <MudTd Class="ps-4">
+                            @category.Text
+                        </MudTd>
+                        <MudTd>
+                            @(category.DefaultPenalty > 0 ? "+" : "")@category.DefaultPenalty
+                        </MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="@(() => OnDeleteVoteCategoryClick(category))" Size="Size.Small" />
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+                <SettingsItem Icon="@Icons.Material.Outlined.Add" Text="Add Vote Category" OnClick="OnAddVoteCategoryClick" Color="Color.Tertiary" />
+                <SettingsItem OnClick="() => categoriesExpanded = false">
+                    <MudText Typo="Typo.caption">Collapse Categories</MudText>
+                </SettingsItem>
+            </SettingsSection>
+        </SettingsTopSection>
     </Authorized>
     <NotAuthorized>
         You are not allowed here ...
@@ -63,11 +69,19 @@
 </AuthorizeView>
 
 @code {
-    [CascadingParameter]
-    public IModalService ModalService { get; set; } = default!;
+    private bool Loading => Bind(League, x => x.Loading) || Bind(Reviews, x => x.Loading);
 
-    [Parameter(CaptureUnmatchedValues = true)]
-    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+    private bool categoriesExpanded = false;
+
+    private EventCallback OnChangeDebounced;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        OnChangeDebounced = EventCallback.Factory.Create(this, DebounceWrapper.Debounce(OnChanged, 500));
+        League.HasChanged += OnVmChanged;
+        Reviews.HasChanged += OnVmChanged;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -76,21 +90,39 @@
         {
             return;
         }
-        await Vm.LoadAsync();
+        await League.LoadCurrent(CancellationToken);
+        await Reviews.LoadAsync(CancellationToken);
         await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ProtestSettingsClick()
+    {
+        var parameters = new DialogParameters<EditProtestSettingsDialog>()
+        {
+            {x => x.Model, League.CopyModel()},
+            {x => x.OnSubmit, async (league, cancellation) => await league.SaveChangesAsync(cancellation)},
+        };
+        var options = new DialogOptions()
+            {
+                FullWidth = false,
+                MaxWidth = MaxWidth.ExtraSmall,
+            };
+        var result = await DialogService.Show<EditProtestSettingsDialog>("Edit Protest Settings", parameters, options).Result;
+        if (result.Canceled == false && result.Data is LeagueModel leagueModel)
+        {
+            League.SetModel(leagueModel);
+        }
     }
 
     private async Task OnVoteCategoryClick(VoteCategoryViewModel voteCategory)
     {
-        var parameters = new ModalParameters<EditVoteCategoryModal>()
-            .Add(x => x.Model, voteCategory.CopyModel())
-            .Add(x => x.OnSubmit, new(async (category, cancellation) => await category.SaveChangesAsync(cancellation)));
-        var options = new ModalOptions()
+        var parameters = new DialogParameters<EditVoteCategoryDialog>()
         {
-            DisableBackgroundCancel = true,
+            {x => x.Model, voteCategory.CopyModel()},
+            {x => x.OnSubmit, new(async (category, cancellation) => await category.SaveChangesAsync(cancellation))},
         };
-        var result = await ModalService.Show<EditVoteCategoryModal>("Edit Vote Category", parameters, options).Result;
-        if (result.Confirmed && result.Data is VoteCategoryModel model)
+        var result = await DialogService.Show<EditVoteCategoryDialog>("Edit Vote Category", parameters).Result;
+        if (result.Canceled == false && result.Data is VoteCategoryModel model)
         {
             voteCategory.SetModel(model);
         }
@@ -98,33 +130,61 @@
 
     private async Task OnAddVoteCategoryClick()
     {
-        var parameters = new ModalParameters<EditVoteCategoryModal>()
-            .Add(x => x.Model, CreateVoteCategoryTemplate())
-            .Add(x => x.OnSubmit, new(async (category, cancellation) => await Vm.AddVoteCategory(category.GetModel(), cancellation)));
-        var options = new ModalOptions()
+        var parameters = new DialogParameters<EditVoteCategoryDialog>()
         {
-            DisableBackgroundCancel = true,
+            {x => x.Model, CreateVoteCategoryTemplate()},
+            {x => x.OnSubmit, new(async (category, cancellation) => await Reviews.AddVoteCategory(category.GetModel(), cancellation))},
         };
-        await ModalService.Show<EditVoteCategoryModal>("Add Vote Category", parameters, options).Result;
+        await DialogService.Show<EditVoteCategoryDialog>("Add Vote Category", parameters).Result;
     }
 
     private async Task OnDeleteVoteCategoryClick(VoteCategoryViewModel voteCategory)
     {
-        var parameters = new ModalParameters<ConfirmModal>()
-            .Add(x => x.Text, $"Really delete vote category \"{voteCategory.Text}\"?")
-            .Add(x => x.ButtonTypes, ButtonTypes.YesNo);
-        var result = await ModalService.Show<ConfirmModal>("Delete Vote Category", parameters).Result;
-        if (result.Confirmed)
+        var parameters = new DialogParameters<ConfirmDialog>()
         {
-            await Vm.DeleteVoteCategory(voteCategory.GetModel());
+            {x => x.Text, $"Really delete vote category \"{voteCategory.Text}\"?"},
+            {x => x.ButtonTypes, ButtonTypes.YesNo},
+        };
+        var result = await DialogService.Show<ConfirmDialog>("Delete Vote Category", parameters).Result;
+        if (result.Canceled == false)
+        {
+            await Reviews.DeleteVoteCategory(voteCategory.GetModel());
         }
     }
 
     private VoteCategoryModel CreateVoteCategoryTemplate()
     {
         return new()
+            {
+                Index = Reviews.VoteCategories.Any() ? Reviews.VoteCategories.Max(x => x.Index) + 1 : 0,
+            };
+    }
+
+    private void OnVmChanged(object? sender, EventArgs e)
+    {
+        InvokeAsync(OnChangeDebounced.InvokeAsync);
+    }
+
+    private async Task OnChanged()
+    {
+        await SaveChanges();
+    }
+
+    private async Task SaveChanges()
+    {
+        if (League.HasChanges)
         {
-            Index = Vm.VoteCategories.Any() ? Vm.VoteCategories.Max(x => x.Index) + 1 : 0,
-        };
+            await League.SaveChangesAsync(CancellationToken);
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            League.HasChanged -= OnVmChanged;
+            Reviews.HasChanged -= OnVmChanged;
+        }
+        base.Dispose(disposing);
     }
 }

@@ -1,10 +1,11 @@
 ﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.ViewModels;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace iRLeagueManager.Web.Data;
 
-public sealed class SharedStateService
+public sealed class SharedStateService : INotifyPropertyChanged
 {
     private bool loggedIn;
     public bool LoggedIn { get => loggedIn; set => Set(ref loggedIn, value); }
@@ -28,12 +29,17 @@ public sealed class SharedStateService
     public ObservableCollection<SeasonModel> SeasonList { get => seasonList; set => Set(ref seasonList, value); }
 
     public event EventHandler? StateChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private TimeZoneInfo localTimeZone;
     public TimeZoneInfo LocalTimeZone { get => localTimeZone; set => Set(ref localTimeZone, value); }
 
     private LeagueModel? leagueInfo;
     public LeagueModel? LeagueInfo { get => leagueInfo; set => Set(ref leagueInfo, value); }
+
+    private int loadingCount;
+    internal int LoadingCount { get => loadingCount; set => Set(ref loadingCount, value, nameof(Loading)); }
+    public bool Loading { get => LoadingCount > 0; }
 
     public SharedStateService()
     {
@@ -53,5 +59,6 @@ public sealed class SharedStateService
     private void OnStateHasChanged([CallerMemberName] string? propertyName = null)
     {
         StateChanged?.Invoke(this, EventArgs.Empty);
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

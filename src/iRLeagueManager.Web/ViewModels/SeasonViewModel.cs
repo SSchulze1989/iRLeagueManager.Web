@@ -26,7 +26,7 @@ public sealed class SeasonViewModel : LeagueViewModelBase<SeasonViewModel, Seaso
     public bool Finished { get => model.Finished; set => SetP(model.Finished, value => model.Finished = value, value); }
     public IEnumerable<long> ScheduleIds => model.ScheduleIds;
 
-    public override void SetModel(SeasonModel model)
+    protected override void SetModel(SeasonModel model)
     {
         model ??= new SeasonModel();
         this.model = model;

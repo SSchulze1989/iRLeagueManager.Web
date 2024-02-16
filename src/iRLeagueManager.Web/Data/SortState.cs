@@ -1,4 +1,4 @@
-﻿using iRLeagueManager.Web.ViewModels;
+﻿using MudBlazor;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 

@@ -1,5 +1,6 @@
 ﻿using iRLeagueApiCore.Common.Enums;
 using iRLeagueManager.Web.Data;
+using MudBlazor;
 
 namespace iRLeagueManager.Web.ViewModels;
 
@@ -19,7 +20,7 @@ public sealed class SortOptionsViewModel : LeagueViewModelBase<SortOptionsViewMo
     private ObservableCollection<SortOptionViewModel> options;
     public ObservableCollection<SortOptionViewModel> Options { get => options; set => Set(ref options, value); }
 
-    public override void SetModel(IList<SortOptions> model)
+    protected override void SetModel(IList<SortOptions> model)
     {
         base.SetModel(model);
         Options = new(model.Select(x => new SortOptionViewModel(x)).ToList());
@@ -73,10 +74,4 @@ public enum SortValue
     RacesCounted,
     RacesScored,
     RacesInPoints,
-}
-
-public enum SortDirection
-{
-    Ascending,
-    Descending,
 }

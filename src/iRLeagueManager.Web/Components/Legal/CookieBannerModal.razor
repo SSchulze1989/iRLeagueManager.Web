@@ -1,21 +1,26 @@
-﻿<CookiePolicy/>
+﻿@namespace iRLeagueManager.Web.Components
 
-<div class="d-flex justify-content-end mt-4">
-    <button class="btn btn-outline-primary" @onclick=ContinueClick>Continue with required cookies</button>
-</div>
+<MudDialog>
+    <DialogContent>
+        <CookiePolicy/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick=ContinueClick>Continue with required cookies</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
     [CascadingParameter]
-    private BlazoredModalInstance ModalInstance { get; set; } = default!;
+    private MudDialogInstance DialogInstance { get; set; } = default!;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        BlazorParameterNullException.ThrowIfNull(this, ModalInstance);
+        BlazorParameterNullException.ThrowIfNull(this, DialogInstance);
     }
 
-    private async Task ContinueClick()
+    private void ContinueClick()
     {
-        await ModalInstance.CloseAsync();
+        DialogInstance.Close();
     }
 }

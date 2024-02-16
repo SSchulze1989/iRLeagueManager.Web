@@ -1,9 +1,11 @@
 ﻿using iRLeagueApiCore.Common.Enums;
 using iRLeagueApiCore.Common.Models;
+using iRLeagueApiCore.Common.Models.Reviews;
 using iRLeagueApiCore.Common.Models.Results;
 using iRLeagueApiCore.Common.Models.Users;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
+using System.Diagnostics.Contracts;
 
 namespace iRLeagueManager.Web.ViewModels;
 
@@ -32,6 +34,9 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
 
     private ObservableCollection<UserModel> leagueUsers = new();
     public ObservableCollection<UserModel> LeagueUsers { get => leagueUsers; set => Set(ref leagueUsers, value); }
+
+    private ICollection<VoteCategoryViewModel> voteCategories = Array.Empty<VoteCategoryViewModel>();
+    public ICollection<VoteCategoryViewModel> VoteCategories { get => voteCategories; set => Set(ref voteCategories, value); }
 
     private CarListModel eventCars;
     public CarListModel EventCars { get => eventCars; set => Set(ref eventCars, value); }
@@ -120,6 +125,31 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
         finally 
         { 
             Loading = false; 
+        }
+    }
+
+    public async Task<StatusResult> LoadVoteCategories(CancellationToken cancellationToken = default)
+    {
+        if (CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await CurrentLeague
+                .VoteCategories()
+                .Get(cancellationToken);
+            if (result.Success && result.Content is IEnumerable<VoteCategoryModel> models)
+            {
+                VoteCategories = models.Select(x => new VoteCategoryViewModel(LoggerFactory, ApiService, x)).ToList();
+            }
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
         }
     }
 

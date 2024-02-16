@@ -1,148 +1,127 @@
-﻿@using System.Linq.Expressions
+﻿@namespace iRLeagueManager.Web.Components
+@using System.Linq.Expressions
 @using iRLeagueApiCore.Common.Enums;
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
+@inject IDialogService DialogService
 
-<div @attributes=AdditionalAttributes>
-    <div class="card my-2" id="results-session-@Bind(Result, x => x.SessionName)">
-        <div class="card-header d-flex justify-content-between">
-            <label>@Bind(Result, x => x.SessionName)</label>
-            <button class="btn p-0 m-0 text-danger" title="Show penalties" @onclick=ShowPenaltiesClick>
-                <span class="bi bi-exclamation-diamond" />
-            </button>
-        </div>
-        @{
-            var resultRows = Result.ResultRows;
-            var displayBonusPoints = resultRows.Any(x => x.BonusPoints != 0);
-            var displayStartPos = resultRows.Any(x => x.StartPosition != 0);
-            var displayChange = displayStartPos;
-            var displayQualyLap = resultRows.Any(x => x.QualifyingTime > TimeSpan.FromSeconds(1));
-        }
-        <div class="card-body overflow-auto p-1">        
-            <ResultTable Data=Result.ResultRows>
-                <HeaderTemplate>
-                    <ResultTableHeader Text="Pos." Sort=@(x => x.FinalPosition) Default=true/>
-                    @if (isTeamResult == false)
-                    {
-                        @if (displayStartPos)
-                        {
-                            <ResultTableHeader Text="Start" Sort=@(x => x.StartPosition) />
-                        }
-                        <ResultTableHeader Text="Name" Sort="@(x => x.Firstname)" />
-                    }
-                    <ResultTableHeader Text="Team" Sort=@(x => x.TeamName)/>
-                    @if (displayQualyLap)
-                    {
-                        <ResultTableHeader Text="Qualy Lap" Sort="@(x => x.QualifyingTime)" />
-                    }
-                    <ResultTableHeader Text="Fastest Lap" Sort="@(x => x.FastestLapTime)" />
-                    <ResultTableHeader Text="Avg. Lap" Sort="@(x => x.AvgLapTime)" />
-                    <ResultTableHeader Text="Interval" Sort="@(x => x.Interval)" />
-                    <ResultTableHeader Text="Laps Lead" Sort="@(x => x.LeadLaps)" Direction="SortDirection.Descending" />
-                    <ResultTableHeader Text="Laps Compl." Sort="@(x => x.CompletedLaps)" Direction="SortDirection.Descending" />
-                    <ResultTableHeader Text="Race Pts." Sort="@(x => x.RacePoints)" Direction="SortDirection.Descending" />
-                    @if (displayBonusPoints)
-                    {
-                        <ResultTableHeader Text="Bonus Pts." Sort="@(x => x.BonusPoints)" Direction="SortDirection.Descending" />
-                    }
-                    <ResultTableHeader Text="Penalty" Sort="@(x => x.PenaltyPoints)" />
-                    <ResultTableHeader Text="Total Pts." Sort="@(x => x.TotalPoints)" Direction="SortDirection.Descending" />
-                    @if (isTeamResult == false)
-                    {
-                        <ResultTableHeader Text="@($"IR ({EvenStrengthOfField(Result)})")" Sort="@(x => x.OldIrating)" Direction="SortDirection.Descending" />
-                    }
-                    <ResultTableHeader Text="Incs." Sort="@(x => x.Incidents)" />
-                    @if (showDisqualification)
-                    {
-                        <th></th>
-                    }
-                    @if (CanEdit)
-                    {
-                        <th></th>
-                    }
-                </HeaderTemplate>
-                <RowTemplate Context=Row>
-                    <td>
-                        <ValueChange Value=Row.FinalPosition Change=@(displayChange ? Row.FinalPositionChange : 0)>
-                            <ValueTemplate Context=Value>
-                                @Value.
-                            </ValueTemplate>
-                        </ValueChange>
-                    </td>
-                    @if (isTeamResult == false)
-                    {
-                        @if (displayStartPos)
-                        {
-                            <td>@Row.StartPosition.</td>
-                        }
-                        <td>@Row.Firstname @Row.Lastname</td>
-                    }
-                    <td style="color:@(Row.TeamColor)">@(Row.TeamName)</td>
-                    @if (displayQualyLap)
-                    {
-                        <td class="@(IsFastestLap(resultRows, Row, x => x.QualifyingTime) ? "fw-bold" : "")">@Row.QualifyingTime.LapTimeString()</td>
-                    }
-                    <td class="@(IsFastestLap(resultRows, Row, x => x.FastestLapTime) ? "fw-bold" : "")">@Row.FastestLapTime.LapTimeString() @(Row.FastLapNr != 0 ? $"({Row.FastLapNr})" : "")</td>
-                    <td class="@(IsFastestLap(resultRows, Row, x => x.AvgLapTime) ? "fw-bold" : "")">@Row.AvgLapTime.LapTimeString()</td>
-                    <td>+@(Row.Interval.Laps == 0 ? Row.Interval.Time.LapTimeString() : $"{Row.Interval.Laps} Laps")</td>
-                    <td>@Row.LeadLaps</td>
-                    <td>@Row.CompletedLaps</td>
-                    <td>@Row.RacePoints</td>
-                    @if (displayBonusPoints)
-                    {
-                        <td>@Row.BonusPoints</td>
-                    }
-                    <td style="@(@Row.PenaltyPoints != 0 ? "color:red" : "")">
-                        @(Row.PenaltyPoints != 0 ? $"-{Row.PenaltyPoints}" : "")
-                    </td>
-                    <td>@Row.TotalPoints</td>
-                    @if (isTeamResult == false)
-                    {
-                        <td>@Row.OldIrating</td>
-                    }
-                    <td>@Row.Incidents</td>
-                    @if (showDisqualification)
-                    {
-                        <td>
-                            @if (Row.Status == RaceStatus.Disqualified)
-                            {
-                                <span class="bi bi-flag-fill" style="color: black" title="Disqualified"/>
-                            }
-                        </td>
-                    }
-                    @if (CanEdit)
-                    {
-                        <td>
-                            <div>
-                                @{
-                                    var rowId = $"table-row-{Row.GetHashCode()}";
-                                }
-                                <div class="table-row-action" type="button" id="@rowId" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span class="bi bi-three-dots-vertical"/>
-                                </div>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" @onclick=@(() => OnRowOptionsClick(Row))>Add Bonus/Penalty</a></li>
-                                    <li><a class="dropdown-item" @onclick=@(() => ShowPenaltiesClick())>Show Bonuses/Penalties</a></li>
-                                </ul>
-                            </div>
-                        </td>
-                    }
-                </RowTemplate>
-            </ResultTable>
-        </div>
-    </div>
-</div>
+<MudElement HtmlTag="div" Class="@Class" Style="@Style">
+    <MudStack Class="px-2 pt-2" AlignItems="AlignItems.Center" Row="true">
+        <MudText Typo="Typo.h6">@Result.SessionName</MudText>
+        <MudSpacer/>
+        <MudIconButton Icon="@Icons.Material.Filled.Info" Title="Show penalties" OnClick=ShowBonusesPenaltiesClick/>
+    </MudStack>
+    @{
+        var resultRows = Result.ResultRows;
+        var displayBonusPoints = resultRows.Any(x => x.BonusPoints != 0);
+        var displayStartPos = resultRows.Any(x => x.StartPosition != 0);
+        var displayChange = displayStartPos;
+        var displayQualyLap = resultRows.Any(x => x.QualifyingTime > TimeSpan.FromSeconds(1));
+    }
+    <ResultTable Data=Result.ResultRows>
+        <HeaderTemplate>
+            <ResultTableHeader Text="Pos." Sort=@(x => x.FinalPosition) Default=true/>
+            @if (isTeamResult == false)
+            {
+                @if (displayStartPos)
+                {
+                        <ResultTableHeader Text="Start" Sort=@(x => x.StartPosition) />
+                }
+                <ResultTableHeader Text="Name" Sort="@(x => x.Firstname)" />
+            }
+            <ResultTableHeader Text="Team" Sort=@(x => x.TeamName)/>
+            @if (displayQualyLap)
+            {
+                <ResultTableHeader Text="Qualy Lap" Sort="@(x => x.QualifyingTime == TimeSpan.Zero ? TimeSpan.MaxValue : x.QualifyingTime)" />
+            
+            }
+            <ResultTableHeader Text="Fastest Lap" Sort="@(x => x.FastestLapTime == TimeSpan.Zero ? TimeSpan.MaxValue : x.FastestLapTime)" />
+            <ResultTableHeader Text="Avg. Lap" Sort="@(x => x.AvgLapTime == TimeSpan.Zero ? TimeSpan.MaxValue : x.AvgLapTime)" />
+            <ResultTableHeader Text="Interval" Sort="@(x => x.Interval)" />
+            <ResultTableHeader Text="Laps Lead" Sort="@(x => x.LeadLaps)" Direction="SortDirection.Descending" />
+            <ResultTableHeader Text="Laps Compl." Sort="@(x => x.CompletedLaps)" Direction="SortDirection.Descending" />
+            <ResultTableHeader Text="Race Pts." Sort="@(x => x.RacePoints)" Direction="SortDirection.Descending" />
+            @if (displayBonusPoints)
+            {
+                <ResultTableHeader Text="Bonus Pts." Sort="@(x => x.BonusPoints)" Direction="SortDirection.Descending" />
+            }
+            <ResultTableHeader Text="Penalty" TextShort="Pen." Breakpoint="Breakpoint.Xl" Sort="@(x => x.PenaltyPoints)" />
+            <ResultTableHeader Text="Total Pts." Sort="@(x => x.TotalPoints)" Direction="SortDirection.Descending" />
+            @if (isTeamResult == false)
+            {
+                <ResultTableHeader Text="@($"IR ({EvenStrengthOfField(Result)})")" Sort="@(x => x.OldIrating)" Direction="SortDirection.Descending" />
+            }
+            <ResultTableHeader Text="Incs." Sort="@(x => x.Incidents)" />
+            @if (CanEdit)
+            {
+                <th style="width: 1em"></th>
+            }
+        </HeaderTemplate>
+        <RowTemplate Context=Row>
+            <td class="px-2 py-2">
+                <ValueChange Value=Row.FinalPosition Change=@(displayChange ? Row.FinalPositionChange : 0)>
+                    <ValueTemplate Context=Value>
+                        @Value.
+                    </ValueTemplate>
+                </ValueChange>
+            </td>
+            @if (isTeamResult == false)
+            {
+                @if (displayStartPos)
+                {
+                    <td class="px-1 py-2">@Row.StartPosition.</td>
+                }
+                <td class="px-1 py-1" style="white-space: nowrap">@Row.Firstname @Row.Lastname</td>
+            }
+            <td class="px-1 py-1" style="color: @(Row.TeamColor); white-space: nowrap">@(Row.TeamName)</td>
+            @if (displayQualyLap)
+            {
+                <td class="px-1 py-1 @(IsFastestLap(resultRows, Row, x => x.QualifyingTime) ? "fw-bold" : "")">@Row.QualifyingTime.LapTimeString()</td>   
+            }
+            <td class="px-1 py-1 @(IsFastestLap(resultRows, Row, x => x.FastestLapTime) ? "fw-bold" : "")">@Row.FastestLapTime.LapTimeString() @(Row.FastLapNr != 0 ? $"({Row.FastLapNr})" : "")</td>
+            <td class="px-1 py-1 @(IsFastestLap(resultRows, Row, x => x.AvgLapTime) ? "fw-bold" : "")">@Row.AvgLapTime.LapTimeString()</td>
+            <td class="px-1 py-1">+@(Row.Interval.Laps == 0 ? Row.Interval.Time.LapTimeString() : $"{Row.Interval.Laps} Laps")</td>
+            <td class="px-1 py-1">@Row.LeadLaps</td>
+            <td class="px-1 py-1">@Row.CompletedLaps</td>
+            <td class="px-1 py-1">@Row.RacePoints</td>
+            @if (displayBonusPoints)
+            {
+                <td class="px-1 py-1">@Row.BonusPoints</td>
+            }
+            <td class="px-1 py-1" style="@(@Row.PenaltyPoints != 0 ? "color:red" : "")">
+                @(Row.PenaltyPoints != 0 ? -Row.PenaltyPoints : "")
+            </td>
+            <td class="px-1 py-1">@Row.TotalPoints</td>
+            @if (isTeamResult == false)
+            {
+                
+                    <td class="px-1 py-1">@Row.OldIrating</td>
+                
+            }
+            <td class="px-1 py-1">@Row.Incidents</td>
+            @if (CanEdit)
+            {
+                <td class="pa-0">
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true" Size="Size.Small">
+                        <MudMenuItem OnClick="() => AddBonusPentalyClick(Row)">Add Bonus/Penalty</MudMenuItem>
+                        <MudMenuItem OnClick="() => ShowBonusesPenaltiesClick(Row)">Show Bonuses/Penalties</MudMenuItem>
+                    </MudMenu>
+                </td>
+            }
+        </RowTemplate>
+    </ResultTable>
+</MudElement>
 
 @code {
     [CascadingParameter]
     private EventListViewModel EventList { get; set; } = default!;
-    [CascadingParameter]
-    public IModalService ModalService { get; set; } = default!;
-    [Parameter(CaptureUnmatchedValues = true)]
-    public IDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter, EditorRequired]
     public SessionResultViewModel Result { get; set; } = default!;
+    [Parameter] 
+    public string Class { get; set; } = string.Empty;
+    [Parameter]
+    public string Style { get; set; } = string.Empty;
     [Parameter]
     public bool CanEdit { get; set; } = false;
 
@@ -154,7 +133,6 @@
     {
         base.OnParametersSet();
         BlazorParameterNullException.ThrowIfNull(this, EventList);
-        BlazorParameterNullException.ThrowIfNull(this, ModalService);
         BlazorParameterNullException.ThrowIfNull(this, Result);
         isTeamResult = Result.ResultRows.Any(x => x.MemberId == null);
         showDisqualification = Result.ResultRows.Any(x => x.Status == RaceStatus.Disqualified);
@@ -175,20 +153,28 @@
         return result.EventResult?.StrengthOfField ?? 0;
     }
 
-    private async Task OnRowOptionsClick(ResultRowModel row)
+    private async Task AddBonusPentalyClick(ResultRowModel row)
     {
-        var parameters = new ModalParameters<EditAddPenaltyModal>()
-            .Add(x => x.Model, new())
-            .Add(x => x.AvailableSessions, Result.EventResult?.GetModel().SessionResults ?? Array.Empty<ResultModel>())
-            .Add(x => x.SelectedSession, Result.GetModel())
-            .Add(x => x.SelectedRow, row)
-            .Add(x => x.CanSelectSession, true)
-            .Add(x => x.OnSubmit, async (p, ct) => await p.SaveNew(ct))
-            .Add(x => x.IsTeamResult, isTeamResult);
-        var result = await ModalService.Show<EditAddPenaltyModal>("Add Penalty", parameters).Result;
+        var parameters = new DialogParameters<EditAddPenaltyModal>()
+        {
+            {x => x.Model, new()},
+            {x => x.AvailableSessions, Result.EventResult?.GetModel().SessionResults ?? Array.Empty<ResultModel>()},
+            {x => x.SelectedSession, Result.GetModel()},
+            {x => x.SelectedRow, row},
+            {x => x.CanSelectSession, true},
+            {x => x.OnSubmit, async (p, ct) => await p.SaveNew(ct)},
+            {x => x.IsTeamResult, isTeamResult},
+        };
+
+        var result = await DialogService.Show<EditAddPenaltyModal>("Add Bonus/Penalty", parameters).Result;
     }
 
-    private async Task ShowPenaltiesClick()
+    private Task ShowBonusesPenaltiesClick()
+    {
+        return ShowBonusesPenaltiesClick(null);
+    }
+
+    private async Task ShowBonusesPenaltiesClick(ResultRowModel? row)
     {
         if (Result.EventResult is null)
         {
@@ -200,17 +186,26 @@
             {
                 return Array.Empty<PenaltyModel>();
             }
-            return penalties.Content.Where(x => Result.SessionNr == 999 || x.SessionNr == Result.SessionNr);
+            var getPenalties = penalties.Content.Where(x => Result.SessionNr == 999 || x.SessionNr == Result.SessionNr);
+            if (row is not null)
+            {
+                getPenalties = getPenalties.Where(x => isTeamResult ? x.Team?.TeamId == row.TeamId : x.Member?.MemberId == row.MemberId);
+            }
+            return getPenalties;
         }
-
-        var parameters = new ModalParameters<ShowPenaltiesModal>()
-            .Add(x => x.GetPenalties, GetPenalties)
-            .Add(x => x.CanEdit, CanEdit)
-            .Add(x => x.IsTeamResult, isTeamResult);
-        var options = new ModalOptions()
+        var parameters = new DialogParameters<ShowPenaltiesModal>()
         {
-            DisableBackgroundCancel = false,
+            {x => x.GetPenalties, GetPenalties},
+            {x => x.CanEdit, CanEdit},
+            {x => x.IsTeamResult, isTeamResult},
         };
-        var result = await ModalService.Show<ShowPenaltiesModal>("Bonuses / Penalties", parameters, options).Result;
+        var options = new DialogOptions()
+        {
+            DisableBackdropClick = false,
+            Position = DialogPosition.Center,
+            FullWidth = true,
+            CloseButton = true,
+        };
+        await DialogService.Show<ShowPenaltiesModal>("Bonuses/Penalties", parameters, options).Result;
     }
 }

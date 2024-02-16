@@ -11,8 +11,8 @@ public sealed class EventListViewModel : LeagueViewModelBase<EventListViewModel>
 
     public long? LoadedSeasonId { get; set; }
 
-    private ObservableCollection<EventViewModel> eventList = new();
-    public ObservableCollection<EventViewModel> EventList { get => eventList; set => Set(ref eventList, value); }
+    private List<EventViewModel> eventList = new List<EventViewModel>();
+    public List<EventViewModel> EventList { get => eventList; set => Set(ref eventList, value); }
 
     private EventViewModel? selected;
     public EventViewModel? Selected
@@ -59,7 +59,7 @@ public sealed class EventListViewModel : LeagueViewModelBase<EventListViewModel>
             }
 
             var sessions = result.Content;
-            EventList = new ObservableCollection<EventViewModel>(sessions.Select(x => new EventViewModel(LoggerFactory, ApiService, x)));
+            EventList = sessions.Select(x => new EventViewModel(LoggerFactory, ApiService, x)).ToList();
             if (Selected != null)
             {
                 Selected = EventList.FirstOrDefault(x => x.EventId == Selected.EventId);

@@ -1,0 +1,13 @@
+﻿@page "/members/logout"
+@inject LeagueApiService apiService
+@inject NavigationManager navigationManager
+@using iRLeagueManager.Web.Extensions
+
+@code {
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        await apiService.Client.LogOut();
+        var returnUrl = navigationManager.QueryString("returnUrl") ?? "";
+        navigationManager.NavigateTo(returnUrl, forceLoad:true);
+    }
+}

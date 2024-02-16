@@ -1,0 +1,218 @@
+﻿@page "/{LeagueName}/Settings/Results/Championships/{ChampionshipId:long}"
+@page "/{LeagueName}/Settings/Results/Championships/{ChampionshipId:long}/ResultConfigs/{ResultConfigId:long}"
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components
+@inherits LeagueComponentBase
+@layout ResultSettingsLayout
+@inject ChampSeasonViewModel ChampSeason
+@inject BreadCrumbService BreadCrumbService
+@inject MemberServiceViewModel MemberService
+@attribute [Authorize]
+
+<PageTitle>
+    Settings - @LeagueName
+</PageTitle>
+
+@if (DisplayLeaveWarning)
+{
+    <MudAlert Severity="Severity.Warning" Elevation="5" Class="mb-3" ShowCloseIcon="true" CloseIconClicked="@(() => DisplayLeaveWarning = false)">
+        <MudText>
+            <b>You have unsaved changes!</b> Save changes or click <a class="link-light" @onclick=Discard>Discard</a> to close this page.
+        </MudText>
+    </MudAlert>
+}
+
+<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
+    <Authorized>
+        @{
+            var disableSave = !HasChanges();
+        }
+        <MudStack Row="true" Justify="Justify.FlexEnd" Style="margin-top: -2em">
+            <MudButton Color="Color.Error" OnClick="Discard" Disabled="disableSave">Discard</MudButton>
+            <MudButton Color="Color.Primary" OnClick="Submit" Disabled="disableSave">Save</MudButton>
+        </MudStack>
+
+        <CascadingValue Value="LeagueMembers">
+            <CascadingValue Value="Teams">
+                <SettingsStack @ref="SettingsStack">
+                    <SettingsStackItem Href="@($"{LeagueName}/Settings/Results/Championships/{ChampionshipId}")">
+                        <ChampionshipSettings ChampSeason="ChampSeason" />
+                    </SettingsStackItem>
+                    <SettingsStackItem Href="@($"{LeagueName}/Settings/Results/Championships/{ChampionshipId}/ResultConfigs/{ResultConfigId}")">
+                        @if (SelectedResultConfig is null)
+                        {
+                            <MudAlert Severity="Severity.Error" Elevation="5" Class="mb-3">
+                                Invalid Championship or Resultconfig id!
+                            </MudAlert>
+                        }
+                        else
+                        {
+                            <ResultConfigSettings Config="SelectedResultConfig" ChampSeason="ChampSeason" AllowEditName="ChampSeason.ResultConfigs.Count > 1" />
+                        }
+                    </SettingsStackItem>
+                </SettingsStack>
+            </CascadingValue>
+        </CascadingValue>
+
+        <MudStack Row="true" Justify="Justify.FlexEnd">
+            <MudButton Color="Color.Error" OnClick="Discard" Disabled="disableSave">Discard</MudButton>
+            <MudButton Color="Color.Primary" OnClick="Submit" Disabled="disableSave">Save</MudButton>
+        </MudStack>
+    </Authorized>
+    <NotAuthorized>
+        You are not allowed here ...
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter] public DialogService DialogService { get; set; } = default!;
+    [Parameter] public long ChampionshipId { get; set; }
+    [Parameter] public long? ResultConfigId { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string returnUrl { get; set; } = string.Empty;
+
+    SettingsStack SettingsStack { get; set; } = default!;
+
+    private bool DisplayLeaveWarning { get; set; } = false;
+    private ElementReference LeaveWarning { get; set; }
+    private StatusResultValidator? ResultValidator { get; set; }
+    private int CarouselIndex { get; set; }
+
+    private ResultConfigViewModel? SelectedResultConfig { get; set; }
+    private IEnumerable<MemberModel> LeagueMembers { get; set; } = Enumerable.Empty<MemberModel>();
+    private IEnumerable<TeamModel> Teams { get; set; } = Enumerable.Empty<TeamModel>();
+    private string Error { get; set; } = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        UpdateBreadCrumb();
+        RegisterLocationChangingHandler();
+        ChampSeason.HasChanged += OnHasChanged;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (string.IsNullOrWhiteSpace(returnUrl))
+        {
+            returnUrl = $"/{LeagueName}/Settings/Results";
+        }
+
+        // do not reload data if changes are present
+        if (HasChanges())
+        {
+            return;
+        }
+
+        await LoadFromAPI();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        await LoadFromAPI();
+    }
+
+    private async Task LoadFromAPI(bool forceReload = false)
+    {
+        if (ChampSeason.ChampionshipId != ChampionshipId || forceReload)
+        {
+            await ChampSeason.Load(ChampionshipId, CancellationToken);
+            await ChampSeason.LoadResultConfigs(CancellationToken);
+        }
+        SelectedResultConfig = ChampSeason.ResultConfigViewModels.FirstOrDefault(x => x.ResultConfigId == ResultConfigId) ?? SelectedResultConfig;
+        LeagueMembers = (await MemberService.GetLeagueMembers(CancellationToken)).Content ?? Enumerable.Empty<MemberModel>();
+        Teams = (await MemberService.GetLeagueTeams(CancellationToken)).Content ?? Enumerable.Empty<TeamModel>();
+        UpdateBreadCrumb();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private bool HasChanges()
+    {
+        return ChampSeason.HasChanges || ChampSeason.ResultConfigViewModels.Any(x => x.HasChanges);
+    }
+
+    protected override async ValueTask OnLocationChanging(LocationChangingContext context)
+    {
+        // Do nothing when viewmodel has no changes or navigation on same page
+        var staysOnPage = context.TargetLocation.Contains($"{LeagueName}/Settings/Results/Championships/{ChampionshipId}");
+        var allowNavigation = HasChanges() == false || staysOnPage;
+        if (allowNavigation)
+        {
+            await base.OnLocationChanging(context);
+            return;
+        }
+
+        // If viewmodel has changes: Cancel navigation and display message
+        context.PreventNavigation();
+        await DisplayLeaveWarningMessage();
+    }
+
+    protected override void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        UpdateBreadCrumb();
+    }
+
+    private async Task SaveChanges()
+    {
+        if (ChampSeason.HasChanges)
+        {
+            await ChampSeason.SaveChangesAsync(CancellationToken);
+        }
+        foreach (var config in ChampSeason.ResultConfigViewModels)
+        {
+            if (config.HasChanges)
+            {
+                await config.SaveChangesAsync(CancellationToken);
+            }
+        }
+    }
+
+    private async Task DisplayLeaveWarningMessage()
+    {
+        DisplayLeaveWarning = true;
+        await InvokeAsync(StateHasChanged);
+        await ScrollToElement(LeaveWarning);
+    }
+
+    private async Task Submit()
+    {
+        await SaveChanges();
+    }
+
+    private async Task Discard()
+    {
+        ChampSeason.ResetChangedState();
+        await LoadFromAPI(forceReload: true);
+        DisplayLeaveWarning = false;
+    }
+
+    private void UpdateBreadCrumb()
+    {
+        BreadCrumbService.Items = new()
+        {
+            new BreadcrumbItem("Championships", $"{Shared.LeagueName}/Settings/Results"),
+            new BreadcrumbItem(ChampSeason.ChampionshipName, $"{Shared.LeagueName}/Settings/Results/Championships/{ChampionshipId}"),
+        };
+        if (ResultConfigId is not null && SelectedResultConfig is not null)
+        {
+            var name = SelectedResultConfig.Name;
+            if (string.IsNullOrEmpty(name) || ChampSeason.ResultConfigs.Count <= 1)
+            {
+                name = "Point Settings";
+            }
+            BreadCrumbService.Add(new BreadcrumbItem($"{ChampSeason.ChampionshipName} - {name}", $"{Shared.LeagueName}/Settings/Results/Championships/{ChampionshipId}/ResultConfigs/{SelectedResultConfig.ResultConfigId}"));
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnHasChanged(object? sender, EventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+}

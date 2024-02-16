@@ -1,0 +1,138 @@
+﻿@namespace iRLeagueManager.Web.Components
+@typeparam T
+
+<div>
+    <MudAutocomplete @bind-Value="@theValue"
+                     SearchFunc="@SearchFunc"      
+                     ShowProgressIndicator="true" 
+                     DebounceInterval="DebounceInterval"        
+                     Label="@Label" 
+                     HelperText="@HelperText"
+                     Placeholder="@Placeholder"
+                     Clearable="true" 
+                     Immediate="false"           
+                     CoerceValue="true"           
+                     ToStringFunc="ToStringFunc"
+                     Variant="@Variant"
+                     Validation="Validation"
+                     Error="Error"
+                     ErrorText="@ErrorText"
+                     @attributes="AdditionalAttributes"
+                     @ref=Autocomplete/>
+    <MudChipSet Class="mt-1" AllClosable=true OnClose="RemoveValue">
+        @foreach (var val in selectedValues)
+        {
+            <MudChip Size="ChipSize" Text="@ToStringFunc(val)" />
+        }
+    </MudChipSet>
+</div>
+
+@code {
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [Parameter]
+    public IEnumerable<T>? Values { get; set; }
+
+    [Parameter]
+    public EventCallback<IEnumerable<T>> ValuesChanged { get; set; }
+
+    [Parameter]
+    public string Label { get; set; } = string.Empty;
+
+    [Parameter]
+    public string HelperText { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Placeholder { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public Func<string, Task<IEnumerable<T>>> SearchFunc { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public Func<T, string> ToStringFunc { get; set; } = default!;
+
+    [Parameter]
+    public Variant Variant { get; set; }
+
+    [Parameter]
+    public Size ChipSize { get; set; } = Size.Medium;
+
+    [Parameter]
+    public int DebounceInterval { get; set; } = 400;
+
+    [Parameter]
+    public object? Validation { get; set; }
+
+    [Parameter]
+    public bool Error { get; set; } = false;
+
+    [Parameter]
+    public string ErrorText { get; set; } = string.Empty;
+
+    private HashSet<T> selectedValues = new HashSet<T>();
+
+    private MudAutocomplete<T> Autocomplete { get; set; } = default!;
+
+    private async Task<IEnumerable<T>> FilteredSearchFunc(string searchText)
+    {
+        if (!string.IsNullOrEmpty(searchText))
+        {
+            var results = await SearchFunc(searchText);
+            return results.Except(selectedValues);
+        }
+
+        return Enumerable.Empty<T>();
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (Values == null)
+        {
+            selectedValues.Clear();
+        }
+        else if (!Values.SequenceEqual(selectedValues))
+        {
+            selectedValues = Values.ToHashSet();
+            ValuesChanged.InvokeAsync(Values);
+        }
+    }
+
+    private void RefreshBinding()
+    {
+        Values = selectedValues.ToList();
+        ValuesChanged.InvokeAsync(Values);
+        StateHasChanged();
+    }
+
+    private void RemoveValue(MudChip chip)
+    {
+        if (selectedValues.RemoveWhere(x => ToStringFunc(x) == chip.Text) > 0)
+            RefreshBinding();
+    }
+
+    private void AddValue(T newValue)
+    {
+        if (newValue != null)
+        {
+            if (selectedValues.Add(newValue))
+                RefreshBinding();
+            Autocomplete.Clear();
+        }
+    }
+
+    /// <summary>
+    /// Note that this is required to a) clear the control after you add
+    /// an item to the list, and b) to trigger the addvalue method.
+    /// If MudAutoComplete's bind-Value:after worked, we could get rid
+    /// of this and just clear the value after it was added.
+    /// </summary>
+    private T theValue
+    {
+        get => default(T)!;
+        set 
+        { AddValue(value); }
+    }
+}

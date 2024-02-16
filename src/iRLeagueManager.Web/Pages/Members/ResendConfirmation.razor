@@ -1,0 +1,89 @@
+﻿@page "/members/resend-confirmation"
+@inject LeagueApiService ApiService
+@inject NavigationManager NavigationManager
+@using System.ComponentModel.DataAnnotations;
+@using iRLeagueApiCore.Client.Endpoints;
+
+<MudContainer MaxWidth="MaxWidth.Small">
+    @if (Success)
+    {
+        <MudPaper Elevation="5" Class="pa-4">
+            <p>An email with a confirmation link has been send to the given email address. Please make sure to check your spam folder if you cannot find any mail from us.</p>
+            <p>If you continue having problems with this step please contact <a href="mailto:simon@irleaguemanager.net">simon@iRLeagueManager.net</a></p>
+        </MudPaper>
+    }
+    else
+    {
+        <EditForm Model="Context" OnValidSubmit="Submit">
+            <MudCard Elevation="1">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Resend confirmation email</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <DataAnnotationsValidator />
+                    <StatusResultValidator @ref=ResultValidator />
+                    <MudTextField 
+                        @bind-Value="Context.Email" 
+                        Label="Email" 
+                        For="@(() => Context.Email)" 
+                        InputType="InputType.Email" 
+                        Variant="Variant.Outlined" 
+                        Adornment="Adornment.End"
+                        AdornmentIcon="@Icons.Material.Filled.AlternateEmail"/>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Disabled="@Loading">
+                        @if (Loading)
+                        {
+                            <MudProgressCircular Size="Size.Small" Class="me-2" Indeterminate="true" />
+                        }
+                        Send Email
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </EditForm>
+    }
+</MudContainer>
+
+@code {
+    private sealed class ConfirmationContext
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+    }
+
+    private StatusResultValidator? ResultValidator { get; set; }
+
+    private bool Loading { get; set; } = false;
+
+    private bool Success { get; set; } = false;
+
+    private ConfirmationContext Context { get; } = new();
+
+    private async Task Submit()
+    {
+        try
+        {
+            Loading = true;
+            var linkTemplate = $$"""{{NavigationManager.BaseUri}}members/{userId}/confirm/{token}""";
+            var result = await ApiService.Client
+                .Users()
+                .ResendConfirmation()
+                .AddQueryParameter(x => x.Add("linkTemplate", linkTemplate))
+                .Post(Context.Email);
+            if (result.Success == false)
+            {
+                ResultValidator?.ValidateResult(result.ToStatusResult());
+                return;
+            }
+            Success = true;
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+}

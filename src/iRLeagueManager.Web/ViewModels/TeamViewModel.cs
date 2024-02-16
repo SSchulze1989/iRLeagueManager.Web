@@ -21,7 +21,8 @@ public sealed class TeamViewModel : LeagueViewModelBase<TeamViewModel, TeamModel
     public string Profile { get => model.Profile; set => SetP(model.Profile, value => model.Profile = value, value); }
     public string TeamColor { get => model.TeamColor; set => SetP(model.TeamColor, value => model.TeamColor = value, value); }
     public string TeamHomepage { get => model.TeamHomepage; set => SetP(model.TeamHomepage, value => model.TeamHomepage = value, value); }
-    public IList<MemberInfoModel> Members { get => (IList<MemberInfoModel>)model.Members; set => SetP(model.Members, value => model.Members = value, value); }
+    public IList<MemberInfoModel> MemberList { get => (IList<MemberInfoModel>)model.Members; set => SetP(model.Members, value => model.Members = value, value); }
+    public IEnumerable<MemberInfoModel> Members { get => model.Members; set => SetP(model.Members, value => model.Members = value.ToList(), value); }
 
     public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

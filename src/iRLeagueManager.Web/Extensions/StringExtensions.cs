@@ -17,4 +17,9 @@ public static class StringExtensions
     {
         return Regex.Replace(input, pattern, replacement);
     }
+
+    public static string Capitalize(this string input)
+    {
+        return string.Concat(input[0].ToString().ToUpper(), input.AsSpan(1));
+    }
 }

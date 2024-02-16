@@ -1,39 +1,66 @@
-﻿@using Blazored.Modal
-@using System.Globalization;
+﻿@using System.Globalization;
 @using iRLeagueManager.Web.ViewModels
 @inject EventListViewModel EventList
 @inject LeagueApiService ApiService
 @inject SharedStateService SharedState
 @inject IJSRuntime JsRuntime
 
-<CascadingValue Value="EventList">
-<CascadingValue Value="SharedState">
-<CascadingBlazoredModal DisableBackgroundCancel="true" Size="ModalSize.Large">
-<CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(App).Assembly">
-        <Found Context="routeData">
-            <CascadingValue Value="routeData">
-                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-                    <NotAuthorized>
-                        <LoginRedirect/>
-                    </NotAuthorized>
-                </AuthorizeRouteView>
-                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-            </CascadingValue>
-        </Found>
-        <NotFound>
-            <PageTitle>Not found</PageTitle>
-            <LayoutView Layout="@typeof(MainLayout)">
-                <p role="alert">Sorry, there's nothing at this address.</p>
-            </LayoutView>
-        </NotFound>
-    </Router>
-</CascadingAuthenticationState>
-</CascadingBlazoredModal>
-</CascadingValue>
-</CascadingValue>
+<MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" Theme="TestTheme" />
+<MudDialogProvider FullWidth="true" DisableBackdropClick="true" CloseButton="true" />
+<MudSnackbarProvider />
+
+<MudBreakpointProvider>
+    <CascadingValue Value="EventList">
+        <CascadingValue Value="SharedState">
+            <CascadingAuthenticationState>
+                <Router AppAssembly="@typeof(App).Assembly">
+                    <Found Context="routeData">
+                        <CascadingValue Value="routeData">
+                            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                                <NotAuthorized>
+                                    <LoginRedirect />
+                                </NotAuthorized>
+                            </AuthorizeRouteView>
+                            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+                        </CascadingValue>
+                    </Found>
+                    <NotFound>
+                        <PageTitle>Not found</PageTitle>
+                        <LayoutView Layout="@typeof(MainLayout)">
+                            <p role="alert">Sorry, there's nothing at this address.</p>
+                        </LayoutView>
+                    </NotFound>
+                </Router>
+            </CascadingAuthenticationState>
+        </CascadingValue>
+    </CascadingValue>
+</MudBreakpointProvider>
 
 @code {
+    MudTheme TestTheme = new()
+        {
+            Palette = new PaletteLight()
+            {
+                Primary = Colors.Blue.Darken1,
+                AppbarBackground = Colors.Blue.Darken1,
+                Surface = Colors.Grey.Lighten5,
+            },
+            PaletteDark = new PaletteDark()
+            {
+                Primary = Colors.Blue.Darken1,
+                Background = "#262629",
+                BackgroundGrey = "#282931",
+                DrawerBackground = "#303033",
+                Surface = "#303033",
+                AppbarBackground = Colors.LightBlue.Darken4,
+                TableStriped = "#404043",
+                TableHover = "#525262",
+            },
+            LayoutProperties = new()
+            {
+                DefaultBorderRadius = "2px",
+            },
+        };
 
     private TimeSpan? userTime { get; set; }
 
@@ -52,5 +79,25 @@
                 // this throws when jsinterop is not yet available
             }
         }
+    }
+
+    private bool _isDarkMode = true;
+    private MudThemeProvider? _mudThemeProvider;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _isDarkMode = await _mudThemeProvider!.GetSystemPreference();
+            await _mudThemeProvider.WatchSystemPreference(OnSystemPreferenceChanged);
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnSystemPreferenceChanged(bool newValue)
+    {
+        _isDarkMode = newValue;
+        StateHasChanged();
+        await Task.CompletedTask;
     }
 }

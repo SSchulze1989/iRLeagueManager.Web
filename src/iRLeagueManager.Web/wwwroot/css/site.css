@@ -14,6 +14,17 @@
     }
 }
 
+body.scroll-locked-no-padding {
+    overflow: hidden !important;
+}
+
+.page {
+    min-height: calc(100vh - 2.5em);
+}
+
+.surface-hover:hover {
+    filter: brightness(95%);
+}
 
 .blazored-typeahead {
     border-color: rgb(206, 212, 218);
@@ -152,7 +163,7 @@
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 
 @media (max-width: 840.98px) {
@@ -248,6 +259,12 @@ a, .btn-link {
 /* Firefox */
 .input-plain {
     -moz-appearance: textfield;
+}
+
+.table-input {
+    margin: 0;
+    line-height: 2.5em;
+    text-align: center;
 }
 
 #blazor-error-ui {
@@ -406,7 +423,6 @@ a, .btn-link {
 .table-header {
     position: relative;
     filter:opacity(75%);
-    padding-right: 0.8em !important;
 }
 
     .table-header.active {
@@ -421,29 +437,16 @@ a, .btn-link {
         filter: opacity(100%);
     }
 
-    .table-header.active.sort-ascending::after, .table-header.action.sort-ascending:hover::after {
-        content: " ";
-        width: 0;
-        height: 0;
-        border-left: 0.3em solid transparent;
-        border-right: 0.3em solid transparent;
-        border-bottom: 0.6em solid;
-        position: absolute;
-        bottom: 0.55em;
-        margin-left: 0.15em;
+    .table-header .table-header-adorner {
+        visibility: hidden;
     }
 
-    .table-header.active.sort-descending::after, .table-header.action.sort-descending:hover::after {
-            
-        content: " ";
-        width: 0;
-        height: 0;
-        border-left: 0.3em solid transparent;
-        border-right: 0.3em solid transparent;
-        border-top: 0.6em solid;
-        position: absolute;
-        bottom: 0.55em;
-        margin-left: 0.15em;
+    .table-header.active .table-header-adorner {
+        visibility: visible;
+    }
+
+    .table-header.action:hover .table-header-adorner {
+        visibility: visible;
     }
 
 .table-row-action {
@@ -461,9 +464,41 @@ a, .btn-link {
         filter: opacity(90%);
     }
 
+.hover-box {
+
+}
+
+.opaque {
+    opacity: 25%;
+}
+
+.hover-box:hover .hover-box-show {
+    visibility: visible !important;
+    opacity: 100% !important;
+}
+
 @media (min-width: 1600px) {
     .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
         max-width: 1520px;
+    }
+}
+
+.mud-container {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+@media (min-width: 600px) {
+    .mud-container {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+}
+
+@media (min-width: 480px) {
+    .mud-container {
+        padding-left: 16px;
+        padding-right: 16px;
     }
 }
 

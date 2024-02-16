@@ -1,36 +1,37 @@
-﻿@using static iRLeagueManager.Web.ViewModels.PointRuleViewModel;
+﻿@namespace iRLeagueManager.Web.Components
+@using static iRLeagueManager.Web.ViewModels.PointRuleViewModel;
 @inherits MvvmComponentBase
 
-<div @attributes=AdditionalAttributes>
-    <small>@GetPointTypeString()</small>
-    @if (@Bind(PointRule, x => x.PointsPerPlace).Count() > 0)
-    {
-        <table class="overflow-scroll table table-sm">
-            <thead>
-                <tr>
-                    <th><small>Pos.</small></th>
-                    @foreach ((var point, var position) in @Bind(PointRule, x => x.PointsPerPlace).Select((x, i) => (x, i + 1)))
-                    {
-                        <th><small>@position.</small></th>
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th><small>Pts.</small></th>
-                    @foreach (var point in @Bind(PointRule, x => x.PointsPerPlace))
-                    {
-                        <td><small>@point</small></td>
-                    }
-                </tr>
-            </tbody>
-        </table>
-    }
-</div>
+<MudSimpleTable Class="@Class" Style="@Style" Elevation="Elevation" Bordered="Bordered" Dense="Dense">
+    <thead>
+        <tr>
+            @foreach (var (_, index) in PointRule.PointsPerPlace.WithIndex())
+            {
+                <th>@(index + 1).</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            @foreach (var point in PointRule.PointsPerPlace)
+            {
+                <td>@point</td>
+            }
+        </tr>
+    </tbody>
+</MudSimpleTable>
 
 @code {
-    [Parameter(CaptureUnmatchedValues = true)]
-    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+    [Parameter]
+    public string Class { get; set; } = string.Empty;
+    [Parameter]
+    public string Style { get; set; } = string.Empty;
+    [Parameter]
+    public int Elevation { get; set; } = 2;
+    [Parameter]
+    public bool Bordered { get; set; }
+    [Parameter]
+    public bool Dense { get; set; }
     [Parameter]
     public PointRuleViewModel PointRule { get; set; } = default!;
 
@@ -38,23 +39,5 @@
     {
         base.OnParametersSet();
         BlazorParameterNullException.ThrowIfNull(this, PointRule);
-    }
-
-    private string GetPointTypeString()
-    {
-        if (PointRule.PointsPerPlace.Count() == 0)
-        {
-            return "Keep points";
-        }
-        switch (PointRule.RuleType)
-        {
-            case PointRuleType.PointList:
-                return "Points per place";
-            case PointRuleType.MaxPoints:
-                return $"Max pts.: {PointRule.MaxPoints}; Drop-off: {PointRule.PointDropOff}";
-            case PointRuleType.Formula:
-                return $"Formula";
-        }
-        return "Unknown";
     }
 }

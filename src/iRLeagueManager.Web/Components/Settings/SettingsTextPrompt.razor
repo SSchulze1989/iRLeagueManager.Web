@@ -1,0 +1,65 @@
+﻿@namespace iRLeagueManager.Web.Components
+@inherits SettingBase
+@typeparam T
+@inject IDialogService DialogService
+
+<SettingsItem Class="@Class"
+              Label="@Label"
+              Text="@GetText()"
+              HelperText="@HelperText"
+              ChildContent="ChildContent!"
+              Icon="@Icon"
+              IconSize="IconSize"
+              IconColor="IconColor"
+              OnClick="Click"
+              Disabled="Disabled"
+              Delete="Delete" 
+              />
+
+@code {
+    [Parameter] public EventCallback Delete { get; set; }
+    [Parameter] public T? Value { get; set; }
+    [Parameter] public EventCallback<T> ValueChanged { get; set; }
+    [Parameter] public InputType InputType { get; set; } = InputType.Text;
+    [Parameter] public bool Clearable { get; set; } = false;
+    [Parameter] public string? DialogHelperText { get; set; }
+
+    private async Task Click()
+    {
+        var parameters = new DialogParameters<TextPromptDialog<T>>()
+        {
+            { x => x.Value, Value },
+            { x => x.Label, Label },
+            { x => x.HelperText, DialogHelperText ?? HelperText },
+            { x => x.InputType, GetInputType() },
+            { x => x.Clearable, Clearable },
+        };
+
+        var options = new DialogOptions()
+            {
+                NoHeader = true,
+            };
+
+        var result = await DialogService.Show<TextPromptDialog<T>>("", parameters: parameters, options: options).Result;
+        if (!result.Canceled)
+        {
+            await ValueChanged.InvokeAsync((T)result.Data);
+        }
+    }
+
+    private string GetText()
+    {
+        if (string.IsNullOrEmpty(Text))
+        {
+            return Value?.ToString() ?? string.Empty;
+        }
+        return Text;
+    }
+
+    private InputType GetInputType() => default(T) switch
+    {
+        int or double or decimal => InputType.Number,
+        DateTime => InputType.Date,
+        _ => InputType.Text,
+    };
+}

@@ -5,6 +5,7 @@ using iRLeagueApiCore.Common.Models.Reviews;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 using iRLeagueManager.Web.Shared;
+using System.ComponentModel.DataAnnotations;
 using System.IO.IsolatedStorage;
 
 namespace iRLeagueManager.Web.ViewModels;
@@ -39,12 +40,8 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
     public TimeSpan TimeStamp { get => model.TimeStamp; set => SetP(model.TimeStamp, value => model.TimeStamp = value, value); }
     public string IncidentNr { get => model.IncidentNr; set => SetP(model.IncidentNr, value => model.IncidentNr = value, value); }
     public string ResultText { get => model.ResultText; set => SetP(model.ResultText, value => model.ResultText = value, value); }
-
-    private IList<MemberInfoModel> involvedMembers = new List<MemberInfoModel>();
-    public IList<MemberInfoModel> InvolvedMembers { get => involvedMembers; set => Set(ref involvedMembers, value); }
-
-    private IList<TeamInfoModel> involvedTeams = new List<TeamInfoModel>();
-    public IList<TeamInfoModel> InvolvedTeams { get => involvedTeams; set => Set(ref involvedTeams, value); }
+    public IEnumerable<MemberInfoModel> InvolvedMembers { get => model.InvolvedMembers; set => SetP(model.InvolvedMembers, value => model.InvolvedMembers = value.ToList(), value); }
+    public IEnumerable<TeamInfoModel> InvolvedTeams { get => model.InvolvedTeams; set => SetP(model.InvolvedTeams, value => model.InvolvedTeams = value.ToList(), value); }
 
     private ObservableCollection<ReviewCommentViewModel> comments = new();
     public ReadOnlyObservableCollection<ReviewCommentViewModel> Comments => new(comments);
@@ -179,8 +176,6 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
             return LeagueNullResult();
         }
 
-        UpdateInvolved();
-
         try
         {
             Loading = true;
@@ -259,12 +254,6 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
         Status = ReviewStatus.Open;
     }
 
-    private void UpdateInvolved()
-    {
-        model.InvolvedMembers = InvolvedMembers;
-        model.InvolvedTeams = InvolvedTeams;
-    }
-
     private bool IsClosed()
     {
         return Votes.Count > 0;
@@ -309,8 +298,6 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
         {
             return LeagueNullResult();
         }
-
-        UpdateInvolved();
 
         try
         {
@@ -363,14 +350,12 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
         }
     }
 
-    public override void SetModel(ReviewModel model)
+    protected override void SetModel(ReviewModel model)
     {
         base.SetModel(model);
-        InvolvedMembers = model.InvolvedMembers.ToList();
-        InvolvedTeams = model.InvolvedTeams.ToList();
         RefreshCommentList();
         RefreshVoteList();
         UpdateReviewStatus();
-        SessionId = model.SessionId;
+        SessionId = model.SessionId == 0 ? null : model.SessionId;
     }
 }

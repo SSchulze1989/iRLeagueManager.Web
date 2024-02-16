@@ -1,0 +1,75 @@
+﻿@namespace iRLeagueManager.Web.Components
+
+<MudDialog>
+    <DialogContent>
+        @if (AllowMarkup)
+        {
+            @((MarkupString)Text)
+        }
+        else
+        {
+            @Text
+        }
+    </DialogContent>
+    <DialogActions>
+        @switch (ButtonTypes)
+        {
+            case ButtonTypes.Ok:
+                <MudButton Color="Color.Primary" OnClick=OkClick>@OkButtonText</MudButton>
+                break;
+            case ButtonTypes.OkCancel:
+                <MudButton Color="Color.Secondary" OnClick=CancelClick>@CancelButtonText</MudButton>    
+                <MudButton Color="Color.Primary" OnClick=OkClick>@OkButtonText</MudButton>
+                break;
+            case ButtonTypes.YesNo:
+                <MudButton Color="Color.Secondary" OnClick=NoClick>No</MudButton>
+                <MudButton Color="Color.Primary" OnClick=OkClick>Yes</MudButton>
+                break;
+            case ButtonTypes.YesNoCancel:
+                <MudButton OnClick="CancelClick">Cancel</MudButton>
+                <MudButton Color="Color.Secondary" OnClick=NoClick>No</MudButton>
+                <MudButton Color="Color.Primary" OnClick=OkClick>Yes</MudButton>
+                break;
+        }
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] 
+    MudDialogInstance ModalInstance { get; set; } = default!;
+    [Parameter]
+    public string Text { get; set; } = string.Empty;
+    [Parameter]
+    public ButtonTypes ButtonTypes { get; set; } = ButtonTypes.Ok;
+    [Parameter]
+    public bool AllowMarkup { get; set; } = false;
+    [Parameter]
+    public string OkButtonText { get; set; } = "Ok";
+    [Parameter]
+    public string CancelButtonText { get; set; } = "Cancel";
+
+    protected override void OnParametersSet()
+    {
+        BlazorParameterNullException.ThrowIfNull(this, ModalInstance);
+    }
+
+    private void OkClick()
+    {
+        ModalInstance.Close(true);
+    }
+
+    private void NoClick()
+    {
+        if (ButtonTypes == ButtonTypes.YesNoCancel)
+        {
+            ModalInstance.Close(false);
+            return;
+        }
+        ModalInstance.Cancel();
+    }
+
+    private void CancelClick()
+    {
+        ModalInstance.Cancel();
+    }
+}

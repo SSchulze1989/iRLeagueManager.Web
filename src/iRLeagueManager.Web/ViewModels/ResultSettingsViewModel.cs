@@ -69,7 +69,7 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
         }
     }
 
-    public async Task<StatusResult> AddChampionship(PutChampSeasonModel champSeason, CancellationToken cancellationToken = default)
+    public async Task<StatusResult> AddChampionship(PutChampSeasonModel champSeason, bool noPointConfigs = false, CancellationToken cancellationToken = default)
     {
         if (CurrentLeague is null) return LeagueNullResult();
         if (CurrentSeason is null) return SeasonNullResult();
@@ -93,22 +93,27 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
             {
                 return postChampionshipResult.ToStatusResult();
             }
-            // Create empty result config
-            var resultConfigTemplate = new PostResultConfigModel()
+
+            if (noPointConfigs == false)
             {
-                Name = "Default Points",
-            };
-            var postResultConfigResult = await CurrentLeague
-                .ChampSeasons()
-                .WithId(postChampSeasonResult.Content.ChampSeasonId)
-                .ResultConfigs()
-                .Post(resultConfigTemplate, cancellationToken);
-            if (postResultConfigResult.Success == false || postResultConfigResult.Content is null)
-            {
-                return postResultConfigResult.ToStatusResult();
+                // Create empty result config
+                var resultConfigTemplate = new PostResultConfigModel()
+                {
+                    Name = "Default Points",
+                };
+                var postResultConfigResult = await CurrentLeague
+                    .ChampSeasons()
+                    .WithId(postChampSeasonResult.Content.ChampSeasonId)
+                    .ResultConfigs()
+                    .Post(resultConfigTemplate, cancellationToken);
+                if (postResultConfigResult.Success == false || postResultConfigResult.Content is null)
+                {
+                    return postResultConfigResult.ToStatusResult();
+                }
+                champSeason.ResultConfigs = new[] { new ResultConfigInfoModel() { ResultConfigId = postResultConfigResult.Content.ResultConfigId } };
+                champSeason.DefaultResultConfig = new() { ResultConfigId = postResultConfigResult.Content.ResultConfigId };
             }
-            champSeason.ResultConfigs = new[] { new ResultConfigInfoModel() { ResultConfigId = postResultConfigResult.Content.ResultConfigId } };
-            champSeason.DefaultResultConfig = new() { ResultConfigId = postResultConfigResult.Content.ResultConfigId };
+
             // Update the champseason with data from model
             var putChampSeasonResult = await CurrentLeague.ChampSeasons()
                 .WithId(postChampSeasonResult.Content.ChampSeasonId)

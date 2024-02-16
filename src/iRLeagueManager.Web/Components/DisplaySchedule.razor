@@ -1,114 +1,129 @@
-﻿@using iRLeagueApiCore.Common.Models
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
 @inherits MvvmComponentBase
 @inject ClientLocalTimeProvider ClientTime
+@inject IDialogService DialogService
 
 @{var maxRaceCount = @Schedule.MaxRaceCount;}
-<div @attributes=AdditionalAttributes>
-    <div class="card my-2 pb-0">
-        <LoadingHeader class="card-header">
-            @if(ReadOnly == false)
-            {
-                <div class="input-group @(EditName ? "" : " d-none")">
-                    <input type="text" class="form-control" @bind="Schedule.Name" @ref="ScheduleNameInput" @onkeydown=@(async args => { if (args.Key == "Enter") { await SaveName(); } })/>
-                    <button type="button" class="btn btn-success @(Schedule.Loading ? "disabled" : "")" @onclick=@SaveName>
-                        &#10004 
-                        @if (Schedule.Loading)
-                        {
-                            <span class="spinner-border spinner-border-sm mr-1"></span>
-                        }
-                    </button>
-                    <button type="button" class="btn btn-danger @(Schedule.Loading ? "disabled" : "")" @onclick=@ResetName>&#128473;</button>
-                </div>
-                <div class="d-flex hover-button pointer @(EditName ? " d-none" : "")" @onclick=@EditNameClick> 
-                    <div>@Bind(Schedule, x => x.Name)</div>
-                    <div class="hover-button-text">
-                        <span class="oi oi-pencil" />
-                    </div>
-                </div>
-            }
-            else
-            {
-                <div>@Bind(Schedule, x => x.Name)</div>
-            }
-        </LoadingHeader>
-        <div class="card-body overflow-auto">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Nr.</th>
-                        <th>Date</th>
-                        <th>Name</th>
-                        <th>Track</th>
-                        <th>Laps</th>
-                        <th>Start</th>
-                        <th>Practice</th>
-                        <th>Qualy</th>
-                        @for(int i=0; i<maxRaceCount; i++)
-                        {
-                            <th>Race @(i+1)</th>
-                        }
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach((var @event, var index) in @Bind(Schedule, x => x.Events).Select((x, i) => (x, i)))
+<MudPaper Elevation="4">
+    @if (DisplayHeader)
+    {
+        <MudToolBar>
+            <LoadingHeader>
+                @if (ReadOnly == false)
                 {
-                    var eventId = @event.EventId;
-                    var races = @Bind(@event, x => x.Races);
-
-                    <tr @onclick="@(() => OnTableRowClick(@event))" class="@(ReadOnly ? "" : "pointer")">
-                        <td>@(index + 1).</td>
-                        <td>@(@event.Date.ToString(@"dd.MM.yyyy"))</td>
-                        <td>@(@event.Name)</td>
-                        <td>@(@event.TrackName)@(@event.ConfigName == "-" ? "" : $" - {@event.ConfigName}")</td>
-                        <td>@(@event.Laps)</td>
-                        <td>@(@event.StartTime.ToString(@"HH:mm"))</td>
-                        <td>@(DurationString(@event.Practice))</td>
-                        <td>@(DurationString(@event.Qualifying))</td>
-                        @for(int i=0; i<maxRaceCount; i++)
-                        {
-                            var race = races.ElementAtOrDefault(i);
-                            @if (race != null)
+                    <div class="input-group @(EditName ? "" : " d-none")">
+                        <input type="text" class="form-control" @bind="Schedule.Name" @ref="ScheduleNameInput" @onkeydown=@(async args => { if (args.Key == "Enter") { await SaveName(); } }) />
+                        <button type="button" class="btn btn-success @(Schedule.Loading ? "disabled" : "")" @onclick=@SaveName>
+                            &#10004
+                            @if (Schedule.Loading)
                             {
-                                <td>@DurationString(race)</td>
+                                <span class="spinner-border spinner-border-sm mr-1"></span>
                             }
-                            else 
-                            {
-                                <td></td>
-                            }
-                        }
-                        <td>
-                            @if (ReadOnly == false)
-                            {
-                                <button class="btn btn-outline-danger btn-sm" @onclick=@(() => RemoveEventClick(@event)) @onclick:stopPropagation @onclick:preventDefault>
-                                    <span class="oi oi-trash"/>
-                                </button>
-                            }
-                        </td>
-                    </tr>
+                        </button>
+                        <button type="button" class="btn btn-danger @(Schedule.Loading ? "disabled" : "")" @onclick=@ResetName>&#128473;</button>
+                    </div>
+                    <div class="d-flex hover-button pointer @(EditName ? " d-none" : "")" @onclick=@EditNameClick>
+                        <div>@Bind(Schedule, x => x.Name)</div>
+                        <div class="hover-button-text">
+                            <span class="oi oi-pencil" />
+                        </div>
+                    </div>
                 }
-                </tbody>
-            </table>
-            @if (ReadOnly == false)
+                else
+                {
+                    <div>@Bind(Schedule, x => x.Name)</div>
+                }
+            </LoadingHeader>
+        </MudToolBar>
+    }
+    <MudSimpleTable Hover="true" Striped="true" Bordered="true" Dense="true">
+        <thead>
+            <tr>
+                <th>Nr.</th>
+                <th>
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        Date
+                        <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" />
+                    </MudStack>
+                </th>
+                <th>Name</th>
+                <th>
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        Track
+                        <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" />
+                    </MudStack>
+                </th>
+                <th>Laps</th>
+                <th>Start</th>
+                <th>Practice</th>
+                <th>Qualy</th>
+                @for (int i = 0; i < maxRaceCount; i++)
+                {
+                    <th>Race @(i + 1)</th>
+                }
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ((var @event, var index) in @Bind(Schedule, x => x.Events).Select((x, i) => (x, i)))
             {
-                <div class="mb-1">
-                    <button class="btn btn-outline-secondary" @onclick=AddEventClick>Add Event</button>
-                </div>
+                var eventId = @event.EventId;
+                var races = @Bind(@event, x => x.Races);
+
+                <tr>
+                    <td>@(index + 1).</td>
+                    <td>@(@event.Date.GetValueOrDefault().ToString(@"dd.MM.yyyy"))</td>
+                    <td>@(@event.Name)</td>
+                    <td>@(@event.TrackName)@(@event.ConfigName == "-" ? "" : $" - {@event.ConfigName}")</td>
+                    <td>@(@event.Laps)</td>
+                    <td>@(@event.StartTime.GetValueOrDefault().AsDateTime().ToString(@"HH:mm"))</td>
+                    <td>@(DurationString(@event.Practice))</td>
+                    <td>@(DurationString(@event.Qualifying))</td>
+                    @for (int i = 0; i < maxRaceCount; i++)
+                    {
+                        var race = races.ElementAtOrDefault(i);
+                        @if (race != null)
+                        {
+                            <td>@DurationString(race)</td>
+                        }
+                        else
+                        {
+                            <td></td>
+                        }
+                    }
+                    <td>
+                        @if (ReadOnly == false)
+                        {
+                            <MudStack Row="true">
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@(() => EditEventClick(@event))" Color="Color.Tertiary" Size="Size.Small"/>
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => RemoveEventClick(@event))" Color="Color.Error" Size="Size.Small"/>
+                            </MudStack>
+                        }
+                    </td>
+                </tr>
             }
-        </div>
-    </div>
-</div>
+        </tbody>
+    </MudSimpleTable>
+</MudPaper>
+
+@if (ReadOnly == false)
+{
+    <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick=AddEventClick Color="Color.Tertiary">Add Event</MudButton>
+}
 
 @code {
-    [CascadingParameter]
-    public IModalService ModalService { get; set; } = default!;
     [Parameter, EditorRequired]
     public ScheduleViewModel Schedule { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues = true)]
     public IDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter]
     public bool ReadOnly { get; set; } = false;
+    [Parameter]
+    public bool DisplayHeader { get; set; } = true;
+    [Parameter]
+    public string Class { get; set; } = string.Empty;
 
     private ElementReference ScheduleNameInput { get; set; }
 
@@ -145,9 +160,9 @@
         }
 
         var parts = new List<string>();
-        if (session.Duration.TimeOfDay != TimeSpan.Zero)
+        if (session.Duration != TimeSpan.Zero)
         {
-            parts.Add(session.Duration.ToString(@"HH:mm"));
+            parts.Add(session.Duration.GetValueOrDefault().AsDateTime().ToString(@"HH:mm"));
         }
         if (session.Laps > 0)
         {
@@ -178,26 +193,21 @@
         }
     }
 
-    private async Task OnTableRowClick(EventViewModel eventViewModel)
+    private async Task EditEventClick(EventViewModel eventViewModel)
     {
         if (ReadOnly)
         {
             return;
         }
         //navigationManager.NavigateTo($"{LeagueName}/Results/Session/{sessionId}");
-        var parameters = new ModalParameters()
-            .Add(nameof(EditEventModal.EventModel), eventViewModel.CopyModel())
-            .Add(nameof(EditEventModal.OnSubmit), 
-                new Func<EventViewModel, CancellationToken, 
-                    Task<StatusResult>>(async (@event, cancellationToken) => await @event.SaveChangesAsync(cancellationToken)));
-        var options = new ModalOptions()
+        var parameters = new DialogParameters<EditEventDialog>()
         {
-            Size = ModalSize.Large,
-            DisableBackgroundCancel = true,
+            {x => x.Model, eventViewModel.CopyModel()},
+            {x => x.OnSubmit, async (@event, cancellation) => await @event.SaveChangesAsync(cancellation)},
         };
-        var modal = ModalService.Show<EditEventModal>("Edit Event", parameters, options);
+        var modal = DialogService.Show<EditEventDialog>("Edit Event", parameters);
         var result = await modal.Result;
-        if (result.Confirmed && result.Data is EventModel eventModel)
+        if (result.Canceled == false && result.Data is EventModel eventModel)
         {
             eventViewModel.SetModel(eventModel);
         }
@@ -209,17 +219,12 @@
         {
             return;
         }
-        var parameters = new ModalParameters()
-            .Add(nameof(EditEventModal.EventModel), await GetNewEvent())
-            .Add(nameof(EditEventModal.OnSubmit),
-                new Func<EventViewModel, CancellationToken, 
-                    Task<StatusResult>>(async (@event, cancellationToken) => await Schedule.AddEvent(@event)));
-        var options = new ModalOptions()
+        var parameters = new DialogParameters<EditEventDialog>()
         {
-            Size = ModalSize.Large,
-            DisableBackgroundCancel = true,
+            {x => x.Model, await GetNewEvent()},
+            {x => x.OnSubmit, async (@event, cancellationToken) => await Schedule.AddEvent(@event)},
         };
-        var result = await ModalService.Show<EditEventModal>("Add Event", parameters, options).Result;
+        var result = await DialogService.Show<EditEventDialog>("Add Event", parameters).Result;
     }
 
     private async Task<EventModel> GetNewEvent()
@@ -254,11 +259,13 @@
 
     private async Task RemoveEventClick(EventViewModel @event)
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(ConfirmModal.Text), $"Are you sure you want to delete this Event? {@event.Name} - {@event.Date.ToString(@"dd.MM.yyyy")}")
-            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
-        var confirm = await ModalService.Show<ConfirmModal>("Delete Event", parameters).Result;
-        if (confirm.Cancelled)
+        var parameters = new DialogParameters<ConfirmDialog>()
+        {
+            { x => x.Text, $"Are you sure you want to delete this Event? {@event.Name} - {@event.Date.GetValueOrDefault().ToString(@"dd.MM.yyyy")}" },
+            { x => x.ButtonTypes, ButtonTypes.YesNo },
+        };
+        var confirm = await DialogService.Show<ConfirmDialog>("Delete Event", parameters).Result;
+        if (confirm.Canceled)
         {
             return;
         }

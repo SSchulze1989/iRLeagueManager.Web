@@ -2,103 +2,112 @@
 @using Markdig;
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueManager.Web.Components
-@using iRLeagueManager.Web.Components.Settings
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
 @layout SettingsLayout
-@inject LeagueViewModel vm
+@inject LeagueViewModel League
 @inject LeagueApiService apiService
 @inject MarkdownPipeline MarkdownPipeline
+@inject IDialogService DialogService
 @attribute [Authorize]
 
-<PageTitle>Settings - @LeagueName</PageTitle>
+<PageTitle>
+    Settings - @LeagueName
+</PageTitle>
+
+<LoadingHeader Loading="@Bind(League, x => x.Loading)">
+    <HeaderText>
+        <MudText Typo="Typo.h5">League Settings</MudText>
+    </HeaderText>
+</LoadingHeader>
 
 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin) Context="AuthContext">
     <Authorized>
-        <div @attributes=AdditionalAttributes>
-            @if (vm.LeaguePublic != LeaguePublicSetting.PublicListed)
-            {
-                <div class="alert alert-warning alert-dismissible fade show d-flex justify-content-between align-items-center gap-2" role="alert">
-                    <label>Your league is still hidden. Others can access your league if they have the link but it will not be listed</label>
-                    <button class="btn btn-secondary" @onclick="MakePublicListed">Make public</button>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
+        @if (League.LeaguePublic != LeaguePublicSetting.PublicListed && showLeagueHiddenAlert)
+        {
+            <MudAlert Class="mt-4" Elevation="5" Severity="Severity.Warning" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="@(() => showLeagueHiddenAlert = false)">
+                Your league is still hidden. Others can access your league if they have the link but it will not be listed
+                <MudLink Color="Color.Primary" OnClick="MakePublicListed">Make public</MudLink>
+            </MudAlert>
+        }
+        <EditForm Model="League" OnValidSubmit="SaveChanges">
+            <StatusResultValidator @ref="ResultValidator" />
+            <MudStack Spacing="1" Class="mt-2">
+                <SettingsTopSection Header="General">
+                    <SettingsTextPrompt Label="Display Name"
+                                        @bind-Value="League.NameFull" />
+                    <MudListItem>
+                        <MudField Label="Description"
+                                  OnAdornmentClick="@(() => EditDescriptionClick(League))"
+                                  Variant="Variant.Text"
+                                  DisableUnderLine="true">
+                            <div style="overflow-x: clip; overflow-y: auto; min-height: 4em; max-height: 12em;">
+                                @((MarkupString)RenderDescriptionPreview(League.Description))
+                            </div>
+                        </MudField>
+                    </MudListItem>
+                </SettingsTopSection>
 
-            <div class="card my-2 pb-0">
-                <div class="card-header">
-                    General
-                </div>
-                <div class="list-group list-group-flush">
-                    <div class="list-group-item list-group-item-action" type="button" @onclick=@(() => EditLeagueNameClick(vm))>
-                        <label class="text-muted">Display Name</label>
-                        <div class="ms-2 me-2">
-                            <DisplayLeague League="vm.GetModel()" MuteTextOnFallback=true />
-                        </div>
-                    </div>
-                    <div class="list-group-item list-group-item-action" type="button" style="max-height: 400px; overflow:auto" @onclick=@(() => EditDescriptionClick(vm))>
-                        <label class="text-muted">Description</label>
-                        <div class="ms-2 me-2">
-                            @((MarkupString)RenderDescriptionPreview(vm.Description))
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card my-2 pb-0">
-                <div class="card-header">
-                    Seasons
-                </div>
-                <div class="list-group list-group-flush">
-                    @foreach ((var season, var index) in @Bind(vm, x => x.Seasons).Select((x, i) => (x, i)))
+                <SettingsTopSection Header="Seasons">
+                    @if (League.CurrentSeason != null)
                     {
-                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" type="button" @onclick=@(() => SeasonClick(season))>
-                            <SeasonPreview Season=season />
-                            <button class="btn btn-outline-danger" @onclick=@(() => DeleteSeasonClick(season)) @onclick:stopPropagation="true">
-                                <span class="oi oi-trash" />
-                            </button>
-                        </div>
+                        <SettingsItem HelperText="Current Season" OnClick="() => SeasonClick(League.CurrentSeason)">
+                            <SeasonPreview Season="League.CurrentSeason" Class="d-flex gap-2 align-center" />
+                        </SettingsItem>
                     }
-                    <div class="list-group-item">
-                        <button class="btn btn-outline-secondary" @onclick=AddSeasonClick>Add Season</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card my-2 pb-0">
-                <div class="card-header">
-                    Protest Settings
-                </div>
-                <div class="list-group list-group-flush">
-                    <div class="list-group-item list-group-item-action" type="button" @onclick=ProtestSettingsClick>
-                        <b>Enabled:</b> @(vm.EnableProtests ? "True" : "False")<br />
-                        @if (vm.EnableProtests)
-                        {
-                            <b>Cooldown Period: </b> @($"{vm.CoolDownHrs:00}:{vm.CoolDownMinutes:00}")
-
-                            <br />
-                            <b>Protests closed after: </b> @($"{vm.ProtestsClosedHrs:00}:{vm.ProtestsClosedMinutes:00}")
-
-                            <br />
-                            <b>Public: </b> @vm.ProtestPublic
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
+                    @if (League.Seasons.Count > 1)
+                    {
+                        <SettingsSection @bind-Expanded="seasonsExpanded"
+                                         Text="All Seasons"
+                                         HelperText="@(seasonsExpanded ? "Collapse" : "Expand")">
+                            @foreach ((var season, var index) in Bind(League, x => x.Seasons).Select((x, i) => (x, i)))
+                            {
+                                <MudListItem Class="py-0 pe-8" OnClick="@(() => SeasonClick(season))">
+                                    <MudElement HtmlTag="div" Class="d-flex align-center">
+                                        <SeasonPreview Season="season" Class="d-flex gap-2 align-center" />
+                                        <MudSpacer />
+                                        <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="@(() => DeleteSeasonClick(season))" Class="flex-grow-0" />
+                                    </MudElement>
+                                </MudListItem>
+                            }
+                            <SettingsItem Icon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="AddSeasonClick">Add Season</SettingsItem>
+                        </SettingsSection>
+                    }
+                    else
+                    {
+                        <MudListItem>
+                            <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="AddSeasonClick" Class="ms-4">Add Season</MudButton>
+                        </MudListItem>
+                    }
+                </SettingsTopSection>
+            </MudStack>
+        </EditForm>
     </Authorized>
     <NotAuthorized>
-        You are not allowed here ...
+        <MudPaper Elevation="5" Class="p-4">
+            You are not allowed here ...
+        </MudPaper>
     </NotAuthorized>
 </AuthorizeView>
 
 @code {
-    [CascadingParameter]
-    public IModalService ModalService { get; set; } = default!;
+    private bool showLeagueHiddenAlert = true;
+    private bool seasonsExpanded = false;
 
-    [Parameter(CaptureUnmatchedValues = true)] 
-    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+    private bool Loading => Bind(League, x => x.Loading);
+
+    private StatusResultValidator? ResultValidator { get; set; }
+
+    private EventCallback OnChangeDebounced;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        OnChangeDebounced = EventCallback.Factory.Create(this, DebounceWrapper.Debounce(OnChanged, 500));
+        League.HasChanged += OnVmChanged;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -107,9 +116,9 @@
         {
             return;
         }
-        await vm.LoadCurrent();
-        await vm.LoadSeasons();
-        if (vm.IsInitialized == false)
+        await League.LoadCurrent();
+        await League.LoadSeasons();
+        if (League.IsInitialized == false)
         {
             await ShowApplyTemplatesModal();
         }
@@ -117,82 +126,51 @@
 
     private async Task AddSeasonClick()
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(EditSeasonModal.Model), new SeasonModel())
-            .Add(nameof(EditSeasonModal.OnSubmit), new Func<SeasonViewModel, CancellationToken, Task<StatusResult>>(async (season, cts) => 
-                await vm.AddSeason(season.GetModel(), cts)));
-        var options = new ModalOptions()
+        var parameters = new DialogParameters<EditSeasonDialog>()
         {
-            DisableBackgroundCancel = true
+            {x => x.Model, new()},
+            {x => x.OnSubmit, async (season, cancellation) => await League.AddSeason(season.GetModel(), cancellation)},
         };
-        var result = await ModalService.Show<EditSeasonModal>("Add Season", parameters, options).Result;
+        var result = await DialogService.Show<EditSeasonDialog>("Add Season", parameters).Result;
     }
 
     private async Task SeasonClick(SeasonViewModel season)
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(EditSeasonModal.Model), season.CopyModel())
-            .Add(nameof(EditSeasonModal.OnSubmit), new Func<SeasonViewModel, CancellationToken, Task<StatusResult>>(async (season, cts) => 
-                await season.SaveChangesAsync(cts)));
-        var options = new ModalOptions()
+        var parameters = new DialogParameters<EditSeasonDialog>()
         {
-            DisableBackgroundCancel = true
+            {x => x.Model, season.CopyModel()},
+            {x => x.OnSubmit, async (season, cancellation) => await season.SaveChangesAsync(cancellation)},
         };
-        var result = await ModalService.Show<EditSeasonModal>("Edit Season", parameters, options).Result;
-        if (result.Confirmed && result.Data is SeasonModel seasonModel)
+        var result = await DialogService.Show<EditSeasonDialog>("Edit Season", parameters).Result;
+        if (result.Canceled == false && result.Data is SeasonModel seasonModel)
         {
             season.SetModel(seasonModel);
         }
     }
 
-    private async Task ProtestSettingsClick()
-    {
-        var parameters = new ModalParameters()
-            .Add(nameof(EditProtestSettingsModal.Model), vm.CopyModel())
-            .Add(nameof(EditProtestSettingsModal.OnSubmit), new Func<LeagueViewModel, CancellationToken, Task<StatusResult>>(async (season, cts) => 
-                await season.SaveChangesAsync(cts)));
-        var options = new ModalOptions()
-        {
-            DisableBackgroundCancel = true
-        };
-        var result = await ModalService.Show<EditProtestSettingsModal>("Edit Protest Settings", parameters, options).Result;
-        if (result.Confirmed && result.Data is LeagueModel leagueModel)
-        {
-            vm.SetModel(leagueModel);
-        }
-    }
-
     private async Task DeleteSeasonClick(SeasonViewModel season)
     {
-        var parameters = new ModalParameters()
-            .Add(nameof(ConfirmModal.Text), $"Really delete season \"{season.Name}\"?")
-            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
-        var result = await ModalService.Show<ConfirmModal>("Delete Season", parameters).Result;
-        if (result.Confirmed)
+        var parameters = new DialogParameters<ConfirmDialog>()
         {
-            await vm.DeleteSeason(season.GetModel());   
-        }
-    }
-
-    private async Task EditLeagueNameClick(LeagueViewModel league)
-    {
-        var parameters = new ModalParameters<EditLeagueNameModal>()
-            .Add(x => x.Model, league.CopyModel())
-            .Add(x => x.OnSubmit, (vm, cancellation) => vm.SaveChangesAsync(cancellation));
-        var result = await ModalService.Show<EditLeagueNameModal>("Edit league name", parameters).Result;
-        if (result.Confirmed && result.Data is LeagueModel model)
+            {x => x.Text, $"Really delete season \"{season.Name}\"?"},
+            {x => x.ButtonTypes, ButtonTypes.YesNo},
+        };
+        var result = await DialogService.Show<ConfirmDialog>("Delete Season", parameters).Result;
+        if (result.Canceled == false)
         {
-            league.SetModel(model);
+            await League.DeleteSeason(season.GetModel());
         }
     }
 
     private async Task EditDescriptionClick(LeagueViewModel league)
     {
-        var parameters = new ModalParameters<EditLeagueDescriptionModal>()
-            .Add(x => x.Model, league.CopyModel())
-            .Add(x => x.OnSubmit, (vm, cancellation) => vm.SaveChangesAsync(cancellation));
-        var result = await ModalService.Show<EditLeagueDescriptionModal>("Edit description", parameters).Result;
-        if (result.Confirmed && result.Data is LeagueModel model)
+        var parameters = new DialogParameters<EditLeagueDescriptionDialog>()
+        {
+            {x => x.Model, league.CopyModel()},
+            {x => x.OnSubmit, (vm, cancellation) => vm.SaveChangesAsync(cancellation)},
+        };
+        var result = await DialogService.Show<EditLeagueDescriptionDialog>("Edit description", parameters).Result;
+        if (result.Canceled == false && result.Data is LeagueModel model)
         {
             league.SetModel(model);
         }
@@ -205,24 +183,53 @@
 
     private async Task ShowApplyTemplatesModal()
     {
-        var parameters = new ModalParameters<ConfirmModal>()
-            .Add(x => x.Text, "Welcome to your new league. To speed up your setup process you can select the basic settings from a template")
-            .Add(x => x.ButtonTypes, ButtonTypes.OkCancel)
-            .Add(x => x.OkButtonText, "Yes, select template")
-            .Add(x => x.CancelButtonText, "No, start with empty league");
-        var result = await ModalService.Show<ConfirmModal>("Select league template", parameters).Result;
-        if (result.Confirmed)
+        var parameters = new DialogParameters<ConfirmDialog>()
+        {
+            {x => x.Text, "Welcome to your new league. To speed up your setup process you can select the basic settings from a template"},
+            {x => x.ButtonTypes, ButtonTypes.OkCancel},
+            {x => x.OkButtonText, "Yes, select template"},
+            {x => x.CancelButtonText, "No, start with empty league"},
+        };
+        var result = await DialogService.Show<ConfirmDialog>("Select league template", parameters).Result;
+        if (result.Canceled == false)
         {
             // forward to select template page
             NavigateTo($"/{LeagueName}/Settings/Templates", returnUrl: GetReturnUrl());
             return;
         }
-        await vm.InitializeLeague(CancellationToken);
+        await League.InitializeLeague(CancellationToken);
     }
 
     private async Task MakePublicListed()
     {
-        vm.LeaguePublic = LeaguePublicSetting.PublicListed;
-        await vm.SaveChangesAsync(CancellationToken);
+        League.LeaguePublic = LeaguePublicSetting.PublicListed;
+        await League.SaveChangesAsync(CancellationToken);
+    }
+
+    private void OnVmChanged(object? sender, EventArgs e)
+    {
+        InvokeAsync(OnChangeDebounced.InvokeAsync);
+    }
+
+    private async Task OnChanged()
+    {
+        await SaveChanges();
+    }
+
+    private async Task SaveChanges()
+    {
+        if (League.HasChanges)
+        {
+            await League.SaveChangesAsync(CancellationToken);
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            League.HasChanged -= OnVmChanged;
+        }
+        base.Dispose(disposing);
     }
 }

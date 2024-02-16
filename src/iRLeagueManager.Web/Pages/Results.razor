@@ -1,4 +1,5 @@
-﻿@page "/{LeagueName}/Results/Events/{EventId:long}"
+﻿@namespace iRLeagueManager.Web.Pages
+@page "/{LeagueName}/Results/Events/{EventId:long}"
 @page "/{LeagueName}/Results/Seasons/{SeasonId:long}"
 @page "/{LeagueName}/Results"
 @using System.ComponentModel
@@ -8,93 +9,124 @@
 @using System.Linq.Expressions
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.Components
-@using iRLeagueManager.Web.Components.Results
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
 @inject ResultsPageViewModel vm
+@inject IDialogService DialogService
 
-<PageTitle>Results - @LeagueName</PageTitle>
+<PageTitle>
+    Results - @LeagueName
+</PageTitle>
 
-<div class="container-xxl">
-    <div class="sticky-header">
-        <div class="d-flex align-items-bottom gap-2">
-            <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
-                <h3>Results</h3>
-            </LoadingHeader>
-            <EventSelect class="mb-2" />
-        </div>
-        @if (@Bind(vm, x => x.Results)?.Count == 0)
-        {
-            <div class="card-body">
-                <p class="results-scoring"><em>No Results</em></p>
-            </div>
-        }
-        <div class="d-flex">
-            <ul class="nav nav-tabs flex-fill">
-                @foreach((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x,i)))
-                {
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href="@GetTabLink(i)">@Bind(eventResult, x => x.Name)</NavLink>
-                    </li>
-                }
-            </ul>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+    <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+        <HeaderText>
+            <MudText Typo="Typo.h5">Results</MudText>
+        </HeaderText>
+        <HeaderActions>
+            <EventSelect />
             <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
                 <Authorized>
-                    @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
-                    {
-                        <button class="btn btn-outline-secondary ms-2" @onclick=TriggerCalculation>
-                            Calculate
-                        </button>
-                        @if (vm.Results.Count > 0)
+                    <MudStack Row="true" Justify="Justify.FlexEnd" Style="flex-grow: 1">
+                        @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
                         {
-                            <button class="btn btn-outline-danger ms-2" @onclick=DeleteResultsClick>
-                                <span class="oi oi-trash" />
-                            </button>
+                            <MudButton OnClick=TriggerCalculation
+                                       Variant="Variant.Outlined"
+                                       StartIcon="@Icons.Material.Filled.Loop">
+                                Calculate
+                            </MudButton>
+                            @if (vm.Results.Count > 0)
+                            {
+                                <MudTooltip Text="Delete Results"
+                                            Delay="0.5"
+                                            Arrow="true">
+                                    <MudIconButton Variant="Variant.Outlined"
+                                                   Icon="@Icons.Material.Filled.Delete"
+                                                   Color="@Color.Error" OnClick=DeleteResultsClick />
+                                </MudTooltip>
+                            }
                         }
-                    }
+                    </MudStack>
                 </Authorized>
             </AuthorizeView>
-        </div>
-    </div>
+        </HeaderActions>
+    </LoadingHeader>
 
-    @if (@Bind(vm, x => x.SelectedEvent) != null && @Bind(vm, x => x.SelectedEventResult) != null)
-    {
-        @foreach(var result in @Bind(vm.SelectedEventResult!, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
+    <MudElement HtmlTag="div" Class="mt-3">
+        @if (@Bind(vm, x => x.Results)?.Count == 0)
         {
-            <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
-                <Authorized>
-                    <DisplayResult class="px-0 mb-2 mx-0" Result="result" CanEdit="true"/>
-                </Authorized>
-                <NotAuthorized>
-                    <DisplayResult class="px-0 mb-2 mx-0" Result="result" />
-                </NotAuthorized>
-            </AuthorizeView>
+            <MudPaper Elevation="5" Class="py-4 px-6">
+                <MudText Typo="Typo.h5">No Results</MudText>
+            </MudPaper>
         }
-    }
+        else
+        {
+            @if (vm.Results.Count > 1)
+            {
+                <MudTabs @bind-ActivePanelIndex="@SelectedTabIndex" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
+                    @foreach ((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x, i)))
+                    {
+                        <MudTabPanel Text="@eventResult.Name">
+                            <MudStack Class="gap-2 pt-2">
+                                @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
+                                {
+                                    <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
+                                        <Authorized>
+                                            <DisplayResult Result="result" CanEdit="true" />
+                                        </Authorized>
+                                        <NotAuthorized>
+                                            <DisplayResult Result="result" />
+                                        </NotAuthorized>
+                                    </AuthorizeView>
+                                }
+                            </MudStack>
+                        </MudTabPanel>
+                    }
+                </MudTabs>
+            }
+            else
+            {
+                var eventResult = vm.Results.First();
+                <MudStack Class="gap-2">
+                    @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
+                    {
+                        <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
+                            <Authorized>
+                                <DisplayResult Result="result" CanEdit="true" />
+                            </Authorized>
+                            <NotAuthorized>
+                                <DisplayResult Result="result" />
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    }
+                </MudStack>
+            }
+        }
+    </MudElement>
+
     <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
         <Authorized>
             @if (SharedState.SeasonFinished == false)
             {
-                <div>
-                    <button class="btn btn-outline-secondary" @onclick=UploadButtonClick>Upload Result</button>
-                </div>
+                <MudButton Color="Color.Primary" OnClick=UploadButtonClick Class="mt-2">Upload Result</MudButton>
             }
         </Authorized>
     </AuthorizeView>
-</div>
+</MudContainer>
 
 @code {
     private const string resultTabParam = "resultTab";
 
+    private int SelectedTabIndex { get => vm.SelectedResultIndex; set => SetSelectedResultIndex(value); }
+
     [CascadingParameter]
     public SharedStateService SharedState { get; set; } = default!;
     [CascadingParameter]
-    public IModalService ModalService { get; set; } = default!;
+    public Breakpoint Breakpoint { get; set; }
 
 
     protected override async Task OnInitializedAsync()
     {
-        NavigationManager.LocationChanged += OnLocationChanged;
         await Task.FromResult(true);
     }
 
@@ -115,7 +147,7 @@
         }
     }
 
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    protected override void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         vm.SelectedResultIndex = NavigationManager.QueryParameter<int>(resultTabParam);
     }
@@ -130,6 +162,7 @@
 
     private void SetSelectedResultIndex(int index)
     {
+        vm.SelectedResultIndex = index;
         NavigationManager.NavigateTo(GetTabLink(index), replace: true);
     }
 
@@ -146,9 +179,16 @@
         {
             return;
         }
-        var parameters = new ModalParameters()
-            .Add(nameof(UploadResultPrompt.Event), @event);
-        await ModalService.Show<UploadResultPrompt>("Upload json result", parameters).Result;
+        var parameters = new DialogParameters<UploadResultDialog>()
+        {
+            { x => x.Event, @event },
+        };
+        var result = await DialogService.Show<UploadResultDialog>("Upload json result", parameters).Result;
+        if (result.Canceled == false)
+        {
+            await Task.Delay(2000);
+            await vm.LoadFromEventAsync(@event.Id);
+        }
     }
 
     private async Task TriggerCalculation()
@@ -167,22 +207,15 @@
         {
             return;
         }
-        var parameters = new ModalParameters()
-            .Add(nameof(ConfirmModal.Text), $"Really delete result for event \"{@event.Name} - {@event.Date.ToString(@"dd.MM.yyyy")}\"?")
-            .Add(nameof(ConfirmModal.ButtonTypes), ButtonTypes.YesNo);
-        var result = await ModalService.Show<ConfirmModal>("Delete Results", parameters).Result;
-        if (result.Confirmed)
+        var parameters = new DialogParameters<ConfirmDialog>()
         {
-            await vm.DeleteEventResults();   
-        }
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing == false)
+            { x => x.Text, $"Really delete result for event \"{@event.Name} - {@event.Date.GetValueOrDefault().ToString(@"dd.MM.yyyy")}\"?" },
+            { x => x.ButtonTypes, ButtonTypes.YesNo },
+        };
+        var result = await DialogService.Show<ConfirmDialog>("Delete Results", parameters).Result;
+        if (result.Canceled == false)
         {
-            NavigationManager.LocationChanged -= OnLocationChanged;
+            await vm.DeleteEventResults();
         }
-        base.Dispose(disposing);
     }
 }

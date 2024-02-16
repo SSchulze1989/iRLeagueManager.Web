@@ -1,0 +1,92 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Users
+@using iRLeagueManager.Web.ViewModels
+@inject LeagueApiService apiService
+
+<MudDialog>
+    <DialogContent>
+        <MudAutocomplete @bind-Value="User"
+                         SearchFunc="SearchUsers"
+                         DebounceInterval="500"
+                         MinCharacters="2"
+                         ToStringFunc="UserToString"
+                         Variant="Variant.Outlined">
+            <ItemTemplate Context="user">
+                <DisplayUser User="user"/>
+            </ItemTemplate>
+            <ItemSelectedTemplate Context="user">
+                <DisplayUser User="user" ShowUserName="false"/>
+            </ItemSelectedTemplate>
+        </MudAutocomplete>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit" Disabled="@(User is null)">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+        [CascadingParameter] public MudDialogInstance DialogInstance { get; set; } = default!;
+        [Parameter] public LeagueUsersViewModel LeagueUsers { get; set; } = default!;
+
+    private UserModel? User { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        BlazorParameterNullException.ThrowIfNull(this, DialogInstance);
+        BlazorParameterNullException.ThrowIfNull(this, LeagueUsers);
+    }
+
+    private async Task<IEnumerable<UserModel?>> SearchUsers(string name)
+    {
+        if (apiService.CurrentLeague == null)
+        {
+            return Array.Empty<UserModel>();
+        }
+        var parts = name.Split(',', ';', ' ');
+        var model = new SearchModel() { SearchKeys = parts };
+        var request = apiService.Client
+            .Users()
+            .Search()
+            .Post(model);
+        var result = await request;
+        if (result.Success && result.Content is not null)
+        {
+            return result.Content;
+        }
+        return Array.Empty<UserModel>();
+    }
+
+    private async Task Submit()
+    {
+        if (User == null)
+        {
+            return;
+        }
+
+        var result = await LeagueUsers.AddUser(User);
+        if (result.IsSuccess)
+        {
+            DialogInstance.Close();
+        }
+    }
+
+    private void Cancel()
+    {
+        DialogInstance.Cancel();
+    }
+
+    private string UserToString(UserModel? user)
+    {
+        if (user is null)
+        {
+            return string.Empty;
+        }
+        if (string.IsNullOrEmpty(user.Firstname) && string.IsNullOrEmpty(user.Lastname))
+        {
+            return user.UserName;
+        }
+        return $"{user.Firstname} {user.Lastname}";
+    }
+}

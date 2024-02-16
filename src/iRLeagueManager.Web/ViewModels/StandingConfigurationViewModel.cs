@@ -19,7 +19,9 @@ public sealed class StandingConfigurationViewModel : LeagueViewModelBase<Standin
 
     public bool UseCombinedResult { get => model.UseCombinedResult; set => SetP(model.UseCombinedResult, value => model.UseCombinedResult = value, value); }
 
+    public bool UseHeatResult { get => !model.UseCombinedResult; set => SetP(model.UseCombinedResult, value => model.UseCombinedResult = value, !value); }
+
     public int? WeeksCounted { get => model.WeeksCounted <= 0 ? null : model.WeeksCounted; set => SetP(model.WeeksCounted, value => model.WeeksCounted = value, value > 0 ? value.Value : 0); }
     
-    public ICollection<SortOptions> SortOptions { get => model.SortOptions; set =>  SetP(model.SortOptions, value => model.SortOptions = value, value); }
+    public IList<SortOptions> SortOptions { get => model.SortOptions.ToList(); set =>  SetP(model.SortOptions, value => model.SortOptions = value, value); }
 }

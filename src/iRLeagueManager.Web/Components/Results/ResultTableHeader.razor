@@ -1,0 +1,128 @@
+﻿@namespace iRLeagueManager.Web.Components
+@typeparam TRow
+
+<th class="table-header
+        py-2 px-1
+        @(Active ? "active" : "" )
+        @(HasAction ? "action" : "")
+        @(CurrentDirection == SortDirection.Ascending ? "sort-ascending" : "sort-descending")
+        @Class
+    "
+    width="@Width"
+    @onclick=@OnClick>
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="pa-0">
+        @if (ChildContent is not null)
+        {
+            @ChildContent
+        }
+        else
+        {
+            <span class="@GetLongTextClass()">@Text</span>
+            <span class="@GetShortTextClass()">@(string.IsNullOrEmpty(TextShort) ? Text : TextShort)</span>
+        }
+        <MudIcon Icon="@(CurrentDirection == SortDirection.Ascending ? Icons.Material.Filled.KeyboardArrowUp : Icons.Material.Filled.KeyboardArrowDown)" 
+                 Size="Size.Small"
+                 Class="table-header-adorner"/>
+    </MudStack>
+</th>
+
+@code {
+    [CascadingParameter]
+    public SortState<TRow> CascadingSortState { get; set; } = default!;
+    [Parameter]
+    public string Text { get; set; } = string.Empty;
+    [Parameter]
+    public string TextShort { get; set; } = string.Empty;
+    [Parameter]
+    public Func<TRow, IComparable>? Sort { get; set; }
+    [Parameter]
+    public bool Default { get; set; } = false;
+    [Parameter]
+    public MudBlazor.SortDirection Direction { get; set; } = SortDirection.Ascending;
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    [Parameter]
+    public Breakpoint Breakpoint { get; set; } = Breakpoint.None;
+    [Parameter]
+    public string Class { get; set; } = string.Empty;
+    [Parameter]
+    public string Width { get; set; } = string.Empty;
+
+    private SortDirection CurrentDirection { get; set; }
+
+    private bool Active => CascadingSortState.SortFunc == Sort && HasAction;
+
+    private bool HasAction => Sort is not null;
+
+    protected override void OnInitialized()
+    {
+        CurrentDirection = Direction;
+        if (Default)
+        {
+            OnClick();
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        BlazorParameterNullException.ThrowIfNull(this, CascadingSortState);
+    }
+
+    private void OnClick()
+    {
+        if (HasAction == false)
+        {
+            return;
+        }
+
+        if (Active)
+        {
+            CurrentDirection = CurrentDirection == SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending;
+        }
+
+        CascadingSortState.Direction = CurrentDirection;
+        CascadingSortState.SortFunc = Sort;
+    }
+
+    private string GetLongTextClass() => Breakpoint switch
+    {
+        Breakpoint.Xs => "d-none d-xs-flex",
+        Breakpoint.Sm => "d-none d-sm-flex",
+        Breakpoint.Md => "d-none d-md-flex",
+        Breakpoint.Lg => "d-none d-lg-flex",
+        Breakpoint.Xl => "d-none d-xl-flex",
+        Breakpoint.Xxl => "d-none d-xxl-flex",
+        Breakpoint.SmAndDown => "d-none d-md-flex",
+        Breakpoint.MdAndDown => "d-none d-lg-flex",
+        Breakpoint.LgAndDown => "d-none d-xl-flex",
+        Breakpoint.XlAndDown => "d-none d-xxl-flex",
+        Breakpoint.SmAndUp => "d-none d-sm-flex",
+        Breakpoint.MdAndUp => "d-none d-md-flex",
+        Breakpoint.LgAndUp => "d-none d-lg-flex",
+        Breakpoint.XlAndUp => "d-none d-xl-flex",
+        Breakpoint.None => "d-flex",
+        Breakpoint.Always => "d-none",
+        _ => ""
+    };
+
+    private string GetShortTextClass() => Breakpoint switch
+    {
+        Breakpoint.Xs => "d-flex d-xs-none",
+        Breakpoint.Sm => "d-flex d-sm-none",
+        Breakpoint.Md => "d-flex d-md-none",
+        Breakpoint.Lg => "d-flex d-lg-none",
+        Breakpoint.Xl => "d-flex d-xl-none",
+        Breakpoint.Xxl => "d-flex d-xxl-none",
+        Breakpoint.SmAndDown => "d-flex d-md-none",
+        Breakpoint.MdAndDown => "d-flex d-lg-none",
+        Breakpoint.LgAndDown => "d-flex d-xl-none",
+        Breakpoint.XlAndDown => "d-flex d-xxl-none",
+        Breakpoint.SmAndUp => "d-flex d-sm-none",
+        Breakpoint.MdAndUp => "d-flex d-md-none",
+        Breakpoint.LgAndUp => "d-flex d-lg-none",
+        Breakpoint.XlAndUp => "d-flex d-xl-none",
+        Breakpoint.None => "d-none",
+        Breakpoint.Always => "d-flex",
+        _ => ""
+    };
+}

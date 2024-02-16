@@ -1,0 +1,194 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Models
+@inherits PromptDialog<PointRuleModel>
+@inject PointRuleViewModel PointRule
+@inject IJSRuntime jsRuntime
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="2">
+            <MudSelect @bind-Value="@PointRule.RuleType" Variant="Variant.Outlined">
+                <MudSelectItem Value=@PointRuleViewModel.PointRuleType.MaxPoints>Max points + Drop-off</MudSelectItem>
+                <MudSelectItem Value=@PointRuleViewModel.PointRuleType.PointList>Point List</MudSelectItem>
+            </MudSelect>
+
+            @switch (PointRule.RuleType)
+            {
+                case PointRuleViewModel.PointRuleType.MaxPoints:
+                    <MudGrid Spacing="2">
+                        <MudItem xs="6">
+                            <MudTextField @bind-Value="PointRule.MaxPoints" Label="Max Points" HelperText="Points awarded for 1st place" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField @bind-Value="PointRule.PointDropOff" Label="Drop off" HelperText="Points difference between positions" Variant="Variant.Outlined" />
+                        </MudItem>
+                    </MudGrid>
+                    break;
+                case PointRuleViewModel.PointRuleType.PointList:
+                    <MudField Label="Points per position" Variant="Variant.Outlined">
+                        @{
+                            var pointsPerPlace = PointRule.PointsPerPlace;
+                        }
+                        <MudSimpleTable Elevation="0">
+                            <thead>
+                                <tr>
+                                    <th>Pos. </th>
+                                    @foreach (var position in pointsPerPlace.Select((x, i) => i + 1))
+                                    {
+                                        <th>@position.</th>
+                                    }
+                                    <th>@(PointRule.PointsPerPlace.Count() + 1).</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Pts.</th>
+                                    @foreach ((var points, var index) in pointsPerPlace.Select((x, i) => ((int?)x, i)))
+                                    {
+                                        <td class="px-1">
+                                            <MudInput Value="points"
+                                                      ValueChanged="@((int? value) => SetValue(index, value))"
+                                                      Variant="Variant.Text"
+                                                      HideSpinButtons="true"
+                                                      DisableUnderLine="false"
+                                                      FullWidth="true" />
+                                        </td>
+                                    }
+                                    <td class="px-1">
+                                        <MudInput @bind-Value="NewValue"
+                                                  @ref="NewNumberInput"
+                                                  Variant="Variant.Text"
+                                                  DisableUnderLine="false"
+                                                  FullWidth="true" />
+                                    </td>
+                                    <td>
+                                        <span @ref=ScrollDummy />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </MudSimpleTable>
+                    </MudField>
+                    break;
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkClick="Submit" CancelClick="Cancel" />
+    </DialogActions>
+</MudDialog>
+
+@* <div class="input-group">
+    <div class="form-control overflow-auto">
+        @{
+            var pointsPerPlace = @Bind(PointRule, x => x.PointsPerPlace);
+        }
+        <table class="mb-3">
+            <thead>
+                <tr>
+                    <th>Pos. </th>
+                    @foreach (var position in pointsPerPlace.Select((x, i) => i + 1))
+                    {
+                        <th>@position.</th>
+                    }
+                    <th>@(PointRule.PointsPerPlace.Count() + 1).</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Pts.</th>
+                    @foreach ((var points, var index) in pointsPerPlace.Select((x, i) => ((int?)x, i)))
+                    {
+                        <td>
+                            <InputNumber Value=points
+                                            ValueExpression=@(() => points)
+                                            ValueChanged=@((int? value) => SetValue(index, value))
+                                            class="input-plain"
+                                            style="width: 2rem;" />
+                        </td>
+                    }
+                    <td>
+                        <InputNumber @bind-Value=NewValue
+                                        @ref=NewNumberInput
+                                        class="input-plain"
+                                        style="width: 2rem;" />
+                    </td>
+                    <td>
+                        <span @ref=ScrollDummy />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div> *@
+
+@code {
+    MudInput<int?> NewNumberInput { get; set; } = default!;
+    ElementReference ScrollDummy { get; set; }
+
+    private int? newValue = default(int?);
+    private int? NewValue
+    {
+        get => newValue;
+        set
+        {
+            if (newValue != value)
+            {
+                _ = NewPointValue(value);
+            }
+        }
+    }
+
+    protected override async void OnAfterRender(bool firstRender)
+    {
+        if (firstRender == false)
+        {
+            return;
+        }
+        if (PointRule.GetModel() != Value)
+        {
+            PointRule.SetModel(Value ?? new());
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task NewPointValue(int? value)
+    {
+        if (value > 0)
+        {
+            PointRule.PointsPerPlace.Add(value.Value);
+        }
+        await ScrollDummy.FocusAsync();
+        await NewNumberInput.FocusAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void SetValue(int index, int? value)
+    {
+        if (value is null)
+        {
+            PointRule.PointsPerPlace.RemoveAt(index);
+            return;
+        }
+        PointRule.PointsPerPlace[index] = value.Value;
+    }
+
+    protected override Task Submit()
+    {
+        if (PointRule.RuleType == PointRuleViewModel.PointRuleType.MaxPoints && PointRule.PointDropOff > 0)
+        {
+            var points = PointRule.MaxPoints;
+            PointRule.PointsPerPlace.Clear();
+            while (points > 0)
+            {
+                PointRule.PointsPerPlace.Add(points);
+                points -= PointRule.PointDropOff;
+            }
+        }
+        else
+        {
+            PointRule.MaxPoints = 0;
+            PointRule.PointDropOff = 0;
+        }
+        return base.Submit();
+    }
+}

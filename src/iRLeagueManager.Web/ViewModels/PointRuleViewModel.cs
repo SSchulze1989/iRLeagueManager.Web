@@ -63,11 +63,10 @@ public sealed class PointRuleViewModel : LeagueViewModelBase<PointRuleViewModel,
         Formula = 2,
     }
 
-    public override void SetModel(PointRuleModel model)
+    protected override void SetModel(PointRuleModel model)
     {
         base.SetModel(model);
         RuleType = InferRuleType(model);
-        OnPropertyChanged();
     }
 
     private void RuleTypeChanged(PointRuleType ruleType)

@@ -1,0 +1,49 @@
+﻿@namespace iRLeagueManager.Web.Components
+@inherits SettingBase
+
+<MudListItem Icon="@Icon"
+             IconSize="IconSize"
+             IconColor="IconColor"
+             OnClick="HandleClick">
+
+    <MudElement HtmlTag="div" Class="d-flex flex-column align-start justify-center">
+        <MudStack AlignItems="AlignItems.Center" Row="true" Spacing="6">
+            <MudText>
+                @if (ChildContent is null)
+                {
+                    @Text
+                }
+                else
+                {
+                    @ChildContent
+                }
+            </MudText>
+            <MudSwitch Checked="Checked" CheckedChanged="CheckedChanged" Color="Color" />
+        </MudStack>
+        @if (displayHelperText)
+        {
+            <p class="mud-input-helper-text">@HelperText</p>
+        }
+    </MudElement>
+</MudListItem>
+
+@code {
+    [Parameter] public bool Checked { get; set; } = false;
+    [Parameter] public EventCallback<bool> CheckedChanged { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (Color == Color.Inherit)
+        {
+            Color = Color.Primary;
+        }
+    }
+
+    async Task HandleClick()
+    {
+        // toggle checked
+        Checked = !Checked;
+        await CheckedChanged.InvokeAsync(Checked);
+    }
+}

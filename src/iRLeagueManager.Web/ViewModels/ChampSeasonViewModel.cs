@@ -26,7 +26,8 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
     public string ChampionshipDisplayName { get => model.ChampionshipDisplayName; set => SetP(model.ChampionshipDisplayName, value => model.ChampionshipDisplayName = value, value); }
     public string SeasonName => model.SeasonName;
     public ResultKind ResultKind { get => model.ResultKind; set => SetP(model.ResultKind, value => model.ResultKind = value, value); }
-    public ICollection<ResultFilterModel> Filters { get => model.Filters; set => SetP(model.Filters, value => model.Filters = value, value); }
+    public IEnumerable<ResultFilterModel> Filters { get => model.Filters; set => SetP(model.Filters, value => model.Filters = value.ToList(), value); }
+    public IEnumerable<FilterConditionModel> FilterConditions { get => model.Filters.Select(x => x.Condition); set => SetFilterConditions(value); }
 
     private StandingConfigurationViewModel? standingConfig;
     public StandingConfigurationViewModel? StandingConfig 
@@ -54,8 +55,8 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
         }
         switch (e.PropertyName)
         {
-            case nameof(HasChanged):
-                HasChanged |= childState.HasChanged;
+            case nameof(HasChanges):
+                HasChanges |= childState.HasChanges;
                 break;
         }
     }
@@ -65,6 +66,37 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
 
     private ICollection<ResultConfigViewModel> resultConfigViewModels;
     public ICollection<ResultConfigViewModel> ResultConfigViewModels { get => resultConfigViewModels; set => Set(ref resultConfigViewModels, value); }
+
+    private ResultConfigViewModel NewResultConfigViewModel(ResultConfigModel model)
+    {
+        var viewModel = new ResultConfigViewModel(LoggerFactory, ApiService, model)
+        {
+            ParentViewModel = this,
+        };
+        return viewModel;
+    }
+
+    private void SetFilterConditions(IEnumerable<FilterConditionModel> conditions)
+    {
+        var updatedFilters = Filters.ToList();
+        for (int i=0; i<Math.Max(Filters.Count(), conditions.Count()); i++)
+        {
+            var filter = Filters.ElementAtOrDefault(i);
+            var condition = conditions.ElementAtOrDefault(i);
+            if (condition is null)
+            {
+                updatedFilters.Remove(filter!);
+                continue;
+            }
+            if (filter is null)
+            {
+                filter = new();
+                updatedFilters.Add(filter);
+            }
+            filter.Condition = condition;
+        }
+        Filters = updatedFilters;
+    }
 
     public async Task<StatusResult> Load(long championshipId, CancellationToken cancellationToken = default)
     {
@@ -144,7 +176,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
                 }
                 configModels.Add(result.Content);
             }
-            ResultConfigViewModels = configModels.Select(x => new ResultConfigViewModel(LoggerFactory, ApiService, x)).ToList();
+            ResultConfigViewModels = configModels.Select(NewResultConfigViewModel).ToList();
             return StatusResult.SuccessResult();
         }
         finally
@@ -213,7 +245,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
         }
     }
 
-    public override void SetModel(ChampSeasonModel model)
+    protected override void SetModel(ChampSeasonModel model)
     {
         base.SetModel(model);
         StandingConfig = model.StandingConfig == null ? null : new(LoggerFactory, ApiService, model.StandingConfig);

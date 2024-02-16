@@ -1,0 +1,19 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.ViewModels
+
+@if (Session != null)
+{
+    <MudGrid>
+        <MudItem xs="6">
+            <MudTextField Label="Duration" @bind-Value="Session.Duration" InputType="InputType.Time" />
+        </MudItem>
+        <MudItem xs="6">
+            <MudNumericField Label="Laps" @bind-Value="Session.Laps"/>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    [Parameter]
+    public SessionViewModel? Session { get; set; }
+}

@@ -1,0 +1,71 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.ViewModels
+@inherits EditDialogBase<TeamViewModel, TeamModel>
+
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model=Vm OnValidSubmit=Submit>
+            <StatusResultValidator @ref=ResultValidator />
+            <MudStack Spacing="2">
+                <MudTextField Label="Name" @bind-Value="Vm.Name" For="@(() => Vm.Name)" Variant="Variant.Outlined" />
+                <MudColorPicker Label="Color"
+                                @bind-Text="Vm.TeamColor"
+                                style="@($"color: {Vm.TeamColor}")"
+                                ColorPickerMode="ColorPickerMode.HEX"
+                                DisableAlpha="true"
+                                DisableToolbar="false"
+                                PickerVariant="PickerVariant.Inline"
+                                Variant="Variant.Outlined" />
+                <MultiSelectAutoComplete Label="Members"
+                                         @bind-Values=Vm.Members
+                                         SearchFunc="SearchMembers"
+                                         ToStringFunc="@(member => member is null ? string.Empty : $"{member.FirstName} {member.LastName}")"
+                                         Variant="Variant.Outlined" />
+                <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
+            </MudStack>
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Submit</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public IEnumerable<MemberInfoModel> LeagueMembers { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        _ = Model ?? throw BlazorParameterNullException.New(this, Model);
+        _ = LeagueMembers ?? throw BlazorParameterNullException.New(this, LeagueMembers);
+
+        if (EqualityComparer<TeamModel>.Default.Equals(Model, Vm.GetModel()) == false)
+        {
+            Vm.SetModel(Model);
+        }
+    }
+
+    private async Task<IEnumerable<MemberInfoModel>> SearchMembers(string searchString)
+    {
+        if (string.IsNullOrEmpty(searchString))
+        {
+            return await Task.FromResult(LeagueMembers);
+        }
+
+        var terms = searchString.ToLower().Split(',', ' ', ';')
+        .Where(x => string.IsNullOrWhiteSpace(x) == false)
+            .ToArray();
+        return await Task.FromResult(LeagueMembers
+            .Where(x => MatchMemberSearchTerms(x, terms)));
+    }
+
+    private bool MatchMemberSearchTerms(MemberInfoModel member, params string[] terms)
+    {
+        var searchName = member.FirstName + member.LastName;
+        return terms.Any(x => searchName.Contains(x, StringComparison.OrdinalIgnoreCase));
+    }
+}

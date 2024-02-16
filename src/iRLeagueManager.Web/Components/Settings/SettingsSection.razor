@@ -1,0 +1,59 @@
+﻿@namespace iRLeagueManager.Web.Components
+@inherits SettingBase
+
+<MudListItem Class="@ClassPrivate"
+             Disabled="Disabled"
+             Expanded="Expanded"
+             ExpandedChanged="ExpandedChanged"
+             InitiallyExpanded="InitiallyExpanded"
+             Icon="@Icon"
+             IconColor="IconColor"
+             IconSize="IconSize"
+             Dense="true">
+    <ChildContent>
+        @if (displayLabel)
+        {
+            <label class="mud-input-label mud-input-label-text" style="font-size: 0.75em">@Label</label>
+        }
+        <MudText Color="Color" Style="width: 100%">
+            @if (Header is null)
+            {
+                @Text
+            }
+            else
+            {
+                @Header
+            }
+        </MudText>
+        @if (displayHelperText)
+        {
+            <p class="mud-input-helper-text">@HelperText</p>
+        }
+    </ChildContent>
+    <NestedList>
+        @ChildContent
+    </NestedList>
+</MudListItem>
+
+@code {
+    [Parameter] public bool Expanded { get; set; } = false;
+    [Parameter] public EventCallback<bool> ExpandedChanged { get; set; }
+    [Parameter] public bool InitiallyExpanded { get; set; } = false;
+    [Parameter] public RenderFragment? Header { get; set; }
+
+    string ClassPrivate => string.IsNullOrEmpty(Class) ? "me-4" : Class;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (ExpandedChanged.HasDelegate)
+        {
+            InitiallyExpanded = Expanded;
+        }
+        else
+        {
+            Expanded = InitiallyExpanded;
+            ExpandedChanged = new EventCallback<bool>(this, (bool x) => Expanded = x);
+        }
+    }
+}

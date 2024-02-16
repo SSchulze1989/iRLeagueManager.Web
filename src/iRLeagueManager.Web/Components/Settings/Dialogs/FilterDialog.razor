@@ -1,0 +1,30 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@inherits PromptDialog<IEnumerable<FilterConditionModel>>
+
+<MudDialog>
+    <DialogContent>
+        <CascadingValue Value="LeagueMembers">
+            <CascadingValue Value="Teams">
+                <FilterTable Filters="Value"
+                             FiltersChanged="@((value) => Value = value)" />
+            </CascadingValue>
+        </CascadingValue>
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkClick="Submit" CancelClick="Cancel" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [Parameter] public IEnumerable<TeamModel> Teams { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers);
+        BlazorParameterNullException.ThrowIfNull(this, Teams);
+    }
+}

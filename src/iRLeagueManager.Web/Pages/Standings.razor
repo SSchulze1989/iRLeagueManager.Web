@@ -8,46 +8,59 @@
 @using System.Linq.Expressions
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.Components
-@using iRLeagueManager.Web.Components.Results
-@using iRLeagueManager.Web.Components.Standings
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
 @inject StandingsPageViewModel vm
 
-<PageTitle>Standings - @LeagueName</PageTitle>
+<PageTitle>
+    Standings - @LeagueName
+</PageTitle>
 
-<div class="container-xxl">
-    <div class="sticky-header">
-        <div class="d-flex align-items-bottom gap-2">
-            <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
-                <h3>Standings</h3>
-            </LoadingHeader>
-            <EventSelect class="mb-2" />
-        </div>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+    <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+        <HeaderText>
+            <MudText Typo="Typo.h5">Standings</MudText>
+        </HeaderText>
+        <HeaderActions>
+            <EventSelect />
+        </HeaderActions>
+    </LoadingHeader>
 
-        @if (@Bind(vm, x => x.Standings)?.Count == 0)
+    <MudElement HtmlTag="div" Class="mt-3">
+        @if (@Bind(vm, x => x.Standings).Count == 0)
         {
-            <div class="card-body">
-                <p class="results-scoring"><em>No Standings</em></p>
-            </div>
+            <MudPaper Elevation="5" Class="py-4 px-6">
+                <MudText Typo="Typo.h5">No Standings</MudText>
+            </MudPaper>
         }
-        <ul class="nav nav-tabs">
-        @foreach((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x,i)))
+        else
         {
-            <li class="nav-item">
-                <NavLink class="nav-link" href="@GetTabLink(i)">@standing.Name</NavLink>
-            </li>
+            @if (vm.Standings.Count > 1)
+            {
+                <MudTabs @bind-ActivePanelIndex="@vm.SelectedStandingIndex" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
+                    @foreach ((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x, i)))
+                    {
+                        <MudTabPanel Text="@standing.Name">
+                            <MudPaper Elevation="4" Class="mt-2">
+                                <DisplayStanding class="px-0 mb-2 mx-0" Standing="standing" />
+                            </MudPaper>
+                        </MudTabPanel>
+                    }
+                </MudTabs>
+            }
+            else
+            {
+                var standing = vm.Standings.First();
+                <DisplayStanding class="px-0 mb-2 mx-0" Standing="standing" />
+            }
         }
-        </ul>
-    </div>
-
-    @if (@Bind(vm, x => x.SelectedStanding) != null)
-    {
-        <DisplayStanding class="px-0 mb-2 mx-0" Standing=@Bind(vm, x => x.SelectedStanding)/>
-    }
-</div>
+    </MudElement>
+</MudContainer>
 
 @code {
+    [CascadingParameter]
+    public Breakpoint Breakpoint { get; set; }
+
     private const string standingTabParam = "standingTab";
 
     protected override void OnInitialized()
@@ -81,7 +94,7 @@
         vm.SelectedStandingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
     }
 
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    protected override void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         vm.SelectedStandingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
     }

@@ -1,18 +1,19 @@
-﻿@page "/cookies"
+﻿@namespace iRLeagueManager.Web.Components
+@page "/cookies"
 
-<div class="container">
-    <h1 class="mb-4">We are using cookies</h1>
+<MudContainer>
+    <h1>We are using cookies</h1>
 
     <p>This website requires the use of cookies that are essential to its functions. Usage of cookies includes:</p>
-    <ul>
-        <li>User Authentication</li>
-        <li>Website & Cookie Preferences.</li>
-    </ul>
+    <MudList>
+        <MudListItem>User Authentication</MudListItem>
+        <MudListItem>Website & Cookie Preferences.</MudListItem>
+    </MudList>
 
     <p>If you have cookies disabled in your browser some features of this website might not function properly.</p>
 
     <p>The user will be informed and asked again when there are changes to the usage of cookies in the future.</p>
-</div>
+</MudContainer>
 
 @code {
 

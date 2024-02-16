@@ -1,72 +1,137 @@
-﻿@inherits MvvmComponentBase
+﻿@namespace iRLeagueManager.Web.Components
 @using System.ComponentModel
-@using Blazored.Typeahead
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Results
 @using iRLeagueManager.Web.ViewModels
+@inherits MvvmComponentBase
 
-<div @attributes=AdditionalAttributes>
-    <div class="card">
-        <div class="card-header d-flex justify-content-between">
-            <div class="col d-md-flex justify-content-start">
-                <span>@Protest.SessionName:&nbsp;&nbsp;</span>
-                <span class="oi oi-flag m-1" /><span>@Bind(Protest, x => x.OnLap)</span>
-                <span class="oi oi-action-undo m-1" /><span>@Bind(Protest, x => x.Corner)</span>
-                @if (string.IsNullOrWhiteSpace(Protest.Author.FirstName) == false || string.IsNullOrWhiteSpace(Protest.Author.LastName) == false)
-                {
-                    <span>&nbsp;&nbsp;By: @Protest.Author.FirstName @Protest.Author.LastName</span>
-                }
-            </div>
-            <div class="d-flex justify-content-end gap-md-2 gap-1">
-                @if (OnCreateReviewClick.HasDelegate)
-                {
-                    <button class="btn btn-outline-secondary" @onclick=OnCreateReviewClick title="Add as Review">
-                        <span class="bi bi-journal-plus"></span>
-                    </button>
-                }
-                @if (OnDeleteClick.HasDelegate)
-                {
-                    <button class="btn btn-outline-danger" @onclick=OnDeleteClick>
-                        <span class="oi oi-trash" />
-                    </button>
-                }
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="container">
-                <div class="row">
-                    <h5>Description</h5>
-                    <div class="preserve-format">
-                        @Protest.FullDescription
-                    </div>
-                </div>
-                <div class="row">
-                    <h5>Involved</h5>
-                    <div class="d-flex">
-                        @foreach(var member in @Bind(Protest, x => x.InvolvedMembers))
+<CascadingValue Value="InvolvedCars">
+    <CascadingValue Value="ChipSize" Name="ChipSize">
+        <MudPaper Elevation="5">
+            <MudStack Spacing="0">
+                <MudStack Row="true"
+                          AlignItems="AlignItems.Center"
+                          Style="background-color: var(--mud-palette-surface); padding: 10px 1.5em;">
+                    <MudText Typo="Typo.button" Class="@($"d-flex flex-wrap align-center {(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "gap-1" : "gap-2")}")">
+                        <div>@Protest.SessionName:</div>
+                        @if (Breakpoint is Breakpoint.Xs or Breakpoint.Sm)
                         {
-                            <div class="badge bg-secondary h-auto me-1">@member.FirstName @member.LastName</div>
+                            <div>L: @Protest.OnLap</div>
+                            <div>T: @Protest.Corner</div>
                         }
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                        else
+                        {
+                            <div>Lap: @Protest.OnLap</div>
+                            <div>Turn: @Protest.Corner</div>
+                        }
+                        @if (string.IsNullOrWhiteSpace(Protest.Author.FirstName) == false || string.IsNullOrWhiteSpace(Protest.Author.LastName) == false)
+                        {
+                            <div>
+                                &nbsp;&nbsp;By: @Protest.Author.FirstName @Protest.Author.LastName
+                            </div>
+                        }
+                    </MudText>
+                    <MudSpacer />
+                    <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                        <ActivatorContent>
+                            <MudIconButton Icon="@Icons.Material.Outlined.Menu" Style="padding: 6px; margin: -6px" />
+                        </ActivatorContent>
+                        <ChildContent>
+                            @if (OnCreateReviewClick.HasDelegate && ReadOnly == false)
+                            {
+                                <MudMenuItem Icon="@Icons.Material.Filled.AddComment" OnClick="OnCreateReviewClick">Create Review</MudMenuItem>
+                            }
+                            @if (OnDeleteClick.HasDelegate && ReadOnly == false)
+                            {
+                                <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="OnDeleteClick">Delete</MudMenuItem>
+                            }
+                        </ChildContent>
+                    </MudMenu>
+                </MudStack>
+                <MudStack Spacing="0">
+                    <MudDivider />
+                    <MudCard Elevation="0">
+                        <MudCardHeader Class="py-1">
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Description</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudText Typo="Typo.body2" Class="ps-2" Style="white-space: pre-wrap">
+                                @Protest.FullDescription
+                            </MudText>
+                        </MudCardContent>
+                    </MudCard>
+                    <MudCard Elevation="0">
+                        <MudCardHeader Class="py-1">
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Involved</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudChipSet ReadOnly="true" Class="d-flex gap-0 flex-wrap">
+                                @foreach (var car in InvolvedCars)
+                                {
+                                    <MudChip Icon="@Icons.Material.Outlined.Person" Label="true" Size="ChipSize" Variant="Variant.Outlined">
+                                        @CarToString(car)
+                                    </MudChip>
+                                }
+                            </MudChipSet>
+                        </MudCardContent>
+                    </MudCard>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+    </CascadingValue>
+</CascadingValue>
 
 @code {
-    [Parameter(CaptureUnmatchedValues=true)]
+    [CascadingParameter]
+    public Breakpoint Breakpoint { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter, EditorRequired]
     public ProtestViewModel Protest { get; set; } = default!;
+    [CascadingParameter]
+    public CarListModel EventCars { get; set; } = default!;
 
+    [Parameter]
+    public bool ReadOnly { get; set; } = false;
     [Parameter]
     public EventCallback<MouseEventArgs> OnDeleteClick { get; set; }
     [Parameter]
     public EventCallback<MouseEventArgs> OnCreateReviewClick { get; set; }
 
+    private Size ChipSize => Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? Size.Small : Size.Medium;
+
+    private bool IsTeamEvent => EventCars.IsTeamEvent;
+
+    private IEnumerable<EventCarInfoModel> InvolvedCars { get; set; } = Array.Empty<EventCarInfoModel>();
+
     protected override void OnParametersSet()
     {
-        _ = Protest ?? throw new InvalidOperationException($"Parameter {nameof(Protest)} must have a value");
         base.OnParametersSet();
+        _ = Protest ?? throw new InvalidOperationException($"Parameter {nameof(Protest)} must have a value");
+        InvolvedCars = GetInvolvedCars();
+    }
+
+    private IEnumerable<EventCarInfoModel> GetInvolvedCars()
+    {
+        if (IsTeamEvent)
+        {
+            // return EventCars.Cars.Where(car => Protest.InvolvedTeams.Any(team => team.TeamId == car.Team?.TeamId));
+            return Array.Empty<EventCarInfoModel>();
+        }
+        return EventCars.Cars.Where(car => Protest.InvolvedMembers.Any(member => car.Members.Any(carMember => carMember.MemberId == member.MemberId)));
+    }
+
+    private string CarToString(EventCarInfoModel car)
+    {
+        if (IsTeamEvent)
+        {
+            return $"#{car.Number} {car.Team?.Name}";
+        }
+        var member = car.Members.FirstOrDefault() ?? new();
+        return $"#{car.Number} {member.FirstName} {member.LastName}";
     }
 }

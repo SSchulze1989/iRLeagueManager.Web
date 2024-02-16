@@ -16,7 +16,6 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
         base(loggerFactory, apiService, new EventModel())
     {
         Sessions = new();
-        resultConfigs = new List<ResultConfigInfoModel>();
         availableResultConfigs = Array.Empty<ResultConfigInfoModel>();
         SetModel(model);
     }
@@ -25,14 +24,14 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
 
     public long EventId { get => model.Id; }
     public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
-    public DateTime Date
+    public DateTime? Date
     {
         get => ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()).Date;
         //set => SetP(model.Date.GetValueOrDefault().Date, value => model.Date = value.Add(model.Date.GetValueOrDefault().TimeOfDay), ClientTime.ConvertToUtc(new DateTime(value.Ticks, DateTimeKind.Local).Date));
         set
         {
             var localDateTime = ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
-            var localDate = value.Date.Add(localDateTime.TimeOfDay);
+            var localDate = value.GetValueOrDefault().Date.Add(localDateTime.TimeOfDay);
             var utcDate = ClientTime.ConvertToUtc(localDate);
             SetP(model.Date, value => model.Date = value, utcDate);
         }
@@ -65,14 +64,14 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
 
     public string ConfigName => model.ConfigName;
 
-    public DateTime StartTime
+    public TimeSpan? StartTime
     {
-        get => ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
+        get => ClientTime.ConvertToLocal(model.Date.GetValueOrDefault()).TimeOfDay;
         //set => SetP(model.Date.GetValueOrDefault().TimeOfDay, value => model.Date = model.Date.GetValueOrDefault().Date.Add(value), ClientTime.ConvertToUtc(new DateTime(value.Ticks, DateTimeKind.Local)).TimeOfDay);
         set
         {
             var localDateTime = ClientTime.ConvertToLocal(model.Date.GetValueOrDefault());
-            var localTimeNew = localDateTime.Date.Add(value.TimeOfDay);
+            var localTimeNew = localDateTime.Date.Add(value.GetValueOrDefault());
             var utcTimeNew = ClientTime.ConvertToUtc(localTimeNew);
             SetP(model.Date, value => model.Date = value, utcTimeNew);
         }
@@ -90,8 +89,7 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
 
     public ObservableCollection<SessionViewModel> Sessions { get; private set; }
 
-    private IList<ResultConfigInfoModel> resultConfigs;
-    public IList<ResultConfigInfoModel> ResultConfigs { get => resultConfigs; set => Set(ref resultConfigs, value); }
+    public IEnumerable<ResultConfigInfoModel> ResultConfigs { get => model.ResultConfigs; set => SetP(model.ResultConfigs, value => model.ResultConfigs = value.ToList(), value); }
 
     private IEnumerable<ResultConfigInfoModel> availableResultConfigs;
     public IEnumerable<ResultConfigInfoModel> AvailableResultConfigs { get => availableResultConfigs; private set => Set(ref availableResultConfigs, value); }
@@ -395,36 +393,12 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
         }
     }
 
-    private void RefreshResultConfigList()
-    {
-        // Add comments from to list that are not already in there
-        foreach (var member in model.ResultConfigs)
-        {
-            if (ResultConfigs.Any(x => x.ResultConfigId == member.ResultConfigId) == false)
-            {
-                ResultConfigs.Add(member);
-            }
-        }
-        // Remove comments that are no longer in the model
-        foreach (var member in ResultConfigs.ToArray())
-        {
-            if (model.ResultConfigs.Any(x => x.ResultConfigId == member.ResultConfigId) == false)
-            {
-                ResultConfigs.Remove(member);
-            }
-        }
-    }
-
-    public override void SetModel(EventModel model)
+    protected override void SetModel(EventModel model)
     {
         _ = model ?? throw new ArgumentNullException(nameof(model));
         this.model = model;
         Sessions = new(model.Sessions.Select(x => new SessionViewModel(LoggerFactory, ApiService, x)));
         SortSessions();
-        if (ResultConfigs is not null)
-        {
-            RefreshResultConfigList();
-        }
         OnPropertyChanged();
     }
 

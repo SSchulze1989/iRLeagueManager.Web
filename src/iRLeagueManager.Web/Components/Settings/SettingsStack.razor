@@ -1,0 +1,52 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using System.Web
+@inject NavigationManager Navigation
+@inject ILogger<SettingsStack> logger
+@implements IDisposable
+
+<CascadingValue Value="this">
+    <div class="settings-stack-container">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+@code {
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
+    [Parameter] public int Index { get; set; } = 0;
+    [Parameter] public EventCallback<int> IndexChanged { get; set; }
+    [Parameter] public bool UpdateNavigation { get; set; } = false;
+
+    public List<SettingsStackItem> Items { get; } = new List<SettingsStackItem>();
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, ChildContent);
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        var match = Navigation.ToBaseRelativePath(e.Location.Split('&')[0]);
+        var index = Items.FindIndex(x => x.Href == match);
+        if (index != Index && index >= 0)
+        {
+            Index = index;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void UpdateStack()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
+}

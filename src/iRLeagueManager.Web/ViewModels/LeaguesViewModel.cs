@@ -14,10 +14,14 @@ public sealed class LeaguesViewModel : LeagueViewModelBase<LeaguesViewModel>
     {
         _status = string.Empty;
         leagues = new ObservableCollection<LeagueViewModel>();
+        events = Array.Empty<EventModel>();
     }
 
     private ObservableCollection<LeagueViewModel> leagues;
     public ObservableCollection<LeagueViewModel> Leagues { get => leagues; set => Set(ref leagues, value); }
+
+    private IEnumerable<EventModel> events;
+    public IEnumerable<EventModel> Events { get => events; set => Set(ref events, value); }
 
     //public override void OnInitialized()
     //{

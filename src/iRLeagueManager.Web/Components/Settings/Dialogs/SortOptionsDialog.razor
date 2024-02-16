@@ -1,0 +1,77 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Enums
+@inherits PromptDialog<IList<SortOptions>>
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="0">
+            @foreach (var (option, index) in options.WithIndex())
+            {
+                var label = index == 0 ? "Order by" : "Then by";
+                @if (index > 0)
+                {
+                    <MudElement HtmlTag="div" Class="d-flex justify-center">
+                        <MudIconButton Icon="@Icons.Material.Filled.SwapVert" Size="Size.Small" OnClick="@(() => MoveUp(index))" />
+                    </MudElement>
+                }
+                <MudSelect Label="@label"
+                           Value="option"
+                           ValueChanged="@((SortOptions option) => options[index] = option)"
+                           Clearable="true"
+                           OnClearButtonClick="@(() => options.RemoveAt(index))"
+                           ToStringFunc="@((SortOptions option) => option.GetText().Capitalize())"
+                           Variant="Variant.Outlined"
+                           AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var availableOption in availableOptions)
+                    {
+                        <MudSelectItem Value="availableOption" />
+                    }
+                </MudSelect>
+            }
+            <MudSelect Label="@NewSelectionLabel"
+                       Value="newSelectionValue"
+                       ValueChanged="@((SortOptions? option) => NewSelectionChanged(option))"
+                       ToStringFunc="@((SortOptions? option) => option?.GetText().Capitalize())"
+                       Variant="Variant.Outlined"
+                       AnchorOrigin="Origin.BottomCenter"
+                       Class="mt-4">
+                @foreach (var availableOption in availableOptions.Cast<SortOptions?>())
+                {
+                    <MudSelectItem Value="availableOption" />
+                }
+            </MudSelect>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkClick="Submit" CancelClick="Cancel" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudSelect<SortOptions> NewSelection { get; set; } = default!;
+    private string NewSelectionLabel => options.Count == 0 ? "Order by" : "Then by";
+    private SortOptions? newSelectionValue = null;
+
+    private IList<SortOptions> options => Value;
+    private IEnumerable<SortOptions> availableOptions = Enum.GetValues<SortOptions>();
+
+    private void MoveUp(int index)
+    {
+        if (index < 1 || index >= options.Count)
+        {
+            return;
+        }
+        var tmp = options[index];
+        options[index] = options[index - 1];
+        options[index - 1] = tmp;
+    }
+
+    private void NewSelectionChanged(SortOptions? selectedOption)
+    {
+        if (selectedOption is null)
+        {
+            return;
+        }
+        options.Add(selectedOption.Value);
+    }
+}

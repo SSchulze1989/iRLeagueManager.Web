@@ -1,53 +1,54 @@
 ﻿@page "/CreateLeague"
 @using System.Text.RegularExpressions
+@using System.ComponentModel
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.Components
+@inherits UtilityComponentBase
 @inject LeaguesViewModel Vm
-@inject NavigationManager NavigationManager
 @attribute [Authorize]
 
-<div class="container-xxl" style="max-width:790px">
-    <div class="card">
-        <div class="card-header">
-            <h5>Create new League</h5>
-        </div>
-        <div class="card-body">
-            <EditForm Model=@Model OnValidSubmit=Submit>
-                <StatusResultValidator @ref=ResultValidator />
-                <div class="form-group mb-3">
-                    <label>Name</label>
-                    <InputText @bind-Value="SetLongName" class="form-control" />
-                    <label class="form-text">Full name to be displayed on pages</label>
-                    <ValidationMessage For="@(() => Model.NameFull)" />
-                </div>
-                <div class="form-group mb-3">
-                    <label>Strong Name</label>
-                    <InputText @bind-Value="SetShortName" class="form-control" placeholder="@GetShortNameFromFullName(Model.NameFull)"/>
-                    <label class="form-text">
-                        Pick a short and unique indentifiying name of the league. This will later be used as part of html routes and shareable links <br/>
-                        e.g: https://irleaguemanager.net/@Model.Name/results
-                    </label>
-                    <ValidationMessage For="@(() => Model.Name)" />
-                </div>
-                <button class="btn btn-primary w-100" type="submit" disabled="@Vm.Loading">
-                    @if (Vm.Loading == true)
-                    {
-                        <span class="spinner-border spinner-border-sm mr-1"></span>
-                    }
-                    Create
-                </button>
-            </EditForm>
-        </div>
-        <div class="alert alert-primary alert-dismissible fade show" role="alert">
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <LoadingHeader>
+        <HeaderText>
+            <MudText Typo="Typo.h5">
+                Create new League
+            </MudText>
+        </HeaderText>
+    </LoadingHeader>
 
-        </div>
-    </div>
-</div>
+    <EditForm Model=@Model OnValidSubmit=Submit>
+        <StatusResultValidator @ref=ResultValidator />
+        <MudCard Elevation="5">
+            <MudCardContent>
+                <MudStack Spacing="2">
+                    <MudTextField Label="Name"
+                                  HelperText="Full name to be displayed on pages"
+                                  @bind-Value="SetLongName"
+                                  For="@(() => Model.NameFull)"
+                                  Variant="Variant.Outlined" />
+                    <MudTextField Label="Strong Name"
+                                  HelperText="@($@" Pick a short and unique indentifiying name of the league. This will later be used as part of html routes and shareable links
+                                  e.g: https://irleaguemanager.net/{Model.Name}/results")"
+                                  @bind-Value="Model.Name"
+                                  Variant="Variant.Outlined" />
+                </MudStack>
+            </MudCardContent>
+            <MudCardActions>
+                <ProgressButton Loading="Vm.Loading" Disabled="Vm.Loading" Color="Color.Primary" ButtonType="ButtonType.Submit">
+                    Create
+                </ProgressButton>
+            </MudCardActions>
+        </MudCard>
+    </EditForm>
+</MudContainer>
 
 @code {
     private StatusResultValidator? ResultValidator { get; set; }
 
     private PostLeagueModel Model { get; set; } = CreateLeagueModel();
+
+    private PropertyChangedEventHandler
+    _vmChangedHandler;
 
     private enum TemplateType
     {
@@ -60,9 +61,9 @@
     private TemplateType TemplateSelect { get; set; } = TemplateType.Empty;
 
     private string? setShortName;
-    private string? SetShortName 
+    private string? SetShortName
     {
-        get => setShortName; 
+        get => setShortName;
         set
         {
             setShortName = value;
@@ -78,7 +79,7 @@
     private string SetLongName
     {
         get => Model.NameFull;
-        set 
+        set
         {
             Model.NameFull = value;
             if (string.IsNullOrEmpty(SetShortName))
@@ -88,8 +89,15 @@
         }
     }
 
-    protected override void OnParametersSet()
+    public CreateLeague()
     {
+        _vmChangedHandler = (sender, e) => InvokeAsync(StateHasChanged);
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Vm.PropertyChanged += _vmChangedHandler;
     }
 
     private string GetShortNameFromFullName(string fullName)
@@ -111,12 +119,22 @@
         var league = leagueResult.Content;
 
         // forward to new league settings page
-        NavigationManager.NavigateTo($"{league.Name}/Settings/League", forceLoad:true);
+        NavigationManager.NavigateTo($"{league.Name}/Settings/League", forceLoad: true);
     }
 
     private static PostLeagueModel CreateLeagueModel() => new()
+        {
+            LeaguePublic = iRLeagueApiCore.Common.Enums.LeaguePublicSetting.PublicHidden,
+            EnableProtests = false,
+        };
+
+
+    protected override void Dispose(bool disposing)
     {
-        LeaguePublic = iRLeagueApiCore.Common.Enums.LeaguePublicSetting.PublicHidden,
-        EnableProtests = false,
-    };
+        if (disposing)
+        {
+            Vm.PropertyChanged -= _vmChangedHandler;
+        }
+        base.Dispose(disposing);
+    }
 }

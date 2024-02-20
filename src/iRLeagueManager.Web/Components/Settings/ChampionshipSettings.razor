@@ -17,6 +17,12 @@
                                   Label="Type"
                                   HelperText="Championship type: Member or Team"
                                   Items="@(new[] { ResultKind.Member, ResultKind.Team })" />
+            @if (ChampSeason.ResultKind == ResultKind.Team)
+            {
+                <SettingsTextPrompt Label="Max. drivers results per team"
+                                    HelperText="@($"Only count the best {maxResultsPerTeam} driver results")"
+                                    @bind-Value="maxResultsPerTeam" />
+            }
         </SettingsTopSection>
 
         @if (multiplePointconfigs)
@@ -101,6 +107,18 @@
     private SettingsStack SettingsStack { get; set; } = default!;
 
     private bool multiplePointconfigs = false;
+
+    private int maxResultsPerTeam
+    {
+        get => ChampSeason.ResultConfigViewModels.FirstOrDefault()?.ResultsPerTeam ?? 0;
+        set
+        {
+            foreach (var config in ChampSeason.ResultConfigViewModels)
+            {
+                config.ResultsPerTeam = value;
+            }
+        }
+    }
 
     protected override void OnParametersSet()
     {

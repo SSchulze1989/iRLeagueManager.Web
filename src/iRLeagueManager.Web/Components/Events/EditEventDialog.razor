@@ -9,7 +9,7 @@
 @inject TrackListService trackListService
 
 <EditForm Model=Vm OnValidSubmit=Submit>
-    <StatusResultValidator @ref=ResultValidator TrimPrefix="Event."/>
+    <StatusResultValidator @ref=ResultValidator TrimPrefix="Event." />
     <MudDialog>
         <DialogContent>
             <MudGrid Spacing="1">
@@ -69,16 +69,16 @@
                                 <div class="d-flex align-end">
                                     <MudGrid>
                                         <MudItem xs="4">
-                                            <MudTextField Label="Session Name" @bind-Value="session.Name" Variant="Variant.Text"/>
+                                            <MudTextField Label="Session Name" @bind-Value="session.Name" Variant="Variant.Text" />
                                         </MudItem>
                                         <MudItem xs="4">
-                                            <MudTextField Label="Duration" @bind-Value="session.Duration" InputType="InputType.Time" Variant="Variant.Text"/>
+                                            <MudTextField Label="Duration" @bind-Value="session.Duration" InputType="InputType.Time" Variant="Variant.Text" />
                                         </MudItem>
                                         <MudItem xs="4">
                                             <MudNumericField Label="Laps" @bind-Value="session.Laps" Variant="Variant.Text" />
                                         </MudItem>
                                     </MudGrid>
-                                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Error" OnClick="@(() => Vm.Sessions.Remove(session))"/>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Error" OnClick="@(() => Vm.Sessions.Remove(session))" />
                                 </div>
                                 @if (@Vm.CanMoveSessionDown(session))
                                 {
@@ -94,7 +94,11 @@
                                              @bind-Values="Vm.ResultConfigs"
                                              SearchFunc="SearchResultConfigs"
                                              ToStringFunc="GetReferencedResultConfigName"
-                                             Variant="Variant.Outlined" />
+                                             Variant="Variant.Outlined">
+                        <NoItemsTemplate>
+                            No configurations available
+                        </NoItemsTemplate>
+                    </MultiSelectAutoComplete>
                 </MudItem>
             </MudGrid>
             <FormValidationMessage For="() => Vm.ResultConfigs" />
@@ -180,11 +184,16 @@
         return await Task.FromResult(TrackList.Where(x => x.TrackName.Contains(search, StringComparison.OrdinalIgnoreCase)));
     }
 
-    private async Task<IEnumerable<ResultConfigInfoModel>> SearchResultConfigs(string name)
+    private Task<IEnumerable<ResultConfigInfoModel>> SearchResultConfigs(string? name)
     {
-        return await Task.FromResult(ResultConfigs
-            .Where(x => Vm.ResultConfigs.Any(y => y.ResultConfigId == x.ResultConfigId) == false)
-            .Where(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase) || x.DisplayName.Contains(name, StringComparison.OrdinalIgnoreCase)));
+        var searchConfigs = ResultConfigs
+            .Where(x => Vm.ResultConfigs.None(y => y?.ResultConfigId == x.ResultConfigId))
+            .Where(x => Vm.ResultConfigs.None(y => y?.ChampSeasonId == x.ChampSeasonId));
+        if (string.IsNullOrEmpty(name) == false)
+        {
+            searchConfigs = searchConfigs.Where(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase) || x.DisplayName.Contains(name, StringComparison.OrdinalIgnoreCase));
+        }
+        return Task.FromResult(searchConfigs);
     }
 
     private string GetReferencedResultConfigName(ResultConfigInfoModel? config)

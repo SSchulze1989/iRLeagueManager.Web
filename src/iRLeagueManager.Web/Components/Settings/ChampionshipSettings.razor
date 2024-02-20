@@ -36,7 +36,7 @@
                                       EndIcon="@Icons.Material.Filled.ArrowForward"
                                       Href="@($"/{Shared.LeagueName}/Settings/Results/Championships/{ChampSeason.ChampionshipId}/ResultConfigs/{config.ResultConfigId}")" />
                     }
-                    <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary">
+                    <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary" OnClick="AddPointConfigurationClick">
                         <MudText Color="Color.Tertiary">
                             Add Result Config
                         </MudText>
@@ -163,5 +163,27 @@
             sb.Append(option.GetText());
         }
         return sb.ToString();
+    }
+
+    private async Task AddPointConfigurationClick()
+    {
+        var pointConfig = new ResultConfigModel()
+        {
+            ResultsPerTeam = maxResultsPerTeam,
+            ChampionshipName = ChampSeason.ChampionshipName,
+        };
+        var parameters = new DialogParameters<DisplayNameDialog>()
+        {
+            { x => x.Value, (pointConfig.Name, pointConfig.DisplayName)},
+        };
+        var result = await DialogService.Show<DisplayNameDialog>("Add Point Configuration").Result;
+        if (result.Canceled || result.Data is not (string name, string displayName))
+        {
+            return;
+        }
+        pointConfig.Name = name;
+        pointConfig.DisplayName = displayName;
+
+        await ChampSeason.AddResultConfig(pointConfig, CancellationToken);
     }
 }

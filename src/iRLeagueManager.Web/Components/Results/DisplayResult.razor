@@ -155,7 +155,7 @@
 
     private async Task AddBonusPentalyClick(ResultRowModel row)
     {
-        var parameters = new DialogParameters<EditAddPenaltyModal>()
+        var parameters = new DialogParameters<EditAddPenaltyDialog>()
         {
             {x => x.Model, new()},
             {x => x.AvailableSessions, Result.EventResult?.GetModel().SessionResults ?? Array.Empty<ResultModel>()},
@@ -166,7 +166,7 @@
             {x => x.IsTeamResult, isTeamResult},
         };
 
-        var result = await DialogService.Show<EditAddPenaltyModal>("Add Bonus/Penalty", parameters).Result;
+        var result = await DialogService.Show<EditAddPenaltyDialog>("Add Bonus/Penalty", parameters).Result;
     }
 
     private Task ShowBonusesPenaltiesClick()
@@ -193,7 +193,7 @@
             }
             return getPenalties;
         }
-        var parameters = new DialogParameters<ShowPenaltiesModal>()
+        var parameters = new DialogParameters<ShowPenaltiesDialog>()
         {
             {x => x.GetPenalties, GetPenalties},
             {x => x.CanEdit, CanEdit},
@@ -206,6 +206,6 @@
             FullWidth = true,
             CloseButton = true,
         };
-        await DialogService.Show<ShowPenaltiesModal>("Bonuses/Penalties", parameters, options).Result;
+        await DialogService.Show<ShowPenaltiesDialog>("Bonuses/Penalties", parameters, options).Result;
     }
 }

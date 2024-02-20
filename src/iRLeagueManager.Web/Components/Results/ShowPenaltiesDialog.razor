@@ -138,14 +138,14 @@
 
     private async Task EditAddPenaltyAsync(PenaltyModel penalty)
     {
-        var parameters = new DialogParameters<EditAddPenaltyModal>()
+        var parameters = new DialogParameters<EditAddPenaltyDialog>()
         {
             {x => x.Model, penalty},
             {x => x.CanSelectSession, false},
             {x => x.CanSelectDriver, false},
             {x => x.OnSubmit, async (p, ct) => await p.SaveChanges(ct)},
         };
-        await DialogService.Show<EditAddPenaltyModal>("Edit penalty", parameters).Result;
+        await DialogService.Show<EditAddPenaltyDialog>("Edit penalty", parameters).Result;
     }
 
     private async Task DeleteAddPenaltyAsync(PenaltyModel penalty)

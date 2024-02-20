@@ -26,7 +26,7 @@
     </SettingsTopSection>
 
     <SettingsTopSection Header="Sessions">
-        @if (AllowEditName)
+        @if (MultiplePointConfigs)
         {
             <SettingsItem Label="Name"
                           Text="@Config.Name"
@@ -60,6 +60,13 @@
                              HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
                 <FilterTable @bind-Filters="Config.FiltersForPoints" />
             </SettingsSection>
+            @if (MultiplePointConfigs)
+            {
+                <SettingsItem Text="Delete Point Configuration"
+                              Color="Color.Error"
+                              Icon="@Icons.Material.Outlined.Delete" 
+                              OnClick="DeleteConfigClick"/>
+            }
         </SettingsTopSection>
     }
 </MudStack>
@@ -68,7 +75,7 @@
     [CascadingParameter] public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
     [CascadingParameter] public IEnumerable<TeamModel> Teams { get; set; } = default!;
     [Parameter, EditorRequired] public ResultConfigViewModel Config { get; set; } = default!;
-    [Parameter] public bool AllowEditName { get; set; } = false;
+    [Parameter] public bool MultiplePointConfigs { get; set; } = false;
     [Parameter] public bool ShowAdvancedSettings { get; set; } = true;
     [Parameter, EditorRequired] public ChampSeasonViewModel ChampSeason { get; set; } = default!;
 
@@ -146,5 +153,22 @@
         {
             ChampSeason.DefaultResultConfig = Config.GetConfigInfoModel(Config.GetModel());
         }
+    }
+
+    private async Task DeleteConfigClick()
+    {
+        var parameters = new DialogParameters<ConfirmDialog>()
+        {
+            { x => x.Text, $"Really delete this point configuration \"{Config.Name}\"?"},
+            { x => x.ButtonTypes, ButtonTypes.YesNo },
+        };
+        var result = await DialogService.Show<ConfirmDialog>("Delete point configuration", parameters).Result;
+        if (result.Canceled)
+        {
+            return;
+        }
+
+        await ChampSeason.DeleteResultConfig(Config.GetModel(), CancellationToken);
+        ForceNavigateTo($"{Shared.LeagueName}/Settings/Results/Championships/{ChampSeason.ChampionshipId}");
     }
 }

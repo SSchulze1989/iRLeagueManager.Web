@@ -15,7 +15,7 @@
             {
                 <label class="mud-input-label mud-input-label-text" style="font-size: 0.75em">@Label</label>
             }
-            @* <MudText Color="Color"> *@
+            <MudText Color="Color">
                 @if (ChildContent is null)
                 {
                     @Text
@@ -24,7 +24,7 @@
                 {
                     @ChildContent
                 }
-            @* </MudText> *@
+            </MudText>
             @if (displayHelperText)
             {
                 <p class="mud-input-helper-text">@HelperText</p>

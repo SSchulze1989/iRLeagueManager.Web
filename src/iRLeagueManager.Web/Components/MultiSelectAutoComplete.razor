@@ -3,22 +3,23 @@
 
 <div>
     <MudAutocomplete @bind-Value="@theValue"
-                     SearchFunc="@SearchFunc"      
-                     ShowProgressIndicator="true" 
-                     DebounceInterval="DebounceInterval"        
-                     Label="@Label" 
+                     SearchFunc="@SearchFunc"
+                     ShowProgressIndicator="true"
+                     DebounceInterval="DebounceInterval"
+                     Label="@Label"
                      HelperText="@HelperText"
                      Placeholder="@Placeholder"
-                     Clearable="true" 
-                     Immediate="false"           
-                     CoerceValue="true"           
+                     Clearable="true"
+                     Immediate="false"
+                     CoerceValue="true"
                      ToStringFunc="ToStringFunc"
                      Variant="@Variant"
                      Validation="Validation"
                      Error="Error"
                      ErrorText="@ErrorText"
                      @attributes="AdditionalAttributes"
-                     @ref=Autocomplete/>
+                     @ref=Autocomplete
+                     NoItemsTemplate="NoItemsTemplate" />
     <MudChipSet Class="mt-1" AllClosable=true OnClose="RemoveValue">
         @foreach (var val in selectedValues)
         {
@@ -69,6 +70,9 @@
 
     [Parameter]
     public string ErrorText { get; set; } = string.Empty;
+
+    [Parameter]
+    public RenderFragment? NoItemsTemplate { get; set; }
 
     private HashSet<T> selectedValues = new HashSet<T>();
 
@@ -132,7 +136,7 @@
     private T theValue
     {
         get => default(T)!;
-        set 
+        set
         { AddValue(value); }
     }
 }

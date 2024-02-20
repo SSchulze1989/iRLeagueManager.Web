@@ -8,7 +8,8 @@
                       Label="@Label"
                       HelperText="@HelperText"
                       Variant="Variant"
-                      InputType="InputType" 
+                      InputType="InputType"
+                      Placeholder="@Placeholder"
                       Clearable="Clearable"/>
     </DialogContent>
     <DialogActions>
@@ -19,4 +20,5 @@
 @code {
     [Parameter] public InputType InputType { get; set; } = InputType.Text;
     [Parameter] public bool Clearable { get; set; } = false;
+    [Parameter] public string Placeholder { get; set; } = string.Empty;
 }

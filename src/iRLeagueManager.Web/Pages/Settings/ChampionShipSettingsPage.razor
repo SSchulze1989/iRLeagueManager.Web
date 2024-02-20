@@ -4,7 +4,7 @@
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.Components
 @inherits LeagueComponentBase
-@layout ResultSettingsLayout
+@layout SettingsLayout
 @inject ChampSeasonViewModel ChampSeason
 @inject BreadCrumbService BreadCrumbService
 @inject MemberServiceViewModel MemberService
@@ -13,6 +13,28 @@
 <PageTitle>
     Settings - @LeagueName
 </PageTitle>
+
+<MudBreadcrumbs Items="BreadCrumbService.Items" />
+<LoadingHeader Loading="Shared.Loading">
+    <HeaderText>
+        <MudStack Row="true" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h5">
+                @if (string.IsNullOrEmpty(BreadCrumbService.Items.LastOrDefault()?.Text) == false)
+                {
+                    @:@BreadCrumbService.Items.Last().Text
+                }
+                else
+                {
+                    @:Result Settings
+                }
+            </MudText>
+            <MudSpacer />
+            <MudElement HtmlTag="div" Style="max-width: 28em" Class="d-flex flex-grow-1">
+                <SeasonSelect Disabled="true" Variant="Variant.Outlined" />
+            </MudElement>
+        </MudStack>
+    </HeaderText>
+</LoadingHeader>
 
 @if (DisplayLeaveWarning)
 {

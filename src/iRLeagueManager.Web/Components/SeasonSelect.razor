@@ -4,18 +4,28 @@
 @inject LeagueApiService ApiService
 @inject SharedStateService Shared
 
-<MudSelect Value="SelectedSeasonId" @attributes=AdditionalAttributes @onclick:stopPropagation>
+<MudSelect @bind-Value="SelectedSeasonId"
+           Variant="Variant"
+           Disabled="Disabled"
+           Dense="true"
+           Margin="Margin.Dense"
+           Style="@Style"
+           @attributes=AdditionalAttributes
+           @onclick:stopPropagation>
     @foreach (var season in Shared.SeasonList)
     {
-        <MudSelectItem Value="@season.SeasonId">@season.SeasonName</MudSelectItem>
+        <MudSelectItem Value="@season.SeasonId">
+            @season.SeasonName
+        </MudSelectItem>
     }
 </MudSelect>
 
 @code {
-    [Parameter(CaptureUnmatchedValues = true)]
-    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
-    [Parameter]
-    public EventCallback<SeasonModel?> SeasonChanged { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+    [Parameter] public EventCallback<SeasonModel?> SeasonChanged { get; set; }
+    [Parameter] public Variant Variant { get; set; }
+    [Parameter] public bool Disabled { get; set; } = false;
+    [Parameter] public string Style { get; set; } = string.Empty;
 
     private long selectedSeasonId;
     private long SelectedSeasonId

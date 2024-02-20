@@ -41,11 +41,19 @@
                     <MudCardContent>
                         <MudGrid>
                             <MudItem xs="6">
-                                <MudText Typo="Typo.caption">Driver</MudText>
-                                <MudText>@penalty.Member?.FirstName @penalty.Member?.LastName</MudText>
-                                </MudItem>
-                                <MudItem xs="3">
-                                    @if (string.IsNullOrWhiteSpace(penalty.Lap) == false)
+                                @if (IsTeamResult)
+                                {
+                                    <MudText Typo="Typo.caption">Team</MudText>
+                                    <MudText>@penalty.Team?.Name</MudText>
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.caption">Driver</MudText>
+                                    <MudText>@penalty.Member?.FirstName @penalty.Member?.LastName</MudText>
+                                }
+                            </MudItem>
+                            <MudItem xs="3">
+                                @if (string.IsNullOrWhiteSpace(penalty.Lap) == false)
                                 {
                                     <MudText Typo="Typo.caption">Lap</MudText>
                                     <MudText>@penalty.Lap</MudText>
@@ -77,7 +85,7 @@
                                         case { Type: PenaltyType.Disqualification }:
                                             <MudStack Row="true" AlignItems="AlignItems.Center">
                                                 <MudText>DSQ</MudText>
-                                                <MudIcon Icon="@Icons.Material.Filled.Flag" Style="color: black;" Size="Size.Small"/>
+                                                <MudIcon Icon="@Icons.Material.Filled.Flag" Style="color: black;" Size="Size.Small" />
                                             </MudStack>
                                             break;
                                     }
@@ -93,7 +101,7 @@
         </MudStack>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="@(() => DialogInstance.Close())">Close</MudButton>
+        <MudButton OnClick="@(() => DialogInstance.Close())" Color="Color.Secondary">Close</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -132,20 +140,20 @@
 
     private string GetPenaltyColor(PenaltyModel penalty) => penalty switch
     {
-        { Type: PenaltyType.Points, Points: >= 0 } or { Type: PenaltyType.Position} => "red", 
+        { Type: PenaltyType.Points, Points: >= 0 } or { Type: PenaltyType.Position } => "red",
         _ => "inherit",
     };
 
     private async Task EditAddPenaltyAsync(PenaltyModel penalty)
     {
-        var parameters = new DialogParameters<EditAddPenaltyModal>()
+        var parameters = new DialogParameters<EditAddPenaltyDialog>()
         {
             {x => x.Model, penalty},
             {x => x.CanSelectSession, false},
             {x => x.CanSelectDriver, false},
             {x => x.OnSubmit, async (p, ct) => await p.SaveChanges(ct)},
         };
-        await DialogService.Show<EditAddPenaltyModal>("Edit penalty", parameters).Result;
+        await DialogService.Show<EditAddPenaltyDialog>("Edit penalty", parameters).Result;
     }
 
     private async Task DeleteAddPenaltyAsync(PenaltyModel penalty)

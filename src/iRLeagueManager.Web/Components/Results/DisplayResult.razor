@@ -9,10 +9,10 @@
 <MudElement HtmlTag="div" Class="@Class" Style="@Style">
     <MudStack Class="px-2 pt-2" AlignItems="AlignItems.Center" Row="true">
         <MudText Typo="Typo.h6">@Result.SessionName</MudText>
-        <MudSpacer/>
-        <MudIconButton Icon="@Icons.Material.Filled.Info" Title="Show penalties" OnClick=ShowBonusesPenaltiesClick/>
-    </MudStack>
-    @{
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Info" Title="Show penalties" OnClick=ShowBonusesPenaltiesClick />
+        </MudStack>
+        @{
         var resultRows = Result.ResultRows;
         var displayBonusPoints = resultRows.Any(x => x.BonusPoints != 0);
         var displayStartPos = resultRows.Any(x => x.StartPosition != 0);
@@ -21,20 +21,20 @@
     }
     <ResultTable Data=Result.ResultRows>
         <HeaderTemplate>
-            <ResultTableHeader Text="Pos." Sort=@(x => x.FinalPosition) Default=true/>
+            <ResultTableHeader Text="Pos." Sort=@(x => x.FinalPosition) Default=true />
             @if (isTeamResult == false)
             {
                 @if (displayStartPos)
                 {
-                        <ResultTableHeader Text="Start" Sort=@(x => x.StartPosition) />
+                    <ResultTableHeader Text="Start" Sort=@(x => x.StartPosition) />
                 }
                 <ResultTableHeader Text="Name" Sort="@(x => x.Firstname)" />
             }
-            <ResultTableHeader Text="Team" Sort=@(x => x.TeamName)/>
+            <ResultTableHeader Text="Team" Sort=@(x => x.TeamName) />
             @if (displayQualyLap)
             {
                 <ResultTableHeader Text="Qualy Lap" Sort="@(x => x.QualifyingTime == TimeSpan.Zero ? TimeSpan.MaxValue : x.QualifyingTime)" />
-            
+
             }
             <ResultTableHeader Text="Fastest Lap" Sort="@(x => x.FastestLapTime == TimeSpan.Zero ? TimeSpan.MaxValue : x.FastestLapTime)" />
             <ResultTableHeader Text="Avg. Lap" Sort="@(x => x.AvgLapTime == TimeSpan.Zero ? TimeSpan.MaxValue : x.AvgLapTime)" />
@@ -53,13 +53,14 @@
                 <ResultTableHeader Text="@($"IR ({EvenStrengthOfField(Result)})")" Sort="@(x => x.OldIrating)" Direction="SortDirection.Descending" />
             }
             <ResultTableHeader Text="Incs." Sort="@(x => x.Incidents)" />
+            <th style="width: 1em"></th>
             @if (CanEdit)
             {
                 <th style="width: 1em"></th>
             }
         </HeaderTemplate>
         <RowTemplate Context=Row>
-            <td class="px-2 py-2">
+            <td class="px-2 py-1">
                 <ValueChange Value=Row.FinalPosition Change=@(displayChange ? Row.FinalPositionChange : 0)>
                     <ValueTemplate Context=Value>
                         @Value.
@@ -70,14 +71,14 @@
             {
                 @if (displayStartPos)
                 {
-                    <td class="px-1 py-2">@Row.StartPosition.</td>
+                    <td class="px-1 py-1">@Row.StartPosition.</td>
                 }
                 <td class="px-1 py-1" style="white-space: nowrap">@Row.Firstname @Row.Lastname</td>
             }
             <td class="px-1 py-1" style="color: @(Row.TeamColor); white-space: nowrap">@(Row.TeamName)</td>
             @if (displayQualyLap)
             {
-                <td class="px-1 py-1 @(IsFastestLap(resultRows, Row, x => x.QualifyingTime) ? "fw-bold" : "")">@Row.QualifyingTime.LapTimeString()</td>   
+                <td class="px-1 py-1 @(IsFastestLap(resultRows, Row, x => x.QualifyingTime) ? "fw-bold" : "")">@Row.QualifyingTime.LapTimeString()</td>
             }
             <td class="px-1 py-1 @(IsFastestLap(resultRows, Row, x => x.FastestLapTime) ? "fw-bold" : "")">@Row.FastestLapTime.LapTimeString() @(Row.FastLapNr != 0 ? $"({Row.FastLapNr})" : "")</td>
             <td class="px-1 py-1 @(IsFastestLap(resultRows, Row, x => x.AvgLapTime) ? "fw-bold" : "")">@Row.AvgLapTime.LapTimeString()</td>
@@ -95,11 +96,21 @@
             <td class="px-1 py-1">@Row.TotalPoints</td>
             @if (isTeamResult == false)
             {
-                
-                    <td class="px-1 py-1">@Row.OldIrating</td>
-                
+
+                <td class="px-1 py-1">@Row.OldIrating</td>
+
             }
             <td class="px-1 py-1">@Row.Incidents</td>
+            <td class="pa-0">
+                @if (Row.Status == RaceStatus.Disqualified)
+                {
+                    <MudElement HtmlTag="div" Class="d-flex justify-center">
+                        <MudTooltip Text="Disqualified">
+                            <MudIcon Icon="@Icons.Material.Filled.Flag" Style="color: black;" Size="Size.Small" />
+                        </MudTooltip>
+                    </MudElement>
+                }
+            </td>
             @if (CanEdit)
             {
                 <td class="pa-0">
@@ -118,7 +129,7 @@
     private EventListViewModel EventList { get; set; } = default!;
     [Parameter, EditorRequired]
     public SessionResultViewModel Result { get; set; } = default!;
-    [Parameter] 
+    [Parameter]
     public string Class { get; set; } = string.Empty;
     [Parameter]
     public string Style { get; set; } = string.Empty;
@@ -155,7 +166,7 @@
 
     private async Task AddBonusPentalyClick(ResultRowModel row)
     {
-        var parameters = new DialogParameters<EditAddPenaltyModal>()
+        var parameters = new DialogParameters<EditAddPenaltyDialog>()
         {
             {x => x.Model, new()},
             {x => x.AvailableSessions, Result.EventResult?.GetModel().SessionResults ?? Array.Empty<ResultModel>()},
@@ -166,7 +177,7 @@
             {x => x.IsTeamResult, isTeamResult},
         };
 
-        var result = await DialogService.Show<EditAddPenaltyModal>("Add Bonus/Penalty", parameters).Result;
+        var result = await DialogService.Show<EditAddPenaltyDialog>("Add Bonus/Penalty", parameters).Result;
     }
 
     private Task ShowBonusesPenaltiesClick()
@@ -180,7 +191,8 @@
         {
             return;
         }
-        async Task<IEnumerable<PenaltyModel>> GetPenalties() {
+        async Task<IEnumerable<PenaltyModel>> GetPenalties()
+        {
             var penalties = await Result.EventResult.GetPenalties();
             if (penalties.IsSuccess == false || penalties.Content is null)
             {
@@ -193,19 +205,19 @@
             }
             return getPenalties;
         }
-        var parameters = new DialogParameters<ShowPenaltiesModal>()
+        var parameters = new DialogParameters<ShowPenaltiesDialog>()
         {
             {x => x.GetPenalties, GetPenalties},
             {x => x.CanEdit, CanEdit},
             {x => x.IsTeamResult, isTeamResult},
         };
         var options = new DialogOptions()
-        {
-            DisableBackdropClick = false,
-            Position = DialogPosition.Center,
-            FullWidth = true,
-            CloseButton = true,
-        };
-        await DialogService.Show<ShowPenaltiesModal>("Bonuses/Penalties", parameters, options).Result;
+            {
+                DisableBackdropClick = false,
+                Position = DialogPosition.Center,
+                FullWidth = true,
+                CloseButton = true,
+            };
+        await DialogService.Show<ShowPenaltiesDialog>("Bonuses/Penalties", parameters, options).Result;
     }
 }

@@ -8,15 +8,23 @@
 @inject ResultSettingsViewModel Vm
 @inject ILogger<ResultSettings> Logger
 @inject IDialogService DialogService
+@inject BreadCrumbService BreadCrumbService
 @attribute [Authorize]
 
 <PageTitle>
     Settings - @LeagueName
 </PageTitle>
 
-<LoadingHeader>
+<MudBreadcrumbs Items="BreadCrumbService.Items" />
+<LoadingHeader Loading="Shared.Loading">
     <HeaderText>
-        <MudText Typo="Typo.h5">Result Settings</MudText>
+        <MudStack Row="true" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h5">Result Settings</MudText>
+            <MudSpacer />
+            <MudElement HtmlTag="div" Style="max-width: 28em" Class="d-flex flex-grow-1">
+                <SeasonSelect SeasonChanged="SeasonChanged" Variant="Variant.Outlined" />
+            </MudElement>
+        </MudStack>
     </HeaderText>
 </LoadingHeader>
 
@@ -106,6 +114,21 @@
 </AuthorizeView>
 
 @code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        await Vm.LoadFromCurrentSeasonAsync(CancellationToken);
+        BreadCrumbService.Items = new List<BreadcrumbItem>()
+        {
+            new("Championships", $"{LeagueName}/Settings/Results")
+        };
+        await InvokeAsync(StateHasChanged);
+    }
+
     private async Task HandleSubmit()
     {
         Logger.LogInformation("Handle submit called!");
@@ -182,17 +205,6 @@
             };
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-        if (firstRender == false)
-        {
-            return;
-        }
-        await Vm.LoadFromCurrentSeasonAsync(CancellationToken);
-        await InvokeAsync(StateHasChanged);
-    }
-
     private async Task ArchiveChampionshipClick(ChampionshipViewModel championship)
     {
         await championship.DeactivateForCurrentSeasonAsync(cancellationToken: CancellationToken);
@@ -201,5 +213,11 @@
     private async Task UnArchiveChampionshipClick(ChampionshipViewModel championship)
     {
         await championship.ActivateForSeasonAsync(cancellationToken: CancellationToken);
+    }
+
+    private async Task SeasonChanged()
+    {
+        await Vm.LoadFromCurrentSeasonAsync(CancellationToken);
+        await InvokeAsync(StateHasChanged);
     }
 }

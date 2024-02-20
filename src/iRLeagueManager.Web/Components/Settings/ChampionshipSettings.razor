@@ -17,6 +17,16 @@
                                   Label="Type"
                                   HelperText="Championship type: Member or Team"
                                   Items="@(new[] { ResultKind.Member, ResultKind.Team })" />
+            @if (ChampSeason.ResultKind == ResultKind.Team)
+            {
+                var maxResultsHelperText = maxResultsPerTeam > 0 ? $"Only count the best {maxResultsPerTeam} driver results" : "Count all driver results";
+                <SettingsTextPrompt Label="Max. drivers results per team"
+                                    HelperText="@maxResultsHelperText"
+                                    @bind-Value="maxResultsPerTeam"
+                                    ToStringFunc="@(value => (value <= 0) ? "All" : value.ToString())"
+                                    Placeholder="All"
+                                    Clearable="true"/>
+            }
         </SettingsTopSection>
 
         @if (multiplePointconfigs)
@@ -30,7 +40,7 @@
                                       EndIcon="@Icons.Material.Filled.ArrowForward"
                                       Href="@($"/{Shared.LeagueName}/Settings/Results/Championships/{ChampSeason.ChampionshipId}/ResultConfigs/{config.ResultConfigId}")" />
                     }
-                    <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary">
+                    <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary" OnClick="AddPointConfigurationClick">
                         <MudText Color="Color.Tertiary">
                             Add Result Config
                         </MudText>
@@ -102,6 +112,18 @@
 
     private bool multiplePointconfigs = false;
 
+    private int maxResultsPerTeam
+    {
+        get => ChampSeason.ResultConfigViewModels.FirstOrDefault()?.ResultsPerTeam ?? 0;
+        set
+        {
+            foreach (var config in ChampSeason.ResultConfigViewModels)
+            {
+                config.ResultsPerTeam = value;
+            }
+        }
+    }
+
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
@@ -145,5 +167,27 @@
             sb.Append(option.GetText());
         }
         return sb.ToString();
+    }
+
+    private async Task AddPointConfigurationClick()
+    {
+        var pointConfig = new ResultConfigModel()
+        {
+            ResultsPerTeam = maxResultsPerTeam,
+            ChampionshipName = ChampSeason.ChampionshipName,
+        };
+        var parameters = new DialogParameters<DisplayNameDialog>()
+        {
+            { x => x.Value, (pointConfig.Name, pointConfig.DisplayName)},
+        };
+        var result = await DialogService.Show<DisplayNameDialog>("Add Point Configuration").Result;
+        if (result.Canceled || result.Data is not (string name, string displayName))
+        {
+            return;
+        }
+        pointConfig.Name = name;
+        pointConfig.DisplayName = displayName;
+
+        await ChampSeason.AddResultConfig(pointConfig, CancellationToken);
     }
 }

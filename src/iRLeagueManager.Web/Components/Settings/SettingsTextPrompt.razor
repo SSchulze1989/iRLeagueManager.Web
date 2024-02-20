@@ -13,7 +13,7 @@
               IconColor="IconColor"
               OnClick="Click"
               Disabled="Disabled"
-              Delete="Delete" 
+              Delete="Delete"
               />
 
 @code {
@@ -23,6 +23,8 @@
     [Parameter] public InputType InputType { get; set; } = InputType.Text;
     [Parameter] public bool Clearable { get; set; } = false;
     [Parameter] public string? DialogHelperText { get; set; }
+    [Parameter] public Func<T?, string> ToStringFunc { get; set; } = (T? value) => value?.ToString() ?? string.Empty;
+    [Parameter] public string Placeholder { get; set; } = string.Empty;
 
     private async Task Click()
     {
@@ -32,6 +34,7 @@
             { x => x.Label, Label },
             { x => x.HelperText, DialogHelperText ?? HelperText },
             { x => x.InputType, GetInputType() },
+            { x => x.Placeholder, Placeholder },
             { x => x.Clearable, Clearable },
         };
 
@@ -51,7 +54,7 @@
     {
         if (string.IsNullOrEmpty(Text))
         {
-            return Value?.ToString() ?? string.Empty;
+            return ToStringFunc(Value);
         }
         return Text;
     }

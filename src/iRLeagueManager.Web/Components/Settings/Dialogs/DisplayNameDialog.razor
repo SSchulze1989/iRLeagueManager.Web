@@ -1,19 +1,23 @@
 ﻿@namespace iRLeagueManager.Web.Components
-@inherits PromptDialog<(string, string)>
+@inherits PromptDialog<(string name, string displayName)>
 
 <MudDialog>
     <DialogContent>
-        <MudStack Spacing="2">
-            <MudTextField @bind-Value="Name"
-                          Label="Name"
-                          HelperText="Short name to identify"
-                          Variant="Variant.Outlined"/>
-            <MudTextField @bind-Value="DisplayName"
-                          Placeholder="@Name"
-                          Label="Display Name"
-                          HelperText="Name as displayed on other parts of the page"
-                          Variant="Variant.Outlined"/>
-        </MudStack>
+        <MudForm Model="Value" @ref="form">
+            <MudStack Spacing="2">
+                <MudTextField @bind-Value="Name"
+                              Label="Name"
+                              HelperText="Short name to identify"
+                              Variant="Variant.Outlined"
+                              Required="true"
+                              RequiredError="Name cannot be empty" />
+                <MudTextField @bind-Value="DisplayName"
+                              Placeholder="@Name"
+                              Label="Display Name"
+                              HelperText="Name as displayed on other parts of the page"
+                              Variant="Variant.Outlined" />
+            </MudStack>
+        </MudForm>
     </DialogContent>
     <DialogActions>
         <PromptDialogButtons OkText="@OkText" OkClick="Submit" CancelText="@CancelText" CancelClick="Cancel" />
@@ -24,15 +28,22 @@
     private string Name { get; set; } = string.Empty;
     private string DisplayName { get; set; } = string.Empty;
 
+    private MudForm form = default!;
+
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
         (Name, DisplayName) = Value;
     }
 
-    protected override Task Submit()
+    protected override async Task Submit()
     {
-        Value = (Name, DisplayName);
-        return base.Submit();
+        await form.Validate();
+        if (form.IsValid == false)
+        {
+            return;
+        }
+        Value = (Name, DisplayName ?? string.Empty);
+        await base.Submit();
     }
 }

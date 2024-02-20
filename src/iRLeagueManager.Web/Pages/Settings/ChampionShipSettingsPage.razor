@@ -28,7 +28,7 @@
         @{
             var disableSave = !HasChanges();
         }
-        <MudStack Row="true" Justify="Justify.FlexEnd" Style="margin-top: -2em">
+        <MudStack Row="true" Justify="Justify.FlexEnd">
             <MudButton Color="Color.Error" OnClick="Discard" Disabled="disableSave">Discard</MudButton>
             <MudButton Color="Color.Primary" OnClick="Submit" Disabled="disableSave">Save</MudButton>
         </MudStack>

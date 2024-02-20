@@ -19,9 +19,13 @@
                                   Items="@(new[] { ResultKind.Member, ResultKind.Team })" />
             @if (ChampSeason.ResultKind == ResultKind.Team)
             {
+                var maxResultsHelperText = maxResultsPerTeam > 0 ? $"Only count the best {maxResultsPerTeam} driver results" : "Count all driver results";
                 <SettingsTextPrompt Label="Max. drivers results per team"
-                                    HelperText="@($"Only count the best {maxResultsPerTeam} driver results")"
-                                    @bind-Value="maxResultsPerTeam" />
+                                    HelperText="@maxResultsHelperText"
+                                    @bind-Value="maxResultsPerTeam"
+                                    ToStringFunc="@(value => (value <= 0) ? "All" : value.ToString())"
+                                    Placeholder="All"
+                                    Clearable="true"/>
             }
         </SettingsTopSection>
 

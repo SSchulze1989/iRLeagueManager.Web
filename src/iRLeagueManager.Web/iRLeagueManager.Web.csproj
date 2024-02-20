@@ -137,7 +137,7 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
-    <PackageReference Include="HtmlSanitizer" Version="8.0.811" />
+    <PackageReference Include="HtmlSanitizer" Version="8.0.843" />
     <PackageReference Include="iRLeagueApiCore.Client" Version="0.11.2" />
     <PackageReference Include="iRLeagueApiCore.Common" Version="0.11.0" />
     <PackageReference Include="Markdig" Version="0.31.0" />
@@ -146,7 +146,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.3" />
-    <PackageReference Include="MudBlazor" Version="6.15.0" />
+    <PackageReference Include="MudBlazor" Version="6.16.0" />
     <PackageReference Include="MvvmBlazor" Version="6.0.6" />
   </ItemGroup>
 

@@ -72,7 +72,12 @@
     private PointRuleModel PointRuleModel
     {
         get => Scoring.PointRule.GetModel();
-        set => Scoring.PointRule.SetModel(value, changed: true);
+        set 
+        {
+            var scoringModel = Scoring.GetModel();
+            scoringModel.PointRule = value;
+            Scoring.SetModel(scoringModel, changed: true);
+        }
     }
 
     protected override void OnParametersSet()

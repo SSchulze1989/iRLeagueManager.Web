@@ -19,8 +19,9 @@
                      ErrorText="@ErrorText"
                      @attributes="AdditionalAttributes"
                      @ref=Autocomplete
-                     NoItemsTemplate="NoItemsTemplate" 
-                     MaxItems="MaxItems" />
+                     NoItemsTemplate="NoItemsTemplate"
+                     MaxItems="MaxItems"
+                     MinCharacters="MinCharacters" />
     <MudChipSet Class="mt-1" AllClosable=true OnClose="RemoveValue">
         @foreach (var val in selectedValues)
         {
@@ -77,6 +78,9 @@
 
     [Parameter]
     public int MaxItems { get; set; } = 100;
+
+    [Parameter]
+    public int MinCharacters { get; set; } = 0;
 
     private HashSet<T> selectedValues = new HashSet<T>();
 

@@ -54,7 +54,7 @@
                         <MudSelect Label="Type" @bind-Value="Condition.Comparator"
                                    HelperText="Select how to compare values"
                                    Variant="Variant.Outlined">
-                            @foreach (var compType in Enum.GetValues<ComparatorType>().Where(x => x != ComparatorType.InList))
+                            @foreach (var compType in Enum.GetValues<ComparatorType>())
                             {
                                 if (AllowForEach == false && compType == ComparatorType.ForEach)
                                 {
@@ -70,7 +70,12 @@
                         }
                         else if (Condition.Comparator == ComparatorType.InList)
                         {
-                            @*TODO: Fill in Component for values selection from list*@
+                            <MultiSelectAutoComplete @bind-Values="Condition.FilterValues"
+                                                     Label="@valueLabel"
+                                                     DebounceInterval="50"
+                                                     SearchFunc="@(async (value) => new[] {value})"
+                                                     ToStringFunc="@(value => value)"
+                                                     Variant="Variant.Outlined" />
                         }
                         else if (propertyType == typeof(RaceStatus))
                         {
@@ -82,10 +87,10 @@
                             </MudSelect>
                         }
                         else if (propertyType == typeof(string)
-                            || propertyType == typeof(double)
-                            || propertyType == typeof(double?)
-                            || propertyType == typeof(int)
-                            || propertyType == typeof(int?))
+                        || propertyType == typeof(double)
+                        || propertyType == typeof(double?)
+                        || propertyType == typeof(int)
+                        || propertyType == typeof(int?))
                         {
                             var isNumeric = propertyType == typeof(double) || propertyType == typeof(double?) || propertyType == typeof(int) || propertyType == typeof(int?);
                             <MudTextField Label="@valueLabel" @bind-Value="Condition.Value" InputType="@(isNumeric ? InputType.Number : InputType.Text)" Variant="Variant.Outlined" />

@@ -52,7 +52,7 @@
                         var propertyType = GetColumnPropertyType(Condition.ColumnPropertyName);
 
                         <MudSelect Label="Type" @bind-Value="Condition.Comparator"
-                                   HelperText="Select how to compare values"
+                                   HelperText="@GetComparatorHelperText(Condition.Comparator)"
                                    Variant="Variant.Outlined">
                             @foreach (var compType in Enum.GetValues<ComparatorType>())
                             {
@@ -60,7 +60,9 @@
                                 {
                                     continue;
                                 }
-                                <MudSelectItem Value=@compType>@compType.GetText()</MudSelectItem>
+                                <MudSelectItem Value=@compType>
+                                    @compType.GetText()
+                                </MudSelectItem>
                             }
                         </MudSelect>
 
@@ -225,4 +227,16 @@
         var property = typeof(ResultRowModel).GetProperty(name);
         return property?.PropertyType;
     }
+
+    private string GetComparatorHelperText(ComparatorType comparator) => comparator switch
+    {
+        ComparatorType.IsSmaller => "match if smaller than given value",
+        ComparatorType.IsSmallerOrEqual => "match if smaller or equal to given value",
+        ComparatorType.IsEqual => "match if equal to given value",
+        ComparatorType.IsBiggerOrEqual => "match if bigger or equal to given value",
+        ComparatorType.IsBigger => "match if bigger than given value",
+        ComparatorType.NotEqual => "match if not equal to given value",
+        ComparatorType.InList => "match if equal to one of the values in list",
+        _ => "",
+    };
 }

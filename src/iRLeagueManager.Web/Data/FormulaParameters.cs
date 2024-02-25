@@ -15,7 +15,7 @@ public static class FormulaParameters
         new(["qlap", "qualy_lap"], "Personal qualy lap"),
         new(["avglap", "avg_lap"], "Personal avg. lap"),
         new(["flapsession", "session_fastest_lap"], "Fastest lap in the session"),
-        new(["qlapsession", "session_fastest_qualy_lap"], "Fastest qaly lap in the session"),
+        new(["qlapsession", "session_fastest_qualy_lap"], "Fastest qualy lap in the session"),
         new(["avglapsession", "session_fastest_avg_lap"], "Fastest avg. lap in the session"),
     };
 

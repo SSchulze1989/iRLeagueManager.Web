@@ -80,22 +80,28 @@
                                           Style="font-family: Consolas, 'Lucida Console'"
                                           Variant="Variant.Outlined"
                                           AutoGrow="true"
-                                          Validation="@((string formula) => ValidateFormula(formula))" 
+                                          Validation="@((string formula) => ValidateFormula(formula))"
                                           Adornment="Adornment.End"
                                           AdornmentIcon="@Icons.Material.Outlined.Help"
-                                          AdornmentColor="Color.Transparent"/>
+                                          AdornmentColor="Color.Transparent" />
                             <MudElement HtmlTag="div" Class="absolute pt-2" Style="top: 0; right: 0;">
                                 <MudTooltip ShowOnHover="false" ShowOnClick="false" ShowOnFocus="true">
                                     <ChildContent>
                                         <MudIconButton Icon="@Icons.Material.Outlined.Help" />
                                     </ChildContent>
                                     <TooltipContent>
-                                        @foreach (var parameter in FormulaParameters.Parameters)
-                                        {
-                                            <MudText>
-                                                @string.Join(", ", parameter.Aliases.Select(x => "[" + x + "]")) => @parameter.Description
-                                            </MudText>
-                                        }
+                                        <table style="border: none; border-spacing: 0.5em">
+                                            <tbody>
+                                                @foreach (var parameter in FormulaParameters.Parameters)
+                                                {
+                                                    <tr>
+                                                        <td style="text-align: end;">@string.Join(", ", parameter.Aliases.Select(x => "[" + x + "]"))</td>
+                                                        <td> => </td>
+                                                        <td style="text-align: start;">@parameter.Description</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
                                     </TooltipContent>
                                 </MudTooltip>
                             </MudElement>

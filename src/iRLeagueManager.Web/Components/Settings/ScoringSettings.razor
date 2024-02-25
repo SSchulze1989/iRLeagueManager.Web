@@ -17,11 +17,14 @@
                     Label="Configure Points"
                     Scroll="true">
     @GetPointTypeString()
-    <PointTable PointRule="Scoring.PointRule"
-                Elevation="0"
-                Bordered="true"
-                Dense="true"
-                Style="background-color: transparent" />
+    @if (PointRuleModel.PointsPerPlace.Any())
+    {
+        <PointTable PointRule="Scoring.PointRule"
+                    Elevation="0"
+                    Bordered="true"
+                    Dense="true"
+                    Style="background-color: transparent" />
+    }
 </SettingsPromptItem>
 
 <SettingsPromptItem Label="Final order after Points"
@@ -72,7 +75,7 @@
     private PointRuleModel PointRuleModel
     {
         get => Scoring.PointRule.GetModel();
-        set 
+        set
         {
             var scoringModel = Scoring.GetModel();
             scoringModel.PointRule = value;
@@ -105,22 +108,17 @@
         return sb.ToString();
     }
 
-    private string GetPointTypeString()
+    private MarkupString GetPointTypeString()
     {
-        if (Scoring.PointRule.PointsPerPlace.Count() == 0)
+        var typeString = Scoring.PointRule switch
         {
-            return "Keep points";
-        }
-        switch (Scoring.PointRule.RuleType)
-        {
-            case PointRuleType.PointList:
-                return "Points per place";
-            case PointRuleType.MaxPointsDropOff:
-                return $"Max pts.: {Scoring.PointRule.MaxPoints}; Drop-off: {Scoring.PointRule.PointDropOff}";
-            case PointRuleType.Formula:
-                return $"Formula";
-        }
-        return "Unknown";
+            var rule when rule.RuleType == PointRuleType.PointList && rule.PointsPerPlace.Any() == false => "Keep points",
+            { RuleType: PointRuleType.PointList } => "Points per place",
+            var rule when rule.RuleType == PointRuleType.MaxPointsDropOff => $"Max pts.: {rule.MaxPoints}; Drop-off: {rule.PointDropOff}",
+            var rule when rule.RuleType == PointRuleType.Formula => $"""Formula: <div style="font-family: Consolas, Lucida Console; white-space: pre;">{rule.Formula}</div>""",
+            _ => "Unknown",
+        };
+        return (MarkupString)typeString;
     }
 
     private async Task OnPointSettingsClick()

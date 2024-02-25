@@ -8,144 +8,111 @@
 
 <MudDialog>
     <DialogContent>
-        <MudStack Spacing="2">
-            <MudSelect @bind-Value="@PointRule.RuleType" Variant="Variant.Outlined">
-                <MudSelectItem Value=@PointRuleType.MaxPointsDropOff>Max points + Drop-off</MudSelectItem>
-                <MudSelectItem Value=@PointRuleType.PointList>Point List</MudSelectItem>
-                <MudSelectItem Value=@PointRuleType.Formula>Formula</MudSelectItem>
-            </MudSelect>
+        <MudForm Model="PointRule" @ref="Form">
+            <MudStack Spacing="2">
+                <MudSelect @bind-Value="@PointRule.RuleType" Variant="Variant.Outlined">
+                    <MudSelectItem Value=@PointRuleType.MaxPointsDropOff>Max points + Drop-off</MudSelectItem>
+                    <MudSelectItem Value=@PointRuleType.PointList>Point List</MudSelectItem>
+                    <MudSelectItem Value=@PointRuleType.Formula>Formula</MudSelectItem>
+                </MudSelect>
 
-            @switch (PointRule.RuleType)
-            {
-                case PointRuleType.MaxPointsDropOff:
-                    <MudGrid Spacing="2">
-                        <MudItem xs="6">
-                            <MudTextField @bind-Value="PointRule.MaxPoints" Label="Max Points" HelperText="Points awarded for 1st place" Variant="Variant.Outlined" />
-                        </MudItem>
-                        <MudItem xs="6">
-                            <MudTextField @bind-Value="PointRule.PointDropOff" Label="Drop off" HelperText="Points difference between positions" Variant="Variant.Outlined" />
-                        </MudItem>
-                    </MudGrid>
-                    break;
-                case PointRuleType.PointList:
-                    <MudField Label="Points per position" Variant="Variant.Outlined">
-                        @{
-                            var pointsPerPlace = PointRule.PointsPerPlace;
-                        }
-                        <MudSimpleTable Elevation="0">
-                            <thead>
-                                <tr>
-                                    <th>Pos. </th>
-                                    @foreach (var position in pointsPerPlace.Select((x, i) => i + 1))
-                                    {
-                                        <th>@position.</th>
-                                    }
-                                    <th>@(PointRule.PointsPerPlace.Count() + 1).</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th>Pts.</th>
-                                    @foreach ((var points, var index) in pointsPerPlace.Select((x, i) => ((int?)x, i)))
-                                    {
+                @switch (PointRule.RuleType)
+                {
+                    case PointRuleType.MaxPointsDropOff:
+                        <MudGrid Spacing="2">
+                            <MudItem xs="6">
+                                <MudTextField @bind-Value="PointRule.MaxPoints" Label="Max Points" HelperText="Points awarded for 1st place" Variant="Variant.Outlined" />
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudTextField @bind-Value="PointRule.PointDropOff" Label="Drop off" HelperText="Points difference between positions" Variant="Variant.Outlined" />
+                            </MudItem>
+                        </MudGrid>
+                        break;
+                    case PointRuleType.PointList:
+                        <MudField Label="Points per position" Variant="Variant.Outlined">
+                            @{
+                                var pointsPerPlace = PointRule.PointsPerPlace;
+                            }
+                            <MudSimpleTable Elevation="0">
+                                <thead>
+                                    <tr>
+                                        <th>Pos. </th>
+                                        @foreach (var position in pointsPerPlace.Select((x, i) => i + 1))
+                                        {
+                                            <th>@position.</th>
+                                        }
+                                        <th>@(PointRule.PointsPerPlace.Count() + 1).</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th>Pts.</th>
+                                        @foreach ((var points, var index) in pointsPerPlace.Select((x, i) => ((int?)x, i)))
+                                        {
+                                            <td class="px-1">
+                                                <MudInput Value="points"
+                                                          ValueChanged="@((int? value) => SetValue(index, value))"
+                                                          Variant="Variant.Text"
+                                                          HideSpinButtons="true"
+                                                          DisableUnderLine="false"
+                                                          FullWidth="true" />
+                                            </td>
+                                        }
                                         <td class="px-1">
-                                            <MudInput Value="points"
-                                                      ValueChanged="@((int? value) => SetValue(index, value))"
+                                            <MudInput @bind-Value="NewValue"
+                                                      @ref="NewNumberInput"
                                                       Variant="Variant.Text"
-                                                      HideSpinButtons="true"
                                                       DisableUnderLine="false"
                                                       FullWidth="true" />
                                         </td>
-                                    }
-                                    <td class="px-1">
-                                        <MudInput @bind-Value="NewValue"
-                                                  @ref="NewNumberInput"
-                                                  Variant="Variant.Text"
-                                                  DisableUnderLine="false"
-                                                  FullWidth="true" />
-                                    </td>
-                                    <td>
-                                        <span @ref=ScrollDummy />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </MudSimpleTable>
-                    </MudField>
-                    break;
-                case PointRuleType.Formula:
-                    <MudStack Row="true" AlignItems="AlignItems.Center">
-                        <MudTextField Label="Formula"
-                                      @bind-Value="PointRule.Formula"
-                                      Variant="Variant.Outlined" 
-                                      AutoGrow="true" />
-                        <MudTooltip ShowOnHover="false" ShowOnClick="false" ShowOnFocus="true">
-                            <ChildContent>
-                                <MudIconButton Icon="@Icons.Material.Outlined.Help" />
-                            </ChildContent>
-                            <TooltipContent>
-                                @foreach (var parameter in FormulaParameters.Parameters)
-                                {
-                                    <MudText>
-                                        @string.Join(", ", parameter.Aliases.Select(x => "[" + x + "]")) => @parameter.Description
-                                    </MudText>
-                                }
-                            </TooltipContent>
-                        </MudTooltip>
-                    </MudStack>
-                    break;
-            }
-        </MudStack>
+                                        <td>
+                                            <span @ref=ScrollDummy />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </MudSimpleTable>
+                        </MudField>
+                        break;
+                    case PointRuleType.Formula:
+                        <MudElement HtmlTag="div" Class="relative" Style="width: 100%">
+                            <MudTextField Label="Formula"
+                                          @bind-Value="PointRule.Formula"
+                                          Style="font-family: Consolas, 'Lucida Console'"
+                                          Variant="Variant.Outlined"
+                                          AutoGrow="true"
+                                          Validation="@((string formula) => ValidateFormula(formula))" 
+                                          Adornment="Adornment.End"
+                                          AdornmentIcon="@Icons.Material.Outlined.Help"
+                                          AdornmentColor="Color.Transparent"/>
+                            <MudElement HtmlTag="div" Class="absolute pt-2" Style="top: 0; right: 0;">
+                                <MudTooltip ShowOnHover="false" ShowOnClick="false" ShowOnFocus="true">
+                                    <ChildContent>
+                                        <MudIconButton Icon="@Icons.Material.Outlined.Help" />
+                                    </ChildContent>
+                                    <TooltipContent>
+                                        @foreach (var parameter in FormulaParameters.Parameters)
+                                        {
+                                            <MudText>
+                                                @string.Join(", ", parameter.Aliases.Select(x => "[" + x + "]")) => @parameter.Description
+                                            </MudText>
+                                        }
+                                    </TooltipContent>
+                                </MudTooltip>
+                            </MudElement>
+                        </MudElement>
+                        break;
+                }
+            </MudStack>
+        </MudForm>
     </DialogContent>
     <DialogActions>
         <PromptDialogButtons OkClick="Submit" CancelClick="Cancel" />
     </DialogActions>
 </MudDialog>
 
-@* <div class="input-group">
-    <div class="form-control overflow-auto">
-        @{
-            var pointsPerPlace = @Bind(PointRule, x => x.PointsPerPlace);
-        }
-        <table class="mb-3">
-            <thead>
-                <tr>
-                    <th>Pos. </th>
-                    @foreach (var position in pointsPerPlace.Select((x, i) => i + 1))
-                    {
-                        <th>@position.</th>
-                    }
-                    <th>@(PointRule.PointsPerPlace.Count() + 1).</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th>Pts.</th>
-                    @foreach ((var points, var index) in pointsPerPlace.Select((x, i) => ((int?)x, i)))
-                    {
-                        <td>
-                            <InputNumber Value=points
-                                            ValueExpression=@(() => points)
-                                            ValueChanged=@((int? value) => SetValue(index, value))
-                                            class="input-plain"
-                                            style="width: 2rem;" />
-                        </td>
-                    }
-                    <td>
-                        <InputNumber @bind-Value=NewValue
-                                        @ref=NewNumberInput
-                                        class="input-plain"
-                                        style="width: 2rem;" />
-                    </td>
-                    <td>
-                        <span @ref=ScrollDummy />
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div> *@
-
 @code {
+    MudForm Form { get; set; } = default!;
+    MudIconButton? FormulaHelpButton { get; set; }
     MudInput<int?> NewNumberInput { get; set; } = default!;
     ElementReference ScrollDummy { get; set; }
 
@@ -198,8 +165,13 @@
         PointRule.PointsPerPlace[index] = value.Value;
     }
 
-    protected override Task Submit()
+    protected override async Task Submit()
     {
+        await Form.Validate();
+        if (Form.IsValid == false)
+        {
+            return;
+        }
         if (PointRule.RuleType == PointRuleType.MaxPointsDropOff && PointRule.PointDropOff > 0)
         {
             var points = PointRule.MaxPoints;
@@ -215,15 +187,29 @@
             PointRule.MaxPoints = 0;
             PointRule.PointDropOff = 0;
         }
-        return base.Submit();
+        if (PointRule.RuleType == PointRuleType.Formula)
+        {
+            PointRule.PointsPerPlace.Clear();
+        }
+        await base.Submit();
     }
 
-    private static string GetInputClassname(MudField baseInput) =>
-            new CssBuilder("mud-input-slot")
-                .AddClass("mud-input-root")
-                .AddClass($"mud-input-root-{baseInput.Variant.ToDescriptionString()}")
-                .AddClass($"mud-input-root-adorned-{baseInput.Adornment.ToDescriptionString()}", baseInput.Adornment != Adornment.None)
-                .AddClass($"mud-input-root-margin-{baseInput.Margin.ToDescriptionString()}", when: () => baseInput.Margin != Margin.None)
-                .AddClass(baseInput.Class)
-                .Build();
+    private string ValidateFormula(string formula)
+    {
+        var rnd = new Random();
+        var expression = new NCalc.Expression(formula);
+        foreach (var (key, parameter) in FormulaParameters.ParameterDict)
+        {
+            expression.Parameters[key] = rnd.NextDouble();
+        }
+        try
+        {
+            expression.Evaluate();
+        }
+        catch (Exception e) when (e is ArgumentException or NCalc.EvaluationException)
+        {
+            return e.Message;
+        }
+        return string.Empty;
+    }
 }

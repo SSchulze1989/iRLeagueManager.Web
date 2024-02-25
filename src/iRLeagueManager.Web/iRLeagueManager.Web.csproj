@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
+    <PackageReference Include="CoreCLR-NCalc" Version="3.0.145" />
     <PackageReference Include="HtmlSanitizer" Version="8.0.843" />
     <PackageReference Include="iRLeagueApiCore.Client" Version="0.11.3-dev.1" />
     <PackageReference Include="iRLeagueApiCore.Common" Version="0.11.1-dev.1" />

@@ -1,5 +1,7 @@
 ﻿@namespace iRLeagueManager.Web.Components
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Enums
+@using MudBlazor.Utilities
 @inherits PromptDialog<PointRuleModel>
 @inject PointRuleViewModel PointRule
 @inject IJSRuntime jsRuntime
@@ -8,13 +10,14 @@
     <DialogContent>
         <MudStack Spacing="2">
             <MudSelect @bind-Value="@PointRule.RuleType" Variant="Variant.Outlined">
-                <MudSelectItem Value=@PointRuleViewModel.PointRuleType.MaxPoints>Max points + Drop-off</MudSelectItem>
-                <MudSelectItem Value=@PointRuleViewModel.PointRuleType.PointList>Point List</MudSelectItem>
+                <MudSelectItem Value=@PointRuleType.MaxPointsDropOff>Max points + Drop-off</MudSelectItem>
+                <MudSelectItem Value=@PointRuleType.PointList>Point List</MudSelectItem>
+                <MudSelectItem Value=@PointRuleType.Formula>Formula</MudSelectItem>
             </MudSelect>
 
             @switch (PointRule.RuleType)
             {
-                case PointRuleViewModel.PointRuleType.MaxPoints:
+                case PointRuleType.MaxPointsDropOff:
                     <MudGrid Spacing="2">
                         <MudItem xs="6">
                             <MudTextField @bind-Value="PointRule.MaxPoints" Label="Max Points" HelperText="Points awarded for 1st place" Variant="Variant.Outlined" />
@@ -24,7 +27,7 @@
                         </MudItem>
                     </MudGrid>
                     break;
-                case PointRuleViewModel.PointRuleType.PointList:
+                case PointRuleType.PointList:
                     <MudField Label="Points per position" Variant="Variant.Outlined">
                         @{
                             var pointsPerPlace = PointRule.PointsPerPlace;
@@ -68,6 +71,27 @@
                             </tbody>
                         </MudSimpleTable>
                     </MudField>
+                    break;
+                case PointRuleType.Formula:
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        <MudTextField Label="Formula"
+                                      @bind-Value="PointRule.Formula"
+                                      Variant="Variant.Outlined" 
+                                      AutoGrow="true" />
+                        <MudTooltip ShowOnHover="false" ShowOnClick="false" ShowOnFocus="true">
+                            <ChildContent>
+                                <MudIconButton Icon="@Icons.Material.Outlined.Help" />
+                            </ChildContent>
+                            <TooltipContent>
+                                @foreach (var parameter in FormulaParameters.Parameters)
+                                {
+                                    <MudText>
+                                        @string.Join(", ", parameter.Aliases.Select(x => "[" + x + "]")) => @parameter.Description
+                                    </MudText>
+                                }
+                            </TooltipContent>
+                        </MudTooltip>
+                    </MudStack>
                     break;
             }
         </MudStack>
@@ -138,6 +162,8 @@
         }
     }
 
+    private bool formulaHelpOpen = false;
+
     protected override async void OnAfterRender(bool firstRender)
     {
         if (firstRender == false)
@@ -174,7 +200,7 @@
 
     protected override Task Submit()
     {
-        if (PointRule.RuleType == PointRuleViewModel.PointRuleType.MaxPoints && PointRule.PointDropOff > 0)
+        if (PointRule.RuleType == PointRuleType.MaxPointsDropOff && PointRule.PointDropOff > 0)
         {
             var points = PointRule.MaxPoints;
             PointRule.PointsPerPlace.Clear();
@@ -191,4 +217,13 @@
         }
         return base.Submit();
     }
+
+    private static string GetInputClassname(MudField baseInput) =>
+            new CssBuilder("mud-input-slot")
+                .AddClass("mud-input-root")
+                .AddClass($"mud-input-root-{baseInput.Variant.ToDescriptionString()}")
+                .AddClass($"mud-input-root-adorned-{baseInput.Adornment.ToDescriptionString()}", baseInput.Adornment != Adornment.None)
+                .AddClass($"mud-input-root-margin-{baseInput.Margin.ToDescriptionString()}", when: () => baseInput.Margin != Margin.None)
+                .AddClass(baseInput.Class)
+                .Build();
 }

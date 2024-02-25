@@ -113,11 +113,11 @@
         }
         switch (Scoring.PointRule.RuleType)
         {
-            case PointRuleViewModel.PointRuleType.PointList:
+            case PointRuleType.PointList:
                 return "Points per place";
-            case PointRuleViewModel.PointRuleType.MaxPoints:
+            case PointRuleType.MaxPointsDropOff:
                 return $"Max pts.: {Scoring.PointRule.MaxPoints}; Drop-off: {Scoring.PointRule.PointDropOff}";
-            case PointRuleViewModel.PointRuleType.Formula:
+            case PointRuleType.Formula:
                 return $"Formula";
         }
         return "Unknown";

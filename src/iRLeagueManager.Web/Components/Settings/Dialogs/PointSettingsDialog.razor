@@ -10,13 +10,18 @@
     <DialogContent>
         <MudForm Model="PointRule" @ref="Form">
             <MudStack Spacing="2">
-                <MudSelect @bind-Value="@PointRule.RuleType" Variant="Variant.Outlined">
-                    <MudSelectItem Value=@PointRuleType.MaxPointsDropOff>Max points + Drop-off</MudSelectItem>
-                    <MudSelectItem Value=@PointRuleType.PointList>Point List</MudSelectItem>
-                    <MudSelectItem Value=@PointRuleType.Formula>Formula</MudSelectItem>
+                <MudSelect Label="Type"
+                           @bind-Value="@ruleType"
+                           Variant="Variant.Outlined"
+                           Clearable="true"
+                           Placeholder="Keep points"
+                           AnchorOrigin="Origin.BottomCenter">
+                    <MudSelectItem Value="@((PointRuleType?)PointRuleType.PointList)">Point List</MudSelectItem>
+                    <MudSelectItem Value="@((PointRuleType?)PointRuleType.MaxPointsDropOff)">Max points + Drop-off</MudSelectItem>
+                    <MudSelectItem Value="@((PointRuleType?)PointRuleType.Formula)">Formula</MudSelectItem>
                 </MudSelect>
 
-                @switch (PointRule.RuleType)
+                @switch (ruleType)
                 {
                     case PointRuleType.MaxPointsDropOff:
                         <MudGrid Spacing="2">
@@ -122,6 +127,8 @@
     MudInput<int?> NewNumberInput { get; set; } = default!;
     ElementReference ScrollDummy { get; set; }
 
+    private PointRuleType? ruleType;
+
     private int? newValue = default(int?);
     private int? NewValue
     {
@@ -137,17 +144,18 @@
 
     private bool formulaHelpOpen = false;
 
-    protected override async void OnAfterRender(bool firstRender)
+    protected override void OnParametersSet()
     {
-        if (firstRender == false)
-        {
-            return;
-        }
+        base.OnParametersSet();
         if (PointRule.GetModel() != Value)
         {
             PointRule.SetModel(Value ?? new());
         }
-        await InvokeAsync(StateHasChanged);
+        ruleType = PointRule switch
+        {
+            var rule when rule.RuleType == PointRuleType.PointList && rule.PointsPerPlace.None() => null,
+            var rule => rule.RuleType,
+        };
     }
 
     private async Task NewPointValue(int? value)
@@ -178,6 +186,7 @@
         {
             return;
         }
+        PointRule.RuleType = ruleType ?? PointRuleType.PointList;
         if (PointRule.RuleType == PointRuleType.MaxPointsDropOff && PointRule.PointDropOff > 0)
         {
             var points = PointRule.MaxPoints;
@@ -193,7 +202,7 @@
             PointRule.MaxPoints = 0;
             PointRule.PointDropOff = 0;
         }
-        if (PointRule.RuleType == PointRuleType.Formula)
+        if (PointRule.RuleType == PointRuleType.Formula || ruleType is null)
         {
             PointRule.PointsPerPlace.Clear();
         }

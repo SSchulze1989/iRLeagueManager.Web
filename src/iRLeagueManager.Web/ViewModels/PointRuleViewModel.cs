@@ -19,19 +19,7 @@ public sealed class PointRuleViewModel : LeagueViewModelBase<PointRuleViewModel,
     public long LeagueId => model.LeagueId;
     public long PointRuleId => model.PointRuleId;
 
-    private PointRuleType ruleType;
-    public PointRuleType RuleType
-    {
-        get => ruleType;
-        set
-        {
-            if (Set(ref ruleType, value))
-            {
-                RuleTypeChanged(value);
-            }
-        }
-    }
-
+    public PointRuleType RuleType { get => model.RuleType; set => SetP(model.RuleType, value => model.RuleType = value, value); }
     public int MaxPoints { get => model.MaxPoints; set => SetP(model.MaxPoints, value => model.MaxPoints = value, value); }
     public int PointDropOff { get => model.PointDropOff; set => SetP(model.PointDropOff, value => model.PointDropOff = value, value); }
     public IList<int> PointsPerPlace { get => model.PointsPerPlace; set => SetP(model.PointsPerPlace, value => model.PointsPerPlace = value, value); }
@@ -56,36 +44,5 @@ public sealed class PointRuleViewModel : LeagueViewModelBase<PointRuleViewModel,
 
     public ICollection<AutoPenaltyConfiguration> AutoPenalties { get => model.AutoPenalties; set => SetP(model.AutoPenalties, value => model.AutoPenalties = value, value); }
 
-    public enum PointRuleType
-    {
-        MaxPoints = 0,
-        PointList = 1,
-        Formula = 2,
-    }
-
-    protected override void SetModel(PointRuleModel model)
-    {
-        base.SetModel(model);
-        RuleType = InferRuleType(model);
-    }
-
-    private void RuleTypeChanged(PointRuleType ruleType)
-    {
-        switch (ruleType)
-        {
-            case PointRuleType.MaxPoints:
-                break;
-            default:
-                break;
-        }
-    }
-
-    private static PointRuleType InferRuleType(PointRuleModel model)
-    {
-        if (model.MaxPoints != 0)
-        {
-            return PointRuleType.MaxPoints;
-        }
-        return PointRuleType.PointList;
-    }
+    public string Formula { get => model.Formula; set => SetP(model.Formula, value => model.Formula = value, value); }
 }

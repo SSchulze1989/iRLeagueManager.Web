@@ -148,6 +148,14 @@
             await ChampSeason.LoadResultConfigs(CancellationToken);
         }
         SelectedResultConfig = ChampSeason.ResultConfigViewModels.FirstOrDefault(x => x.ResultConfigId == ResultConfigId) ?? SelectedResultConfig;
+        if (SelectedResultConfig is not null)
+        {
+            await SelectedResultConfig.LoadAvailableResultConfigs(CancellationToken);
+        }
+        else if (ChampSeason.ResultConfigViewModels.Any())
+        {
+            await ChampSeason.ResultConfigViewModels.First().LoadAvailableResultConfigs(CancellationToken);
+        }
         LeagueMembers = (await MemberService.GetLeagueMembers(CancellationToken)).Content ?? Enumerable.Empty<MemberModel>();
         Teams = (await MemberService.GetLeagueTeams(CancellationToken)).Content ?? Enumerable.Empty<TeamModel>();
         UpdateBreadCrumb();

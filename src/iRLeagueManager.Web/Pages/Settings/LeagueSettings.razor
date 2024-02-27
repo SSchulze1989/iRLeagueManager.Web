@@ -38,16 +38,15 @@
                 <SettingsTopSection Header="General">
                     <SettingsTextPrompt Label="Display Name"
                                         @bind-Value="League.NameFull" />
-                    <MudListItem>
-                        <MudField Label="Description"
-                                  OnAdornmentClick="@(() => EditDescriptionClick(League))"
-                                  Variant="Variant.Text"
-                                  DisableUnderLine="true">
-                            <div style="overflow-x: clip; overflow-y: auto; min-height: 4em; max-height: 12em;">
-                                @((MarkupString)RenderDescriptionPreview(League.Description))
-                            </div>
-                        </MudField>
-                    </MudListItem>
+                    <SettingsPromptItem Label="Description"
+                                        HelperText="Enter a description displayed on your league home page. Supports Markdown"
+                                        T="string"
+                                        TDialog="LeagueDescriptionDialog"
+                                        @bind-Value="League.Description">
+                        <MudElement HtmlTag="div" Style="overflow-x: clip; overflow-y: auto; min-height: 4em; max-height: 20em; width: 100%;">
+                            @((MarkupString)RenderDescriptionPreview(League.Description))
+                        </MudElement>
+                    </SettingsPromptItem>
                 </SettingsTopSection>
 
                 <SettingsTopSection Header="Seasons">
@@ -159,20 +158,6 @@
         if (result.Canceled == false)
         {
             await League.DeleteSeason(season.GetModel());
-        }
-    }
-
-    private async Task EditDescriptionClick(LeagueViewModel league)
-    {
-        var parameters = new DialogParameters<EditLeagueDescriptionDialog>()
-        {
-            {x => x.Model, league.CopyModel()},
-            {x => x.OnSubmit, (vm, cancellation) => vm.SaveChangesAsync(cancellation)},
-        };
-        var result = await DialogService.Show<EditLeagueDescriptionDialog>("Edit description", parameters).Result;
-        if (result.Canceled == false && result.Data is LeagueModel model)
-        {
-            league.SetModel(model);
         }
     }
 

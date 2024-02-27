@@ -4,22 +4,20 @@
 @inherits InputBase<string>
 
 <div class="@CssClass" @attributes=AdditionalAttributes>
-    <nav>
-        <div class="nav nav-tabs" id="nav-tab-@uuid" role="tablist">
-            <button class="nav-link active" data-bs-toggle="tab" id="nav-edit-tab-@uuid" data-bs-target="#nav-edit-@uuid" type="button" role="tab" aria-controls="nav-edit-@uuid" aria-selected="true">Edit</button>
-            <button class="nav-link" data-bs-toggle="tab" id="nav-preview-tab-@uuid" data-bs-target="#nav-preview-@uuid" type="button" role="tab" aria-controls="nav-preview-@uuid" aria-selected="false">Preview</button>
-        </div>
-    </nav>
-    <div class="tab-content" id="nav-content-@uuid">
-        <div class="tab-pane tab-pane-keep-space show active" id="nav-edit-@uuid" role="tabpanel" aria-labelledby="nav-edit-tab-@uuid">
-            <textarea @bind=CurrentValueAsString class="form-control" style="height: 400px"/>
-        </div>
-        <div class="tab-pane" id="nav-preview-@uuid" role="tabpanel" aria-labelledby="nav-preview-tab-@uuid">
-            <div class="form-control" style="position: absolute; top: 0; left: 0; height: 100%;">
-                <DisplayMarkdown Text=@Value />
-            </div>
-        </div>
-    </div>
+    <MudTabs>
+        <MudTabPanel Text="Edit">
+            <MudTextField @bind-Value="CurrentValueAsString"
+                          Variant="Variant.Outlined"
+                          Lines="25" 
+                          FullWidth="true"
+                          Style="font-family: 'Consolas', 'Lucida Console'"/>
+        </MudTabPanel>
+        <MudTabPanel Text="Preview">
+            <MudField Variant="Variant.Outlined">
+                <DisplayMarkdown Text=@Value Style="width: 100%; overflow: auto;" />
+            </MudField>
+        </MudTabPanel>
+    </MudTabs>
 </div>
 
 @code {

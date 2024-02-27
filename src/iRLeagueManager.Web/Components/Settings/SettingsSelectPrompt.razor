@@ -4,6 +4,7 @@
 @inject IDialogService DialogService
 
 <SettingsItem Class="@Class"
+              Label="@Label"
               Text="@ValueString"
               HelperText="@HelperText"
               ChildContent="ChildContent!"
@@ -39,12 +40,13 @@
             { x => x.HelperText, HelperText },
             { x => x.Items, Items },
             { x => x.ItemTemplate, ItemTemplate },
+            { x => x.ToStringFunc, ToStringFunc },
         };
 
         var options = new DialogOptions()
-        {
-            NoHeader = string.IsNullOrEmpty(DialogHeader),
-        };
+            {
+                NoHeader = string.IsNullOrEmpty(DialogHeader),
+            };
 
         var result = await DialogService.Show<SelectPromptDialog<T>>(DialogHeader, parameters: parameters, options: options).Result;
         if (!result.Canceled)

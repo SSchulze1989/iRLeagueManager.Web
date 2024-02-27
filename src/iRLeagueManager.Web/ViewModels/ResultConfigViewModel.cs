@@ -1,10 +1,6 @@
-﻿using iRLeagueApiCore.Common.Enums;
-using iRLeagueApiCore.Common.Models;
+﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
-using Microsoft.Extensions.Configuration.EnvironmentVariables;
-using MudBlazor.Charts;
-using System.Runtime.CompilerServices;
 
 namespace iRLeagueManager.Web.ViewModels;
 
@@ -36,7 +32,7 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
     public long SourceResultConfigId
     {
         get => SourceResultConfig?.ResultConfigId ?? 0;
-        set => SetP(SourceResultConfig, value => SourceResultConfig = value, GetConfigInfoModel(AvailableResultConfigs.FirstOrDefault(x => x.ResultConfigId == value)));
+        set => SetP(SourceResultConfig, value => SourceResultConfig = value, AvailableResultConfigs.FirstOrDefault(x => x.ResultConfigId == value));
     }
     public bool CalculateCombinedResult
     {
@@ -74,8 +70,8 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
     private ObservableCollection<ResultFilterViewModel> filtersForResult;
     public ObservableCollection<ResultFilterViewModel> FiltersForResult { get => filtersForResult; set => Set(ref filtersForResult, value); }
 
-    private ObservableCollection<ResultConfigModel> availableResultConfigs;
-    public ObservableCollection<ResultConfigModel> AvailableResultConfigs { get => availableResultConfigs; set => Set(ref availableResultConfigs, value); }
+    private ObservableCollection<ResultConfigInfoModel> availableResultConfigs;
+    public ObservableCollection<ResultConfigInfoModel> AvailableResultConfigs { get => availableResultConfigs; set => Set(ref availableResultConfigs, value); }
 
     private ObservableCollection<MemberModel> leagueMembers;
     public ObservableCollection<MemberModel> LeagueMembers { get => leagueMembers; set => Set(ref leagueMembers, value); }
@@ -166,7 +162,7 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         var result = await request;
         if (result.Success && result.Content is not null)
         {
-            AvailableResultConfigs = new(result.Content);
+            AvailableResultConfigs = new(result.Content.Select(GetConfigInfoModel).NotNull());
         }
 
         return result.ToStatusResult();
@@ -281,6 +277,8 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
 
         return new()
         {
+            ChampionshipName = model.ChampionshipName,
+            ChampSeasonId = model.ChampSeasonId,
             Name = model.Name,
             DisplayName = model.DisplayName,
             LeagueId = model.LeagueId,

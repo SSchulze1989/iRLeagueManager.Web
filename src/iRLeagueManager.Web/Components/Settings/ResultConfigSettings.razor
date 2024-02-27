@@ -23,6 +23,18 @@
                 </SettingsSection>
             }
         }
+        @{
+            var sourceHelperText = Config.SourceResultConfig != null ? $"Reuse results calculated in {Config.SourceResultConfig.ChampionshipName} - {Config.SourceResultConfig.Name}" : "Use uploaded result data";
+        }
+        <SettingsSelectPrompt Label="Source"
+                              HelperText="@sourceHelperText"
+                              @bind-Value="Config.SourceResultConfig"
+                              Items="Config.AvailableResultConfigs"
+                              ToStringFunc="@(config => config != null ? $"{config.ChampionshipName} - {config.Name}" : "Raw Result")">
+            <ItemTemplate Context="sourceConfig">
+                @sourceConfig?.ChampionshipName - @sourceConfig?.Name
+            </ItemTemplate>
+        </SettingsSelectPrompt>
     </SettingsTopSection>
 
     <SettingsTopSection Header="Sessions">
@@ -64,8 +76,8 @@
             {
                 <SettingsItem Text="Delete Point Configuration"
                               Color="Color.Error"
-                              Icon="@Icons.Material.Outlined.Delete" 
-                              OnClick="DeleteConfigClick"/>
+                              Icon="@Icons.Material.Outlined.Delete"
+                              OnClick="DeleteConfigClick" />
             }
         </SettingsTopSection>
     }

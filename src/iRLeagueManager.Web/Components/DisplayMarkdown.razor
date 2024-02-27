@@ -4,11 +4,17 @@
 @inject MarkdownPipeline Pipeline
 @inject HtmlSanitizer Sanitizer
 
-@((MarkupString)RenderBody())
+<div class="@Class" style="@Style">
+    @((MarkupString)RenderBody())
+</div>
 
 @code {
     [Parameter, EditorRequired]
     public string Text { get; set; } = string.Empty;
+    [Parameter]
+    public string Class { get; set; } = string.Empty;
+    [Parameter]
+    public string Style { get; set; } = string.Empty;
 
     private string RenderBody()
     {

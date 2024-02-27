@@ -1,0 +1,26 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using Ganss.Xss
+@using iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Models
+@inherits PromptDialog<string>
+@inject HtmlSanitizer Sanitizer
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model=Value>
+            <InputMarkdown @bind-Value="Value" />
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkText="Ok" OkClick="Submit" CancelText="Cancel" CancelClick="Cancel" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    protected override async Task Submit()
+    {
+        // sanitize input before saving
+        Value = Sanitizer.Sanitize(Value);
+        await base.Submit();
+    }
+}

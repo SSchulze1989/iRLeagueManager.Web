@@ -2,119 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
-	<Version>0.11.6</Version>
+	<Version>0.11.7</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-iRLeagueManager.Web-2B05F9DC-55A3-49D1-BD64-31507000EDF3</UserSecretsId>
     <Configurations>Debug;Release;</Configurations>
-	<LangVersion>11</LangVersion>
+	<LangVersion>12</LangVersion>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\js\bootstrap.bundle.js" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\js\bootstrap.bundle.js.map" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\js\bootstrap.bundle.min.js" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\js\bootstrap.bundle.min.js.map" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\js\bootstrap.esm.js" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\js\bootstrap.esm.js.map" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\js\bootstrap.esm.min.js" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\js\bootstrap.esm.min.js.map" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\js\bootstrap.js" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\js\bootstrap.js.map" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\js\bootstrap.min.js" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\js\bootstrap.min.js.map" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\bootstrap-grid.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\bootstrap-reboot.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\bootstrap-utilities.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\bootstrap.css" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\bootstrap.min.css" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\bootstrap.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\forms\_floating-labels.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\forms\_form-check.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\forms\_form-control.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\forms\_form-range.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\forms\_form-select.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\forms\_form-text.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\forms\_input-group.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\forms\_labels.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\forms\_validation.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\helpers\_clearfix.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\helpers\_color-bg.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\helpers\_colored-links.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\helpers\_position.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\helpers\_ratio.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\helpers\_stacks.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\helpers\_stretched-link.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\helpers\_text-truncation.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\helpers\_visually-hidden.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\helpers\_vr.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_alert.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_backdrop.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_banner.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_border-radius.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_box-shadow.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_breakpoints.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_buttons.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_caret.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_clearfix.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_color-scheme.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_container.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_deprecate.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_forms.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_gradients.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_grid.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_image.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_list-group.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_lists.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_pagination.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_reset-text.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_resize.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_table-variants.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_text-truncate.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_transition.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_utilities.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\mixins\_visually-hidden.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\utilities\_api.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\vendor\_rfs.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_accordion.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_alert.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_badge.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_breadcrumb.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_button-group.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_buttons.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_card.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_carousel.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_close.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_containers.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_dropdown.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_forms.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_functions.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_grid.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_helpers.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_images.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_list-group.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_maps.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_mixins.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_modal.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_nav.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_navbar.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_offcanvas.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_pagination.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_placeholders.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_popover.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_progress.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_reboot.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_root.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_spinners.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_tables.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_toasts.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_tooltip.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_transitions.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_type.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_utilities.scss" />
-    <Content Remove="C:\Users\simon\.nuget\packages\bootstrap.sass\5.2.3\contentFiles\any\any\wwwroot\scss\_variables.scss" />
-    <Content Remove="compilerconfig.json" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Remove="Components\InputMarkdown.razor.css" />
@@ -137,9 +31,10 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
+    <PackageReference Include="CoreCLR-NCalc" Version="3.0.145" />
     <PackageReference Include="HtmlSanitizer" Version="8.0.843" />
-    <PackageReference Include="iRLeagueApiCore.Client" Version="0.11.2" />
-    <PackageReference Include="iRLeagueApiCore.Common" Version="0.11.0" />
+    <PackageReference Include="iRLeagueApiCore.Client" Version="0.11.3" />
+    <PackageReference Include="iRLeagueApiCore.Common" Version="0.11.1" />
     <PackageReference Include="Markdig" Version="0.31.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.3" />

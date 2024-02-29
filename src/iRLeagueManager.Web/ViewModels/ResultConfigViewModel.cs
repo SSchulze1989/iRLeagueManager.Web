@@ -162,7 +162,10 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         var result = await request;
         if (result.Success && result.Content is not null)
         {
-            AvailableResultConfigs = new(result.Content.Select(GetConfigInfoModel).NotNull());
+            AvailableResultConfigs = new(result.Content
+                .Select(GetConfigInfoModel)
+                .NotNull()
+                .Where(x => x.ChampSeasonId != ChampSeasonId));
         }
 
         return result.ToStatusResult();

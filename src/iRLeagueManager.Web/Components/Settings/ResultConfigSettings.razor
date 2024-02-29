@@ -24,13 +24,15 @@
             }
         }
         @{
-            var sourceHelperText = Config.SourceResultConfig != null ? $"Reuse results calculated in {Config.SourceResultConfig.ChampionshipName} - {Config.SourceResultConfig.Name}" : "Use uploaded result data";
+            var sourceHelperText = Config.SourceResultConfig != null ? $"Use points and final order calculated in {Config.SourceResultConfig.ChampionshipName} - {Config.SourceResultConfig.Name}" : "Use uploaded result data";
         }
         <SettingsSelectPrompt Label="Source"
                               HelperText="@sourceHelperText"
                               @bind-Value="Config.SourceResultConfig"
                               Items="Config.AvailableResultConfigs"
-                              ToStringFunc="@(config => config != null ? $"{config.ChampionshipName} - {config.Name}" : "Raw Result")">
+                              Placeholder="Raw Results"
+                              ToStringFunc="@(config => config != null ? $"{config.ChampionshipName} - {config.Name}" : null)"
+                              Clearable="true">
             <ItemTemplate Context="sourceConfig">
                 @sourceConfig?.ChampionshipName - @sourceConfig?.Name
             </ItemTemplate>

@@ -7,9 +7,11 @@
         <MudSelect @bind-Value="Value"
                    Label="@Label"
                    HelperText="@HelperText"
+                   Placeholder="@Placeholder"
                    Variant="Variant"
                    AnchorOrigin="Origin.BottomCenter"
-                   ToStringFunc="ToStringFunc">
+                   ToStringFunc="ToStringFunc"
+                   Clearable="Clearable">
             @if (ItemTemplate is not null)
             {
                 @foreach (var item in Items)
@@ -39,6 +41,8 @@
     [Parameter] public IEnumerable<T> Items { get; set; } = Array.Empty<T>();
     [Parameter] public Func<T, string> ToStringFunc { get; set; } = x => x?.ToString() ?? string.Empty;
     [Parameter] public RenderFragment<T>? ItemTemplate { get; set; }
+    [Parameter] public bool Clearable { get; set; } = false;
+    [Parameter] public string Placeholder { get; set; } = string.Empty;
 
     protected override void OnParametersSet()
     {

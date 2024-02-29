@@ -23,8 +23,10 @@
     [Parameter] public Func<T, string> ToStringFunc { get; set; } = value => value?.ToString() ?? string.Empty;
     [Parameter] public IEnumerable<T> Items { get; set; } = Array.Empty<T>();
     [Parameter] public RenderFragment<T> ItemTemplate { get; set; } = default!;
+    [Parameter] public bool Clearable { get; set; } = false;
+    [Parameter] public string Placeholder { get; set; } = string.Empty;
 
-    private string ValueString => ToStringFunc(Value);
+    private string ValueString => ToStringFunc(Value) ?? Placeholder;
 
     protected override void OnParametersSet()
     {
@@ -41,6 +43,8 @@
             { x => x.Items, Items },
             { x => x.ItemTemplate, ItemTemplate },
             { x => x.ToStringFunc, ToStringFunc },
+            { x => x.Clearable, Clearable },
+            { x => x.Placeholder, Placeholder },
         };
 
         var options = new DialogOptions()

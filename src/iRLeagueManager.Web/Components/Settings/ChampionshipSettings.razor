@@ -25,7 +25,7 @@
                                     @bind-Value="maxResultsPerTeam"
                                     ToStringFunc="@(value => (value <= 0) ? "All" : value.ToString())"
                                     Placeholder="All"
-                                    Clearable="true"/>
+                                    Clearable="true" />
             }
         </SettingsTopSection>
 
@@ -68,7 +68,10 @@
                                     T="IList<SortOptions>"
                                     TDialog="SortOptionsDialog"
                                     @bind-Value="standingConfig.SortOptions"
-                                    Text="@GetSortingHelperText(standingConfig.SortOptions)" />
+                                    Text="@GetSortingHelperText(standingConfig.SortOptions)"
+                                    Parameters="@(new() {
+                                      { x => x.AvailableOptions, standingSortOptions },
+                                    })" />
                 @if (ChampSeason.ResultConfigViewModels.Any(x => x.Scorings.Count > 1))
                 {
                     var switchHeatsAsSingleHelperText = standingConfig.UseCombinedResult
@@ -111,6 +114,22 @@
     private SettingsStack SettingsStack { get; set; } = default!;
 
     private bool multiplePointconfigs = false;
+
+    private static IEnumerable<SortOptions> standingSortOptions = [
+        SortOptions.TotalPtsDesc,
+    SortOptions.WinsDesc,
+    SortOptions.PenPtsAsc,
+    SortOptions.Top3Desc,
+    SortOptions.Top5Desc,
+    SortOptions.Top10Desc,
+    SortOptions.IncsAsc,
+    SortOptions.LeadLapsDesc,
+    SortOptions.LastRaceOrderDesc,
+    SortOptions.RacesDesc,
+    SortOptions.RacesCountedDesc,
+    SortOptions.RacesInPointsDesc,
+    SortOptions.RacesScoredDesc,
+    ];
 
     private int maxResultsPerTeam
     {
@@ -172,10 +191,10 @@
     private async Task AddPointConfigurationClick()
     {
         var pointConfig = new ResultConfigModel()
-        {
-            ResultsPerTeam = maxResultsPerTeam,
-            ChampionshipName = ChampSeason.ChampionshipName,
-        };
+            {
+                ResultsPerTeam = maxResultsPerTeam,
+                ChampionshipName = ChampSeason.ChampionshipName,
+            };
         var parameters = new DialogParameters<DisplayNameDialog>()
         {
             { x => x.Value, (pointConfig.Name, pointConfig.DisplayName)},

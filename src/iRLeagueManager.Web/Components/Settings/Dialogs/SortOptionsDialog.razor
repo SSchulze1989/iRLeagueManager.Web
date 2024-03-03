@@ -22,7 +22,7 @@
                            ToStringFunc="@((SortOptions option) => option.GetText().Capitalize())"
                            Variant="Variant.Outlined"
                            AnchorOrigin="Origin.BottomCenter">
-                    @foreach (var availableOption in availableOptions)
+                    @foreach (var availableOption in AvailableOptions)
                     {
                         <MudSelectItem Value="availableOption" />
                     }
@@ -35,7 +35,7 @@
                        Variant="Variant.Outlined"
                        AnchorOrigin="Origin.BottomCenter"
                        Class="mt-4">
-                @foreach (var availableOption in availableOptions.Cast<SortOptions?>())
+                @foreach (var availableOption in AvailableOptions.Cast<SortOptions?>())
                 {
                     <MudSelectItem Value="availableOption" />
                 }
@@ -53,7 +53,23 @@
     private SortOptions? newSelectionValue = null;
 
     private IList<SortOptions> options => Value;
-    private IEnumerable<SortOptions> availableOptions = Enum.GetValues<SortOptions>();
+    [Parameter] public IEnumerable<SortOptions> AvailableOptions { get; set; } = [
+        SortOptions.PosAsc,
+        SortOptions.FinPosAsc,
+        SortOptions.TotalPtsDesc,
+        SortOptions.TotalPtsWoBonusDesc,
+        SortOptions.TotalPtsWoPenaltyDesc,
+        SortOptions.StartPosAsc,
+        SortOptions.RacePtsDesc,
+        SortOptions.PenPtsAsc,
+        SortOptions.BonusPtsDesc,
+        SortOptions.IntvlDesc,
+        SortOptions.ComplLapsDesc,
+        SortOptions.LeadLapsDesc,
+        SortOptions.IncsAsc,
+        SortOptions.FastLapAsc,
+        SortOptions.QualLapAsc,
+    ];
 
     private void MoveUp(int index)
     {

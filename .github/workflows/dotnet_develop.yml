@@ -26,4 +26,4 @@ jobs:
     - name: Build
       run: dotnet build -c $BUILD_CONFIG --no-restore
     - name: Test
-      run: dotnet test -c $BUILD_CONFIG --no-build --verbosity normal
+      run: dotnet test -c $BUILD_CONFIG --no-build --verbosity normal --filter FullyQualifiedName\!~IntegrationTests

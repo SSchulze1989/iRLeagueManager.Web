@@ -1,0 +1,27 @@
+name: .NET
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  publish:
+    env:
+      BUILD_CONFIG: Release
+      NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+        source-url: https://nuget.pkg.github.com/SSchulze1989/index.json
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build -c $BUILD_CONFIG --no-restore
+    - name: Test
+      run: dotnet test -c $BUILD_CONFIG --no-build --verbosity normal

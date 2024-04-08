@@ -33,7 +33,6 @@
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
     <PackageReference Include="CoreCLR-NCalc" Version="3.0.145" />
     <PackageReference Include="HtmlSanitizer" Version="8.0.843" />
-    <PackageReference Include="iRLeagueApiCore.Client" Version="0.11.3" />
     <PackageReference Include="iRLeagueApiCore.Common" Version="0.11.1" />
     <PackageReference Include="Markdig" Version="0.31.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.3" />
@@ -43,6 +42,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.3" />
     <PackageReference Include="MudBlazor" Version="6.16.0" />
     <PackageReference Include="MvvmBlazor" Version="6.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\iRLeagueApiCore.Client\iRLeagueApiCore.Client.csproj" />
   </ItemGroup>
 
 </Project>

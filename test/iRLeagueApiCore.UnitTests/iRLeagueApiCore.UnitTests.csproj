@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <UserSecretsId>268f531b-646e-4c03-bd3f-0c5544ed5c1b</UserSecretsId>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Client\Endpoints\Leagues\**" />
+    <Compile Remove="Server\Validators\Scorings\**" />
+    <EmbeddedResource Remove="Client\Endpoints\Leagues\**" />
+    <EmbeddedResource Remove="Server\Validators\Scorings\**" />
+    <None Remove="Client\Endpoints\Leagues\**" />
+    <None Remove="Server\Validators\Scorings\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoFixture.AutoMoq" Version="4.17.0" />
+    <PackageReference Include="FluentAssertions" Version="6.7.0" />
+    <PackageReference Include="FluentIdentityBuilder" Version="0.0.3" />
+    <PackageReference Include="iRLeagueApiCore.Common" Version="0.11.1" />
+    <PackageReference Include="iRLeagueDatabaseCore" Version="0.11.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+    <PackageReference Include="Moq" Version="4.18.0" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector" Version="3.1.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\iRLeagueApiCore.Client\iRLeagueApiCore.Client.csproj" />
+    <ProjectReference Include="..\..\src\iRLeagueApiCore.Server\iRLeagueApiCore.Server.csproj" />
+    <ProjectReference Include="..\..\src\iRLeagueApiCore.Services\iRLeagueApiCore.Services.csproj" />
+    <ProjectReference Include="..\..\src\iRLeagueApiCore.TrackImport\iRLeagueApiCore.TrackImport.csproj" />
+    <ProjectReference Include="..\iRLeagueApiCore.Mocking\iRLeagueApiCore.Mocking.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Data\iracing-result.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

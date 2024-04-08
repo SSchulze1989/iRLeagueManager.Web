@@ -18,7 +18,7 @@
 	</ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CoreCLR-NCalc" Version="3.0.144" />
+    <PackageReference Include="CoreCLR-NCalc" Version="3.1.233" />
     <PackageReference Include="iRLeagueDatabaseCore" Version="0.11.1" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />

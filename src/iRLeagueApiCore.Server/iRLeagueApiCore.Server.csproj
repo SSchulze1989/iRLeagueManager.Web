@@ -23,7 +23,6 @@
     <PackageReference Include="Aydsko.iRacingData" Version="2303.0.0" />
     <PackageReference Include="FluentValidation" Version="11.9.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0" />
-    <PackageReference Include="iRLeagueDatabaseCore" Version="0.11.1" />
 	<PackageReference Include="MediatR" Version="10.0.1" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.9" />
@@ -49,6 +48,7 @@
     <ProjectReference Include="..\iRLeagueApiCore.Common\iRLeagueApiCore.Common.csproj" />
     <ProjectReference Include="..\iRLeagueApiCore.TrackImport\iRLeagueApiCore.TrackImport.csproj" />
 	<ProjectReference Include="..\iRLeagueApiCore.Services\iRLeagueApiCore.Services.csproj" />
+	<ProjectReference Include="..\iRLeagueDatabaseCore\iRLeagueDatabaseCore.csproj" />
   </ItemGroup>
 
 	<Target Name="CopyReferenceFiles" AfterTargets="AfterBuild">

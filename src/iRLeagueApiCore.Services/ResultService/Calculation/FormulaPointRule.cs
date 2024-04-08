@@ -1,6 +1,5 @@
 ﻿
 using iRLeagueApiCore.Services.ResultService.Models;
-using MySqlX.XDevAPI.Relational;
 using NCalc;
 
 namespace iRLeagueApiCore.Services.ResultService.Calculation;

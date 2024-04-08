@@ -2,7 +2,6 @@
 using iRLeagueApiCore.Common.Models;
 using iRLeagueApiCore.Services.ResultService.Extensions;
 using iRLeagueApiCore.Services.ResultService.Models;
-using MySqlX.XDevAPI.Relational;
 
 namespace iRLeagueApiCore.Services.ResultService.Calculation;
 

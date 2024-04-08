@@ -21,7 +21,6 @@
     <PackageReference Include="AutoFixture.AutoMoq" Version="4.17.0" />
     <PackageReference Include="FluentAssertions" Version="6.7.0" />
     <PackageReference Include="FluentIdentityBuilder" Version="0.0.3" />
-    <PackageReference Include="iRLeagueApiCore.Common" Version="0.11.1" />
     <PackageReference Include="iRLeagueDatabaseCore" Version="0.11.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.9">
@@ -43,6 +42,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\iRLeagueApiCore.Client\iRLeagueApiCore.Client.csproj" />
+    <ProjectReference Include="..\..\src\iRLeagueApiCore.Common\iRLeagueApiCore.Common.csproj" />
     <ProjectReference Include="..\..\src\iRLeagueApiCore.Server\iRLeagueApiCore.Server.csproj" />
     <ProjectReference Include="..\..\src\iRLeagueApiCore.Services\iRLeagueApiCore.Services.csproj" />
     <ProjectReference Include="..\..\src\iRLeagueApiCore.TrackImport\iRLeagueApiCore.TrackImport.csproj" />

@@ -23,8 +23,6 @@
     <PackageReference Include="Aydsko.iRacingData" Version="2303.0.0" />
     <PackageReference Include="FluentValidation" Version="11.0.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.0.1" />
-	  <PackageReference Include="iRLeagueApiCore.Common" Version="0.11.1" CopyToOutputDirectory="lib/net6.0">
-	  </PackageReference>
     <PackageReference Include="iRLeagueDatabaseCore" Version="0.11.1" />
 	<PackageReference Include="MediatR" Version="10.0.1" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
@@ -48,6 +46,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\iRLeagueApiCore.Client\iRLeagueApiCore.Client.csproj" />
+    <ProjectReference Include="..\iRLeagueApiCore.Common\iRLeagueApiCore.Common.csproj" />
     <ProjectReference Include="..\iRLeagueApiCore.TrackImport\iRLeagueApiCore.TrackImport.csproj" />
 	<ProjectReference Include="..\iRLeagueApiCore.Services\iRLeagueApiCore.Services.csproj" />
   </ItemGroup>

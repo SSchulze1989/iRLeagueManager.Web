@@ -108,7 +108,10 @@
         <Authorized>
             @if (SharedState.SeasonFinished == false)
             {
-                <MudButton Color="Color.Primary" OnClick=UploadButtonClick Class="mt-2">Upload Result</MudButton>
+                <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" Class="mt-2">
+                    <MudButton OnClick=UploadButtonClick>Upload Result</MudButton>
+                    <MudButton OnClick="FetchResultsClick">Fetch from SubsessionId</MudButton>
+                </MudButtonGroup>
             }
         </Authorized>
     </AuthorizeView>
@@ -184,6 +187,25 @@
             { x => x.Event, @event },
         };
         var result = await DialogService.Show<UploadResultDialog>("Upload json result", parameters).Result;
+        if (result.Canceled == false)
+        {
+            await Task.Delay(2000);
+            await vm.LoadFromEventAsync(@event.Id);
+        }
+    }
+
+    private async Task FetchResultsClick()
+    {
+        var @event = vm.SelectedEvent?.GetModel();
+        if (@event is null)
+        {
+            return;
+        }
+        var parameters = new DialogParameters<FetchResultsDialog>()
+        {
+            { x => x.Event, @event },
+        };
+        var result = await DialogService.Show<FetchResultsDialog>("Fetch results from iracing subsession", parameters).Result;
         if (result.Canceled == false)
         {
             await Task.Delay(2000);

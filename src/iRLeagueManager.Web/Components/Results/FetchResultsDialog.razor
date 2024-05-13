@@ -1,0 +1,64 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Models
+@inject LeagueApiService apiService
+@inherits PromptDialog<string>
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="Value"
+                      Label="@Label"
+                      HelperText="@HelperText"
+                      Variant="Variant"
+                      InputType="InputType.Text"
+                      Placeholder="1234567"
+                      Clearable="true" 
+                      Error="hasError"
+                      ErrorText="@errorText"/>
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkClick="Submit" OkText="Upload" CancelClick="Cancel"/>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public EventModel Event { get; set; } = default!;
+
+    private bool hasError = false;
+    private string errorText = string.Empty;
+
+    protected override async Task Submit()
+    {
+        hasError = false;
+        errorText = string.Empty;
+
+        if (apiService.CurrentLeague is null)
+        {
+            MudDialog.Cancel();
+            return;
+        }
+
+        if (int.TryParse(Value, out int subsessionId) == false)
+        {
+            hasError = true;
+            errorText = "Subsession id must be a valid number";
+            return;
+        }
+
+        var request = apiService.CurrentLeague
+            .Events()
+            .WithId(Event.Id)
+            .Results()
+            .Fetch()
+            .FromIracingSubSession(subsessionId)
+            .Post(CancellationToken);
+        var result = await request;
+        if (result.Success == false)
+        {
+            hasError = true;
+            errorText = @"Fetching results from iracing api failed. Please check the subsession id and if the league results are available from public.
+Please use JSON upload if this does not work";
+        }
+
+        MudDialog.Close(Value);
+    }
+}

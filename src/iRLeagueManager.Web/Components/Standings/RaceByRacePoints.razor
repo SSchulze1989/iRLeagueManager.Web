@@ -39,7 +39,7 @@
                 </td>
                 @foreach (var race in columns)
                 {
-                    <td class="col-3 py-0" colspan="3" style="text-align: center">
+                    <td class="@($"col-3 py-0 {(race?.IsScored == false ? "dropped" : "")}")" colspan="3" style="text-align: center">
                         @race?.TotalPoints
                     </td>
                 }
@@ -47,13 +47,13 @@
             <tr>
                 @foreach (var race in columns)
                 {
-                    <td class="col-1 py-0">
+                    <td class="@($"col-1 py-0 {(race?.IsScored == false ? "dropped" : "")}")">
                         @race?.RacePoints
                     </td>
-                    <td class="col-1 py-0">
+                    <td class="@($"col-1 py-0 {(race?.IsScored == false ? "dropped" : "")}")">
                         @race?.BonusPoints
                     </td>
-                    <td class="col-1 py-0" style="@(race?.PenaltyPoints != 0 ? "color:red" : "")">
+                    <td class="@($"col-1 py-0 {(race?.IsScored == false ? "dropped" : "")}")" style="@(race?.PenaltyPoints != 0 ? "color:red" : "")">
                         @(race?.PenaltyPoints is < 0 or > 0 ? "-" : "")@race?.PenaltyPoints
                     </td>
                 }

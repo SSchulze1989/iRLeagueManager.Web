@@ -17,3 +17,7 @@
     background-color: var(--mud-palette-table-striped);
     filter: brightness(85%);
 }
+
+.mud-simple-table .mud-table-container table tbody tr td.dropped {
+    color: var(--mud-palette-text-disabled);
+}

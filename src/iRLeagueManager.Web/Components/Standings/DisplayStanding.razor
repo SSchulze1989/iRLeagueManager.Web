@@ -1,5 +1,6 @@
 ﻿@namespace iRLeagueManager.Web.Components
 @using iRLeagueApiCore.Common.Models.Standings
+@using iRLeagueApiCore.Common.Models
 
 <div @attributes=AdditionalAttributes>
     @{
@@ -15,7 +16,7 @@
 
     @if (showRaceByRace)
     {
-        <RaceByRacePoints StandingRows="Standing.StandingRows" />
+        <RaceByRacePoints StandingRows="Standing.StandingRows" Events="raceEvents"/>
     }
     else
     {
@@ -67,12 +68,22 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    private EventListViewModel EventList { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues = true)]
     public IDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter, EditorRequired]
     public StandingsModel Standing { get; set; } = default!;
 
     private bool showRaceByRace = false;
+    private IEnumerable<EventModel> raceEvents = [];
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, EventList, cascading: true);
+        raceEvents = GetStandingEvents();
+    }
 
     private bool HasDriver(IEnumerable<StandingRowModel> rows)
     {
@@ -82,5 +93,20 @@
     private bool HasTeam(IEnumerable<StandingRowModel> rows)
     {
         return rows.Any(x => x.TeamId != null);
+    }
+
+    private IEnumerable<EventModel> GetStandingEvents()
+    {
+        var eventIds = Standing.StandingRows
+            .SelectMany(x => x.ResultRows)
+            .NotNull()
+            .Select(x => x.EventId)
+            .Distinct();
+        var events = eventIds
+            .Select(eventId => EventList.EventList.FirstOrDefault(e => e.EventId == eventId))
+            .NotNull()
+            .Select(x => x.GetModel())
+            .ToList();
+        return events;
     }
 }

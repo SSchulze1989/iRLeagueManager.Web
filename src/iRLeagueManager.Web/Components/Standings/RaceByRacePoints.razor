@@ -5,23 +5,80 @@
 <MudSimpleTable Elevation=5 Dense="true" Bordered="true">
     @{
         var columnsCount = RaceColumns ?? StandingRows.Select(x => x.ResultRows.Count()).Max();
+        int raceColumnWidthPct = 90 / (columnsCount == 0 ? 1 : columnsCount);
     }
     <thead>
         <tr>
             <td rowspan="2" class="py-2">
                 Pos.
             </td>
-            <td rowspan="2" class="py-2">
+            <td rowspan="2" class="py-2" width="15%">
                 Name
             </td>
-            @for (int i = 1; i <= columnsCount; i++)
+            @for (int i = 0; i < columnsCount; i++)
             {
-                <th colspan="3" style="text-align: center">
+                var @event = Events.ElementAtOrDefault(i);
+                <th colspan="3" class="px-0 py-0" style="text-align: center">
                     R@(i.ToString())
+                    @if (@event is not null)
+                    {
+                        <MudText Typo="Typo.subtitle2">
+                            @(@event.Date.GetValueOrDefault().ToString("dd.MM.yy"))
+                        </MudText>
+                    }
                 </th>
             }
         </tr>
+        <tr>
+            @for (int i = 0; i < columnsCount; i++)
+            {
+                var @event = Events.ElementAtOrDefault(i);
+                <td colspan="3" class="px-0 py-0" style="@($"width: {raceColumnWidthPct}%; text-align: center")">
+                    @if (@event is not null)
+                    {
+                        <MudText Typo="Typo.caption">
+                            @(@event.TrackName)
+                        </MudText>
+                    }
+                </td>
+            }
+        </tr>
     </thead>
+
+    <tbody>
+        <tr>
+            <td rowspan="2" class="py-0">
+            </td>
+            <td rowspan="2" class="py-0">
+            </td>
+            @for (int i = 0; i < columnsCount; i++)
+            {
+                <td colspan="3" class="px-0 py-0" style="text-align: center">
+                    Total
+                </td>
+            }
+        </tr>
+        <tr>
+            @for (int i = 0; i < columnsCount; i++)
+            {
+                <td class="px-0 py-0" style="text-align: center">
+                    <MudTooltip Text="Race points">
+                        R
+                    </MudTooltip>
+                </td>
+                <td class="px-0 py-0" style="text-align: center">
+                    <MudTooltip Text="Bonus points">
+                        B
+                    </MudTooltip>
+                </td>
+                <td class="px-0 py-0" style="text-align: center">
+                    <MudTooltip Text="Penalty points">
+                        P
+                    </MudTooltip>
+                </td>
+            }
+        </tr>
+    </tbody>
     @foreach (var row in StandingRows)
     {
         var columns = row.ResultRows.ToList();
@@ -47,14 +104,14 @@
             <tr>
                 @foreach (var race in columns)
                 {
-                    <td class="@($"col-1 py-0 {(race?.IsScored == false ? "dropped" : "")}")">
+                    <td class="@($"col-1 px-2 py-0 {(race?.IsScored == false ? "dropped" : "")}")" style="text-align: center">
                         @race?.RacePoints
                     </td>
-                    <td class="@($"col-1 py-0 {(race?.IsScored == false ? "dropped" : "")}")">
-                        @race?.BonusPoints
+                    <td class="@($"col-1 px-2 py-0 {(race?.IsScored == false ? "dropped" : "")}")" style="text-align: center">
+                        @(race?.BonusPoints is > 0 ? $"+{race.BonusPoints}" : race is not null ? "-" : "")
                     </td>
-                    <td class="@($"col-1 py-0 {(race?.IsScored == false ? "dropped" : "")}")" style="@(race?.PenaltyPoints != 0 ? "color:red" : "")">
-                        @(race?.PenaltyPoints is < 0 or > 0 ? "-" : "")@race?.PenaltyPoints
+                    <td class="@($"col-1 px-2 py-0 {(race?.IsScored == false ? "dropped" : "")}")" style="@(race?.PenaltyPoints != 0 ? "color:red" : "" + "text-align: center")">
+                        @(race?.PenaltyPoints is < 0 or > 0 ? $"-{@race?.PenaltyPoints}" : race is not null ? "-" : "")
                     </td>
                 }
             </tr>
@@ -63,12 +120,14 @@
 </MudSimpleTable>
 
 @code {
+    [Parameter] public IEnumerable<EventModel> Events { get; set; } = default!;
     [Parameter] public IEnumerable<StandingRowModel> StandingRows { get; set; } = default!;
     [Parameter] public int? RaceColumns { get; set; }
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, Events);
         BlazorParameterNullException.ThrowIfNull(this, StandingRows);
     }
 }

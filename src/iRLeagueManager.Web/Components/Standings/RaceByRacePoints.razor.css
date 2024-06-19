@@ -1,5 +1,10 @@
-﻿.mud-simple-table .mud-table-container table tbody tr:last-child {
+﻿.mud-simple-table .mud-table-container table tbody tr:last-child td,
+.mud-simple-table .mud-table-container table thead tr:last-child th{
     border-bottom: 1px solid var(--mud-palette-table-lines);
+}
+
+.mud-simple-table .mud-table-container table thead tr:not(:last-child) th {
+    border-bottom: none;
 }
 
 .mud-simple-table .mud-table-container table tbody:hover {

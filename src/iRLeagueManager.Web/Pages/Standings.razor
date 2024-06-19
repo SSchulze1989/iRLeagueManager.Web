@@ -41,9 +41,7 @@
                     @foreach ((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x, i)))
                     {
                         <MudTabPanel Text="@standing.Name">
-                            <MudPaper Elevation="4" Class="mt-2">
-                                <DisplayStanding class="px-0 mb-2 mx-0" Standing="standing" />
-                            </MudPaper>
+                            <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing"/>
                         </MudTabPanel>
                     }
                 </MudTabs>
@@ -51,7 +49,7 @@
             else
             {
                 var standing = vm.Standings.First();
-                <DisplayStanding class="px-0 mb-2 mx-0" Standing="standing" />
+                <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing"/>
             }
         }
     </MudElement>

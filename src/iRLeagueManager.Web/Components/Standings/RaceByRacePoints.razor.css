@@ -1,0 +1,23 @@
+﻿.mud-simple-table .mud-table-container table tbody tr:last-child {
+    border-bottom: 1px solid var(--mud-palette-table-lines);
+}
+
+.mud-simple-table .mud-table-container table tbody:hover {
+    background-color: var(--mud-palette-table-hover) !important;
+}
+
+.mud-simple-table .mud-table-container table tbody:nth-of-type(2n+1):not(:hover) {
+    background-color: var(--mud-palette-table-striped);
+}
+
+.mud-simple-table .mud-table-container table tbody:nth-child(2n+1):not(:hover) tr:nth-child(2n+1) td:nth-child(2n+3),
+.mud-simple-table .mud-table-container table tbody:nth-child(2n+1):not(:hover) tr:nth-child(2n) td:nth-child(6n+3),
+.mud-simple-table .mud-table-container table tbody:nth-child(2n+1):not(:hover) tr:nth-child(2n) td:nth-child(6n+2),
+.mud-simple-table .mud-table-container table tbody:nth-child(2n+1):not(:hover) tr:nth-child(2n) td:nth-child(6n+1) {
+    background-color: var(--mud-palette-table-striped);
+    filter: brightness(85%);
+}
+
+.mud-simple-table .mud-table-container table tbody tr td.dropped {
+    color: var(--mud-palette-text-disabled);
+}

@@ -1,0 +1,50 @@
+﻿@namespace iRLeagueManager.Web.Components
+@inherits UtilityComponentBase
+
+<MudDialog>
+    <DialogContent>
+        <MudSimpleTable>
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>Date</th>
+                    <th>Track</th>
+                    <th>Pos.</th>
+                    <th>Total</th>
+                    <th>Bonus</th>
+                    <th>Penalty</th>
+                    <th>Dropped</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var (@event, i) in Events.WithIndex())
+                {
+                    var row = StandingRow.ResultRows.FirstOrDefault(x => x?.EventId == @event.Id);
+                    var dropweekOverride = dropweekOverrides.FirstOrDefault(x => x.ScoredResultRowId == row?.ResultRowId);
+                    @if (row is null)
+                    {
+                        continue;
+                    }
+                    <tr>
+                        <td class="py-1 px-1" style="text-align: center">@($"{i + 1:00}").</td>
+                        <td class="py-1">@(@event.Date.GetValueOrDefault().ToString("dd.MM.yy"))</td>
+                        <td class="py-1 px-1">@(@event.TrackName)</td>
+                        <td class="py-1 px-1" style="text-align: center">@(row.FinalPosition).</td>
+                        <td class="py-1 px-1" style="text-align: center">@row.TotalPoints</td>
+                        <td class="py-1 px-1" style="text-align: center">@row.BonusPoints</td>
+                        <td class="py-1 px-1" style="text-align: center">@row.PenaltyPoints</td>
+                        <td class="py-1">
+                            <MudCheckBox Value="row.IsScored" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Close())">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+}

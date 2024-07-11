@@ -31,9 +31,10 @@ public static class EnumerableExtensions
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="enumerable"></param>
+    /// <param name="start">start index for the first element</param>
     /// <returns></returns>
-    public static IEnumerable<(T item, int index)> WithIndex<T>(this IEnumerable<T> enumerable)
+    public static IEnumerable<(T item, int index)> WithIndex<T>(this IEnumerable<T> enumerable, int start = 0)
     {
-        return enumerable.Select((x, i) => (x, i));
+        return enumerable.Select((x, i) => (x, i + start));
     }
 }

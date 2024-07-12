@@ -95,7 +95,7 @@
     private bool showLeagueHiddenAlert = true;
     private bool seasonsExpanded = false;
 
-    private bool Loading => Bind(League, x => x.Loading);
+    private new bool Loading => Bind(League, x => x.Loading);
 
     private StatusResultValidator? ResultValidator { get; set; }
 

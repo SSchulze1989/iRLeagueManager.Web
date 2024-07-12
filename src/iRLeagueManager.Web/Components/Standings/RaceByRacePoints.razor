@@ -1,0 +1,74 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Standings
+
+<MudSimpleTable Elevation=5 Dense="true" Bordered="true">
+    @{
+        var columnsCount = RaceColumns ?? StandingRows.Select(x => x.ResultRows.Count()).Max();
+    }
+    <thead>
+        <tr>
+            <td rowspan="2" class="py-2">
+                Pos.
+            </td>
+            <td rowspan="2" class="py-2">
+                Name
+            </td>
+            @for (int i = 1; i <= columnsCount; i++)
+            {
+                <th colspan="3" style="text-align: center">
+                    R@(i.ToString())
+                </th>
+            }
+        </tr>
+    </thead>
+    @foreach (var row in StandingRows)
+    {
+        var columns = row.ResultRows.ToList();
+        if (columnsCount > columns.Count)
+        {
+            columns.AddRange(Enumerable.Repeat<StandingResultRowModel?>(null, columns.Count - columnsCount));
+        };
+        <tbody>
+            <tr>
+                <td rowspan="2" class="py-0">
+                    @(row.Position).
+                </td>
+                <td rowspan="2" class="py-0">
+                    @row.Firstname @row.Lastname
+                </td>
+                @foreach (var race in columns)
+                {
+                    <td class="@($"col-3 py-0 {(race?.IsScored == false ? "dropped" : "")}")" colspan="3" style="text-align: center">
+                        @race?.TotalPoints
+                    </td>
+                }
+            </tr>
+            <tr>
+                @foreach (var race in columns)
+                {
+                    <td class="@($"col-1 py-0 {(race?.IsScored == false ? "dropped" : "")}")">
+                        @race?.RacePoints
+                    </td>
+                    <td class="@($"col-1 py-0 {(race?.IsScored == false ? "dropped" : "")}")">
+                        @race?.BonusPoints
+                    </td>
+                    <td class="@($"col-1 py-0 {(race?.IsScored == false ? "dropped" : "")}")" style="@(race?.PenaltyPoints != 0 ? "color:red" : "")">
+                        @(race?.PenaltyPoints is < 0 or > 0 ? "-" : "")@race?.PenaltyPoints
+                    </td>
+                }
+            </tr>
+        </tbody>
+    }
+</MudSimpleTable>
+
+@code {
+    [Parameter] public IEnumerable<StandingRowModel> StandingRows { get; set; } = default!;
+    [Parameter] public int? RaceColumns { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, StandingRows);
+    }
+}

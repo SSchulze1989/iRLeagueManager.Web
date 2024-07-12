@@ -19,7 +19,7 @@ public partial class Templates : LeagueComponentBase
     private string Status { get; set; } = string.Empty;
     private string Message { get; set; } = string.Empty;
     private IEnumerable<object> Errors { get; set; } = Array.Empty<object>();
-    private bool Loading { get; set; } = false;
+    private new bool Loading { get; set; } = false;
 
     private enum TemplateType
     {

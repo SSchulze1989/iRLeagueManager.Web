@@ -6,7 +6,7 @@
 @using iRLeagueManager.Web.ViewModels
 @inherits EditDialogBase<ReviewViewModel, ReviewModel>
 
-<EditForm Model=Vm OnValidSubmit=Submit>
+<EditForm Model=Vm>
     <StatusResultValidator @ref=ResultValidator />
     <MudDialog>
         <DialogContent>
@@ -53,7 +53,7 @@
         </DialogContent>
         <DialogActions>
             <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
-            <ProgressButton Color="Color.Primary" ButtonType="ButtonType.Submit" Loading="Loading">Save</ProgressButton>
+            <ProgressButton Color="Color.Primary" OnClick="Submit" Loading="Loading">Save</ProgressButton>
         </DialogActions>
     </MudDialog>
 </EditForm>

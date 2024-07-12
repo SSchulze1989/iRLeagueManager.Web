@@ -6,50 +6,64 @@
         var showDriver = HasDriver(Standing.StandingRows) && Standing.IsTeamStanding == false;
         var hasTeam = HasTeam(Standing.StandingRows);
     }
-    <ResultTable Data="@Standing.StandingRows">
-        <HeaderTemplate>
-            <ResultTableHeader Text="Pos" Sort="@(x => x.Position)" Default=true />
-            @if (showDriver)
-            {
-                <ResultTableHeader Text="Driver" Sort="@(x => x.Firstname)"/>
-            }
-            @if (hasTeam)
-            {
-                <ResultTableHeader Text="Team" Sort="@(x => x.TeamName)" />
-            }
-            <ResultTableHeader Text="RacePoints" Sort="@(x => x.RacePoints)" Direction="SortDirection.Descending" />
-            <ResultTableHeader Text="Penalties" Sort="@(x => x.PenaltyPoints)" />
-            <ResultTableHeader Text="Total Points" Sort="@(x => x.TotalPoints)" Direction="SortDirection.Descending" />
-            <ResultTableHeader Text="Races" Sort="@(x => x.Races)" Direction="SortDirection.Descending" />
-            <ResultTableHeader Text="Poles" Sort="@(x => x.PolePositions)" Direction="SortDirection.Descending" />
-            <ResultTableHeader Text="Wins" Sort="@(x => x.Wins)" Direction="SortDirection.Descending" />
-            <ResultTableHeader Text="Podiums" Sort="@(x => x.Top3)" Direction="SortDirection.Descending" />
-            <ResultTableHeader Text="Incidents" Sort="@(x => x.Incidents)" />
-        </HeaderTemplate>
-        <RowTemplate Context=Row>
-            <td class="px-1 py-1"><ValueChange Value=Row.Position Change=Row.PositionChange /></td>
-            @if (showDriver)
-            {
-                <td class="px-1 py-1">@Row.Firstname @Row.Lastname</td>
-            }
-            @if (hasTeam)
-            {
-                <td class="px-1 py-1" style="color:@Row.TeamColor">@Row.TeamName</td>
-            }
-            <td class="px-1 py-1"><ValueChange Value=Row.RacePoints Change=Row.RacePointsChange /></td>
-            <td class="px-1 py-1" style="@(@Row.PenaltyPoints != 0 ? "color:red" : "")">
-                @(Row.PenaltyPoints != 0 ? "-" : "")@Row.PenaltyPoints
-            </td>
-            <td class="px-1 py-1"><ValueChange Value=Row.TotalPoints Change=Row.TotalPointsChange /></td>
-            <td class="px-1 py-1">
-                @Row.RacesCounted@(Row.RacesCounted != Row.Races ? $" ({Row.Races})" : "")
-            </td>
-            <td class="px-1 py-1"><ValueChange Value=Row.PolePositions Change=Row.PolePositionsChange /></td>
-            <td class="px-1 py-1"><ValueChange Value=Row.Wins Change=Row.WinsChange /></td>
-            <td class="px-1 py-1">@Row.Top3</td>
-            <td class="px-1 py-1">@Row.Incidents</td>
-        </RowTemplate>
-    </ResultTable>
+
+    <MudElement HtmlTag="div" Class="d-flex justify-end">
+        <MudSwitch @bind-Value="showRaceByRace" Class="px-2" Color="Color.Primary">
+            Show race-by-race
+        </MudSwitch>
+    </MudElement>
+
+    @if (showRaceByRace)
+    {
+        <RaceByRacePoints StandingRows="Standing.StandingRows" />
+    }
+    else
+    {
+        <ResultTable Data="@Standing.StandingRows">
+            <HeaderTemplate>
+                <ResultTableHeader Text="Pos" Sort="@(x => x.Position)" Default=true />
+                @if (showDriver)
+                {
+                    <ResultTableHeader Text="Driver" Sort="@(x => x.Firstname)" />
+                }
+                @if (hasTeam)
+                {
+                    <ResultTableHeader Text="Team" Sort="@(x => x.TeamName)" />
+                }
+                <ResultTableHeader Text="RacePoints" Sort="@(x => x.RacePoints)" Direction="SortDirection.Descending" />
+                <ResultTableHeader Text="Penalties" Sort="@(x => x.PenaltyPoints)" />
+                <ResultTableHeader Text="Total Points" Sort="@(x => x.TotalPoints)" Direction="SortDirection.Descending" />
+                <ResultTableHeader Text="Races" Sort="@(x => x.Races)" Direction="SortDirection.Descending" />
+                <ResultTableHeader Text="Poles" Sort="@(x => x.PolePositions)" Direction="SortDirection.Descending" />
+                <ResultTableHeader Text="Wins" Sort="@(x => x.Wins)" Direction="SortDirection.Descending" />
+                <ResultTableHeader Text="Podiums" Sort="@(x => x.Top3)" Direction="SortDirection.Descending" />
+                <ResultTableHeader Text="Incidents" Sort="@(x => x.Incidents)" />
+            </HeaderTemplate>
+            <RowTemplate Context=Row>
+                <td class="px-1 py-1"><ValueChange Value=Row.Position Change=Row.PositionChange /></td>
+                @if (showDriver)
+                {
+                    <td class="px-1 py-1">@Row.Firstname @Row.Lastname</td>
+                }
+                @if (hasTeam)
+                {
+                    <td class="px-1 py-1" style="color:@Row.TeamColor">@Row.TeamName</td>
+                }
+                <td class="px-1 py-1"><ValueChange Value=Row.RacePoints Change=Row.RacePointsChange /></td>
+                <td class="px-1 py-1" style="@(@Row.PenaltyPoints != 0 ? "color:red" : "")">
+                    @(Row.PenaltyPoints != 0 ? "-" : "")@Row.PenaltyPoints
+                </td>
+                <td class="px-1 py-1"><ValueChange Value=Row.TotalPoints Change=Row.TotalPointsChange /></td>
+                <td class="px-1 py-1">
+                    @Row.RacesCounted@(Row.RacesCounted != Row.Races ? $" ({Row.Races})" : "")
+                </td>
+                <td class="px-1 py-1"><ValueChange Value=Row.PolePositions Change=Row.PolePositionsChange /></td>
+                <td class="px-1 py-1"><ValueChange Value=Row.Wins Change=Row.WinsChange /></td>
+                <td class="px-1 py-1">@Row.Top3</td>
+                <td class="px-1 py-1">@Row.Incidents</td>
+            </RowTemplate>
+        </ResultTable>
+    }
 </div>
 
 @code {
@@ -57,6 +71,8 @@
     public IDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter, EditorRequired]
     public StandingsModel Standing { get; set; } = default!;
+
+    private bool showRaceByRace = false;
 
     private bool HasDriver(IEnumerable<StandingRowModel> rows)
     {

@@ -69,7 +69,7 @@
 </AuthorizeView>
 
 @code {
-    private bool Loading => Bind(League, x => x.Loading) || Bind(Reviews, x => x.Loading);
+    private new bool Loading => Bind(League, x => x.Loading) || Bind(Reviews, x => x.Loading);
 
     private bool categoriesExpanded = false;
 

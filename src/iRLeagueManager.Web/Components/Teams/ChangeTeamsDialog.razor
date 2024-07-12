@@ -1,0 +1,80 @@
+﻿@namespace iRLeagueManager.Web.Components
+@inherits UtilityComponentBase
+
+<MudDialog>
+    <DialogContent>
+        <MudStack>
+            <MudProgressLinear Indeterminate="Loading" Color="Color.Primary" Class="@(Loading ? "" : "invisible")"/>
+            @* Driver Info *@
+            <MudText Typo="Typo.h5">
+                @Member.FirstName @Member.LastName
+            </MudText>
+
+            @* Select new Team *@
+            <MudAutocomplete Label="New Team"
+                             @bind-Value="newTeam"
+                             SearchFunc="SearchTeam"
+                             Placeholder="@currentTeam?.Name"
+                             ToStringFunc="@(team => team?.Name)"
+                             Clearable="true">
+            </MudAutocomplete>
+
+            @* Select Season *@
+            <MudSelect Label="Season" @bind-Value="Season">
+                @foreach (var season in ApiService.Shared.SeasonList)
+                {
+                    <MudSelectItem Value="season">
+                        @season.SeasonName
+                    </MudSelectItem>
+                }
+            </MudSelect>
+            <MudSwitch Label="Apply to whole season"
+                       @bind-Value="selectWholeSeason"
+                       Color="Color.Primary" />
+
+            @* Result/Team table *@
+            <MudTable Items="memberTeamResults" Bordered="true" Dense="true">
+                <HeaderContent>
+                    <MudTh></MudTh>
+                    <MudTh>Race</MudTh>
+                    <MudTh>Team</MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate Context="Row">
+                    <MudTd>
+                        <MudCheckBox Value="@(Row.Selected || selectWholeSeason)"
+                                     ValueChanged="@((bool value) => Row.Selected = value)"
+                                     Disabled="selectWholeSeason" />
+                    </MudTd>
+                    <MudTd>
+                        <MudStack Spacing="0">
+                            <span>@Row.RaceNr. - @Row.Date.ToShortDateFormatted()</span>
+                            <span>@Row.TrackName</span>
+                        </MudStack>
+                    </MudTd>
+                    <MudTd Style="@($"{(Row.Team != null ? $"color: {Row.Team.TeamColor}" : "")}")">@Row.Team?.Name</MudTd>
+                    <MudTd Style="width: 4em">
+                        @switch (Row.State)
+                        {
+                            case ChangeTeamState.ToChange:
+                                <MudIcon Icon="@Icons.Material.Outlined.Pending"/>
+                                break;
+                            case ChangeTeamState.Changing:
+                                <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
+                                break;
+                            case ChangeTeamState.Changed:
+                                <MudIcon Icon="@Icons.Material.Outlined.CheckCircle" Color="Color.Success" />
+                                break;
+                            default:
+                                break;
+                        }
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" OnClick="@(() => ModalInstance.Close())">Close</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit" Disabled="!CanSubmit">Apply</MudButton>
+    </DialogActions>
+</MudDialog>

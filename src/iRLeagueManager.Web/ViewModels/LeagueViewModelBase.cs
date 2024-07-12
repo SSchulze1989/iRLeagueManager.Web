@@ -113,6 +113,12 @@ public abstract class LeagueViewModelBase : ViewModelBase, IDisposable
         {
             disposedValue = true;
         }
+
+        if (!disposing)
+        {
+            Cts.Dispose();
+            Loading = false;
+        }
     }
 
     public void Dispose()

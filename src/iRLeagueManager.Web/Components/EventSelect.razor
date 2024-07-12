@@ -154,7 +154,7 @@
             return null;
         }
         index ??= EventList.EventList.IndexOf(@event);
-        return $"{(index + 1).Value.ToString("00")}. {@event.Date.GetValueOrDefault().ToString("dd.MM.yy")}: {@event.TrackName}" + (@event.ConfigName != "-" ? $" - {@event.ConfigName}" : "");
+        return $"{(index + 1).Value.ToString("00")}. {@event.Date.GetValueOrDefault().ToShortDateFormatted()}: {@event.TrackName}" + (@event.ConfigName != "-" ? $" - {@event.ConfigName}" : "");
     }
 
     public void Dispose()

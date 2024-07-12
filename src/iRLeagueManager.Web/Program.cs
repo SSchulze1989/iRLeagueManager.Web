@@ -30,14 +30,13 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddMvvm();
 builder.Services.AddLeagueApiService();
 
-builder.Services.AddScoped(configure =>
-{
-    var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-    jsonOptions.Converters.Add(new JsonStringEnumConverter());
-    jsonOptions.Converters.Add(new JsonTimeSpanConverter());
-    jsonOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-    return jsonOptions;
-});
+//builder.Services.AddScoped(configure =>
+//{
+//    var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+//    jsonOptions.Converters.Add(new JsonStringEnumConverter());
+//    jsonOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+//    return jsonOptions;
+//});
 
 builder.Services.AddLeagueApiClient(config => config
     .UseBaseAddress(builder.Configuration["APIServer"] ?? string.Empty)

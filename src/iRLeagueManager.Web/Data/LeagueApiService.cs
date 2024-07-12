@@ -10,18 +10,16 @@ public sealed class LeagueApiService
 {
     //private readonly ILogger<LeagueApiService> logger;
 
-    public LeagueApiService(ILeagueApiClient apiClient, SharedStateService sharedState, ClientLocalTimeProvider localTimeProvider, JsonSerializerOptions jsonOptions)
+    public LeagueApiService(ILeagueApiClient apiClient, SharedStateService sharedState, ClientLocalTimeProvider localTimeProvider)
     {
         //this.logger = logger;
         Client = apiClient;
         Shared = sharedState;
-        JsonOptions = jsonOptions;
         ClientTimeProvider= localTimeProvider;
     }
 
     public ILeagueApiClient Client { get; }
     public SharedStateService Shared { get; }
-    public JsonSerializerOptions JsonOptions { get; }
     public ClientLocalTimeProvider ClientTimeProvider { get; }
     public ILeagueByNameEndpoint? CurrentLeague { get; private set; }
     public ISeasonByIdEndpoint? CurrentSeason { get; private set; }

@@ -117,6 +117,7 @@
                     <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true" Size="Size.Small">
                         <MudMenuItem OnClick="() => AddBonusPentalyClick(Row)">Add Bonus/Penalty</MudMenuItem>
                         <MudMenuItem OnClick="() => ShowBonusesPenaltiesClick(Row)">Show Bonuses/Penalties</MudMenuItem>
+                        <MudMenuItem OnClick="() => ChangeTeamClick(Row)">Change Team</MudMenuItem>
                     </MudMenu>
                 </td>
             }
@@ -127,6 +128,8 @@
 @code {
     [CascadingParameter]
     private EventListViewModel EventList { get; set; } = default!;
+    [CascadingParameter]
+    private ResultsPageViewModel? ResultsPageVm { get; set; }
     [Parameter, EditorRequired]
     public SessionResultViewModel Result { get; set; } = default!;
     [Parameter]
@@ -143,7 +146,7 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        BlazorParameterNullException.ThrowIfNull(this, EventList);
+        BlazorParameterNullException.ThrowIfNull(this, EventList, cascading: true);
         BlazorParameterNullException.ThrowIfNull(this, Result);
         isTeamResult = Result.ResultRows.Any(x => x.MemberId == null);
         showDisqualification = Result.ResultRows.Any(x => x.Status == RaceStatus.Disqualified);
@@ -219,5 +222,30 @@
                 CloseButton = true,
             };
         await DialogService.Show<ShowPenaltiesDialog>("Bonuses/Penalties", parameters, options).Result;
+    }
+
+    private async Task ChangeTeamClick(ResultRowModel? row)
+    {
+        if (row is null)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<ChangeTeamsDialog>()
+        {
+            { x => x.Member, new() { FirstName = row.Firstname, LastName = row.Lastname, MemberId = row.MemberId.GetValueOrDefault() }},
+        };
+
+        await DialogService.Show<ChangeTeamsDialog>("Change Team", parameters).Result;
+        await Refresh();
+    }
+
+    private async Task Refresh()
+    {
+        if (ResultsPageVm?.SelectedEvent is null)
+        {
+            return;
+        }
+        await ResultsPageVm.LoadFromEventAsync(ResultsPageVm.SelectedEvent.EventId);
     }
 }

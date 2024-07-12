@@ -4,6 +4,7 @@ using iRLeagueManager.Web.Extensions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.JSInterop;
+using MudBlazor;
 using MvvmBlazor.Components;
 using System.Net;
 using System.Threading;
@@ -27,6 +28,20 @@ public class UtilityComponentBase : MvvmComponentBase
 
     private IDisposable? locationChangingHandler;
 
+    private bool loading;
+    public bool Loading
+    {
+        get => loading;
+        protected set
+        {
+            if (loading != value)
+            {
+                loading = value;
+                Shared.LoadingCount += loading ? 1 : -1;
+            }
+        }
+    }
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -48,6 +63,7 @@ public class UtilityComponentBase : MvvmComponentBase
             cancellationTokenSource.Dispose();
             Shared.StateChanged -= SharedStateChanged;
             NavigationManager.LocationChanged -= OnLocationChanged;
+            Loading = false;
         }
 
         base.Dispose(disposing);
@@ -161,4 +177,13 @@ public class UtilityComponentBase : MvvmComponentBase
         }
         return WebUtility.UrlEncode(returnUrl);
     }
+
+    protected static StatusResult LeagueNullResult() =>
+        StatusResult.FailedResult("League Null", $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentLeague)} was null", []);
+
+    protected static StatusResult SeasonNullResult() =>
+        StatusResult.FailedResult("Season Null", $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentSeason)} was null", []);
+
+    protected static StatusResult<T> LeagueNullResult<T>(T? content = default) =>
+        StatusResult<T>.FailedResult("League Null", content, $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentSeason)}", []);
 }

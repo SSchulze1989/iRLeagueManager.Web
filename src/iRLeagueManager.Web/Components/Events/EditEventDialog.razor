@@ -5,10 +5,9 @@
 @using iRLeagueApiCore.Common.Models.Tracks
 @using iRLeagueManager.Web.ViewModels
 @inherits EditDialogBase<EventViewModel, EventModel>
-@inject JsonSerializerOptions jsonOptions
 @inject TrackListService trackListService
 
-<EditForm Model=Vm OnValidSubmit=Submit>
+<EditForm Model=Vm>
     <StatusResultValidator @ref=ResultValidator TrimPrefix="Event." />
     <MudDialog>
         <DialogContent>
@@ -106,7 +105,7 @@
         </DialogContent>
         <DialogActions>
             <MudButton OnClick="Cancel" Color="Color.Secondary">Cancel</MudButton>
-            <ProgressButton ButtonType="ButtonType.Submit" Color="Color.Primary" Loading="Loading">Save</ProgressButton>
+            <ProgressButton OnClick="Submit" Color="Color.Primary" Loading="Loading">Save</ProgressButton>
         </DialogActions>
     </MudDialog>
 </EditForm>

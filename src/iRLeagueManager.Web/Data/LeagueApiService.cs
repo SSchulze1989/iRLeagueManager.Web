@@ -8,11 +8,8 @@ namespace iRLeagueManager.Web.Data;
 
 public sealed class LeagueApiService
 {
-    //private readonly ILogger<LeagueApiService> logger;
-
     public LeagueApiService(ILeagueApiClient apiClient, SharedStateService sharedState, ClientLocalTimeProvider localTimeProvider)
     {
-        //this.logger = logger;
         Client = apiClient;
         Shared = sharedState;
         ClientTimeProvider= localTimeProvider;

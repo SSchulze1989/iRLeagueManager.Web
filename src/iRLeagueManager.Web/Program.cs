@@ -1,13 +1,10 @@
 using Blazored.LocalStorage;
-using iRLeagueApiCore.Common.Converters;
 using iRLeagueManager.Web;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Shared;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.HttpOverrides;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using MudBlazor.Services;
@@ -29,14 +26,6 @@ builder.Services.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName,
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddMvvm();
 builder.Services.AddLeagueApiService();
-
-//builder.Services.AddScoped(configure =>
-//{
-//    var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-//    jsonOptions.Converters.Add(new JsonStringEnumConverter());
-//    jsonOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-//    return jsonOptions;
-//});
 
 builder.Services.AddLeagueApiClient(config => config
     .UseBaseAddress(builder.Configuration["APIServer"] ?? string.Empty)

@@ -7,7 +7,7 @@
 @inherits EditDialogBase<ReviewViewModel, ReviewModel>
 @inject LeagueApiService ApiService
 
-<EditForm Model=Vm OnValidSubmit=Submit>
+<EditForm Model=Vm>
     <MudDialog>
         <DialogContent>
             <MudStack Spacing="2">
@@ -84,7 +84,7 @@
         </DialogContent>
         <DialogActions>
             <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
-            <ProgressButton Color="Color.Primary" ButtonType="ButtonType.Submit" Loading="Vm.Loading">Save</ProgressButton>
+            <ProgressButton Color="Color.Primary" OnClick="Submit" Loading="Vm.Loading">Save</ProgressButton>
         </DialogActions>
     </MudDialog>
 </EditForm>

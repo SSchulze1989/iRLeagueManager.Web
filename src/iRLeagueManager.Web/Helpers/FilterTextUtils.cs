@@ -10,8 +10,8 @@ internal static class FilterTextUtils
         IEnumerable<MemberModel>? members = default,
         IEnumerable<TeamModel>? teams = default)
     {
-        members ??= Array.Empty<MemberModel>();
-        teams ??= Array.Empty<TeamModel>();
+        members ??= [];
+        teams ??= [];
         return condition.FilterType switch
         {
             FilterType.Member => string.Join(", ", condition.FilterValues.Select(x => GetMemberName(x, members))),
@@ -74,7 +74,9 @@ internal static class FilterTextUtils
             ComparatorType.IsBigger => ">",
             ComparatorType.NotEqual => "!=",
             ComparatorType.InList => "in",
-            ComparatorType.ForEach => "%",
+            ComparatorType.ForEach => "each",
+            ComparatorType.Min => "min",
+            ComparatorType.Max => "max",
             _ => "",
         };
     }

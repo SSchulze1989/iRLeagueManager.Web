@@ -66,40 +66,43 @@
                             }
                         </MudSelect>
 
-                        @if (propertyType is null)
+                        @if (Condition.DisplayValueField)
                         {
-                            <MudField Label="@valueLabel" Disabled="true" Variant="Variant.Outlined" />
-                        }
-                        else if (Condition.Comparator == ComparatorType.InList)
-                        {
-                            <MultiSelectAutoComplete @bind-Values="Condition.FilterValues"
-                                                     Label="@valueLabel"
-                                                     DebounceInterval="50"
-                                                     SearchFunc="@(async (value) => new[] {value})"
-                                                     ToStringFunc="@(value => value)"
-                                                     Variant="Variant.Outlined" />
-                        }
-                        else if (propertyType == typeof(RaceStatus))
-                        {
-                            <MudSelect Label="@valueLabel" @bind-Value="Condition.Value" Variant="Variant.Outlined">
-                                @foreach (var status in Enum.GetValues(typeof(RaceStatus)))
-                                {
-                                    <MudSelectItem Value="@(((int)status).ToString())">@status.ToString()</MudSelectItem>
-                                }
-                            </MudSelect>
-                        }
-                        else if (propertyType == typeof(string)
-                        || propertyType == typeof(double)
-                        || propertyType == typeof(double?)
-                        || propertyType == typeof(int)
-                        || propertyType == typeof(int?))
-                        {
-                            var isNumeric = propertyType == typeof(double) || propertyType == typeof(double?) || propertyType == typeof(int) || propertyType == typeof(int?);
-                            <MudTextField Label="@valueLabel" @bind-Value="Condition.Value" InputType="@(isNumeric ? InputType.Number : InputType.Text)" Variant="Variant.Outlined" />
-                        }
-                        else
-                        {
-                            <MudField Label="@valueLabel" Disabled="true" Variant="Variant.Outlined">Not supported</MudField>
+                            @if (propertyType is null)
+                            {
+                                <MudField Label="@valueLabel" Disabled="true" Variant="Variant.Outlined" />
+                            }
+                            else if (Condition.Comparator == ComparatorType.InList)
+                            {
+                                <MultiSelectAutoComplete @bind-Values="Condition.FilterValues"
+                                                         Label="@valueLabel"
+                                                         DebounceInterval="50"
+                                                         SearchFunc="@(async (value) => new[] {value})"
+                                                         ToStringFunc="@(value => value)"
+                                                         Variant="Variant.Outlined" />
+                            }
+                            else if (propertyType == typeof(RaceStatus))
+                            {
+                                <MudSelect Label="@valueLabel" @bind-Value="Condition.Value" Variant="Variant.Outlined">
+                                    @foreach (var status in Enum.GetValues(typeof(RaceStatus)))
+                                    {
+                                        <MudSelectItem Value="@(((int)status).ToString())">@status.ToString()</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            }
+                            else if (propertyType == typeof(string)
+                            || propertyType == typeof(double)
+                            || propertyType == typeof(double?)
+                            || propertyType == typeof(int)
+                            || propertyType == typeof(int?))
+                            {
+                                var isNumeric = propertyType == typeof(double) || propertyType == typeof(double?) || propertyType == typeof(int) || propertyType == typeof(int?);
+                                <MudTextField Label="@valueLabel" @bind-Value="Condition.Value" InputType="@(isNumeric ? InputType.Number : InputType.Text)" Variant="Variant.Outlined" />
+                            }
+                            else
+                            {
+                                <MudField Label="@valueLabel" Disabled="true" Variant="Variant.Outlined">Not supported</MudField>
+                            }
                         }
                         break;
                 }

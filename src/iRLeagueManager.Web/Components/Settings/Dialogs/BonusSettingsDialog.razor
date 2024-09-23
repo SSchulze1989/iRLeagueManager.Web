@@ -36,6 +36,12 @@
                                         <MudNumericField @bind-Value="bonus.Position" Label="Position" />
                                     </MudItem>
                                 }
+                                @if (bonus.Option.Type == BonusPointType.Custom)
+                                {
+                                    <MudItem xs="12">
+                                        <MudTextField Label="Name" @bind-Value="bonus.Name" Placeholder="@bonus.Option.Description" />
+                                    </MudItem>
+                                }
                                 <MudItem xs="@(bonus.Option.HasPosition ? 6 : 12)">
                                     <MudNumericField @bind-Value="bonus.Points" Label="Points" />
                                 </MudItem>
@@ -47,11 +53,18 @@
                                               InnerPadding="false"
                                               Class="mt-2 mb-1">
                                         <MudElement HtmlTag="div" Class="ps-1">
-                                            @foreach (var condition in bonus.Conditions)
+                                            @foreach (var (condition, conditionIndex) in bonus.Conditions.WithIndex())
                                             {
-                                                <MudElement HtmlTag="div" Class="d-flex">
+                                                <MudElement id="@($"{bonus.Option.Type}_{bonus.Name}_{condition.ColumnPropertyName}")" HtmlTag="div" Class="d-flex relative">
                                                     <FilterInput Condition="condition" ColumnNames="FilterColumnsAvailable" />
                                                     <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="@(() => DeleteCondition(bonus, condition))" />
+                                                    @if (conditionIndex + 1 < bonus.Conditions.Count)
+                                                    {
+                                                        <MudIconButton Icon="@Icons.Material.Filled.SwapVert"
+                                                                       Size="Size.Small"
+                                                                       Style="position: absolute; bottom: -25%; right: -1em"
+                                                                       OnClick="@(() => SwapConditions(bonus, condition))" />
+                                                    }
                                                 </MudElement>
                                             }
                                             <MudElement HtmlTag="div" Class="d-flex">
@@ -107,6 +120,8 @@
         nameof(ResultRowModel.Interval),
         nameof(ResultRowModel.LeadLaps),
         nameof(ResultRowModel.StartPosition),
+        nameof(ResultRowModel.PenaltyPoints),
+        "Count",
     };
 
     protected override void OnParametersSet()
@@ -138,6 +153,18 @@
                 ColumnPropertyName = condition.ColumnPropertyName,
             });
         condition.ColumnPropertyName = "";
+    }
+
+    private void SwapConditions(BonusPointConfig config, FilterConditionModel condition)
+    {
+        var index = config.Conditions.IndexOf(condition);
+        if (config.Conditions.Count < index + 1)
+        {
+            return;
+        }
+        var tmp = config.Conditions[index + 1];
+        config.Conditions[index + 1] = config.Conditions[index];
+        config.Conditions[index] = tmp;
     }
 
     private void DeleteCondition(BonusPointConfig config, FilterConditionModel condition)

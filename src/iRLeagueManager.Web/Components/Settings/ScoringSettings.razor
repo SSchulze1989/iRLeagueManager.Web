@@ -137,7 +137,8 @@
 
     private string GetBonusPointText(BonusPointConfig bonus)
     {
-        return $"{bonus.Option.Description}{(bonus.Option.HasPosition ? " " + GetPositionString(bonus.Position) : "")} => {bonus.Points}";
+        var name = string.IsNullOrEmpty(bonus.Name) ? bonus.Option.Description : bonus.Name;
+        return $"{name}{(bonus.Option.HasPosition ? " " + GetPositionString(bonus.Position) : "")} => {bonus.Points}";
     }
 
     private string GetPenaltyText(AutoPenaltyConfiguration penalty)

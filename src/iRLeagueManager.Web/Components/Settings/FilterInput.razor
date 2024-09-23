@@ -18,7 +18,11 @@
     </MudItem>
     @{
         var valueLabel = ConditionVm.Comparator == ComparatorType.InList ? "Values" : "Value";
-        var propertyType = GetColumnPropertyType(Condition.ColumnPropertyName);
+        var propertyType = Condition.FilterType switch
+        {
+            FilterType.Count => typeof(int),
+            _ => GetColumnPropertyType(Condition.ColumnPropertyName),
+        };
     }
 
     <MudItem xs="2">
@@ -32,49 +36,52 @@
         </MudSelect>
     </MudItem>
 
-    <MudItem xs="4">
-        @if (propertyType is null)
-        {
-            <MudField Label="@valueLabel"
-                      Disabled="true"
-                      Variant="Variant.Text" />
-        }
-        else if (Condition.Comparator == ComparatorType.InList)
-        {
-            @*TODO: Fill in Component for values selection from list*@
-        }
-        else if (propertyType == typeof(RaceStatus))
-        {
-            <MudSelect Label="@valueLabel"
-                       @bind-Value="ConditionVm.Value"
-                       Variant="Variant.Text"
-                       Disabled="@(string.IsNullOrEmpty(Condition.ColumnPropertyName))">
-                @foreach (var status in Enum.GetValues(typeof(RaceStatus)))
-                {
-                    <MudSelectItem Value="@(((int)status).ToString())">@status.ToString()</MudSelectItem>
-                }
-            </MudSelect>
-        }
-        else if (propertyType == typeof(string)
-        || propertyType == typeof(double)
-        || propertyType == typeof(double?)
-        || propertyType == typeof(int)
-        || propertyType == typeof(int?))
-        {
-            var isNumeric = propertyType == typeof(double) || propertyType == typeof(double?) || propertyType == typeof(int) || propertyType == typeof(int?);
-            <MudTextField Label="@valueLabel"
-                          @bind-Value="ConditionVm.Value"
-                          InputType="@(isNumeric ? InputType.Number : InputType.Text)"
-                          Variant="Variant.Text"
-                          Disabled="@(string.IsNullOrEmpty(Condition.ColumnPropertyName))" />
-        }
-        else
-        {
-            <MudField Label="@valueLabel"
-                      Disabled="true"
-                      Variant="Variant.Text">Not supported</MudField>
-        }
-    </MudItem>
+    @if (ConditionVm.DisplayValueField)
+    {
+        <MudItem xs="4">
+            @if (propertyType is null)
+            {
+                <MudField Label="@valueLabel"
+                          Disabled="true"
+                          Variant="Variant.Text" />
+            }
+            else if (Condition.Comparator == ComparatorType.InList)
+            {
+                @*TODO: Fill in Component for values selection from list*@
+            }
+            else if (propertyType == typeof(RaceStatus))
+            {
+                <MudSelect Label="@valueLabel"
+                           @bind-Value="ConditionVm.Value"
+                           Variant="Variant.Text"
+                           Disabled="@(string.IsNullOrEmpty(Condition.ColumnPropertyName))">
+                    @foreach (var status in Enum.GetValues(typeof(RaceStatus)))
+                    {
+                        <MudSelectItem Value="@(((int)status).ToString())">@status.ToString()</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+            else if (propertyType == typeof(string)
+            || propertyType == typeof(double)
+            || propertyType == typeof(double?)
+            || propertyType == typeof(int)
+            || propertyType == typeof(int?))
+            {
+                var isNumeric = propertyType == typeof(double) || propertyType == typeof(double?) || propertyType == typeof(int) || propertyType == typeof(int?);
+                <MudTextField Label="@valueLabel"
+                              @bind-Value="ConditionVm.Value"
+                              InputType="@(isNumeric ? InputType.Number : InputType.Text)"
+                              Variant="Variant.Text"
+                              Disabled="@(string.IsNullOrEmpty(Condition.ColumnPropertyName))" />
+            }
+            else
+            {
+                <MudField Label="@valueLabel"
+                          Disabled="true"
+                          Variant="Variant.Text">Not supported</MudField>
+            }
+        </MudItem>
+    }
 </MudGrid>
 
 @code {
@@ -86,6 +93,11 @@
     {
         base.OnInitialized();
         BlazorParameterNullException.ThrowIfNull(this, Condition);
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
         ConditionVm.SetModel(Condition);
     }
 

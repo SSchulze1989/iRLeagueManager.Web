@@ -38,6 +38,7 @@ public class FilterConditionViewModel : LeagueViewModelBase<FilterConditionViewM
         set => SetP(model.FilterValues.FirstOrDefault() ?? string.Empty, value => model.FilterValues = new[] { value }.ToList(), ConvertToValue(value, ColumnPropertyName));
     }
     public MatchedValueAction Action { get => model.Action; set => SetP(model.Action, value => model.Action = value, value); }
+    public bool DisplayValueField => (Comparator is not ComparatorType.Min and not ComparatorType.Max);
 
     protected override void SetModel(FilterConditionModel model)
     {
@@ -51,6 +52,7 @@ public class FilterConditionViewModel : LeagueViewModelBase<FilterConditionViewM
         {
             "Member" => FilterType.Member,
             "Team" => FilterType.Team,
+            "Count" => FilterType.Count,
             _ => FilterType.ColumnProperty,
         };
     }

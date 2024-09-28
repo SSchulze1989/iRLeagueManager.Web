@@ -102,8 +102,8 @@
             .NotNull()
             .Select(x => x.EventId)
             .Distinct();
-        var events = eventIds
-            .Select(eventId => EventList.EventList.FirstOrDefault(e => e.EventId == eventId))
+        var events = EventList.EventList
+            .Where(x => eventIds.Contains(x.EventId))
             .NotNull()
             .Select(x => x.GetModel())
             .ToList();

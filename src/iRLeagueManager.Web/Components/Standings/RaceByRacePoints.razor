@@ -92,7 +92,14 @@
                     @(row.Position).
                 </td>
                 <td rowspan="2" class="py-0">
-                    @row.Firstname @row.Lastname
+                    @if (Standing.IsTeamStanding)
+                    {
+                        <span style="@($"color: {row.TeamColor}")">@row.TeamName</span>
+                    }
+                    else
+                    {
+                        @row.Firstname @row.Lastname
+                    }
                 </td>
                 @foreach (var race in columns)
                 {
@@ -121,13 +128,15 @@
 
 @code {
     [Parameter] public IEnumerable<EventModel> Events { get; set; } = default!;
-    [Parameter] public IEnumerable<StandingRowModel> StandingRows { get; set; } = default!;
+    [Parameter] public StandingsModel Standing { get; set; } = default!;
     [Parameter] public int? RaceColumns { get; set; }
+
+    private IEnumerable<StandingRowModel> StandingRows => Standing.StandingRows;
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
         BlazorParameterNullException.ThrowIfNull(this, Events);
-        BlazorParameterNullException.ThrowIfNull(this, StandingRows);
+        BlazorParameterNullException.ThrowIfNull(this, Standing);
     }
 }

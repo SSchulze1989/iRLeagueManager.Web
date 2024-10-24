@@ -16,7 +16,13 @@
     <MudStack Spacing="2">
         <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
             <HeaderText>
-                <MudText Typo="Typo.h5">Schedule</MudText>
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Style="margin-left: -0.5em">
+                    <MudMenu Icon="@Icons.Material.Outlined.Link" AnchorOrigin="Origin.BottomLeft">
+                        <MudMenuItem OnClick="@(() => CopyToClipboard(GetCurrentScheduleLink()))">Current Schedule</MudMenuItem>
+                        <MudMenuItem OnClick="@(() => CopyToClipboard(GetActiveScheduleLink()))">Latest Season Schedule</MudMenuItem>
+                    </MudMenu>
+                    <MudText Typo="Typo.h5">Schedule</MudText>
+                </MudStack>
             </HeaderText>
         </LoadingHeader>
 
@@ -48,5 +54,20 @@
     private async Task LoadSchedules()
     {
         await vm.Load();
+    }
+
+    private string GetActiveScheduleLink()
+    {
+        var url = $"{NavigationManager.BaseUri}{LeagueName}/Schedules";
+        return url;
+    }
+
+    private string GetCurrentScheduleLink()
+    {
+        if (SeasonId == null)
+        {
+            return GetActiveScheduleLink();
+        }
+        return $"{NavigationManager.BaseUri}{LeagueName}/Schedules/Seasons/{SeasonId}";
     }
 }

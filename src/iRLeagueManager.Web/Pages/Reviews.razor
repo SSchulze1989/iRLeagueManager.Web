@@ -18,7 +18,17 @@
 <MudContainer MaxWidth="MaxWidth.Large">
     <LoadingHeader Loading=@Bind(ReviewsVm, x => x.Loading)>
         <HeaderText>
-            <MudText Typo="Typo.h5">Reviews</MudText>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Style="margin-left: -0.5em">
+                <MudMenu Icon="@Icons.Material.Outlined.Link" AnchorOrigin="Origin.BottomLeft">
+                    <MudMenuItem OnClick="@(() => CopyToClipboard(GetCurrentReviewLink()))">Current Race Reviews</MudMenuItem>
+                    @if (Shared.SeasonName is not null)
+                    {
+                        <MudMenuItem OnClick="@(() => CopyToClipboard(GetCurrentSeasonLatestReviewLink()))">Latest Race Reviews (@Shared.SeasonName)</MudMenuItem>
+                    }
+                    <MudMenuItem OnClick="@(() => CopyToClipboard(GetLatestStandingsLink()))">Latest Race Reviews (All seasons)</MudMenuItem>
+                </MudMenu>
+                <MudText Typo="Typo.h5">Reviews</MudText>
+            </MudStack>
         </HeaderText>
         <HeaderActions>
             <EventSelect />
@@ -368,5 +378,28 @@
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
         base.Dispose(disposing);
+    }
+
+    private string GetLatestStandingsLink()
+    {
+        return $"{NavigationManager.BaseUri}{LeagueName}/Reviews";
+    }
+
+    private string GetCurrentSeasonLatestReviewLink()
+    {
+        if (Shared.SeasonName == null)
+        {
+            return GetLatestStandingsLink();
+        }
+        return $"{NavigationManager.BaseUri}{LeagueName}/Reviews/Seasons/{Shared.SeasonId}";
+    }
+
+    private string GetCurrentReviewLink()
+    {
+        if (Event is null)
+        {
+            return GetCurrentSeasonLatestReviewLink();    
+        }
+        return $"{NavigationManager}{LeagueName}/Reviews/Events/{Event.EventId}";
     }
 }

@@ -22,7 +22,17 @@
     <MudContainer MaxWidth="MaxWidth.ExtraLarge">
         <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
             <HeaderText>
-                <MudText Typo="Typo.h5">Results</MudText>
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Style="margin-left: -0.5em">
+                    <MudMenu Icon="@Icons.Material.Outlined.Link" AnchorOrigin="Origin.BottomLeft">
+                        <MudMenuItem OnClick="@(() => CopyToClipboard(GetCurrentResultLink()))">Current Result</MudMenuItem>
+                        @if (Shared.SeasonName is not null)
+                        {
+                            <MudMenuItem OnClick="@(() => CopyToClipboard(GetCurrentSeasonLatestResultLink()))">Latest Result (@Shared.SeasonName)</MudMenuItem>
+                        }
+                        <MudMenuItem OnClick="@(() => CopyToClipboard(GetLatestResultLink()))">Latest Result (All seasons)</MudMenuItem>
+                    </MudMenu>
+                    <MudText Typo="Typo.h5">Results</MudText>
+                </MudStack>
             </HeaderText>
             <HeaderActions>
                 <EventSelect />
@@ -241,5 +251,29 @@
         {
             await vm.DeleteEventResults();
         }
+    }
+
+
+    private string GetLatestResultLink()
+    {
+        return $"{NavigationManager.BaseUri}{LeagueName}/Results";
+    }
+
+    private string GetCurrentSeasonLatestResultLink()
+    {
+        if (Shared.SeasonName == null)
+        {
+            return GetLatestResultLink();
+        }
+        return $"{NavigationManager.BaseUri}{LeagueName}/Results/Seasons/{Shared.SeasonId}";
+    }
+
+    private string GetCurrentResultLink()
+    {
+        if (Event is null)
+        {
+            return GetCurrentSeasonLatestResultLink();
+        }
+        return $"{NavigationManager.BaseUri}{LeagueName}/Results/Events/{Event.EventId}";
     }
 }

@@ -172,4 +172,9 @@ public abstract partial class LeagueComponentBase : UtilityComponentBase
     {
         return GetRoleString(Shared.LeagueName, roleNames);
     }
+
+    protected async void CopyToClipboard(string text)
+    {
+        await JsRuntime.InvokeVoidAsync("clipboardCopy.copyText", text);
+    }
 }

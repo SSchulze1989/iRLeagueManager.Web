@@ -9,7 +9,10 @@
                     TDialog="SortOptionsDialog"
                     Value="Scoring.PointRule.PointsSortOptions.ToList()"
                     ValueChanged="@((IList<SortOptions> value) => Scoring.PointRule.PointsSortOptions = value)"
-                    Text="@GetSortingHelperText(Scoring.PointRule.PointsSortOptions)" />
+                    Text="@GetSortingHelperText(Scoring.PointRule.PointsSortOptions)"
+                    Parameters="@(new() {
+                        {x => x.AvailableOptions, [SortOptions.FinPosAsc, SortOptions.IntvlAsc, SortOptions.PenPtsAsc, SortOptions.FastLapAsc, SortOptions.QualLapAsc]}
+                    })" />
 
 <SettingsPromptItem @bind-Value="PointRuleModel"
                     T="PointRuleModel"

@@ -35,13 +35,14 @@
                              HelperText="@(categoriesExpanded ? "Collapse" : "Expand")"
                              InitiallyExpanded="false"
                              Class="me-4 pe-4">
-                <MudTable Items="Bind(Reviews, x => x.VoteCategories)"
+                <MudTable Items="Reviews.VoteCategories"
                           Breakpoint="Breakpoint.None"
                           Hover="true"
                           OnRowClick="@((TableRowClickEventArgs<VoteCategoryViewModel> e) => OnVoteCategoryClick(e.Item))">
                     <HeaderContent>
                         <MudTh Class="ps-4">Text</MudTh>
                         <MudTh>Penalty/Bonus</MudTh>
+                        <MudTh></MudTh>
                         <MudTh></MudTh>
                     </HeaderContent>
                     <RowTemplate Context=category>
@@ -50,6 +51,14 @@
                         </MudTd>
                         <MudTd>
                             @(category.DefaultPenalty > 0 ? "+" : "")@category.DefaultPenalty
+                        </MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward"
+                                           Size="Size.Small" Disabled="category.Index <= 0"
+                                           OnClick="@(() => MoveCategoryUp(category))" />
+                            <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward"
+                                           Size="Size.Small" Disabled="category.Index >= Reviews.VoteCategories.Count - 1"
+                                           OnClick="@(() => MoveCategoryDown(category))" />
                         </MudTd>
                         <MudTd>
                             <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="@(() => OnDeleteVoteCategoryClick(category))" Size="Size.Small" />
@@ -186,5 +195,31 @@
             Reviews.HasChanged -= OnVmChanged;
         }
         base.Dispose(disposing);
+    }
+
+    private async Task MoveCategoryUp(VoteCategoryViewModel category)
+    {
+        var index = Reviews.VoteCategories.IndexOf(category);
+        if (index <= 0 || Reviews.VoteCategories.Count <= index)
+        {
+            return;
+        }
+        var tmp = Reviews.VoteCategories[index];
+        Reviews.VoteCategories[index] = Reviews.VoteCategories[index - 1];
+        Reviews.VoteCategories[index - 1] = tmp;
+        await Reviews.UpdateVoteCategoryOrder(Reviews.VoteCategories, CancellationToken);
+    }
+
+    private async Task MoveCategoryDown(VoteCategoryViewModel category)
+    {
+        var index = Reviews.VoteCategories.IndexOf(category);
+        if (index < 0 || Reviews.VoteCategories.Count <= index + 1)
+        {
+            return;
+        }
+        var tmp = Reviews.VoteCategories[index];
+        Reviews.VoteCategories[index] = Reviews.VoteCategories[index + 1];
+        Reviews.VoteCategories[index + 1] = tmp;
+        await Reviews.UpdateVoteCategoryOrder(Reviews.VoteCategories, CancellationToken);
     }
 }

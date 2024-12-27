@@ -70,17 +70,14 @@
                                 <MudText Style="@($"color: {GetPenaltyColor(penalty)}")">
                                     @switch (penalty)
                                     {
-                                        case { Type: PenaltyType.Points, Points: >= 0 }:
-                                            @:@(-penalty.Points) pt@(penalty.Points != 1 ? "s" : "")
-                                            break;
-                                        case { Type: PenaltyType.Points, Points: < 0 }:
-                                            @:+@(-penalty.Points) pt@(penalty.Points != 1 ? "s" : "")
+                                        case { Type: PenaltyType.Points }:
+                                            @:@(penalty.Points < 0 ? "+" : "")@(-penalty.Points) pt@(penalty.Points != 1 ? "s" : "")
                                             break;
                                         case { Type: PenaltyType.Position }:
-                                            @:+ @penalty.Positions position@(penalty.Positions != 1 ? "s" : "")
+                                            @:@(penalty.Positions >= 0 ? "+" : "")@penalty.Positions position@(penalty.Positions != 1 ? "s" : "")
                                             break;
                                         case { Type: PenaltyType.Time }:
-                                            @:+ @penalty.Time
+                                            @:@(penalty.Time >= TimeSpan.Zero ? "+" : "")@penalty.Time
                                             break;
                                         case { Type: PenaltyType.Disqualification }:
                                             <MudStack Row="true" AlignItems="AlignItems.Center">

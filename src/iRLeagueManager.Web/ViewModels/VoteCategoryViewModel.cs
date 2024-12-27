@@ -1,4 +1,6 @@
-﻿using iRLeagueApiCore.Common.Models.Reviews;
+﻿using iRLeagueApiCore.Common.Enums;
+using iRLeagueApiCore.Common.Models;
+using iRLeagueApiCore.Common.Models.Reviews;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 
@@ -18,7 +20,12 @@ public sealed class VoteCategoryViewModel : LeagueViewModelBase<VoteCategoryView
 
     public long CatId => model.Id;
     public string Text { get => model.Text; set => SetP(model.Text, value => model.Text = value, value); }
-    public int DefaultPenalty { get => -model.DefaultPenalty; set => SetP(model.DefaultPenalty, value => model.DefaultPenalty = value, -value); }
+    public PenaltyModel DefaultPenalty { get => model.DefaultPenalty; set => SetP(model.DefaultPenalty, value => model.DefaultPenalty = value, value); }
+    public PenaltyType Type { get => DefaultPenalty.Type; set => SetP(DefaultPenalty.Type, value => DefaultPenalty.Type = value, value); }
+    public int Points { get => -DefaultPenalty.Points; set => SetP(DefaultPenalty.Points, value => DefaultPenalty.Points = value, -value); }
+    public int Positions { get => DefaultPenalty.Positions; set => SetP(DefaultPenalty.Positions, value => DefaultPenalty.Positions = value, value); }
+    public TimeSpan Time { get => DefaultPenalty.Time; set => SetP(DefaultPenalty.Time, value => DefaultPenalty.Time = value, value); }
+    public int TimeSeconds { get => (int)DefaultPenalty.Time.TotalSeconds; set => SetP(TimeSeconds, value => DefaultPenalty.Time = TimeSpan.FromSeconds(value), value); }
     public int Index { get => model.Index; set => SetP(model.Index, value => model.Index = value, value); }
 
     public async Task<StatusResult> SaveChangesAsync(CancellationToken cancellationToken = default)

@@ -1,4 +1,5 @@
 ﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models.Reviews
 @inherits EditDialogBase<VoteCategoryViewModel, VoteCategoryModel>
 
@@ -6,22 +7,30 @@
     <DialogContent>
         <EditForm Model="Vm" OnValidSubmit=Submit>
             <StatusResultValidator @ref=ResultValidator />
-            <MudGrid Spacing="2">
-                <MudItem xs="8">
-                    <MudTextField @bind-Value="Vm.Text"
-                                  Label="Name"
-                                  For="() => Vm.Text"
-                                  Variant="Variant.Outlined" />
-                </MudItem>
-                <MudItem xs="4">
-                    <MudTextField @bind-Value="Vm.DefaultPenalty"
-                                  Label="@GetPointLabel(Vm.DefaultPenalty)"
-                                  For="() => Vm.DefaultPenalty"
-                                  InputMode="InputMode.numeric"
-                                  InputType="InputType.Number"
-                                  Variant="Variant.Outlined" />
-                </MudItem>
-            </MudGrid>
+            <MudStack Spacing="2">
+                <MudTextField @bind-Value="Vm.Text"
+                                Label="Name"
+                                For="() => Vm.Text"
+                                Variant="Variant.Outlined" />
+                <MudSelect Label="Type" @bind-Value="Vm.Type" Variant="Variant.Outlined">
+                    @foreach (var penaltyType in Enum.GetValues<PenaltyType>())
+                    {
+                        <MudSelectItem Value="@penaltyType" />
+                    }
+                </MudSelect>
+                @switch (Vm.DefaultPenalty.Type)
+                {
+                    case PenaltyType.Points:
+                        <MudNumericField Label="Points" @bind-Value="Vm.Points" Variant="Variant.Outlined" />
+                        break;
+                    case PenaltyType.Position:
+                        <MudNumericField Label="Positions" @bind-Value="Vm.Positions" Variant="Variant.Outlined" />
+                        break;
+                    case PenaltyType.Time:
+                        <MudNumericField Label="Time" @bind-Value="Vm.TimeSeconds" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="seconds" />
+                        break;
+                }
+            </MudStack>
             <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
         </EditForm>
     </DialogContent>

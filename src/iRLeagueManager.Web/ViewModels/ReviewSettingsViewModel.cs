@@ -1,7 +1,6 @@
 ﻿using iRLeagueApiCore.Common.Models.Reviews;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace iRLeagueManager.Web.ViewModels;
 
@@ -10,11 +9,11 @@ public sealed class ReviewSettingsViewModel : LeagueViewModelBase<ReviewSettings
     public ReviewSettingsViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) : 
         base(loggerFactory, apiService)
     {
-        voteCategories = new();
+        voteCategories = [];
     }
 
-    private ObservableCollection<VoteCategoryViewModel> voteCategories;
-    public ObservableCollection<VoteCategoryViewModel> VoteCategories 
+    private IList<VoteCategoryViewModel> voteCategories;
+    public IList<VoteCategoryViewModel> VoteCategories 
     { 
         get => voteCategories;
         set
@@ -41,7 +40,7 @@ public sealed class ReviewSettingsViewModel : LeagueViewModelBase<ReviewSettings
 
     public async Task<StatusResult> LoadAsync(CancellationToken cancellationToken = default)
     {
-        if (ApiService.CurrentLeague is null)
+        if (CurrentLeague is null)
         {
             return LeagueNullResult();
         }
@@ -49,12 +48,12 @@ public sealed class ReviewSettingsViewModel : LeagueViewModelBase<ReviewSettings
         try
         {
             Loading = true;
-            var request = ApiService.CurrentLeague.VoteCategories()
+            var request = CurrentLeague.VoteCategories()
                 .Get(cancellationToken);
             var result = await request;
             if (result.Success && result.Content is not null)
             {
-                VoteCategories = new(result.Content.Select(x => new VoteCategoryViewModel(LoggerFactory, ApiService, x)));
+                VoteCategories = result.Content.Select(x => new VoteCategoryViewModel(LoggerFactory, ApiService, x)).ToList();
             }
             return result.ToStatusResult();
         }
@@ -64,9 +63,9 @@ public sealed class ReviewSettingsViewModel : LeagueViewModelBase<ReviewSettings
         }
     }
 
-    public async Task<StatusResult> AddVoteCategory(VoteCategoryModel voteCategory, CancellationToken cancellationToken = default)
+    public async Task<StatusResult> UpdateVoteCategoryOrder(IList<VoteCategoryViewModel> voteCategories, CancellationToken cancellationToken = default)
     {
-        if (ApiService.CurrentLeague is null)
+        if (CurrentLeague == null)
         {
             return LeagueNullResult();
         }
@@ -74,7 +73,48 @@ public sealed class ReviewSettingsViewModel : LeagueViewModelBase<ReviewSettings
         try
         {
             Loading = true;
-            var request = ApiService.CurrentLeague.VoteCategories()
+            bool hasIndexUpdated = false;
+            foreach (var (voteCategory, index) in voteCategories.WithIndex())
+            {
+                if (voteCategory.Index != index)
+                {
+                    voteCategory.Index = index;
+                    var request = CurrentLeague
+                        .VoteCategories()
+                        .WithId(voteCategory.CatId)
+                        .Put(voteCategory.GetModel(), cancellationToken);
+                    var result = await request;
+                    if (result.Success == false)
+                    {
+                        return result.ToStatusResult();
+                    }
+                    hasIndexUpdated = true;
+                }
+            }
+
+            if (hasIndexUpdated)
+            {
+                return await LoadAsync(cancellationToken);
+            }
+            return StatusResult.SuccessResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    public async Task<StatusResult> AddVoteCategory(VoteCategoryModel voteCategory, CancellationToken cancellationToken = default)
+    {
+        if (CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var request = CurrentLeague.VoteCategories()
                 .Post(voteCategory, cancellationToken);
             var result = await request;
             if (result.Success == false)
@@ -91,7 +131,7 @@ public sealed class ReviewSettingsViewModel : LeagueViewModelBase<ReviewSettings
 
     public async Task<StatusResult> DeleteVoteCategory(VoteCategoryModel voteCategory, CancellationToken cancellationToken = default)
     {
-        if (ApiService.CurrentLeague is null)
+        if (CurrentLeague is null)
         {
             return LeagueNullResult();
         }
@@ -99,7 +139,7 @@ public sealed class ReviewSettingsViewModel : LeagueViewModelBase<ReviewSettings
         try
         {
             Loading = true;
-            var request = ApiService.CurrentLeague.VoteCategories()
+            var request = CurrentLeague.VoteCategories()
                 .WithId(voteCategory.Id)
                 .Delete(cancellationToken);
             var result = await request;

@@ -50,7 +50,24 @@
                             @category.Text
                         </MudTd>
                         <MudTd>
-                            @(category.DefaultPenalty > 0 ? "+" : "")@category.DefaultPenalty
+                            @switch(category.Type)
+                            {
+                                case PenaltyType.Points:
+                                    @:@(category.Points >= 0 ? "+" : "")@(category.Points) pt@(category.Points != 1 ? "s" : "")
+                                    break;
+                                case PenaltyType.Position:
+                                    @:@(category.Positions >= 0 ? "+" : "")@category.Positions position@(category.Positions != 1 ? "s" : "")
+                                    break;
+                                case PenaltyType.Time:
+                                    @:@(category.Time >= TimeSpan.Zero ? "+" : "")@category.Time
+                                    break;
+                                case PenaltyType.Disqualification:
+                                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                                        <MudText>DSQ</MudText>
+                                        <MudIcon Icon="@Icons.Material.Filled.Flag" Style="color: black;" Size="Size.Small" />
+                                    </MudStack>
+                                    break;
+                            }
                         </MudTd>
                         <MudTd>
                             <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward"

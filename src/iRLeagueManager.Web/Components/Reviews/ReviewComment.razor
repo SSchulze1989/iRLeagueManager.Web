@@ -107,7 +107,7 @@
             {x => x.OnSubmit, async (comment, cancellation) => await comment.SaveChangesAsync(cancellation)},
         };
         var result = await DialogService.Show<EditCommentDialog>("Edit Comment", parameters).Result;
-        if (result.Canceled == false && result.Data is ReviewCommentModel comment)
+        if (result?.Canceled == false && result.Data is ReviewCommentModel comment)
         {
             Comment.SetModel(comment);
         }

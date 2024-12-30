@@ -147,7 +147,7 @@
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
         var result = await DialogService.Show<ConfirmDialog>("Delete Result Config", parameters).Result;
-        if (result.Canceled == false)
+        if (result is null || result.Canceled == false)
         {
             await vm.DeleteTeam(team.GetModel());
         }

@@ -141,7 +141,7 @@
             {x => x.OnSubmit, async (season, cancellation) => await season.SaveChangesAsync(cancellation)},
         };
         var result = await DialogService.Show<EditSeasonDialog>("Edit Season", parameters).Result;
-        if (result.Canceled == false && result.Data is SeasonModel seasonModel)
+        if (result?.Canceled == false && result.Data is SeasonModel seasonModel)
         {
             season.SetModel(seasonModel);
         }
@@ -155,7 +155,7 @@
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
         var result = await DialogService.Show<ConfirmDialog>("Delete Season", parameters).Result;
-        if (result.Canceled == false)
+        if (result?.Canceled == false)
         {
             await League.DeleteSeason(season.GetModel());
         }
@@ -176,7 +176,7 @@
             {x => x.CancelButtonText, "No, start with empty league"},
         };
         var result = await DialogService.Show<ConfirmDialog>("Select league template", parameters).Result;
-        if (result.Canceled == false)
+        if (result?.Canceled == false)
         {
             // forward to select template page
             NavigateTo($"/{LeagueName}/Settings/Templates", returnUrl: GetReturnUrl());

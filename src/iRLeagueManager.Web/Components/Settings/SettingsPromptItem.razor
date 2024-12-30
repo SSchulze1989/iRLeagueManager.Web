@@ -51,7 +51,7 @@
             }
         }
         var result = await DialogService.Show<TDialog>(Label, parameters).Result;
-        if (result.Canceled || result.Data is not T dialogValue)
+        if (result is null || result.Canceled || result.Data is not T dialogValue)
         {
             return;
         }

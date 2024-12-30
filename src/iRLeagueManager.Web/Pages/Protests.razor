@@ -226,7 +226,7 @@
             { x => x.ButtonTypes, ButtonTypes.YesNo },
         };
         var confirm = await DialogService.Show<ConfirmDialog>("Confirm Protest", parameters).Result;
-        if (confirm.Canceled)
+        if (confirm is null || confirm.Canceled)
         {
             return;
         }

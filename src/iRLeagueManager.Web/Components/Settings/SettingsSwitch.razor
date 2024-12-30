@@ -1,11 +1,11 @@
 ﻿@namespace iRLeagueManager.Web.Components
 @inherits SettingBase
 
-<MudListItem Icon="@Icon"
+<MudListItem T="object"
+             Icon="@Icon"
              IconSize="IconSize"
              IconColor="IconColor"
              OnClick="HandleClick">
-
     <MudElement HtmlTag="div" Class="d-flex flex-column align-start justify-center">
         <MudStack AlignItems="AlignItems.Center" Row="true" Spacing="6">
             <MudText>
@@ -18,7 +18,7 @@
                     @ChildContent
                 }
             </MudText>
-            <MudSwitch Checked="Checked" CheckedChanged="CheckedChanged" Color="Color" />
+            <MudSwitch Value="Checked" ValueChanged="CheckedChanged" Color="Color" />
         </MudStack>
         @if (displayHelperText)
         {

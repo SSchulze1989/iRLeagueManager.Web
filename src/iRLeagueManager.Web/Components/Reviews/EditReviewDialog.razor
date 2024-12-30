@@ -77,7 +77,7 @@
         BlazorParameterNullException.ThrowIfNull(this, EventCars);
     }
 
-    private async Task<IEnumerable<EventCarInfoModel>> SearchCars(string searchString)
+    private async Task<IEnumerable<EventCarInfoModel>> SearchCars(string searchString, CancellationToken cancellationToken)
     {
         var filteredCars = await Task.FromResult(EventCars.Cars
             .Where(x => InvolvedCars.Contains(x) == false));

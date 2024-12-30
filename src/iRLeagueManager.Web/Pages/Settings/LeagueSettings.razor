@@ -63,7 +63,7 @@
                                          HelperText="@(seasonsExpanded ? "Collapse" : "Expand")">
                             @foreach ((var season, var index) in Bind(League, x => x.Seasons).Select((x, i) => (x, i)))
                             {
-                                <MudListItem Class="py-0 pe-8" OnClick="@(() => SeasonClick(season))">
+                                <MudListItem T="string" Class="py-0 pe-8" OnClick="@(() => SeasonClick(season))">
                                     <MudElement HtmlTag="div" Class="d-flex align-center">
                                         <SeasonPreview Season="season" Class="d-flex gap-2 align-center" />
                                         <MudSpacer />
@@ -76,7 +76,7 @@
                     }
                     else
                     {
-                        <MudListItem>
+                        <MudListItem T="string">
                             <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="AddSeasonClick" Class="ms-4">Add Season</MudButton>
                         </MudListItem>
                     }

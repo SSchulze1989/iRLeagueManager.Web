@@ -27,7 +27,7 @@
     <MudText Style="white-space: pre-wrap" Typo="Typo.body2" Class="ps-2">
         @Bind(Comment, x=> x.Text)
     </MudText>
-    <MudChipSet ReadOnly="true">
+    <MudChipSet T="string" ReadOnly="true">
         @foreach (var vote in Bind(Comment, x => x.Votes))
         {
             var atFault = VoteAtFaultToString(vote);

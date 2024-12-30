@@ -40,7 +40,7 @@
                                       EndIcon="@Icons.Material.Filled.ArrowForward"
                                       Href="@($"/{Shared.LeagueName}/Settings/Results/Championships/{ChampSeason.ChampionshipId}/ResultConfigs/{config.ResultConfigId}")" />
                     }
-                    <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary" OnClick="AddPointConfigurationClick">
+                    <MudListItem T="string" Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary" OnClick="AddPointConfigurationClick">
                         <MudText Color="Color.Tertiary">
                             Add Result Config
                         </MudText>

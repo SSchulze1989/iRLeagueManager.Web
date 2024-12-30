@@ -45,8 +45,8 @@
                                         var disabled = user.IsImplicitRole(role) || role == LeagueRoles.Owner;
                                     }
                                     <div class="d-flex justify-center">
-                                        <MudCheckBox Checked="@(user.HasRole(role))"
-                                                     CheckedChanged="@((bool active) => SetUserRole(user, role, active))"
+                                        <MudCheckBox Value="@(user.HasRole(role))"
+                                                     ValueChanged="@((bool active) => SetUserRole(user, role, active))"
                                                      Disabled="disabled"
                                                      Dense="true"
                                                      Color="Color.Primary" />

@@ -44,7 +44,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MudBlazor" Version="6.16.0" />
+    <PackageReference Include="MudBlazor" Version="7.15.0" />
     <PackageReference Include="MvvmBlazor" Version="6.0.6" />
   </ItemGroup>
 

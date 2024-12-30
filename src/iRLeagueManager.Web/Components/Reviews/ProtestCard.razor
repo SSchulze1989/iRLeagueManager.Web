@@ -69,7 +69,7 @@
                             </CardHeaderContent>
                         </MudCardHeader>
                         <MudCardContent>
-                            <MudChipSet ReadOnly="true" Class="d-flex gap-0 flex-wrap">
+                            <MudChipSet T="string" ReadOnly="true" Class="d-flex gap-0 flex-wrap">
                                 @foreach (var car in InvolvedCars)
                                 {
                                     <MudChip Icon="@Icons.Material.Outlined.Person" Label="true" Size="ChipSize" Variant="Variant.Outlined">

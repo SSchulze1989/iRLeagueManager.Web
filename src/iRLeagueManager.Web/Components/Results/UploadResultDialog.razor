@@ -8,14 +8,13 @@
 <MudDialog>
     <DialogContent>
         <MudFileUpload T="IBrowserFile" FilesChanged="OnFileChanged">
-            <ButtonTemplate>
+            <ActivatorContent>
                 <MudButton HtmlTag="label"
                            Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           for="@context.Id">
+                           Color="Color.Primary">
                     Select file
                 </MudButton>
-            </ButtonTemplate>
+            </ActivatorContent>
             <SelectedTemplate>
                 @if (context != null)
                 {

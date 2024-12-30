@@ -6,6 +6,7 @@
 @inject IJSRuntime JsRuntime
 
 <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" Theme="TestTheme" />
+<MudPopoverProvider />
 <MudDialogProvider FullWidth="true" DisableBackdropClick="true" CloseButton="true" />
 <MudSnackbarProvider />
 
@@ -39,17 +40,17 @@
 @code {
     MudTheme TestTheme = new()
         {
-            Palette = new PaletteLight()
+            PaletteLight = new PaletteLight()
             {
                 Primary = Colors.Blue.Darken1,
                 AppbarBackground = "#34495e",
-                Surface = Colors.Grey.Lighten5,
+                Surface = Colors.Gray.Lighten5,
             },
             PaletteDark = new PaletteDark()
             {
                 Primary = Colors.Blue.Darken1,
                 Background = "#262629",
-                BackgroundGrey = "#282931",
+                BackgroundGray = "#282931",
                 DrawerBackground = "#303033",
                 Surface = "#303033",
                 AppbarBackground = "#34495e",

@@ -17,7 +17,9 @@ builder.Logging.AddConfiguration(
 
 // Add services to the container.
 builder.Services.AddScoped<ServerAuthenticationStateProvider>();
-builder.Services.AddRazorPages();
+//builder.Services.AddRazorPages();
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName, config =>
 {
@@ -37,10 +39,9 @@ builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStatePr
 builder.Services.AddTrackList();
 builder.Services.AddViewModels();
 builder.Services.AddSingleton<IAuthorizationHandler, ProfileHandler>();
-builder.Services.AddAuthorization(config =>
-{
-    config.AddPolicy(ProfileOwnerRequirement.Policy, policy => policy.AddRequirements(new ProfileOwnerRequirement()));
-});
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy(ProfileOwnerRequirement.Policy, policy => policy.AddRequirements(new ProfileOwnerRequirement()));
 
 builder.Services.AddLocalization();
 builder.Services.AddMarkdown();
@@ -73,16 +74,14 @@ else
 
 app.UseStaticFiles();
 
-app.UseRouting();
+app.UseAntiforgery();
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
 app.UseRequestLocalization(new RequestLocalizationOptions()
-    .AddSupportedCultures(new[] { "en-US", "de" })
-    .AddSupportedUICultures(new[] { "en-US", "de" }));
+    .AddSupportedCultures(["en-US", "de"])
+    .AddSupportedUICultures(["en-US", "de"]));
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapControllers();
-app.MapBlazorHub();
-app.MapFallbackToPage("/_Host");
 
 app.Run();

@@ -1,6 +1,4 @@
-﻿using Humanizer;
-using Microsoft.AspNetCore.Authorization;
-using static Humanizer.In;
+﻿using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using iRLeagueManager.Web.Extensions;
 

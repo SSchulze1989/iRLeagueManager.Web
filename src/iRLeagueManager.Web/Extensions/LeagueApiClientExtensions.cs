@@ -89,9 +89,4 @@ public sealed class ActionResultException<T> : InvalidOperationException
     {
         ActionResult = actionResult;
     }
-
-    public ActionResultException(ClientActionResult<T> actionResult, SerializationInfo info, StreamingContext context) : base(info, context)
-    {
-        ActionResult = actionResult;
-    }
 }

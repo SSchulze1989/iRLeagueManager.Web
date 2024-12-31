@@ -16,7 +16,7 @@
 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
     <Authorized>
         <MudPaper Elevation="5" Class="mt-2">
-            <MudList Clickable="true">
+            <MudList T="string">
                 @foreach (var ((template, (title, description)), index) in TemplatesAvailable.WithIndex())
                 {
                     @if (index > 0)

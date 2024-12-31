@@ -63,7 +63,7 @@ public partial class Templates : LeagueComponentBase
             { x => x.ButtonTypes, ButtonTypes.YesNo},
         };
         var result = await DialogService.Show<ConfirmDialog>("Apply Template", parameters).Result;
-        if (!result.Canceled)
+        if (result?.Canceled == false)
         {
             await SubmitTemplateSelection(template);
         }

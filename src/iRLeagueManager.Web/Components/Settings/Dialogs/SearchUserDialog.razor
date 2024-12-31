@@ -38,7 +38,7 @@
         BlazorParameterNullException.ThrowIfNull(this, LeagueUsers);
     }
 
-    private async Task<IEnumerable<UserModel?>> SearchUsers(string name)
+    private async Task<IEnumerable<UserModel?>> SearchUsers(string name, CancellationToken cancellationToken)
     {
         if (apiService.CurrentLeague == null)
         {

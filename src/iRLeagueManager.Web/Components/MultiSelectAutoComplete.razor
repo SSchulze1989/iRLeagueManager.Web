@@ -22,7 +22,7 @@
                      NoItemsTemplate="NoItemsTemplate"
                      MaxItems="MaxItems"
                      MinCharacters="MinCharacters" />
-    <MudChipSet Class="mt-1" AllClosable=true OnClose="RemoveValue">
+    <MudChipSet T="string" Class="mt-1" AllClosable=true OnClose="RemoveValue">
         @foreach (var val in selectedValues)
         {
             <MudChip Size="ChipSize" Text="@ToStringFunc(val)" />
@@ -50,7 +50,7 @@
     public string Placeholder { get; set; } = string.Empty;
 
     [Parameter, EditorRequired]
-    public Func<string, Task<IEnumerable<T>>> SearchFunc { get; set; } = default!;
+    public Func<string, CancellationToken, Task<IEnumerable<T>>> SearchFunc { get; set; } = default!;
 
     [Parameter, EditorRequired]
     public Func<T, string> ToStringFunc { get; set; } = default!;
@@ -86,11 +86,11 @@
 
     private MudAutocomplete<T> Autocomplete { get; set; } = default!;
 
-    private async Task<IEnumerable<T>> FilteredSearchFunc(string searchText)
+    private async Task<IEnumerable<T>> FilteredSearchFunc(string searchText, CancellationToken cancellationToken)
     {
         if (!string.IsNullOrEmpty(searchText))
         {
-            var results = await SearchFunc(searchText);
+            var results = await SearchFunc(searchText, cancellationToken);
             return results.Except(selectedValues);
         }
 
@@ -119,7 +119,7 @@
         StateHasChanged();
     }
 
-    private void RemoveValue(MudChip chip)
+    private void RemoveValue<TChip>(MudChip<TChip> chip)
     {
         if (selectedValues.RemoveWhere(x => ToStringFunc(x) == chip.Text) > 0)
             RefreshBinding();
@@ -131,7 +131,7 @@
         {
             if (selectedValues.Add(newValue))
                 RefreshBinding();
-            Autocomplete.Clear();
+            InvokeAsync(Autocomplete.ClearAsync);
         }
     }
 

@@ -264,7 +264,7 @@ public partial class ChangeTeamsDialog : UtilityComponentBase
         };
     }
 
-    private async Task<IEnumerable<TeamInfoModel?>> SearchTeam(string term)
+    private async Task<IEnumerable<TeamInfoModel?>> SearchTeam(string term, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(term))
         {

@@ -16,9 +16,9 @@
             @foreach (var (scoring, index) in Config.Scorings.WithIndex())
             {
                 <SettingsSection Text="@scoring.Name"
-                                 HelperText="@(scoring.IsCombinedResult ? "Combined result" : "Heat session result")"
-                                 Expanded="@(index == expandedScoringIndex)"
-                                 ExpandedChanged="@((expanded) => SetExpandedScoringIndex(index, expanded))">
+                HelperText="@(scoring.IsCombinedResult ? "Combined result" : "Heat session result")"
+                Expanded="@(index == expandedScoringIndex)"
+                ExpandedChanged="@((expanded) => SetExpandedScoringIndex(index, expanded))">
                     <ScoringSettings Scoring="scoring" />
                 </SettingsSection>
             }
@@ -27,12 +27,12 @@
             var sourceHelperText = Config.SourceResultConfig != null ? $"Use points and final order calculated in {Config.SourceResultConfig.ChampionshipName} - {Config.SourceResultConfig.Name}" : "Use uploaded result data";
         }
         <SettingsSelectPrompt Label="Source"
-                              HelperText="@sourceHelperText"
-                              @bind-Value="Config.SourceResultConfig"
-                              Items="Config.AvailableResultConfigs"
-                              Placeholder="Raw Results"
-                              ToStringFunc="@(config => config != null ? $"{config.ChampionshipName} - {config.Name}" : null)"
-                              Clearable="true">
+        HelperText="@sourceHelperText"
+        @bind-Value="Config.SourceResultConfig"
+        Items="Config.AvailableResultConfigs"
+        Placeholder="Raw Results"
+        ToStringFunc="@(config => config != null ? $"{config.ChampionshipName} - {config.Name}" : null)"
+        Clearable="true">
             <ItemTemplate Context="sourceConfig">
                 @sourceConfig?.ChampionshipName - @sourceConfig?.Name
             </ItemTemplate>
@@ -43,22 +43,22 @@
         @if (MultiplePointConfigs)
         {
             <SettingsItem Label="Name"
-                          Text="@Config.Name"
-                          HelperText="@(string.IsNullOrEmpty(Config.DisplayName) ? "" : Config.DisplayName)"
-                          OnClick="NameClick" />
+            Text="@Config.Name"
+            HelperText="@(string.IsNullOrEmpty(Config.DisplayName) ? "" : Config.DisplayName)"
+            OnClick="NameClick" />
         }
 
         <SettingsSwitch @bind-Checked="EnableHeatRaces"
-                        Text="Enable Heat Sessions"
-                        HelperText="Allow multiple race session per event" />
+        Text="Enable Heat Sessions"
+        HelperText="Allow multiple race session per event" />
 
         <MudCollapse Expanded="EnableHeatRaces">
             <SettingsTextPrompt @bind-Value="Config.RaceCount"
-                                Label="Number of races"
-                                HelperText="Number of races per event" />
+            Label="Number of races"
+            HelperText="Number of races per event" />
             <SettingsSwitch @bind-Checked="Config.CalculateCombinedResult"
-                            Text="Combined Result"
-                            HelperText="Calculate a combined result from individual heat sessions" />
+            Text="Combined Result"
+            HelperText="Calculate a combined result from individual heat sessions" />
         </MudCollapse>
     </SettingsTopSection>
 
@@ -66,20 +66,20 @@
     {
         <SettingsTopSection Header="Advanced">
             <SettingsSwitch Text="Set as default"
-                            Checked="@(ChampSeason.DefaultResultConfig?.ResultConfigId == Config.ResultConfigId)"
-                            CheckedChanged="SetAsDefaultConfig" />
+            Checked="@(ChampSeason.DefaultResultConfig?.ResultConfigId == Config.ResultConfigId)"
+            CheckedChanged="SetAsDefaultConfig" />
             <SettingsSection Text="Conditions for Points"
-                             @bind-Expanded="filtersExpanded"
-                             InitiallyExpanded="false"
-                             HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
+            @bind-Expanded="filtersExpanded"
+            InitiallyExpanded="false"
+            HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
                 <FilterTable @bind-Filters="Config.FiltersForPoints" />
             </SettingsSection>
             @if (MultiplePointConfigs)
             {
                 <SettingsItem Text="Delete Point Configuration"
-                              Color="Color.Error"
-                              Icon="@Icons.Material.Outlined.Delete"
-                              OnClick="DeleteConfigClick" />
+                Color="Color.Error"
+                Icon="@Icons.Material.Outlined.Delete"
+                OnClick="DeleteConfigClick" />
             }
         </SettingsTopSection>
     }
@@ -139,9 +139,10 @@
             { x => x.Value, (Config.Name, Config.DisplayName) },
         };
         var result = await DialogService.Show<DisplayNameDialog>("", parameters).Result;
-        if (!result.Canceled)
+        if (result?.Canceled == false && result.Data is (string name, string displayName))
         {
-            (Config.Name, Config.DisplayName) = ((string, string))result.Data;
+            Config.Name = name;
+            Config.DisplayName = displayName;
         }
     }
 
@@ -177,7 +178,7 @@
             { x => x.ButtonTypes, ButtonTypes.YesNo },
         };
         var result = await DialogService.Show<ConfirmDialog>("Delete point configuration", parameters).Result;
-        if (result.Canceled)
+        if (result is null || result.Canceled)
         {
             return;
         }

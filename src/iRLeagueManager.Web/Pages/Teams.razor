@@ -53,7 +53,7 @@
                     </CardHeaderActions>
                 </MudCardHeader>
                 <MudCardContent>
-                    <MudChipSet ReadOnly="true">
+                    <MudChipSet T="string" ReadOnly="true">
                         @foreach (var member in team.MemberList.OrderBy(x => x.LastName).ThenBy(x => x.FirstName))
                         {
                             <MudChip Icon="@Icons.Material.Filled.Person" Label="true" Variant="Variant.Outlined">
@@ -107,10 +107,10 @@
         var options = new DialogOptions()
             {
                 FullWidth = true,
-                DisableBackdropClick = true,
+                BackdropClick = false,
             };
         var result = await DialogService.Show<EditTeamDialog>("Edit Team", parameters, options).Result;
-        if (result.Canceled == false && result.Data is TeamModel model)
+        if (result?.Canceled == false && result.Data is TeamModel model)
         {
             config.SetModel(model);
         }
@@ -127,7 +127,7 @@
         var options = new DialogOptions()
             {
                 FullWidth = true,
-                DisableBackdropClick = true,
+                BackdropClick = false,
             };
         var result = await DialogService.Show<EditTeamDialog>("Add new Team", parameters, options).Result;
     }
@@ -147,7 +147,7 @@
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
         var result = await DialogService.Show<ConfirmDialog>("Delete Result Config", parameters).Result;
-        if (result.Canceled == false)
+        if (result is null || result.Canceled == false)
         {
             await vm.DeleteTeam(team.GetModel());
         }

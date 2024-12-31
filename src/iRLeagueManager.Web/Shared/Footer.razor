@@ -85,11 +85,11 @@
     {
         var options = new DialogOptions()
         {
-            DisableBackdropClick= true,
+            BackdropClick= false,
             NoHeader = true,
         };
         var result = await DialogService.Show<CookieBannerModal>("", options).Result;
-        return result.Canceled == false;
+        return result?.Canceled == false;
     }
 
     public virtual void Dispose()

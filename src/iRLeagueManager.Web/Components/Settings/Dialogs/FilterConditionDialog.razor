@@ -77,7 +77,7 @@
                                 <MultiSelectAutoComplete @bind-Values="Condition.FilterValues"
                                                          Label="@valueLabel"
                                                          DebounceInterval="50"
-                                                         SearchFunc="@(async (value) => new[] {value})"
+                                                         SearchFunc="@(async (value, _) => new[] {value})"
                                                          ToStringFunc="@(value => value)"
                                                          Variant="Variant.Outlined" />
                             }
@@ -176,7 +176,7 @@
         return team != null ? $"{team.Name} ({team.IRacingTeamId})" : teamId;
     }
 
-    private async Task<IEnumerable<string>> SearchMembers(string searchString)
+    private async Task<IEnumerable<string>> SearchMembers(string searchString, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(searchString))
         {
@@ -191,7 +191,7 @@
         .Select(x => x.MemberId.ToString()));
     }
 
-    private async Task<IEnumerable<string>> SearchTeams(string searchstring)
+    private async Task<IEnumerable<string>> SearchTeams(string searchstring, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(searchstring))
         {

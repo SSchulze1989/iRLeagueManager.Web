@@ -1,7 +1,7 @@
 ﻿@namespace iRLeagueManager.Web.Components
 
 <MudPaper Elevation="5" Class="@Class">
-    <MudList Clickable="true">
+    <MudList T="string" Clickable="true">
         @if (string.IsNullOrEmpty(Header) == false)
         {
             <MudListSubheader>

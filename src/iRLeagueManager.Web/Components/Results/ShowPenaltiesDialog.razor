@@ -161,7 +161,7 @@
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
         var confirmed = await DialogService.Show<ConfirmDialog>("Delete penalty", parameters).Result;
-        if (confirmed.Canceled)
+        if (confirmed is null || confirmed.Canceled)
         {
             return;
         }

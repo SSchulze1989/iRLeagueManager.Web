@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:7.0 as build
+﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 as build
 WORKDIR /source
 
 # copy csproj and restore as distinct layers
@@ -10,7 +10,7 @@ COPY . .
 RUN dotnet publish -o /app
 
 # final stage/image
-FROM mcr.microsoft.com/dotnet/sdk:7.0
+FROM mcr.microsoft.com/dotnet/sdk:8.0
 WORKDIR /app
 COPY --from=build /app .
 USER $APP_UID

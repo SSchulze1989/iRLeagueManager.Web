@@ -49,7 +49,7 @@
             </ItemTemplate>
         </SettingsSelectPrompt>
     }
-    <MudListItem Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary" OnClick="@(() => AddItemClick())">
+    <MudListItem T="string" Icon="@Icons.Material.Filled.Add" IconColor="Color.Tertiary" OnClick="@(() => AddItemClick())">
         <MudText Color="Color.Tertiary">Add Sort Condition</MudText>
     </MudListItem>
 </SettingsSection>
@@ -104,7 +104,7 @@
             { x => x.ToStringFunc, ToStringFunc },
         };
         var result = await DialogService.Show<SelectPromptDialog<T?>>("Add Item", parameters).Result;
-        if (result.Canceled || result.Data is T item == false)
+        if (result is null || result.Canceled || result.Data is T item == false)
         {
             return;
         }
@@ -123,7 +123,7 @@
             { x => x.Text, $"Delete {itemsList[index]}?" },
         };
         var result = await DialogService.Show<ConfirmDialog>("Delete item", parameters).Result;
-        if (result.Canceled)
+        if (result is null || result.Canceled)
         {
             return;
         }

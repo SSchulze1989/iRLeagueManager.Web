@@ -1,10 +1,10 @@
 ﻿@namespace iRLeagueManager.Web.Components
 @using System.Linq.Expressions
-@using iRLeagueApiCore.Common.Enums;
+@using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
-@inherits MvvmComponentBase
-@inject IDialogService DialogService
+@inherits MvvmBlazor.Components.MvvmComponentBase
+@inject MudBlazor.IDialogService DialogService
 
 <MudElement HtmlTag="div" Class="@Class" Style="@Style">
     <MudStack Class="px-2 pt-2" AlignItems="AlignItems.Center" Row="true">
@@ -216,7 +216,7 @@
         };
         var options = new DialogOptions()
             {
-                DisableBackdropClick = false,
+                BackdropClick = true,
                 Position = DialogPosition.Center,
                 FullWidth = true,
                 CloseButton = true,

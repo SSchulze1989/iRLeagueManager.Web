@@ -14,7 +14,7 @@
                 @if (ReadOnly == false)
                 {
                     <div class="input-group @(EditName ? "" : " d-none")">
-                        <input type="text" class="form-control" @bind="Schedule.Name" @ref="ScheduleNameInput" @onkeydown=@(async args => { if (args.Key == "Enter") { await SaveName(); } }) />
+                        <input type="text" class="form-control" @bind="Schedule.Name" @ref="ScheduleNameInput" @onkeydown="@(async args => { if (args.Key == "Enter") { await SaveName(); } })" />
                         <button type="button" class="btn btn-success @(Schedule.Loading ? "disabled" : "")" @onclick=@SaveName>
                             &#10004
                             @if (Schedule.Loading)
@@ -207,7 +207,7 @@
         };
         var modal = DialogService.Show<EditEventDialog>("Edit Event", parameters);
         var result = await modal.Result;
-        if (result.Canceled == false && result.Data is EventModel eventModel)
+        if (result?.Canceled == false && result.Data is EventModel eventModel)
         {
             eventViewModel.SetModel(eventModel);
         }
@@ -265,7 +265,7 @@
             { x => x.ButtonTypes, ButtonTypes.YesNo },
         };
         var confirm = await DialogService.Show<ConfirmDialog>("Delete Event", parameters).Result;
-        if (confirm.Canceled)
+        if (confirm is null || confirm.Canceled)
         {
             return;
         }

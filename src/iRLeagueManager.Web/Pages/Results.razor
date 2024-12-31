@@ -199,7 +199,7 @@
             { x => x.Event, @event },
         };
         var result = await DialogService.Show<UploadResultDialog>("Upload json result", parameters).Result;
-        if (result.Canceled == false)
+        if (result?.Canceled == false)
         {
             await Task.Delay(2000);
             await vm.LoadFromEventAsync(@event.Id);
@@ -218,7 +218,7 @@
             { x => x.Event, @event },
         };
         var result = await DialogService.Show<FetchResultsDialog>("Fetch results from iracing subsession", parameters).Result;
-        if (result.Canceled == false)
+        if (result?.Canceled == false)
         {
             await Task.Delay(2000);
             await vm.LoadFromEventAsync(@event.Id);
@@ -247,7 +247,7 @@
             { x => x.ButtonTypes, ButtonTypes.YesNo },
         };
         var result = await DialogService.Show<ConfirmDialog>("Delete Results", parameters).Result;
-        if (result.Canceled == false)
+        if (result?.Canceled == false)
         {
             await vm.DeleteEventResults();
         }

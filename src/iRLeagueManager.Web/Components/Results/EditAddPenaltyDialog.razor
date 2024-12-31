@@ -117,7 +117,7 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task<IEnumerable<ResultRowModel?>> SearchResultRow(string searchString)
+    private async Task<IEnumerable<ResultRowModel?>> SearchResultRow(string searchString, CancellationToken cancellationToken)
     {
         if (SelectedSession is null)
         {

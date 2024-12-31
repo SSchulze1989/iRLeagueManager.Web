@@ -186,7 +186,7 @@
         EventMembers = ReviewsVm.EventCars.Cars.SelectMany(x => x.Members);
     }
 
-    private async Task<IEnumerable<MemberInfoModel?>> SearchMembers(string searchString)
+    private async Task<IEnumerable<MemberInfoModel?>> SearchMembers(string searchString, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(searchString))
         {
@@ -226,7 +226,7 @@
             { x => x.ButtonTypes, ButtonTypes.YesNo },
         };
         var confirm = await DialogService.Show<ConfirmDialog>("Confirm Protest", parameters).Result;
-        if (confirm.Canceled)
+        if (confirm is null || confirm.Canceled)
         {
             return;
         }

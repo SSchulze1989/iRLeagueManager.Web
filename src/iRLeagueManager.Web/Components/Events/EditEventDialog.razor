@@ -50,13 +50,13 @@
                 </MudItem>
                 <MudItem xs="6">
                     <MudField Label="Practice" Variant="Variant.Outlined">
-                        <MudCheckBox Label="Has Practice" @bind-Checked="Vm.HasPractice" />
+                        <MudCheckBox Label="Has Practice" @bind-Value="Vm.HasPractice" />
                         <EditSession Session=Vm.Practice />
                     </MudField>
                 </MudItem>
                 <MudItem xs="6">
                     <MudField Label="Qualifying" Variant="Variant.Outlined">
-                        <MudCheckBox Label="Has Qualifying" @bind-Checked="Vm.HasQualifying" />
+                        <MudCheckBox Label="Has Qualifying" @bind-Value="Vm.HasQualifying" />
                         <EditSession Session=Vm.Qualifying />
                     </MudField>
                 </MudItem>
@@ -174,7 +174,7 @@
         Vm.TrackId = trackGroup?.TrackId;
     }
 
-    private async Task<IEnumerable<TrackGroupModel?>> SearchTracks(string search)
+    private async Task<IEnumerable<TrackGroupModel?>> SearchTracks(string search, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(search))
         {
@@ -183,7 +183,7 @@
         return await Task.FromResult(TrackList.Where(x => x.TrackName.Contains(search, StringComparison.OrdinalIgnoreCase)));
     }
 
-    private Task<IEnumerable<ResultConfigInfoModel>> SearchResultConfigs(string? name)
+    private Task<IEnumerable<ResultConfigInfoModel>> SearchResultConfigs(string? name, CancellationToken cancellationToken)
     {
         var searchConfigs = ResultConfigs
             .Where(x => Vm.ResultConfigs.None(y => y?.ResultConfigId == x.ResultConfigId))

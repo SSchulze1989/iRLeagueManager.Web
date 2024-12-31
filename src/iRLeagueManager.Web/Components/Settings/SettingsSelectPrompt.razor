@@ -53,9 +53,9 @@
             };
 
         var result = await DialogService.Show<SelectPromptDialog<T>>(DialogHeader, parameters: parameters, options: options).Result;
-        if (!result.Canceled)
+        if (result?.Canceled == false)
         {
-            await ValueChanged.InvokeAsync((T)result.Data);
+            await ValueChanged.InvokeAsync((T?)result.Data);
         }
     }
 }

@@ -50,7 +50,7 @@
                             @category.Text
                         </MudTd>
                         <MudTd>
-                            @switch(category.Type)
+                            @switch (category.Type)
                             {
                                 case PenaltyType.Points:
                                     @:@(category.Points >= 0 ? "+" : "")@(category.Points) pt@(category.Points != 1 ? "s" : "")
@@ -134,21 +134,25 @@
                 MaxWidth = MaxWidth.ExtraSmall,
             };
         var result = await DialogService.Show<EditProtestSettingsDialog>("Edit Protest Settings", parameters, options).Result;
-        if (result.Canceled == false && result.Data is LeagueModel leagueModel)
+        if (result?.Canceled == false && result.Data is LeagueModel leagueModel)
         {
             League.SetModel(leagueModel);
         }
     }
 
-    private async Task OnVoteCategoryClick(VoteCategoryViewModel voteCategory)
+    private async Task OnVoteCategoryClick(VoteCategoryViewModel? voteCategory)
     {
+        if (voteCategory is null)
+        {
+            return;
+        }
         var parameters = new DialogParameters<EditVoteCategoryDialog>()
         {
             {x => x.Model, voteCategory.CopyModel()},
             {x => x.OnSubmit, new(async (category, cancellation) => await category.SaveChangesAsync(cancellation))},
         };
         var result = await DialogService.Show<EditVoteCategoryDialog>("Edit Vote Category", parameters).Result;
-        if (result.Canceled == false && result.Data is VoteCategoryModel model)
+        if (result?.Canceled == false && result.Data is VoteCategoryModel model)
         {
             voteCategory.SetModel(model);
         }
@@ -172,7 +176,7 @@
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
         var result = await DialogService.Show<ConfirmDialog>("Delete Vote Category", parameters).Result;
-        if (result.Canceled == false)
+        if (result?.Canceled == false)
         {
             await Reviews.DeleteVoteCategory(voteCategory.GetModel());
         }

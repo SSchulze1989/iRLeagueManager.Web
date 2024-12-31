@@ -119,7 +119,7 @@
                                             </CardHeaderActions>
                                         </MudCardHeader>
                                         <MudCardContent>
-                                            <MudChipSet ReadOnly="true" Class="d-flex gap-0 flex-wrap">
+                                            <MudChipSet T="string" ReadOnly="true" Class="d-flex gap-0 flex-wrap">
                                                 @foreach (var car in InvolvedCars)
                                                 {
                                                     <MudChip Icon="@Icons.Material.Outlined.Person" Label="true" Size="ChipSize" Variant="Variant.Outlined">
@@ -150,7 +150,7 @@
                                             </CardHeaderActions>
                                         </MudCardHeader>
                                         <MudCardContent>
-                                            <MudChipSet ReadOnly="true" Class="d-flex gap-2 flex-wrap">
+                                            <MudChipSet T="string" ReadOnly="true" Class="d-flex gap-2 flex-wrap">
                                                 @foreach (var vote in @Bind(Review, x => x.CountedVotes))
                                                 {
                                                     var atFault = VoteAtFaultToString(vote.Vote);
@@ -186,7 +186,7 @@
                                     <MudText Typo="Typo.body2" Class="ps-2" Style="white-space: pre-wrap;">
                                         @Bind(Review, x => x.ResultText)
                                     </MudText>
-                                    <MudChipSet ReadOnly="true" Class="d-flex gap-0 flex-wrap">
+                                    <MudChipSet T="string" ReadOnly="true" Class="d-flex gap-0 flex-wrap">
                                         @foreach (var vote in Bind(Review, x => x.Votes))
                                         {
                                             var atFault = VoteAtFaultToString(vote);
@@ -231,7 +231,7 @@
                             <MudText Typo="Typo.h6">Involved</MudText>
                         </MudItem>
                         <MudItem xs="10" Class="py-1 d-flex align-center">
-                            <MudChipSet ReadOnly="true">
+                            <MudChipSet T="string" ReadOnly="true">
                                 @foreach (var car in InvolvedCars)
                                 {
                                     <MudChip Icon="@Icons.Material.Outlined.Person" Label="true" Size="ChipSize" Variant="Variant.Outlined">
@@ -244,7 +244,7 @@
                             <MudText Typo="Typo.h6">Result</MudText>
                         </MudItem>
                         <MudItem xs="10" Class="py-1 d-flex align-center">
-                            <MudChipSet ReadOnly="true">
+                            <MudChipSet T="string" ReadOnly="true">
                                 @foreach (var vote in Bind(Review, x => x.Votes))
                                 {
                                     var atFault = VoteAtFaultToString(vote);
@@ -355,7 +355,7 @@
             {x => x.OnSubmit, async (review, cancellation) => await review.SaveChangesAsync(cancellation)},
         };
         var result = await DialogService.Show<EditReviewResultDialog>("Edit Result", parameters).Result;
-        if (result.Canceled == false && result.Data is ReviewModel reviewModel)
+        if (result?.Canceled == false && result.Data is ReviewModel reviewModel)
         {
             Review.SetModel(reviewModel);
         }
@@ -384,10 +384,10 @@
         };
         var options = new DialogOptions()
             {
-                DisableBackdropClick = false,
+                BackdropClick = true,
             };
         var confirm = await DialogService.Show<ConfirmDialog>("Delete Comment", parameters, options).Result;
-        if (confirm.Canceled == false)
+        if (confirm?.Canceled == false)
         {
             await Review.RemoveComment(comment);
         }

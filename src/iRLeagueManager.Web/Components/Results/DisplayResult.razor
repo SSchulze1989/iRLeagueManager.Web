@@ -9,10 +9,10 @@
 <MudElement HtmlTag="div" Class="@Class" Style="@Style">
     <MudStack Class="px-2 pt-2" AlignItems="AlignItems.Center" Row="true">
         <MudText Typo="Typo.h6">@Result.SessionName</MudText>
-            <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.Info" Title="Show penalties" OnClick=ShowBonusesPenaltiesClick />
-        </MudStack>
-        @{
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Info" Title="Show penalties" OnClick=ShowBonusesPenaltiesClick />
+    </MudStack>
+    @{
         var resultRows = Result.ResultRows;
         var displayBonusPoints = resultRows.Any(x => x.BonusPoints != 0);
         var displayStartPos = resultRows.Any(x => x.StartPosition != 0);
@@ -90,8 +90,26 @@
             {
                 <td class="px-1 py-1">@Row.BonusPoints</td>
             }
-            <td class="px-1 py-1" style="@(@Row.PenaltyPoints != 0 ? "color:red" : "")">
-                @(Row.PenaltyPoints != 0 ? -Row.PenaltyPoints : "")
+            <td class="px-1 py-1">
+                <MudStack Spacing="2" Row="true">
+                    @if (Row.PenaltyPoints != 0)
+                    {
+                        <span style="@(Row.PenaltyPoints > 0 ? "color:red" : "")">
+                            @(-Row.PenaltyPoints) pts.
+                        </span>
+                    }
+                    @if (Row.PenaltyTime != TimeSpan.Zero)
+                    {
+                        <span style="@(Row.PenaltyTime > TimeSpan.Zero ? "color:red" : "")">
+                            @(Row.PenaltyTime >= TimeSpan.Zero ? "+" : "")@(Row.PenaltyTime.ShortTimeString())
+                        </span>
+                    }
+                    @if (Row.PenaltyPositions != 0) {
+                        <span style="@(Row.PenaltyPositions > 0 ? "color: red" : "")">
+                            @(Row.PenaltyPositions >= 0 ? "+" : "")@(Row.PenaltyPositions) pos.
+                        </span>
+                    }
+                </MudStack>
             </td>
             <td class="px-1 py-1">@Row.TotalPoints</td>
             @if (isTeamResult == false)
@@ -181,6 +199,8 @@
         };
 
         var result = await DialogService.Show<EditAddPenaltyDialog>("Add Bonus/Penalty", parameters).Result;
+        await Task.Delay(2000);
+        await Refresh();
     }
 
     private Task ShowBonusesPenaltiesClick()
@@ -222,6 +242,8 @@
                 CloseButton = true,
             };
         await DialogService.Show<ShowPenaltiesDialog>("Bonuses/Penalties", parameters, options).Result;
+        await Task.Delay(2000);
+        await Refresh();
     }
 
     private async Task ChangeTeamClick(ResultRowModel? row)

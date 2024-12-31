@@ -11,4 +11,13 @@ public static class TimeSpanExtensions
     {
         return timeSpan.AsDateTime().ToString(@"m:ss.fff");
     }
+
+    public static string ShortTimeString(this TimeSpan timeSpan)
+    {
+        if (timeSpan > TimeSpan.Zero)
+        {
+            return $"{timeSpan.AsDateTime():mm:ss}";
+        }
+        return $"-{timeSpan.Negate().AsDateTime():mm:ss}";
+    }
 }

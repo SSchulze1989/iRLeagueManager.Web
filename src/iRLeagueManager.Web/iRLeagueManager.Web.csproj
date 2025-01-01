@@ -11,17 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Components\InputMarkdown.razor.css" />
-    <None Remove="Components\Reviews\ReviewCard.razor.css" />
-  </ItemGroup>
-
-  <ItemGroup>
     <_ContentIncludedByDefault Remove="wwwroot\css\toggle.css" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Components\InputMarkdown.razor.css" />
-    <Content Include="Components\Reviews\ReviewCard.razor.css" />
   </ItemGroup>
 
   <ItemGroup>

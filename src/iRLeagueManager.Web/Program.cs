@@ -39,10 +39,9 @@ builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStatePr
 builder.Services.AddTrackList();
 builder.Services.AddViewModels();
 builder.Services.AddSingleton<IAuthorizationHandler, ProfileHandler>();
-builder.Services.AddAuthentication();
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy(ProfileOwnerRequirement.Policy, policy => policy.AddRequirements(new ProfileOwnerRequirement()));
-
+builder.Services.AddSingleton<IAuthorizationHandler, CustomAuthorizationHandler>();
 builder.Services.AddLocalization();
 builder.Services.AddMarkdown();
 
@@ -81,7 +80,6 @@ app.UseRequestLocalization(new RequestLocalizationOptions()
     .AddSupportedCultures(["en-US", "de"])
     .AddSupportedUICultures(["en-US", "de"]));
 
-app.UseAuthentication();
 app.UseAuthorization();
 
 app.Run();

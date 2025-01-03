@@ -22,18 +22,18 @@
         <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
             <Authorized>
                 <MudNavGroup Title="Settings" Icon="@Icons.Material.Filled.Settings">
-                    <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AdminPanelSettings" Href="@GetLeagueLink("settings/league")">League</MudNavLink>
-                    <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person" Href="@GetLeagueLink("settings/users")">Users</MudNavLink>
-                    <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Calculate" Href="@GetLeagueLink("settings/results")">Results</MudNavLink>
-                    <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.LocalPolice" Href="@GetLeagueLink("settings/reviews")">Reviews</MudNavLink>
+                    <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AdminPanelSettings" Href="@GetLeagueLink("settings/League")">League</MudNavLink>
+                    <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person" Href="@GetLeagueLink("settings/Users")">Users</MudNavLink>
+                    <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Calculate" Href="@GetLeagueLink("settings/Results")">Results</MudNavLink>
+                    <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.LocalPolice" Href="@GetLeagueLink("settings/Reviews")">Reviews</MudNavLink>
                 </MudNavGroup>   
             </Authorized>
         </AuthorizeView>
-        <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CalendarMonth" Href=@GetLeagueLink("schedules")>Schedule</MudNavLink>
-        <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.TableChart" Href=@GetLeagueLink("results")>Results</MudNavLink>
-        <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.TableChart" Href=@GetLeagueLink("standings")>Standings</MudNavLink>
-        <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CalendarMonth" Href=@GetLeagueLink("reviews")>Reviews</MudNavLink>
-        <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Groups" Href="@GetLeagueLink("teams")">Teams</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CalendarMonth" Href=@GetLeagueLink("Schedules")>Schedule</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.TableChart" Href=@GetLeagueLink("Results")>Results</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.TableChart" Href=@GetLeagueLink("Standings")>Standings</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CalendarMonth" Href=@GetLeagueLink("Reviews")>Reviews</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Groups" Href="@GetLeagueLink("Teams")">Teams</MudNavLink>
     }
 </MudNavMenu>
 
@@ -111,23 +111,23 @@
         }
         await ApiService.SetCurrentSeasonAsync(Shared.LeagueName, season.SeasonId);
 
-        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Results"))
+        if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Results", StringComparison.OrdinalIgnoreCase))
         {
             ForceNavigateTo($"{Shared.LeagueName}/Results");
         }
-        else if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Schedules"))
+        else if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Schedules", StringComparison.OrdinalIgnoreCase))
         {
             ForceNavigateTo($"{Shared.LeagueName}/Schedules");
         }
-        else if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Standings"))
+        else if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Standings", StringComparison.OrdinalIgnoreCase))
         {
             ForceNavigateTo($"{Shared.LeagueName}/Standings");
         }
-        else if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Reviews"))
+        else if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Reviews", StringComparison.OrdinalIgnoreCase))
         {
             ForceNavigateTo($"{Shared.LeagueName}/Reviews");
         }
-        else if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Settings/Results"))
+        else if (NavigationManager.Uri.Contains($"{Shared.LeagueName}/Settings/Results", StringComparison.OrdinalIgnoreCase))
         {
             ForceNavigateTo($"{Shared.LeagueName}/Settings/Results");
         }

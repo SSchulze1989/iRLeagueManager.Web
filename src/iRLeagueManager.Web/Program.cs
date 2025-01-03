@@ -44,6 +44,7 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services.AddSingleton<IAuthorizationHandler, CustomAuthorizationHandler>();
 builder.Services.AddLocalization();
 builder.Services.AddMarkdown();
+builder.Services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
 
 builder.Services.AddMudServices(config =>
 {

@@ -1,0 +1,71 @@
+﻿@namespace iRLeagueManager.Web.Components
+@inherits UtilityComponentBase
+
+<MudDialog>
+    <DialogContent>
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@(Loading ? "" : "invisible" + " my-0")" />
+        <MudText Typo="Typo.h5">
+            @if (Standing.IsTeamStanding) {
+                <span style="@($"color: {StandingRow.TeamColor}")">@StandingRow.TeamName</span>
+            } else
+            {
+                @StandingRow.Firstname @StandingRow.Lastname
+            }
+        </MudText>
+
+        <MudSimpleTable>
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>Date</th>
+                    <th>Track</th>
+                    <th>Pos.</th>
+                    <th>Total</th>
+                    <th>Bonus</th>
+                    <th>Penalty</th>
+                    <th>Dropped</th>
+                    <th>Drop/Keep</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var (@event, i) in Events.WithIndex())
+                {
+                    var row = StandingRow.ResultRows.FirstOrDefault(x => x?.EventId == @event.Id);
+                    var dropweekOverride = dropweekOverrides.FirstOrDefault(x => x.ScoredResultRowId == row?.ResultRowId);
+                    var dropValue = dropweekOverride is null ? DropMode.None : dropweekOverride.ShouldDrop ? DropMode.AlwaysDrop : DropMode.AlwaysKeep;
+                    @if (row is null)
+                    {
+                        continue;
+                    }
+                    <tr>
+                        <td class="py-1 px-1" style="text-align: center">@($"{i + 1:00}").</td>
+                        <td class="py-1">@(@event.Date.GetValueOrDefault().ToString("dd.MM.yy"))</td>
+                        <td class="py-1 px-1">@(@event.TrackName)</td>
+                        <td class="py-1 px-1" style="text-align: center">@(row.FinalPosition).</td>
+                        <td class="py-1 px-1" style="text-align: center">@row.TotalPoints</td>
+                        <td class="py-1 px-1" style="text-align: center">@row.BonusPoints</td>
+                        <td class="py-1 px-1" style="text-align: center">@row.PenaltyPoints</td>
+                        <td class="py-1">
+                            @if (!row.IsScored) {
+                                <MudIcon Icon="@Icons.Material.Filled.Clear" Color="Color.Error" />
+                            }
+                        </td>
+                        <td class="py-1">
+                            <MudSelect T="DropMode" Variant="Variant.Text" Value="dropValue" ValueChanged="@(value => SetDropMode(row.ResultRowId, (DropMode)value))">
+                                <MudSelectItem Value="DropMode.None">- - -</MudSelectItem>
+                                <MudSelectItem Value="DropMode.AlwaysDrop">Drop</MudSelectItem>
+                                <MudSelectItem Value="DropMode.AlwaysKeep">Keep</MudSelectItem>
+                            </MudSelect>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Close">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+}

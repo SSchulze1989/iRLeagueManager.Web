@@ -511,3 +511,98 @@ a, .btn-link {
         transform: rotate(360deg);
     }
 }
+
+.settings-stack-container {
+    overflow-x: clip;
+    margin-left: -24px;
+    padding-left: 24px;
+    margin-right: -24px;
+    padding-right: 24px;
+    position: relative;
+}
+
+.settings-stack-slide {
+    position: absolute;
+    top: 0;
+    left: 24px;
+    right: 24px;
+    bottom: 0;
+}
+
+.settings-stack-slide-in {
+    animation: settings-stack-slide-in-right 0.275s ease-in-out;
+}
+
+.settings-stack-slide-out {
+    animation: settings-stack-slide-out-right 0.275s ease-in-out;
+    transform: translateX(100%)
+}
+
+@-webkit-keyframes settings-stack-slide-in-right {
+    from {
+        transform: translateX(100%)
+    }
+
+    to {
+        transform: translateX(0%)
+    }
+}
+
+@keyframes settings-stack-slide-in-right {
+    from {
+        transform: translateX(100%)
+    }
+
+    to {
+        transform: translateX(0%)
+    }
+}
+
+@-webkit-keyframes settings-stack-slide-out-right {
+    from {
+        transform: translateX(0%)
+    }
+
+    to {
+        transform: translateX(100%)
+    }
+}
+
+@keyframes settings-stack-slide-out-right {
+    from {
+        transform: translateX(0%)
+    }
+
+    to {
+        transform: translateX(100%)
+    }
+}
+
+.race-by-race-table.mud-simple-table .mud-table-container table tbody tr:last-child td,
+.race-by-race-table.mud-simple-table .mud-table-container table thead tr:last-child th {
+    border-bottom: 1px solid var(--mud-palette-table-lines);
+}
+
+.race-by-race-table.mud-simple-table .mud-table-container table thead tr:not(:last-child) th {
+    border-bottom: none;
+}
+
+.race-by-race-table.mud-simple-table .mud-table-container table tbody:hover {
+    background-color: var(--mud-palette-table-hover) !important;
+}
+
+.race-by-race-table.mud-simple-table .mud-table-container table tbody:nth-of-type(2n+1):not(:hover) {
+    background-color: var(--mud-palette-table-striped);
+}
+
+.race-by-race-table.mud-simple-table .mud-table-container table tbody:nth-child(2n+1):not(:hover) tr:nth-child(2n+1) td:nth-child(2n+3),
+.race-by-race-table.mud-simple-table .mud-table-container table tbody:nth-child(2n+1):not(:hover) tr:nth-child(2n) td:nth-child(6n+3),
+.race-by-race-table.mud-simple-table .mud-table-container table tbody:nth-child(2n+1):not(:hover) tr:nth-child(2n) td:nth-child(6n+2),
+.race-by-race-table.mud-simple-table .mud-table-container table tbody:nth-child(2n+1):not(:hover) tr:nth-child(2n) td:nth-child(6n+1) {
+    background-color: var(--mud-palette-table-striped);
+    filter: brightness(85%);
+}
+
+.race-by-race-table.mud-simple-table .mud-table-container table tbody tr td.dropped {
+    color: #3074ff90;
+}

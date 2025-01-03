@@ -98,11 +98,10 @@
     private bool DisplayLeaveWarning { get; set; } = false;
     private ElementReference LeaveWarning { get; set; }
     private StatusResultValidator? ResultValidator { get; set; }
-    private int CarouselIndex { get; set; }
 
     private ResultConfigViewModel? SelectedResultConfig { get; set; }
-    private IEnumerable<MemberModel> LeagueMembers { get; set; } = Enumerable.Empty<MemberModel>();
-    private IEnumerable<TeamModel> Teams { get; set; } = Enumerable.Empty<TeamModel>();
+    private IEnumerable<MemberModel> LeagueMembers { get; set; } = [];
+    private IEnumerable<TeamModel> Teams { get; set; } = [];
     private string Error { get; set; } = string.Empty;
 
     protected override void OnInitialized()
@@ -164,7 +163,7 @@
 
     private bool HasChanges()
     {
-        return ChampSeason.HasChanges || ChampSeason.ResultConfigViewModels.Any(x => x.HasChanges);
+        return ChampSeason.HasChanges || ChampSeason.ResultConfigViewModels.Any(x => x.HasChanges) || ChampSeason.StandingConfig?.HasChanges == true;
     }
 
     protected override async ValueTask OnLocationChanging(LocationChangingContext context)

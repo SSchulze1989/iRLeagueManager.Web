@@ -16,7 +16,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
     public ChampSeasonViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, ChampSeasonModel model) : 
         base(loggerFactory, apiService, model)
     {
-        resultConfigViewModels = new List<ResultConfigViewModel>();
+        resultConfigViewModels = [];
     }
 
     public long ChampSeasonId => model.ChampSeasonId;
@@ -163,7 +163,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
         try
         {
             Loading = true;
-            List<ResultConfigModel> configModels = new();
+            List<ResultConfigModel> configModels = [];
             foreach(var configInfo in model.ResultConfigs)
             {
                 var result = await ApiService.CurrentLeague
@@ -249,6 +249,10 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
     {
         base.SetModel(model);
         StandingConfig = model.StandingConfig == null ? null : new(LoggerFactory, ApiService, model.StandingConfig);
+        if (StandingConfig != null)
+        {
+            StandingConfig.ParentViewModel = this;
+        }
         ResetChangedState();
     }
 }

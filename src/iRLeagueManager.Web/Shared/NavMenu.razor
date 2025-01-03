@@ -13,7 +13,7 @@
     </MudNavGroup>
     @if (Shared.LeagueInfo is not null)
     {
-        <MudNavGroup Title="@Shared.SeasonName" Expanded="@SeasonExpanded">
+        <MudNavGroup Title="@Shared.SeasonName" @bind-Expanded="SeasonExpanded">
             @foreach(var season in Shared.SeasonList)
             {
                 <MudNavLink OnClick="@(() => OnSeasonChanged(season))">@season.SeasonName</MudNavLink>

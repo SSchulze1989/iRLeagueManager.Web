@@ -34,9 +34,9 @@
     private int animationTimeout = 5000;
 
     protected string className => new CssBuilder()
-        .AddClass("slide", TransitionState != ItemTransitionState.None)
-        .AddClass("slide-in", TransitionState == ItemTransitionState.MovingIn)
-        .AddClass("slide-out", TransitionState == ItemTransitionState.MovingOut)
+        .AddClass("settings-stack-slide", TransitionState != ItemTransitionState.None)
+        .AddClass("settings-stack-slide-in", TransitionState == ItemTransitionState.MovingIn)
+        .AddClass("settings-stack-slide-out", TransitionState == ItemTransitionState.MovingOut)
         .Build();
 
     protected override void OnInitialized()

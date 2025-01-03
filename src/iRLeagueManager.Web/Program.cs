@@ -65,7 +65,9 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseStaticFiles("/_content");
+app.UseAuthorization();
+
+app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
@@ -73,7 +75,5 @@ app.MapRazorComponents<App>()
 app.UseRequestLocalization(new RequestLocalizationOptions()
     .AddSupportedCultures(["en-US", "de"])
     .AddSupportedUICultures(["en-US", "de"]));
-
-app.UseAuthorization();
 
 app.Run();

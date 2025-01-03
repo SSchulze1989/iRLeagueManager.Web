@@ -46,11 +46,18 @@
         {
             @if (vm.Standings.Count > 1)
             {
-                <MudTabs @bind-ActivePanelIndex="@vm.SelectedStandingIndex" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
+                <MudTabs ActivePanelIndex="@vm.SelectedStandingIndex" ActivePanelIndexChanged="@(SetSelectedStandingIndex)" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
                     @foreach ((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x, i)))
                     {
                         <MudTabPanel Text="@standing.Name">
-                            <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" />
+                            <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
+                                <Authorized>
+                                    <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" CanEdit="true" Refresh="Refresh"/>
+                                </Authorized>
+                                <NotAuthorized>
+                                    <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" Refresh="Refresh" />
+                                </NotAuthorized>
+                            </AuthorizeView>
                         </MudTabPanel>
                     }
                 </MudTabs>
@@ -58,7 +65,16 @@
             else
             {
                 var standing = vm.Standings.First();
-                <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" />
+                <MudTabPanel Text="@standing.Name">
+                    <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
+                        <Authorized>
+                            <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" CanEdit="true" Refresh="Refresh" />
+                        </Authorized>
+                        <NotAuthorized>
+                            <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" Refresh="Refresh" />
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </MudTabPanel>
             }
         }
     </MudElement>
@@ -106,6 +122,17 @@
         vm.SelectedStandingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
     }
 
+    private void SetSelectedStandingIndex(int index)
+    {
+        vm.SelectedStandingIndex = index;
+        if (index > vm.Standings.Count() || index < 0)
+        {
+            index = 0; ;
+        }
+        var uri = NavigationManager.GetUriWithQueryParameter(standingTabParam, index);
+        NavigationManager.NavigateTo(uri, replace: true);
+    }
+
     private string GetTabLink(int index)
     {
         var url = NavigationManager.GetUriWithQueryParameter(standingTabParam, index);
@@ -133,5 +160,15 @@
             return GetLatestStandingsLink();
         }
         return $"{NavigationManager.BaseUri}{LeagueName}/Results/Seasons/{Shared.SeasonId}";
+    }
+
+    private async Task Refresh()
+    {
+        if (Event is null)
+        {
+            await vm.LoadAsync();
+            return;
+        }
+        await vm.LoadFromEventAsync(Event.EventId);
     }
 }

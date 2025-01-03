@@ -11,10 +11,10 @@
             </MudText>
 
             @* Select new Team *@
-            <MudAutocomplete Label="New Team"
+            <MudAutocomplete Label="Select Team"
                              @bind-Value="newTeam"
+                             ResetValueOnEmptyText="true"
                              SearchFunc="SearchTeam"
-                             Placeholder="@currentTeam?.Name"
                              ToStringFunc="@(team => team?.Name)"
                              Clearable="true">
             </MudAutocomplete>

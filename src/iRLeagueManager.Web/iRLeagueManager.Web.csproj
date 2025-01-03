@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-	<Version>0.14.0-dev.1</Version>
+	<Version>0.14.0</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-iRLeagueManager.Web-2B05F9DC-55A3-49D1-BD64-31507000EDF3</UserSecretsId>
@@ -20,8 +20,8 @@
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageReference Include="CoreCLR-NCalc" Version="3.1.253" />
     <PackageReference Include="HtmlSanitizer" Version="8.1.870" />
-    <PackageReference Include="iRLeagueApiCore.Client" Version="0.14.0-dev.4" />
-    <PackageReference Include="iRLeagueApiCore.Common" Version="0.14.0-dev.4" />
+    <PackageReference Include="iRLeagueApiCore.Client" Version="0.14.0" />
+    <PackageReference Include="iRLeagueApiCore.Common" Version="0.14.0" />
     <PackageReference Include="Markdig" Version="0.39.1" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />

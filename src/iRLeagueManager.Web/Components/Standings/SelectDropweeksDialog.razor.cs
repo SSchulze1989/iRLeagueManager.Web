@@ -18,8 +18,14 @@ public partial class SelectDropweeksDialog : UtilityComponentBase
     [Parameter] public StandingsModel Standing { get; set; } = default!;
     [Parameter] public StandingRowModel StandingRow { get; set; } = default!;
 
-    private bool loading = false;
     private IEnumerable<DropweekOverrideModel> dropweekOverrides = [];
+
+    private enum DropMode
+    {
+        None,
+        AlwaysKeep,
+        AlwaysDrop,
+    }
 
     protected override void OnParametersSet()
     {
@@ -44,13 +50,13 @@ public partial class SelectDropweeksDialog : UtilityComponentBase
     {
         if (ApiService.CurrentLeague is null)
         {
-            return StatusResult.FailedResult("League Null", $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentLeague)} was null", Array.Empty<object>());
+            return StatusResult.FailedResult("League Null", $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentLeague)} was null", []);
         }
 
         using var cts = new CancellationTokenSource();
         try
         {
-            loading = true;
+            Loading = true;
             var requests = StandingRow.ResultRows
             .NotNull()
                 .Select(row =>
@@ -91,12 +97,120 @@ public partial class SelectDropweeksDialog : UtilityComponentBase
         }
         finally
         {
-            loading = false;
+            Loading = false;
         }
     }
 
-    //private async Task ToggleDropweek(bool isScored, DropweekOverrideModel dropweekOverride) 
-    //{ 
+    private async Task<StatusResult> DeleteDropweekOverride(long scoredResultRowId)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return StatusResult.FailedResult("League Null", $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentLeague)} was null", []);
+        }
 
-    //}
+        try
+        {
+            Loading = true;
+            var result = await ApiService.CurrentLeague
+                .Standings()
+                .WithId(Standing.StandingId)
+                .ResultRows()
+                .WithId(scoredResultRowId)
+                .DropweekOverride()
+                .Delete(CancellationToken);
+
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private async Task<StatusResult<DropweekOverrideModel>> SaveDropweekOverride(long scoredResultRowId, PutDropweekOverrideModel model)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return StatusResult<DropweekOverrideModel>.FailedResult("League Null", null, $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentLeague)} was null", []);
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await ApiService.CurrentLeague
+                .Standings()
+                .WithId(Standing.StandingId)
+                .ResultRows()
+                .WithId(scoredResultRowId)
+                .DropweekOverride()
+                .Put(model, CancellationToken);
+
+            return result.ToContentStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private async Task SetDropMode(long scoredResultRowId, DropMode mode)
+    {
+        switch (mode)
+        {
+            case DropMode.None:
+                await DeleteDropweekOverride(scoredResultRowId);
+                break;
+            case DropMode.AlwaysKeep:
+            case DropMode.AlwaysDrop:
+                var shouldDrop = mode == DropMode.AlwaysDrop;
+                await SaveDropweekOverride(scoredResultRowId, new()
+                {
+                    ShouldDrop = shouldDrop,
+                });
+                break;
+        }
+
+        await LoadDropweekOverrides();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task<StatusResult> CalculateStandings(long eventId)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await ApiService.CurrentLeague
+                .Events()
+                .WithId(eventId)
+                .Standings()
+                .Calculate()
+                .Post(CancellationToken);
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private async Task Close()
+    {
+        var latestEvent = Events.LastOrDefault(x => x.HasResult);
+        if (latestEvent is not null)
+        {
+            await CalculateStandings(latestEvent.Id);
+        }
+        var firstEvent = Events.FirstOrDefault(x => x.HasResult);
+        if (firstEvent is not null)
+        {
+            await CalculateStandings(firstEvent.Id);
+        }
+
+        MudDialog.Close();
+    }
 }

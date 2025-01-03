@@ -50,7 +50,14 @@
                     @foreach ((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x, i)))
                     {
                         <MudTabPanel Text="@standing.Name">
-                            <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" />
+                            <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
+                                <Authorized>
+                                    <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" CanEdit="true" Refresh="Refresh"/>
+                                </Authorized>
+                                <NotAuthorized>
+                                    <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" Refresh="Refresh" />
+                                </NotAuthorized>
+                            </AuthorizeView>
                         </MudTabPanel>
                     }
                 </MudTabs>
@@ -58,7 +65,16 @@
             else
             {
                 var standing = vm.Standings.First();
-                <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" />
+                <MudTabPanel Text="@standing.Name">
+                    <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
+                        <Authorized>
+                            <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" CanEdit="true" Refresh="Refresh" />
+                        </Authorized>
+                        <NotAuthorized>
+                            <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" Refresh="Refresh" />
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </MudTabPanel>
             }
         }
     </MudElement>
@@ -144,5 +160,15 @@
             return GetLatestStandingsLink();
         }
         return $"{NavigationManager.BaseUri}{LeagueName}/Results/Seasons/{Shared.SeasonId}";
+    }
+
+    private async Task Refresh()
+    {
+        if (Event is null)
+        {
+            await vm.LoadAsync();
+            return;
+        }
+        await vm.LoadFromEventAsync(Event.EventId);
     }
 }

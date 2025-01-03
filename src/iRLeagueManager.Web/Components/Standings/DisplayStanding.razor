@@ -1,6 +1,8 @@
 ﻿@namespace iRLeagueManager.Web.Components
 @using iRLeagueApiCore.Common.Models.Standings
 @using iRLeagueApiCore.Common.Models
+@inherits UtilityComponentBase
+@inject IDialogService DialogService
 
 <div @attributes=AdditionalAttributes>
     @{
@@ -16,7 +18,7 @@
 
     @if (showRaceByRace)
     {
-        <RaceByRacePoints Standing="Standing" Events="raceEvents"/>
+        <RaceByRacePoints Standing="Standing" Events="raceEvents" CanEdit="CanEdit" EditDropWeeks="EditDropWeeksClick"/>
     }
     else
     {
@@ -39,6 +41,9 @@
                 <ResultTableHeader Text="Wins" Sort="@(x => x.Wins)" Direction="SortDirection.Descending" />
                 <ResultTableHeader Text="Podiums" Sort="@(x => x.Top3)" Direction="SortDirection.Descending" />
                 <ResultTableHeader Text="Incidents" Sort="@(x => x.Incidents)" />
+                @if (CanEdit) {
+                    <th></th>
+                }
             </HeaderTemplate>
             <RowTemplate Context=Row>
                 <td class="px-1 py-1"><ValueChange Value=Row.Position Change=Row.PositionChange /></td>
@@ -62,6 +67,13 @@
                 <td class="px-1 py-1"><ValueChange Value=Row.Wins Change=Row.WinsChange /></td>
                 <td class="px-1 py-1">@Row.Top3</td>
                 <td class="px-1 py-1">@Row.Incidents</td>
+                @if (CanEdit) {
+                    <td class="pa-0">
+                        <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true" Size="Size.Small">
+                            <MudMenuItem OnClick="() => EditDropWeeksClick(Row)">Edit Dropweeks</MudMenuItem>
+                        </MudMenu>
+                    </td>
+                }
             </RowTemplate>
         </ResultTable>
     }
@@ -74,6 +86,10 @@
     public IDictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter, EditorRequired]
     public StandingsModel Standing { get; set; } = default!;
+    [Parameter]
+    public bool CanEdit { get; set; } = false;
+    [Parameter, EditorRequired]
+    public Func<Task> Refresh { get; set; } = default!;
 
     private bool showRaceByRace = false;
     private IEnumerable<EventModel> raceEvents = [];
@@ -82,6 +98,7 @@
     {
         base.OnParametersSet();
         BlazorParameterNullException.ThrowIfNull(this, EventList, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, Refresh);
         raceEvents = GetStandingEvents();
     }
 
@@ -108,5 +125,22 @@
             .Select(x => x.GetModel())
             .ToList();
         return events;
+    }
+
+    private async Task EditDropWeeksClick(StandingRowModel standingRow)
+    {
+        var parameters = new DialogParameters<SelectDropweeksDialog>()
+        {
+            { x => x.Events, raceEvents },
+            { x => x.Standing, Standing },
+            { x => x.StandingRow, standingRow },
+        };
+        var options = new DialogOptions()
+            {
+                MaxWidth = MaxWidth.Large,
+            };
+        await (await DialogService.ShowAsync<SelectDropweeksDialog>("Select dropweeks", parameters, options)).Result;
+        await Task.Delay(2000, CancellationToken);
+        await Refresh();
     }
 }

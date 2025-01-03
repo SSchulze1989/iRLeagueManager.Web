@@ -13,7 +13,7 @@
 <CascadingValue Value="InvolvedCars">
     <CascadingValue Value="ChipSize" Name="ChipSize">
         <MudCard Elevation="5" id="@($"review-card-{Review.ReviewId}")">
-            <MudExpansionPanel DisableGutters="true" Dense="true" HideIcon="true" @bind-IsExpanded="IsExpanded">
+            <MudExpansionPanel Gutters="false" Dense="true" HideIcon="true" @bind-Expanded="Expanded">
                 <TitleContent>
                     <MudStack Row="true" AlignItems="AlignItems.Center"
                               Class="surface-hover"
@@ -48,7 +48,7 @@
                             }
                         </MudText>
                         <MudSpacer />
-                        <MudIcon Icon="@(IsExpanded ? Icons.Material.Filled.KeyboardArrowUp : Icons.Material.Filled.KeyboardArrowDown)" />
+                        <MudIcon Icon="@(Expanded ? Icons.Material.Filled.KeyboardArrowUp : Icons.Material.Filled.KeyboardArrowDown)" />
                         <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
                             <ActivatorContent>
                                 <MudIconButton Icon="@Icons.Material.Outlined.Menu" Style="padding: 6px; margin: -6px" />
@@ -224,7 +224,7 @@
                     </MudCard>
                 </ChildContent>
             </MudExpansionPanel>
-            <MudCollapse Expanded="@(!IsExpanded)">
+            <MudCollapse Expanded="@(!Expanded)">
                 <MudPaper Class="ma-0 pa-4" Elevation="0">
                     <MudGrid>
                         <MudItem xs="2" Class="py-1 d-flex align-center">
@@ -291,7 +291,7 @@
 
     private string StatusColor => GetStatusColor(Selected, Review.Status);
 
-    private bool IsExpanded { get; set; } = false;
+    private bool Expanded { get; set; } = false;
 
     private string AddCssClass { get; set; } = string.Empty;
 

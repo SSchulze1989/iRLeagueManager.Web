@@ -5,7 +5,7 @@
 @inject LeaguesViewModel Vm
 
 <MudNavMenu>
-    <MudNavGroup Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.House" Href=@GetLeagueLink("") Title="@DisplayLeague.GetLeagueName(Shared.LeagueInfo, "Select League")">
+    <MudNavGroup Icon="@Icons.Material.Filled.House" Title="@DisplayLeague.GetLeagueName(Shared.LeagueInfo, "Select League")">
         @foreach(var league in Vm.Leagues)
         {
             <MudNavLink Icon="@Icons.Material.Filled.Person" OnClick="@(() => ForceNavigateTo($"/{league.LeagueName}", fullReload: true))" Style="cursor: pointer"><DisplayLeague League="league.GetModel()"/></MudNavLink>

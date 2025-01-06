@@ -65,16 +65,14 @@
             else
             {
                 var standing = vm.Standings.First();
-                <MudTabPanel Text="@standing.Name">
-                    <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
-                        <Authorized>
-                            <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" CanEdit="true" Refresh="Refresh" />
-                        </Authorized>
-                        <NotAuthorized>
-                            <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" Refresh="Refresh" />
-                        </NotAuthorized>
-                    </AuthorizeView>
-                </MudTabPanel>
+                <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
+                    <Authorized>
+                        <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" CanEdit="true" Refresh="Refresh" />
+                    </Authorized>
+                    <NotAuthorized>
+                        <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" Refresh="Refresh" />
+                    </NotAuthorized>
+                </AuthorizeView>
             }
         }
     </MudElement>

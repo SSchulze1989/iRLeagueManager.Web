@@ -1,0 +1,71 @@
+﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Models
+
+<MudTable Items="ResultRows.OrderBy(x => x.FinishPosition)"
+          Class="py-4 px-6"
+          Striped="true"
+          Bordered="true"
+          Dense="true"
+          CanCancelEdit="true"
+          RowEditCancel="@(row => ((RawResultRowViewModel)row).Reset())"
+          RowEditCommit="@(row => ApplyRowChanges((RawResultRowViewModel)row))"
+          OnCommitEditClick="@(() => InvokeAsync(StateHasChanged))">
+    <HeaderContent>
+        <MudTh>Position</MudTh>
+        <MudTh>Start Position</MudTh>
+        <MudTh>Member</MudTh>
+        <MudTh>Completed Laps</MudTh>
+        <MudTh>Points</MudTh>
+        <MudTh>Interval</MudTh>
+        <MudTh>Fastest Lap</MudTh>
+        <MudTh>Incidents</MudTh>
+    </HeaderContent>
+    <RowTemplate Context="Row">
+        @{
+            var index = ResultRows.IndexOf(Row);
+        }
+        <MudTd DataLabel="Position">@Row.FinishPosition</MudTd>
+        <MudTd DataLabel="Start Position">@Row.StartPosition</MudTd>
+        <MudTd DataLabel="Member">@GetMemberNameFromId(Row.MemberId)</MudTd>
+        <MudTd DataLabel="Completed Laps">@Row.CompletedLaps</MudTd>
+        <MudTd DataLabel="Points">@Row.RacePoints</MudTd>
+        <MudTd DataLabel="Interval">@Row.Interval.LapTimeString()</MudTd>
+        <MudTd DataLabel="Fastest Lap">@Row.FastestLapTime.LapTimeString()</MudTd>
+        <MudTd DataLabel="Incidents">@Row.Incidents</MudTd>
+    </RowTemplate>
+    <RowEditingTemplate Context="Row">
+        <MudTd DataLabel="Position">
+            <MudNumericField @bind-Value="Row.FinishPosition" />
+        </MudTd>
+        <MudTd DataLabel="Start Position">
+            <MudNumericField @bind-Value="Row.StartPosition" />
+        </MudTd>
+        <MudTd DataLabel="Member">
+            <MudAutocomplete Label="Members"
+                             @bind-Value="Row.MemberId"
+                             SearchFunc="SearchMembers"
+                             ToStringFunc="GetMemberNameFromId"
+                             Variant="Variant.Outlined"
+                             MaxItems="1000" />
+        </MudTd>
+        <MudTd DataLabel="Completed Laps">
+            <MudNumericField @bind-Value="Row.CompletedLaps" />
+        </MudTd>
+        <MudTd DataLabel="Points">
+            <MudNumericField @bind-Value="Row.RacePoints" />
+        </MudTd>
+        <MudTd DataLabel="Interval">
+            <MudTextField @bind-Value="Row.Interval" />
+        </MudTd>
+        <MudTd DataLabel="Fastest Lap">
+            <MudTextField @bind-Value="Row.FastestLapTime" />
+        </MudTd>
+        <MudTd DataLabel="Incidents">
+            <MudNumericField @bind-Value="Row.Incidents" />
+        </MudTd>
+    </RowEditingTemplate>
+</MudTable>
+
+@code {
+
+}

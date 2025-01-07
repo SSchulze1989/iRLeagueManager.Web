@@ -1,0 +1,64 @@
+﻿@namespace iRLeagueManager.Web.Pages
+@page "/{LeagueName}/Results/Events/{EventId:long}/Edit"
+@using System.Reflection
+@using System.Linq.Expressions
+@using iRLeagueApiCore.Common.Models
+@inherits LeagueComponentBase
+@inject EditResultViewModel Result
+
+<PageTitle>
+    Edit Result - @LeagueName
+</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+    <LoadingHeader Loading=@Bind(Result, x => x.Loading)>
+        <HeaderText>
+            <MudText Typo="Typo.h5">Edit Result</MudText>
+        </HeaderText>
+    </LoadingHeader>
+
+    @foreach (var sessionResult in Result.SessionResults.AsEnumerable().Reverse())
+    {
+        var sessionName = Event?.Sessions.FirstOrDefault(x => x.SessionId == sessionResult.SessionId)?.Name;
+        <MudElement HtmlTag="div" Class="mt-3">
+            <MudText Typo="Typo.h6">@sessionName</MudText>
+            <EditResultTable SessionResult="sessionResult" Members="Result.Members" />
+            @if (sessionResult.HasChanges)
+            {
+                <MudStack Row="true" Justify="Justify.FlexEnd">
+                    <MudButton>Save</MudButton>
+                    <MudButton>Reset</MudButton>
+                </MudStack>
+            }
+        </MudElement>
+    }
+</MudContainer>
+
+@code {
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Result.HasChanged += OnResultChanged;
+    }
+
+    private void OnResultChanged(object? sender, EventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnEventChangedAsync(EventViewModel? @event)
+    {
+        if (@event is null)
+        {
+            Result.SetModel(new());
+            return;
+        }
+        await Result.Load(@event.EventId);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        Result.HasChanged -= OnResultChanged;
+        base.Dispose(disposing);
+    }
+}

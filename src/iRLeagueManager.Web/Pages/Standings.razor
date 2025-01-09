@@ -46,13 +46,13 @@
         {
             @if (vm.Standings.Count > 1)
             {
-                <MudTabs ActivePanelIndex="@vm.SelectedStandingIndex" ActivePanelIndexChanged="@(SetSelectedStandingIndex)" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
+                <MudTabs @bind-ActivePanelIndex="SelectedStandingIndex" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
                     @foreach ((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x, i)))
                     {
                         <MudTabPanel Text="@standing.Name">
                             <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
                                 <Authorized>
-                                    <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" CanEdit="true" Refresh="Refresh"/>
+                                    <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" CanEdit="true" Refresh="Refresh" />
                                 </Authorized>
                                 <NotAuthorized>
                                     <DisplayStanding class="px-0 mt-2 mb-2 mx-0" Standing="standing" Refresh="Refresh" />
@@ -83,6 +83,29 @@
     public Breakpoint Breakpoint { get; set; }
 
     private const string standingTabParam = "standingTab";
+    [Parameter]
+    [SupplyParameterFromQuery(Name = standingTabParam)]
+    public int SelectedStandingIndexParam { get; set; } = 0;
+
+    private int selectedStandingIndex;
+    public int SelectedStandingIndex
+    {
+        get => selectedStandingIndex;
+        set
+        {
+            if (selectedStandingIndex != value)
+            {
+                selectedStandingIndex = value;
+                NavigationManager.NavigateTo(GetTabLink(value), replace: true);
+            }
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        selectedStandingIndex = SelectedStandingIndexParam;
+    }
 
     protected override void OnInitialized()
     {
@@ -97,38 +120,20 @@
             var standingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
             await vm.LoadFromEventAsync(@event.EventId);
 
-            if (standingIndex >= vm.Standings.Count() || standingIndex < 0)
+            var standingsCount = vm.Standings.Count();
+            if (SelectedStandingIndex < 0)
             {
-                standingIndex = 0;
+                selectedStandingIndex = 0;
             }
-            var navUri = $"/{LeagueName}/Standings/Events/{@event.EventId}?{standingTabParam}={standingIndex}";
+            if (standingsCount > 0 && SelectedStandingIndex >= vm.Standings.Count())
+            {
+                selectedStandingIndex = standingsCount - 1;
+            }
+            var navUri = $"/{LeagueName}/Standings/Events/{@event.EventId}";
             bool replace = NavigationManager.Uri.Contains($"/Events/") == false || NavigationManager.Uri.Contains(navUri);
+            navUri = $"{navUri}?{standingTabParam}={standingIndex}";
             NavigationManager.NavigateTo(navUri, replace: replace);
         }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-        if (firstRender == false) return;
-
-        vm.SelectedStandingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
-    }
-
-    protected override void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        vm.SelectedStandingIndex = NavigationManager.QueryParameter<int>(standingTabParam);
-    }
-
-    private void SetSelectedStandingIndex(int index)
-    {
-        vm.SelectedStandingIndex = index;
-        if (index > vm.Standings.Count() || index < 0)
-        {
-            index = 0; ;
-        }
-        var uri = NavigationManager.GetUriWithQueryParameter(standingTabParam, index);
-        NavigationManager.NavigateTo(uri, replace: true);
     }
 
     private string GetTabLink(int index)

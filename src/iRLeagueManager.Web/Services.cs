@@ -52,6 +52,7 @@ public static class Services
         services.TryAddTransient<ResultFilterViewModel>();
         services.TryAddTransient<FilterConditionViewModel>();
         services.TryAddScoped<ResultsPageViewModel>();
+        services.TryAddScoped<EditResultViewModel>();
         services.TryAddScoped<ResultSettingsViewModel>();
         services.TryAddScoped<ReviewsPageViewModel>();
         services.TryAddScoped<EventListViewModel>();

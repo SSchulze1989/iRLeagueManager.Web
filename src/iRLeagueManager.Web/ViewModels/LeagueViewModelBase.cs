@@ -172,7 +172,12 @@ public abstract class LeagueViewModelBase<TViewModel, TModel> : LeagueViewModelB
 
     public virtual TModel CopyModel()
     {
-        return ModelHelper.CopyModel(model)!;
+        return CopyModel(model);
+    }
+
+    public virtual TModel CopyModel(TModel source)
+    {
+        return ModelHelper.CopyModel(source)!;
     }
 
     public virtual void ResetChangedState()

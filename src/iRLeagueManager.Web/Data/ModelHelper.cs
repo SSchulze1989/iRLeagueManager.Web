@@ -17,7 +17,20 @@ internal static class ModelHelper
             return model;
         }
 
-        return (T?)JsonSerializer.Deserialize(JsonSerializer.Serialize(model), typeof(T))
+        return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(model))
             ?? throw new InvalidOperationException("Could not copy model");
+    }
+
+    public static T CopyModelProperties<T>(T source, T target)
+    {
+        var modelType = typeof(T);
+        var properties = modelType.GetProperties()
+            .Where(x => x.SetMethod != null);
+        foreach (var property in properties)
+        {
+            var value = property.GetValue(source);
+            property.SetValue(target, value);
+        }
+        return target;
     }
 }

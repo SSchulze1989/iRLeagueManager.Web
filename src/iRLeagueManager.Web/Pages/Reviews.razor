@@ -38,7 +38,7 @@
     <MudElement HtmlTag="div" Class="mt-3">
         @if (ReviewsVm.ProtestsEnabled)
         {
-            <MudTabs Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
+            <MudTabs Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")" ActivePanelIndex="SelectedTabIndex">
                 <MudTabPanel Text="Reviews" OnClick="@(() => NavigateTo(GetTabLink(0)))" />
                 <MudTabPanel Text="Protests" OnClick="@(() => NavigateTo(GetTabLink(1)))" />
             </MudTabs>
@@ -161,42 +161,26 @@
     [CascadingParameter]
     public Breakpoint Breakpoint { get; set; }
 
+    // Query parameters
+    private const string tabIndexParam = "tabIndex";
+    [Parameter]
+    [SupplyParameterFromQuery(Name = tabIndexParam)]
+    public int SelectedTabIndex { get; set; }
+
+    private const string reviewIdParam = "reviewId";
+    [Parameter]
+    [SupplyParameterFromQuery(Name = reviewIdParam)]
+    public long SelectedReviewId { get; set; } = -1;
+
     private string UserId { get; set; } = string.Empty;
 
     private bool ReadOnly => Shared.SeasonFinished;
 
     private IEnumerable<VoteCategoryModel> AvailableVoteCategories = Array.Empty<VoteCategoryModel>();
 
-    // Query parameters
-    private const string tabIndexParam = "tabIndex";
-    private const string reviewIdParam = "reviewId";
-
-    private int selectedTabIndex;
-    private int SelectedTabIndex
-    {
-        get => selectedTabIndex;
-        set
-        {
-            if (selectedTabIndex != value)
-            {
-                selectedTabIndex = value;
-                _ = SelectedTabChanged();
-            }
-        }
-    }
-    private long SelectedReviewId { get; set; }
-
-    protected override void OnInitialized()
-    {
-        NavigationManager.LocationChanged += OnLocationChanged;
-        SelectedTabIndex = NavigationManager.QueryParameter<int>(tabIndexParam);
-        SelectedReviewId = NavigationManager.QueryParameter<long>(reviewIdParam);
-        base.OnInitialized();
-    }
-
     protected override async Task OnParametersSetAsync()
     {
-        _ = AuthTask ?? throw BlazorParameterNullException.New(this, AuthTask);
+        BlazorParameterNullException.ThrowIfNull(this, AuthTask);
         await SetCurrentUserId();
     }
 
@@ -207,8 +191,6 @@
         {
             return;
         }
-        SelectedTabIndex = NavigationManager.QueryParameter<int>(tabIndexParam);
-        SelectedReviewId = NavigationManager.QueryParameter<long>(reviewIdParam);
         await ReviewsVm.LoadUsers();
         await ReviewsVm.LoadVoteCategories();
         StateHasChanged();
@@ -240,18 +222,13 @@
 
     private IReadOnlyDictionary<string, object?> GetQueryParameters()
     {
-        return new Dictionary<string, object?>()
+        var dict = new Dictionary<string, object?>();
+        dict.Add(tabIndexParam, SelectedTabIndex);
+        if (SelectedReviewId > 0)
         {
-            {tabIndexParam, SelectedTabIndex},
-            {reviewIdParam, SelectedReviewId},
-        };
-    }
-
-    protected override void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        SelectedTabIndex = NavigationManager.QueryParameter<int>(tabIndexParam);
-        SelectedReviewId = NavigationManager.QueryParameter<long>(reviewIdParam);
-        StateHasChanged();
+            dict.Add(reviewIdParam, SelectedReviewId);
+        }
+        return dict;
     }
 
     private async Task SetCurrentUserId()
@@ -363,11 +340,6 @@
             .ThenBy(x => x.Corner.PadNumbers());
     }
 
-    public async Task SelectedTabChanged()
-    {
-        await InvokeAsync(StateHasChanged);
-    }
-
     private string GetTabLink(int tabIndex)
     {
         var url = NavigationManager.GetUriWithQueryParameter(tabIndexParam, tabIndex);
@@ -398,7 +370,7 @@
     {
         if (Event is null)
         {
-            return GetCurrentSeasonLatestReviewLink();    
+            return GetCurrentSeasonLatestReviewLink();
         }
         return $"{NavigationManager}{LeagueName}/Reviews/Events/{Event.EventId}";
     }

@@ -16,8 +16,8 @@
             <MudExpansionPanel Gutters="false" Dense="true" HideIcon="true" @bind-Expanded="Expanded">
                 <TitleContent>
                     <MudStack Row="true" AlignItems="AlignItems.Center"
-                              Class="surface-hover"
-                              Style="@($@"
+                    Class="surface-hover"
+                    Style="@($@"
                         margin: -16px -24px -16px -24px;
                         padding: 10px 1.5em;
                         background-color: var(--mud-palette-surface);
@@ -208,17 +208,17 @@
                                             <MudDivider DividerType="DividerType.Middle" />
                                         }
                                         <ReviewComment Comment=comment
-                                                       IsTeamEvent="IsTeamEvent"
-                                                       OnStateHasChanged=@(() => CommentStateChanged(comment))
-                                                       OnDeleteClick=@(() => DeleteCommentClick(comment)) />
+                                        IsTeamEvent="IsTeamEvent"
+                                        OnStateHasChanged=@(() => CommentStateChanged(comment))
+                                        OnDeleteClick=@(() => DeleteCommentClick(comment)) />
                                     }
                                 </MudStack>
                             }
                             @if (IsSteward && Bind(Review, x => x.Comments).Any(x => x.AuthorUserId == UserId) == false)
                             {
                                 <MudButton StartIcon="@Icons.Material.Outlined.AddComment"
-                                           Color="Color.Tertiary" Class="ma-2"
-                                           OnClick="AddCommentClick">Add Comment</MudButton>
+                                Color="Color.Tertiary" Class="ma-2"
+                                OnClick="AddCommentClick">Add Comment</MudButton>
                             }
                         </MudStack>
                     </MudCard>
@@ -297,8 +297,6 @@
 
     private Size ChipSize => Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? Size.Small : Size.Medium;
 
-    public bool Collapsed { get; set; } = true;
-
     private bool IsTeamEvent => EventCars.IsTeamEvent;
 
     private IEnumerable<EventCarInfoModel> InvolvedCars { get; set; } = Array.Empty<EventCarInfoModel>();
@@ -310,7 +308,7 @@
         BlazorParameterNullException.ThrowIfNull(this, VoteCategories);
         var addClassAttribute = (AdditionalAttributes?.TryGetValue("class", out var @class) == true) ? @class : string.Empty;
         AddCssClass = addClassAttribute.ToString()!;
-        Collapsed &= !Selected;
+        Expanded |= Selected;
         InvolvedCars = GetInvolvedCars();
         StateHasChanged();
     }
@@ -326,11 +324,6 @@
         {
             await ScrollToElementId($"review-card-{Review.ReviewId}");
         }
-    }
-
-    private void ToggleCollapsed()
-    {
-        Collapsed = !Collapsed;
     }
 
     private async Task Delete()
@@ -427,7 +420,7 @@
 
     protected async Task ScrollToElementId(string id)
     {
-        await JsRuntime.InvokeVoidAsync("scrollToElementId", id);
+        await JsRuntime.InvokeVoidAsync("scrollPageElementToTop", id);
     }
 
     private IEnumerable<EventCarInfoModel> GetInvolvedCars()

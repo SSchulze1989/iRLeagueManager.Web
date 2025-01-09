@@ -21,6 +21,10 @@
         </HeaderText>
     </LoadingHeader>
 
+    <MudAlert Severity="Severity.Warning">
+        Editing the raw results cannot be undone automatically after clicking "Save". Please take care when editing your leagues results.
+    </MudAlert>
+
     @foreach (var sessionResult in Result.SessionResults.AsEnumerable().Reverse())
     {
         var sessionName = Event?.Sessions.FirstOrDefault(x => x.SessionId == sessionResult.SessionId)?.Name;

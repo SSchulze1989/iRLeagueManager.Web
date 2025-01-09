@@ -9,7 +9,7 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
         base(loggerFactory, apiService)
     {
         this.eventList = eventList.EventList;
-        results = new ObservableCollection<EventResultViewModel>();
+        results = [];
     }
 
     private long? loadedSeasonId;
@@ -17,12 +17,6 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
 
     private List<EventViewModel> eventList;
     public List<EventViewModel> EventList { get => eventList; set => Set(ref eventList, value); }
-
-    private int selectedResultIndex;
-    public int SelectedResultIndex { get => selectedResultIndex; set { if (Set(ref selectedResultIndex, value)) OnPropertyChanged(nameof(SelectedEventResult)); } }
-
-    //private long? selectedSessionId;
-    //public long? SelectedSessionId { get => selectedSessionId; set { if (Set(ref selectedSessionId, value)) _ = OnSelectedSessionChanged(value); } }
 
     private EventViewModel? selectedEvent;
     public EventViewModel? SelectedEvent
@@ -35,8 +29,6 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
     public ObservableCollection<EventResultViewModel> Results { get => results; set => Set(ref results, value); }
 
     public event Action<EventViewModel?>? SelectedSessionChanged;
-
-    public EventResultViewModel? SelectedEventResult => Results.ElementAtOrDefault(SelectedResultIndex);
 
     public async Task LoadEventListAsync()
     {
@@ -101,11 +93,6 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
             }
             var results = requestResult.Content;
             Results = new ObservableCollection<EventResultViewModel>(results.Select(x => new EventResultViewModel(LoggerFactory, ApiService, x)));
-
-            if (SelectedResultIndex > Results.Count)
-            {
-                SelectedResultIndex = Results.Count;
-            }
         }
         finally
         {

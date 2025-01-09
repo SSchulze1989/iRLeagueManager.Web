@@ -42,18 +42,18 @@
                             @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
                             {
                                 <MudButton OnClick=TriggerCalculation
-                                           Variant="Variant.Outlined"
-                                           StartIcon="@Icons.Material.Filled.Loop">
+                                Variant="Variant.Outlined"
+                                StartIcon="@Icons.Material.Filled.Loop">
                                     Calculate
                                 </MudButton>
                                 @if (vm.Results.Count > 0)
                                 {
                                     <MudTooltip Text="Delete Results"
-                                                Delay="0.5"
-                                                Arrow="true">
+                                    Delay="0.5"
+                                    Arrow="true">
                                         <MudIconButton Variant="Variant.Outlined"
-                                                       Icon="@Icons.Material.Filled.Delete"
-                                                       Color="@Color.Error" OnClick=DeleteResultsClick />
+                                        Icon="@Icons.Material.Filled.Delete"
+                                        Color="@Color.Error" OnClick=DeleteResultsClick />
                                     </MudTooltip>
                                 }
                             }
@@ -74,7 +74,7 @@
             {
                 @if (vm.Results.Count > 1)
                 {
-                    <MudTabs @bind-ActivePanelIndex="@SelectedTabIndex" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
+                    <MudTabs @bind-ActivePanelIndex="SelectedTabIndex" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
                         @foreach ((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x, i)))
                         {
                             <MudTabPanel Text="@eventResult.Name">
@@ -130,55 +130,59 @@
 </CascadingValue>
 
 @code {
-    private const string resultTabParam = "resultTab";
-
-    private int SelectedTabIndex { get => vm.SelectedResultIndex; set => SetSelectedResultIndex(value); }
-
     [CascadingParameter]
     public SharedStateService SharedState { get; set; } = default!;
     [CascadingParameter]
     public Breakpoint Breakpoint { get; set; }
+    private const string resultTabParam = "resultTab";
+    [Parameter]
+    [SupplyParameterFromQuery(Name = resultTabParam)]
+    public int SelectedTabIndexParam { get; set; } = 0;
 
+    private int selectedTabIndex;
+    private int SelectedTabIndex
+    {
+        get => selectedTabIndex;
+        set
+        {
+            if (selectedTabIndex != value)
+            {
+                selectedTabIndex = value;
+                NavigationManager.NavigateTo(GetTabLink(value), replace: true);
+            }
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
         await Task.FromResult(true);
     }
 
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        selectedTabIndex = SelectedTabIndexParam;
+    }
+
     protected override async Task OnEventChangedAsync(EventViewModel? @event)
     {
         if (@event?.EventId != null)
         {
-            var resultIndex = NavigationManager.QueryParameter<int>(resultTabParam);
             await vm.LoadFromEventAsync(@event.EventId);
-
-            if (resultIndex >= vm.Results.Count() || resultIndex < 0)
+            var resultCount = vm.Results.Count();
+            if (SelectedTabIndex < 0)
             {
-                resultIndex = 0;
+                selectedTabIndex = 0;
             }
-            var navUri = $"/{LeagueName}/Results/Events/{@event.EventId}?{resultTabParam}={resultIndex}";
+            if (resultCount > 0 && selectedTabIndex >= resultCount)
+            {
+                selectedTabIndex = resultCount - 1;
+            }
+            var navUri = $"/{LeagueName}/Results/Events/{@event.EventId}";
             bool replace = NavigationManager.Uri.Contains($"/Events/") == false || NavigationManager.Uri.Contains(navUri);
-            NavigationManager.NavigateTo(navUri, replace: replace);
+            navUri = $"{navUri}?{resultTabParam}={SelectedTabIndex}";
+            NavigateTo(navUri, replace: replace);
         }
-    }
-
-    protected override void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        vm.SelectedResultIndex = NavigationManager.QueryParameter<int>(resultTabParam);
-    }
-
-    protected async override Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-        if (firstRender == false) return;
-
-        vm.SelectedResultIndex = NavigationManager.QueryParameter<int>(resultTabParam);
-    }
-
-    private void SetSelectedResultIndex(int index)
-    {
-        vm.SelectedResultIndex = index;
-        NavigationManager.NavigateTo(GetTabLink(index), replace: true);
     }
 
     private string GetTabLink(int index)

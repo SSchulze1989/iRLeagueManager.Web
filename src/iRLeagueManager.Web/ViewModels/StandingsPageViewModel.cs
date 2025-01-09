@@ -9,16 +9,11 @@ public sealed class StandingsPageViewModel : LeagueViewModelBase<StandingsPageVi
     public StandingsPageViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         base(loggerFactory, apiService)
     {
-        standings = new ObservableCollection<StandingsModel>();
+        standings = [];
     }
 
     private ObservableCollection<StandingsModel> standings;
     public ObservableCollection<StandingsModel> Standings { get => standings; set => Set(ref standings, value); }
-
-    private int selectedStandingIndex;
-    public int SelectedStandingIndex { get => selectedStandingIndex; set { if (Set(ref selectedStandingIndex, value)) OnPropertyChanged(nameof(SelectedStanding)); } }
-
-    public StandingsModel? SelectedStanding => Standings.ElementAtOrDefault(SelectedStandingIndex);
 
     public async Task<StatusResult> LoadFromEventAsync(long eventId)
     {

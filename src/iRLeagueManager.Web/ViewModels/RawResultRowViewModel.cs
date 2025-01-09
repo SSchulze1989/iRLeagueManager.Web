@@ -9,7 +9,7 @@ public sealed class RawResultRowViewModel : LeagueViewModelBase<RawResultRowView
     {
     }
 
-    private RawResultRowModel modelCopy;
+    private RawResultRowModel modelCopy = new();
 
     public int FinishPosition { get => (int)model.FinishPosition; set => SetP(model.FinishPosition, value => model.FinishPosition = value, value);}
     public int StartPosition { get => (int)model.StartPosition; set => SetP(model.StartPosition, value => model.StartPosition = value, value);}
@@ -29,7 +29,8 @@ public sealed class RawResultRowViewModel : LeagueViewModelBase<RawResultRowView
 
     public void Reset()
     {
-        SetModel(modelCopy);
+        ModelHelper.CopyModelProperties(modelCopy, model);
+        ResetChangedState();
     }
 
     public void ApplyChanges()

@@ -9,7 +9,8 @@
           CanCancelEdit="true"
           RowEditCancel="@(row => ((RawResultRowViewModel)row).Reset())"
           RowEditCommit="@(row => ApplyRowChanges((RawResultRowViewModel)row))"
-          OnCommitEditClick="@(() => InvokeAsync(StateHasChanged))">
+          OnCommitEditClick="@(() => InvokeAsync(StateHasChanged))"
+          Loading="SessionResult.Loading">
     <HeaderContent>
         <MudTh>Position</MudTh>
         <MudTh>Start Position</MudTh>

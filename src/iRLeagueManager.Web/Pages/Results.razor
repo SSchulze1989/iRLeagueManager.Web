@@ -41,21 +41,18 @@
                         <MudStack Row="true" Justify="Justify.FlexEnd" Style="flex-grow: 1">
                             @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
                             {
-                                <MudButton OnClick=TriggerCalculation
-                                Variant="Variant.Outlined"
-                                StartIcon="@Icons.Material.Filled.Loop">
-                                    Calculate
-                                </MudButton>
-                                @if (vm.Results.Count > 0)
-                                {
-                                    <MudTooltip Text="Delete Results"
-                                    Delay="0.5"
-                                    Arrow="true">
-                                        <MudIconButton Variant="Variant.Outlined"
-                                        Icon="@Icons.Material.Filled.Delete"
-                                        Color="@Color.Error" OnClick=DeleteResultsClick />
-                                    </MudTooltip>
-                                }
+                                <MudMenu Icon="@Icons.Material.Filled.Menu">
+                                    <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => NavigateTo($"{GetCurrentResultLink()}/Edit"))">Edit Raw Results</MudMenuItem>
+                                    <MudMenuItem Icon="@Icons.Material.Filled.Loop" OnClick="TriggerCalculation">
+                                        Calculate
+                                    </MudMenuItem>
+                                    @if (vm.Results.Count > 0)
+                                    {
+                                        <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="@Color.Error" OnClick=DeleteResultsClick>
+                                            Clear Calculated Results
+                                        </MudMenuItem>
+                                    }
+                                </MudMenu>
                             }
                         </MudStack>
                     </Authorized>

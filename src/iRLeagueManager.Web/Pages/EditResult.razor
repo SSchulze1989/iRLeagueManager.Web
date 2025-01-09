@@ -5,6 +5,7 @@
 @using iRLeagueApiCore.Common.Models
 @inherits LeagueComponentBase
 @inject EditResultViewModel Result
+@inject IDialogService DialogService
 
 <PageTitle>
     Edit Result - @LeagueName
@@ -12,10 +13,10 @@
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
     <LoadingHeader Loading=@Bind(Result, x => x.Loading)>
-        <HeaderText >
+        <HeaderText>
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Style="margin-left: -0.5em">
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Href="@($"/{LeagueName}/Results/Events/{EventId}")"/>
-            <MudText Typo="Typo.h5">Edit Result</MudText>
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Href="@($"/{LeagueName}/Results/Events/{EventId}")" />
+                <MudText Typo="Typo.h5">Edit Result</MudText>
             </MudStack>
         </HeaderText>
     </LoadingHeader>
@@ -30,15 +31,15 @@
             {
                 <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" Class="m-2">
                     <MudButton Color="Color.Primary"
-                               Variant="Variant.Filled"
-                               Size="Size.Large"
-                               Onclick="@(async () => await sessionResult.SaveAsync(Event?.EventId ?? 0, CancellationToken))">
+                    Variant="Variant.Filled"
+                    Size="Size.Large"
+                    Onclick="@(async () => await SaveSessionResult(sessionResult))">
                         Save
                     </MudButton>
                     <MudButton Color="Color.Secondary"
-                               Variant="Variant.Outlined"
-                               Size="Size.Large"
-                               OnClick="@(() => sessionResult.Reset())">
+                    Variant="Variant.Outlined"
+                    Size="Size.Large"
+                    OnClick="@(() => sessionResult.Reset())">
                         Reset
                     </MudButton>
                 </MudStack>
@@ -73,5 +74,29 @@
     {
         Result.HasChanged -= OnResultChanged;
         base.Dispose(disposing);
+    }
+
+    private async Task SaveSessionResult(RawSessionResultViewModel sessionResult)
+    {
+        if (Event is null)
+        {
+            return;
+        }
+        var status = await sessionResult.SaveAsync(Event.EventId, CancellationToken);
+        if (!status.IsSuccess)
+        {
+            return;
+        }
+
+        var dialogParameters = new DialogParameters<ConfirmDialog>()
+        {
+            { x => x.ButtonTypes, ButtonTypes.YesNo },
+        };
+        var confirmDialog = await DialogService.Show<ConfirmDialog>("Calculate results?", dialogParameters).Result;
+        if (confirmDialog?.Canceled != false) 
+        {
+            return;
+        }
+        await Result.CalculateResults(CancellationToken);
     }
 }

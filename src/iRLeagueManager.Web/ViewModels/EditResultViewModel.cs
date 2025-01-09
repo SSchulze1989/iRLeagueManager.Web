@@ -6,10 +6,13 @@ namespace iRLeagueManager.Web.ViewModels;
 
 public sealed class EditResultViewModel : LeagueViewModelBase<EditResultViewModel, RawEventResultModel>
 {
-    public EditResultViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService)
+    public EditResultViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, EventListViewModel eventList)
         : base(loggerFactory, apiService, new())
     {
+        this.eventList = eventList;
     }
+
+    private readonly EventListViewModel eventList;
 
     private List<TeamInfoModel> teams = [];
     public List<TeamInfoModel> Teams { get => teams; set => Set(ref teams, value); }
@@ -111,5 +114,22 @@ public sealed class EditResultViewModel : LeagueViewModelBase<EditResultViewMode
                 ParentViewModel = this,
             })
             .ToList();
+    }
+
+    public async Task<StatusResult> CalculateResults(CancellationToken cancellationToken)
+    {
+        try
+        {
+            Loading = true;
+            ResultsPageViewModel resultsPageVm = new(LoggerFactory, ApiService, eventList)
+            {
+                SelectedEvent = eventList.Selected
+            };
+            return await resultsPageVm.TriggerCalculation(cancellationToken);
+        }
+        finally
+        {
+            Loading = false;
+        }
     }
 }

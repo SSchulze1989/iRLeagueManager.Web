@@ -1,4 +1,5 @@
 ﻿@namespace iRLeagueManager.Web.Components
+@using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
 
 <MudTable Items="ResultRows.OrderBy(x => x.FinishPosition)"
@@ -11,15 +12,31 @@
           RowEditCommit="@(row => ApplyRowChanges((RawResultRowViewModel)row))"
           OnCommitEditClick="@(() => InvokeAsync(StateHasChanged))"
           Loading="SessionResult.Loading">
+    <ColGroup>
+        <col style="width: 5em;" />
+        <col style="width: 5em;" />
+        <col style="width: 25%;" />
+        <col style="width: 5em;" />
+        <col style="width: 5em;" />
+        <col style="width: 5em;" />
+        <col style="width: 8em;" />
+        <col style="width: 12em" />
+        <col style="width: 12em" />
+        <col style="width: 6em;" />
+        <col style="width: 10em" />
+    </ColGroup>
     <HeaderContent>
         <MudTh>Position</MudTh>
         <MudTh>Start Position</MudTh>
         <MudTh>Member</MudTh>
-        <MudTh>Completed Laps</MudTh>
+        <MudTh>Car Nr.</MudTh>
         <MudTh>Points</MudTh>
+        <MudTh>Compl. Laps</MudTh>
+        <MudTh>Lead Laps</MudTh>
         <MudTh>Interval</MudTh>
         <MudTh>Fastest Lap</MudTh>
         <MudTh>Incidents</MudTh>
+        <MudTh>Status</MudTh>
     </HeaderContent>
     <RowTemplate Context="Row">
         @{
@@ -28,11 +45,14 @@
         <MudTd DataLabel="Position">@Row.FinishPosition</MudTd>
         <MudTd DataLabel="Start Position">@Row.StartPosition</MudTd>
         <MudTd DataLabel="Member">@GetMemberNameFromId(Row.MemberId)</MudTd>
-        <MudTd DataLabel="Completed Laps">@Row.CompletedLaps</MudTd>
+        <MudTd DataLabel="Car Nr.">@Row.CarNumber</MudTd>
         <MudTd DataLabel="Points">@Row.RacePoints</MudTd>
+        <MudTd DataLabel="Completed Laps">@Row.CompletedLaps</MudTd>
+        <MudTd DataLabel="Lead Laps">@Row.LeadLaps</MudTd>
         <MudTd DataLabel="Interval">@Row.Interval.LapTimeString()</MudTd>
         <MudTd DataLabel="Fastest Lap">@Row.FastestLapTime.LapTimeString()</MudTd>
         <MudTd DataLabel="Incidents">@Row.Incidents</MudTd>
+        <MudTd DataLabel="Status">@Row.Status</MudTd>
     </RowTemplate>
     <RowEditingTemplate Context="Row">
         <MudTd DataLabel="Position">
@@ -49,11 +69,17 @@
                              Variant="Variant.Outlined"
                              MaxItems="1000" />
         </MudTd>
-        <MudTd DataLabel="Completed Laps">
-            <MudNumericField @bind-Value="Row.CompletedLaps" />
+        <MudTd DataLabel="Car Nr.">
+            <MudTextField @bind-Value="Row.CarNumber" MaxLength="3" />
         </MudTd>
         <MudTd DataLabel="Points">
             <MudNumericField @bind-Value="Row.RacePoints" />
+        </MudTd>
+        <MudTd DataLabel="Completed Laps">
+            <MudNumericField @bind-Value="Row.CompletedLaps" />
+        </MudTd>
+        <MudTd DataLabel="Lead Laps">
+            <MudNumericField @bind-Value="Row.LeadLaps" />
         </MudTd>
         <MudTd DataLabel="Interval">
             <MudTextField @bind-Value="Row.Interval" />
@@ -63,6 +89,14 @@
         </MudTd>
         <MudTd DataLabel="Incidents">
             <MudNumericField @bind-Value="Row.Incidents" />
+        </MudTd>
+        <MudTd DataLabel="Status">
+            <MudSelect @bind-Value="Row.Status" FullWidth="true">
+                @foreach (var status in Enum.GetValues<RaceStatus>())
+                {
+                    <MudSelectItem Value="status">@status</MudSelectItem>
+                }
+            </MudSelect>
         </MudTd>
     </RowEditingTemplate>
 </MudTable>

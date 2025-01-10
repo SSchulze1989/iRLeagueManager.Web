@@ -6,6 +6,7 @@
 @inherits LeagueComponentBase
 @inject EditResultViewModel Result
 @inject IDialogService DialogService
+@attribute [Authorize]
 
 <PageTitle>
     Edit Result - @LeagueName
@@ -21,35 +22,42 @@
         </HeaderText>
     </LoadingHeader>
 
-    <MudAlert Severity="Severity.Warning">
-        Editing the raw results cannot be undone automatically after clicking "Save". Please take care when editing your leagues results.
-    </MudAlert>
+    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+        <Authorized>
+            <MudAlert Severity="Severity.Warning">
+                Editing the raw results is permanent. Please take care when editing your leagues results.
+            </MudAlert>
 
-    @foreach (var sessionResult in Result.SessionResults.AsEnumerable().Reverse())
-    {
-        var sessionName = Event?.Sessions.FirstOrDefault(x => x.SessionId == sessionResult.SessionId)?.Name;
-        <MudElement HtmlTag="div" Class="mt-3">
-            <MudText Typo="Typo.h6">@sessionName</MudText>
-            <EditResultTable SessionResult="sessionResult" Members="Result.Members" />
-            @if (sessionResult.HasChanges)
+            @foreach (var sessionResult in Result.SessionResults.AsEnumerable().Reverse())
             {
-                <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" Class="m-2">
-                    <MudButton Color="Color.Primary"
-                    Variant="Variant.Filled"
-                    Size="Size.Large"
-                    Onclick="@(async () => await SaveSessionResult(sessionResult))">
-                        Save
-                    </MudButton>
-                    <MudButton Color="Color.Secondary"
-                    Variant="Variant.Outlined"
-                    Size="Size.Large"
-                    OnClick="@(() => sessionResult.Reset())">
-                        Reset
-                    </MudButton>
-                </MudStack>
+                var sessionName = Event?.Sessions.FirstOrDefault(x => x.SessionId == sessionResult.SessionId)?.Name;
+                <MudElement HtmlTag="div" Class="mt-3">
+                    <MudText Typo="Typo.h6">@sessionName</MudText>
+                    <EditResultTable SessionResult="sessionResult" Members="Result.Members" />
+                    @if (sessionResult.HasChanges)
+                    {
+                        <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" Class="m-2">
+                            <MudButton Color="Color.Primary"
+                                       Variant="Variant.Filled"
+                                       Size="Size.Large"
+                                       Onclick="@(async () => await SaveSessionResult(sessionResult))">
+                                Save
+                            </MudButton>
+                            <MudButton Color="Color.Secondary"
+                                       Variant="Variant.Outlined"
+                                       Size="Size.Large"
+                                       OnClick="@(() => sessionResult.Reset())">
+                                Reset
+                            </MudButton>
+                        </MudStack>
+                    }
+                </MudElement>
             }
-        </MudElement>
-    }
+        </Authorized>
+        <NotAuthorized>
+            <MudAlert Severity="Severity.Error">Not allowed</MudAlert>
+        </NotAuthorized>
+    </AuthorizeView>
 </MudContainer>
 
 @code {
@@ -97,7 +105,7 @@
             { x => x.ButtonTypes, ButtonTypes.YesNo },
         };
         var confirmDialog = await DialogService.Show<ConfirmDialog>("Calculate results?", dialogParameters).Result;
-        if (confirmDialog?.Canceled != false) 
+        if (confirmDialog?.Canceled != false)
         {
             return;
         }

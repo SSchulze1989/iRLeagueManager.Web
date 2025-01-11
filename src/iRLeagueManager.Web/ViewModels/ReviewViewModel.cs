@@ -319,15 +319,15 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
         }
     }
 
-    public async Task<bool> DeleteAsync(CancellationToken cancellationToken = default)
+    public async Task<StatusResult> DeleteAsync(CancellationToken cancellationToken = default)
     {
         if (model == null)
         {
-            return true;
+            return StatusResult.SuccessResult();
         }
         if (ApiService.CurrentLeague == null)
         {
-            return false;
+            return LeagueNullResult();
         }
 
         try
@@ -337,12 +337,7 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
                 .WithId(ReviewId)
                 .Delete(cancellationToken);
             var result = await request;
-            if (result.Success == false)
-            {
-                result.EnsureSuccess();
-                return false;
-            }
-            return true;
+            return result.ToStatusResult();
         }
         finally
         {

@@ -10,6 +10,7 @@
 @inject ReviewsPageViewModel ReviewsVm
 @inject ClientLocalTimeProvider ClientTime
 @inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
 <PageTitle>
     Reviews - @LeagueName
@@ -62,19 +63,19 @@
                                             @foreach (var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
                                             {
                                                 <ReviewCard Review=review
-                                                            Selected=@(review.ReviewId == SelectedReviewId)
-                                                            OnEditClick=@(async () => await OnEditClick(review))
-                                                            OnDeleteClick=@(async () => await OnDeleteClick(review))
-                                                            IsSteward=true
-                                                            ReadOnly=@ReadOnly
-                                                            UserId=@UserId />
+                                                Selected=@(review.ReviewId == SelectedReviewId)
+                                                OnEditClick=@(async () => await OnEditClick(review))
+                                                OnDeleteClick=@(async () => await OnDeleteClick(review))
+                                                IsSteward=true
+                                                ReadOnly=@ReadOnly
+                                                UserId=@UserId />
                                             }
                                             @if (ReadOnly == false)
                                             {
                                                 <MudButton StartIcon="@Icons.Material.Filled.Add"
-                                                           Color="Color.Tertiary"
-                                                           ButtonType="ButtonType.Button"
-                                                           OnClick=OnAddClick>Add Review</MudButton>
+                                                Color="Color.Tertiary"
+                                                ButtonType="ButtonType.Button"
+                                                OnClick=OnAddClick>Add Review</MudButton>
                                             }
                                         </Authorized>
                                         <NotAuthorized>
@@ -97,9 +98,9 @@
                                             @foreach (var protest in @Bind(ReviewsVm, x => x.Protests))
                                             {
                                                 <ProtestCard Protest=protest
-                                                             ReadOnly=@ReadOnly
-                                                             OnCreateReviewClick="@(() => OnCreateReviewFromProtestClick(protest))"
-                                                             OnDeleteClick=@(() => OnProtestDeleteClick(protest)) />
+                                                ReadOnly=@ReadOnly
+                                                OnCreateReviewClick="@(() => OnCreateReviewFromProtestClick(protest))"
+                                                OnDeleteClick=@(() => OnProtestDeleteClick(protest)) />
                                             }
                                         </Authorized>
                                         <NotAuthorized>
@@ -116,8 +117,8 @@
                                         @if (ReviewsVm.CanFileProtest(Event))
                                         {
                                             <MudButton Href=@($"./{LeagueName}/Protests/Events/{EventId}")
-                                                       StartIcon="@Icons.Material.Outlined.Campaign"
-                                                       Color="Color.Primary">
+                                            StartIcon="@Icons.Material.Outlined.Campaign"
+                                            Color="Color.Primary">
                                                 File Protest
                                             </MudButton>
                                             @if (ReviewsVm.ProtestClosedAfter > TimeSpan.Zero)
@@ -267,10 +268,12 @@
             return;
         }
         var result = await review.DeleteAsync();
-        if (result == true)
+        if (!result.IsSuccess)
         {
-            ReviewsVm.Reviews.Remove(review);
+            Snackbar.Add($@"Error deleting review - Status ""{result.Status}""", Severity.Error);
+            return;
         }
+        ReviewsVm.Reviews.Remove(review);
     }
 
     private async Task OnProtestDeleteClick(ProtestViewModel protest)

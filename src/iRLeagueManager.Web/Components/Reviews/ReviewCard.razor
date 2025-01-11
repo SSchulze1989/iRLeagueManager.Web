@@ -326,11 +326,6 @@
         }
     }
 
-    private async Task Delete()
-    {
-        await Review.DeleteAsync();
-    }
-
     private bool UserHasCommented(ReviewViewModel review)
     {
         var hasCommented = Review.Comments.Any(x => x.AuthorUserId == UserId);

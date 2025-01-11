@@ -23,6 +23,8 @@ public sealed class ChampionshipViewModel : LeagueViewModelBase<ChampionshipView
     public bool IsActive { get => isActive; private set => Set(ref isActive, value); }
     private bool isActive;
 
+    public ChampSeasonViewModel? CurrentChampSeason { get; set; }
+
     public async Task<StatusResult> Load(long championshipId, CancellationToken cancellationToken = default)
     {
         if (CurrentLeague is null)

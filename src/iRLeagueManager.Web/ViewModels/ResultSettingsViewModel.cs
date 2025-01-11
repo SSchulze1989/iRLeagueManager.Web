@@ -11,19 +11,19 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
     public ResultSettingsViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService) :
         base(loggerFactory, apiService)
     {
-        championships = new();
-        currentChampSeasons = new();
-        resultConfigs = new();
+        championships = [];
+        currentChampSeasons = [];
+        resultConfigs = [];
     }
 
-    private ObservableCollection<ChampionshipViewModel> championships;
-    public ObservableCollection<ChampionshipViewModel> Championships { get => championships; set => Set(ref championships, value); }
+    private List<ChampionshipViewModel> championships;
+    public List<ChampionshipViewModel> Championships { get => championships; set => Set(ref championships, value); }
 
-    private ObservableCollection<ChampSeasonViewModel> currentChampSeasons;
-    public ObservableCollection<ChampSeasonViewModel> CurrentChampSeasons { get => currentChampSeasons; set => Set(ref currentChampSeasons, value); }
+    private List<ChampSeasonViewModel> currentChampSeasons;
+    public List<ChampSeasonViewModel> CurrentChampSeasons { get => currentChampSeasons; set => Set(ref currentChampSeasons, value); }
 
-    private ObservableCollection<ResultConfigViewModel> resultConfigs;
-    public ObservableCollection<ResultConfigViewModel> ResultsConfigs { get => resultConfigs; set => Set(ref resultConfigs, value); }
+    private List<ResultConfigViewModel> resultConfigs;
+    public List<ResultConfigViewModel> ResultsConfigs { get => resultConfigs; set => Set(ref resultConfigs, value); }
 
     private ResultConfigViewModel? selected;
     public ResultConfigViewModel? Selected { get => selected; set => Set(ref selected, value); }
@@ -50,7 +50,7 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
             {
                 return getChampionships.ToStatusResult();
             }
-            Championships = new(getChampionships.Content.Select(x => new ChampionshipViewModel(LoggerFactory, ApiService, x)));
+            Championships = getChampionships.Content.Select(x => new ChampionshipViewModel(LoggerFactory, ApiService, x)).ToList();
 
             var getChampSeasons = await ApiService.CurrentSeason
                 .ChampSeasons()
@@ -59,7 +59,12 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
             {
                 return getChampSeasons.ToStatusResult();
             }
-            CurrentChampSeasons = new(getChampSeasons.Content.Select(x => new ChampSeasonViewModel(LoggerFactory, ApiService, x)));
+            CurrentChampSeasons = getChampSeasons.Content.Select(x => new ChampSeasonViewModel(LoggerFactory, ApiService, x)).ToList();
+            foreach(var championship in Championships)
+            {
+                championship.CurrentChampSeason = CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipId == championship.ChampionshipId);
+            }
+            Championships = Championships.OrderBy(x => x.CurrentChampSeason?.Index ?? -1).ToList();
             
             return StatusResult.SuccessResult();
         }

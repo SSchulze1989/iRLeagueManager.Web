@@ -22,6 +22,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
     public long ChampSeasonId => model.ChampSeasonId;
     public long ChampionshipId => model.ChampionshipId;
     public long SeasonId => model.SeasonId;
+    public int Index { get => model.Index; set => SetP(model.Index, value => model.Index = value, value); }
     public string ChampionshipName { get => model.ChampionshipName; set => SetP(model.ChampionshipName, value => model.ChampionshipName = value, value); }
     public string ChampionshipDisplayName { get => model.ChampionshipDisplayName; set => SetP(model.ChampionshipDisplayName, value => model.ChampionshipDisplayName = value, value); }
     public string SeasonName => model.SeasonName;

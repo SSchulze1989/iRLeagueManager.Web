@@ -32,9 +32,14 @@
     <Authorized>
         <MudText Typo="Typo.h6" Class="mt-2 px-2">Championships</MudText>
         <MudStack Spacing="5">
+            <MudStack Row="true" Justify="Justify.FlexEnd">
+                <MudButton Variant="Variant.Text"
+                           OnClick="ReorderClick">
+                    Change order
+                </MudButton>
+            </MudStack>
             <MudPaper Elevation="5">
-
-                <MudTable Items="Vm.Championships.Where(x => x.IsActive)" Striped="true" Hover="true" Elevation="0" Breakpoint="Breakpoint.None">
+                <MudTable Items="Vm.Championships.Where(x => x.IsActive && x.CurrentChampSeason is not null)" Striped="true" Hover="true" Elevation="0" Breakpoint="Breakpoint.None">
                     <HeaderContent>
                         <MudTh>Name</MudTh>
                         <MudTh>Type</MudTh>
@@ -43,7 +48,7 @@
                     </HeaderContent>
                     <RowTemplate Context=row>
                         @{
-                            var champSeason = Vm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipId == row.ChampionshipId);
+                            var champSeason = row.CurrentChampSeason;
                         }
                         <MudTd DataLabel="Name">
                             <MudLink Href="@($"{LeagueName}/Settings/Results/Championships/{row.ChampionshipId}")">
@@ -60,7 +65,7 @@
                             }
                         </MudTd>
                         <MudTd>
-                            <MudIconButton Icon="@Icons.Material.Outlined.Archive" Color="Color.Default" OnClick="@(() => ArchiveChampionshipClick(row))"/>
+                            <MudIconButton Icon="@Icons.Material.Outlined.Archive" Color="Color.Default" OnClick="@(() => ArchiveChampionshipClick(row))" />
                         </MudTd>
                     </RowTemplate>
                 </MudTable>
@@ -219,5 +224,15 @@
     {
         await Vm.LoadFromCurrentSeasonAsync(CancellationToken);
         await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ReorderClick()
+    {
+        var parameters = new DialogParameters<ReorderChampionshipsDialog>()
+        {
+            { x => x.Value, Vm.CurrentChampSeasons.ToList() },
+        };
+        await DialogService.Show<ReorderChampionshipsDialog>("Reorder Championships", parameters).Result;
+        await Vm.LoadFromCurrentSeasonAsync(CancellationToken);
     }
 }

@@ -1,0 +1,78 @@
+﻿@namespace iRLeagueManager.Web.Components
+@inherits PromptDialog<List<ChampSeasonViewModel>>
+
+<MudDialog>
+    <DialogContent>
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@(Loading ? "" : "invisible" + " my-0")" />
+        <MudDropContainer T="ChampSeasonViewModel" Items="Value"
+        ItemsSelector="@((item, dropzone) => dropzone ==  "OrderDropZone")"
+        ItemDropped="ItemDropped"
+        Class="d-flex flex-wrap flex-grow-1">
+            <ChildContent>
+                <MudDropZone T="ChampSeasonViewModel" Identifier="OrderDropZone" AllowReorder="true">
+                    <MudText Typo="Typo.h6" Class="mb-4">Drag to reorder</MudText>
+                </MudDropZone>
+            </ChildContent>
+            <ItemRenderer Context="Championship">
+                <MudPaper Elevation="25" Class="pa-4 my-4">
+                    <MudText>@Championship.ChampionshipName</MudText>
+                </MudPaper>
+            </ItemRenderer>
+        </MudDropContainer>
+        @foreach (var error in errors)
+        {
+            <MudAlert Severity="Severity.Error">error</MudAlert>
+        }
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkText="Save" OkClick="Submit" CancelText="Cancel" CancelClick="Cancel" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private List<string> errors = [];
+
+    private bool Loading => Value.Any(x => x.Loading);
+
+    private void ItemDropped(MudItemDropInfo<ChampSeasonViewModel> dropItem)
+    {
+        if (dropItem.Item is null){
+            return;
+        }
+        var itemIndex = Value.IndexOf(dropItem.Item);
+        if (itemIndex < 0 || dropItem.IndexInZone >= Value.Count)
+        {
+            return;
+        }
+        (Value[itemIndex].Index, Value[dropItem.IndexInZone].Index) = (dropItem.IndexInZone, itemIndex);
+        (Value[itemIndex], Value[dropItem.IndexInZone]) = (Value[dropItem.IndexInZone], Value[itemIndex]);
+    }
+
+    protected override async Task Submit()
+    {
+        var saveTasks = Value.Select(x => x.SaveChangesAsync(CancellationToken)).ToList();
+        var timeout = Task.Delay(5000);
+
+        await InvokeAsync(StateHasChanged);
+        await Task.WhenAny(Task.WhenAll(saveTasks), timeout);
+        await InvokeAsync(StateHasChanged);
+
+        if (saveTasks.Any(x => !x.IsCompleted))
+        {
+            errors = ["Operation timed out"];
+            return;
+        }
+        if (saveTasks.Any(x => !x.IsCompletedSuccessfully))
+        {
+            errors = saveTasks.Where(x => x.IsFaulted || x.IsCanceled).Select(x => x.Exception?.Message ?? "Unknown Error").ToList();
+            return;
+        }
+        var saveTaskResults = saveTasks.Select(x => x.Result);
+        if (saveTaskResults.Any(x => !x.IsSuccess))
+        {
+            errors = saveTaskResults.Select(x => x.Message).ToList();
+            return;
+        }
+        await base.Submit();
+    }
+}

@@ -99,6 +99,19 @@ public class UtilityComponentBase : MvvmComponentBase
         await JsRuntime.InvokeVoidAsync("enableTooltips", "right");
     }
 
+    public static string GetFlagEmoji(string? countryCode)
+    {
+        if (string.IsNullOrEmpty(countryCode))
+        {
+            return string.Empty;
+        }
+
+        var characters = countryCode
+            .ToUpper()
+            .Select(x => char.ConvertFromUtf32(x + 0x1F1A5));
+        return string.Concat(characters);
+    }
+
     protected void NavigateTo(string url, bool replace = false, string? returnUrl = null)
     {
         if (string.IsNullOrEmpty(returnUrl) == false)

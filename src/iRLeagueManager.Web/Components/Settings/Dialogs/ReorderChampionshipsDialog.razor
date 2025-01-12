@@ -50,6 +50,11 @@
 
     protected override async Task Submit()
     {
+        foreach(var (champoinship, index) in Value.WithIndex())
+        {
+            champoinship.Index = index;
+        }
+
         var saveTasks = Value.Select(x => x.SaveChangesAsync(CancellationToken)).ToList();
         var timeout = Task.Delay(5000);
 

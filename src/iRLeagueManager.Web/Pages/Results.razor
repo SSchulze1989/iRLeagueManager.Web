@@ -42,10 +42,18 @@
                             @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
                             {
                                 <MudMenu Icon="@Icons.Material.Filled.Menu">
-                                    <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => NavigateTo($"{GetCurrentResultLink()}/Edit"))">Edit Raw Results</MudMenuItem>
+                                    <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => NavigateTo($"{GetCurrentResultLink()}/Edit"))">
+                                        Edit Raw Results
+                                    </MudMenuItem>
                                     <MudMenuItem Icon="@Icons.Material.Filled.Loop" OnClick="TriggerCalculation">
                                         Calculate
                                     </MudMenuItem>
+                                    @if (vm.Results.Count > 1)
+                                    {
+                                        <MudMenuItem Icon="@Icons.Material.Filled.CompareArrows" OnClick="ChangeTabOrder">
+                                            Change tab order
+                                        </MudMenuItem>
+                                    }
                                     @if (vm.Results.Count > 0)
                                     {
                                         <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="@Color.Error" OnClick=DeleteResultsClick>
@@ -233,6 +241,20 @@
             return;
         }
         await vm.TriggerCalculation();
+    }
+
+    private async Task ChangeTabOrder()
+    {
+        var settingsViewModel = RootServiceProvider.GetRequiredService<ResultSettingsViewModel>();
+        await settingsViewModel.LoadFromCurrentSeasonAsync(CancellationToken);
+        var parameters = new DialogParameters<ReorderChampionshipsDialog>() {
+            { x => x.Value, settingsViewModel.CurrentChampSeasons.ToList() }
+        };
+        var result = await DialogService.Show<ReorderChampionshipsDialog>("Change tab order", parameters).Result;
+        if (result?.Canceled == false && Event is not null)
+        {
+            await vm.LoadFromEventAsync(Event.EventId);
+        }
     }
 
     private async Task DeleteResultsClick()

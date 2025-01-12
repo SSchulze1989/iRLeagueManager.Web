@@ -18,7 +18,7 @@
 
     @if (showRaceByRace)
     {
-        <RaceByRacePoints Standing="Standing" Events="raceEvents" CanEdit="CanEdit" EditDropWeeks="EditDropWeeksClick"/>
+        <RaceByRacePoints Standing="Standing" Events="raceEvents" CanEdit="CanEdit" EditDropWeeks="EditDropWeeksClick" />
     }
     else
     {
@@ -41,7 +41,8 @@
                 <ResultTableHeader Text="Wins" Sort="@(x => x.Wins)" Direction="SortDirection.Descending" />
                 <ResultTableHeader Text="Podiums" Sort="@(x => x.Top3)" Direction="SortDirection.Descending" />
                 <ResultTableHeader Text="Incidents" Sort="@(x => x.Incidents)" />
-                @if (CanEdit) {
+                @if (CanEdit)
+                {
                     <th></th>
                 }
             </HeaderTemplate>
@@ -49,7 +50,13 @@
                 <td class="px-1 py-1"><ValueChange Value=Row.Position Change=Row.PositionChange /></td>
                 @if (showDriver)
                 {
-                    <td class="px-1 py-1">@Row.Firstname @Row.Lastname</td>
+                    <td class="px-1 py-1">
+                        @if (!string.IsNullOrEmpty(Row.CountryCode))
+                        {
+                            @:@GetFlagEmoji(Row.CountryCode)&nbsp;
+                        }
+                        @Row.Firstname @Row.Lastname
+                    </td>
                 }
                 @if (hasTeam)
                 {
@@ -67,7 +74,8 @@
                 <td class="px-1 py-1"><ValueChange Value=Row.Wins Change=Row.WinsChange /></td>
                 <td class="px-1 py-1">@Row.Top3</td>
                 <td class="px-1 py-1">@Row.Incidents</td>
-                @if (CanEdit) {
+                @if (CanEdit)
+                {
                     <td class="pa-0">
                         <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true" Size="Size.Small">
                             <MudMenuItem OnClick="() => EditDropWeeksClick(Row)">Edit Dropweeks</MudMenuItem>

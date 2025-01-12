@@ -3,7 +3,7 @@
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
-@inherits MvvmBlazor.Components.MvvmComponentBase
+@inherits UtilityComponentBase
 @inject MudBlazor.IDialogService DialogService
 
 <MudElement HtmlTag="div" Class="@Class" Style="@Style">
@@ -190,19 +190,6 @@
     private int EvenStrengthOfField(SessionResultViewModel result)
     {
         return result.EventResult?.StrengthOfField ?? 0;
-    }
-
-    public static string GetFlagEmoji(string? countryCode)
-    {
-        if (string.IsNullOrEmpty(countryCode))
-        {
-            return string.Empty;
-        }
-
-        var characters = countryCode
-            .ToUpper()
-            .Select(x => char.ConvertFromUtf32(x + 0x1F1A5));
-        return string.Concat(characters);
     }
 
     private async Task AddBonusPentalyClick(ResultRowModel row)

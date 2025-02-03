@@ -5,6 +5,13 @@ VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iRLeagueManager.Web", "src\iRLeagueManager.Web\iRLeagueManager.Web.csproj", "{0E1210B9-CB90-497D-9B67-D084D7DFE768}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Projektmappenelemente", "Projektmappenelemente", "{A36C6547-B125-4391-9F6E-C41690F2AD97}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\dotnet_main.yml = .github\workflows\dotnet_main.yml
+		.github\workflows\dotnet_tag_release.yml = .github\workflows\dotnet_tag_release.yml
+		.github\workflows\dotnet_develop.yml = .github\workflows\dotnet_develop.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -21,7 +21,7 @@
                            OnClearButtonClick="@(() => options.RemoveAt(index))"
                            ToStringFunc="@((SortOptions option) => option.GetText().Capitalize())"
                            Variant="Variant.Outlined"
-                           AnchorOrigin="Origin.BottomCenter">
+                           AnchorOrigin="Origin.BottomLeft">
                     @foreach (var availableOption in AvailableOptions)
                     {
                         <MudSelectItem Value="availableOption" />
@@ -33,7 +33,7 @@
                        ValueChanged="@((SortOptions? option) => NewSelectionChanged(option))"
                        ToStringFunc="@((SortOptions? option) => option?.GetText().Capitalize())"
                        Variant="Variant.Outlined"
-                       AnchorOrigin="Origin.BottomCenter"
+                       AnchorOrigin="Origin.BottomLeft"
                        Class="mt-4">
                 @foreach (var availableOption in AvailableOptions.Cast<SortOptions?>())
                 {

@@ -1,0 +1,30 @@
+name: .NET
+
+on:
+  push:
+    branches: [ develop* ]
+  pull_request:
+    branches: [ develop* ]
+
+jobs:
+  build:
+    name: Build & Test
+    env:
+      BUILD_CONFIG: Debug
+
+    runs-on: ubuntu-latest
+    continue-on-error: false
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+        source-url: https://api.nuget.org/v3/index.json
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build -c $BUILD_CONFIG --no-restore -p:TreatWarningsAsErrors=true
+    - name: Test
+      run: dotnet test -c $BUILD_CONFIG --no-build --verbosity normal

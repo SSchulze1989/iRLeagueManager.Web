@@ -225,7 +225,7 @@
             { x => x.Text, "Please make sure you have filled out this protest correctly.\nOnce you submit it you can not delete or change it anymore." },
             { x => x.ButtonTypes, ButtonTypes.YesNo },
         };
-        var confirm = await DialogService.Show<ConfirmDialog>("Confirm Protest", parameters).Result;
+        var confirm = await (await DialogService.ShowAsync<ConfirmDialog>("Confirm Protest", parameters)).Result;
         if (confirm is null || confirm.Canceled)
         {
             return;

@@ -205,7 +205,7 @@
             {x => x.IsTeamResult, isTeamResult},
         };
 
-        var result = await DialogService.Show<EditAddPenaltyDialog>("Add Bonus/Penalty", parameters).Result;
+        var result = await (await DialogService.ShowAsync<EditAddPenaltyDialog>("Add Bonus/Penalty", parameters)).Result;
         await Task.Delay(2000);
         await Refresh();
     }
@@ -248,7 +248,7 @@
                 FullWidth = true,
                 CloseButton = true,
             };
-        await DialogService.Show<ShowPenaltiesDialog>("Bonuses/Penalties", parameters, options).Result;
+        await DialogService.ShowAsync<ShowPenaltiesDialog>("Bonuses/Penalties", parameters, options);
         await Task.Delay(2000);
         await Refresh();
     }
@@ -265,7 +265,7 @@
             { x => x.Member, new() { FirstName = row.Firstname, LastName = row.Lastname, MemberId = row.MemberId.GetValueOrDefault() }},
         };
 
-        await DialogService.Show<ChangeTeamsDialog>("Change Team", parameters).Result;
+        await DialogService.ShowAsync<ChangeTeamsDialog>("Change Team", parameters);
         await Refresh();
     }
 

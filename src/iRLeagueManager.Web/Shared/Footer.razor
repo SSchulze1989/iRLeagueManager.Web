@@ -83,12 +83,12 @@
 
     private async Task<bool> OnCookieBannerClick()
     {
-        var options = new DialogOptions()
+        var options = new DialogOptions() with
         {
             BackdropClick= false,
             NoHeader = true,
         };
-        var result = await DialogService.Show<CookieBannerModal>("", options).Result;
+        var result = await (await DialogService.ShowAsync<CookieBannerModal>("", options)).Result;
         return result?.Canceled == false;
     }
 

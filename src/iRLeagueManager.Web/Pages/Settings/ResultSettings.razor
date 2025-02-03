@@ -157,7 +157,7 @@
             { x => x.Text, $"Really delete championship {championship.Name}? This will also remove all settings from previous seasons but it will still keep the results." },
             { x => x.ButtonTypes, ButtonTypes.YesNo },
         };
-        var result = await DialogService.Show<ConfirmDialog>("Delete Championship", parameters).Result;
+        var result = await (await DialogService.ShowAsync<ConfirmDialog>("Delete Championship", parameters)).Result;
         if (result?.Canceled == false)
         {
             await Vm.DeleteChampionship(championship.GetModel(), CancellationToken);
@@ -168,7 +168,7 @@
     {
         var championship = CreateChampionshipFromTemplate();
         var parameters = new DialogParameters<DisplayNameDialog>();
-        var result = await DialogService.Show<DisplayNameDialog>("Create Championship", parameters).Result;
+        var result = await (await DialogService.ShowAsync<DisplayNameDialog>("Create Championship", parameters)).Result;
         if (result is null || result.Canceled || result.Data is not (string name, string displayName))
         {
             return;
@@ -232,7 +232,7 @@
         {
             { x => x.Value, Vm.CurrentChampSeasons.ToList() },
         };
-        await DialogService.Show<ReorderChampionshipsDialog>("Reorder Championships", parameters).Result;
+        await DialogService.ShowAsync<ReorderChampionshipsDialog>("Reorder Championships", parameters);
         await Vm.LoadFromCurrentSeasonAsync(CancellationToken);
     }
 }

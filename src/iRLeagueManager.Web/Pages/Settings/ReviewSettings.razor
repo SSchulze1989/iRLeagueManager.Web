@@ -133,7 +133,7 @@
                 FullWidth = false,
                 MaxWidth = MaxWidth.ExtraSmall,
             };
-        var result = await DialogService.Show<EditProtestSettingsDialog>("Edit Protest Settings", parameters, options).Result;
+        var result = await (await DialogService.ShowAsync<EditProtestSettingsDialog>("Edit Protest Settings", parameters, options)).Result;
         if (result?.Canceled == false && result.Data is LeagueModel leagueModel)
         {
             League.SetModel(leagueModel);
@@ -151,7 +151,7 @@
             {x => x.Model, voteCategory.CopyModel()},
             {x => x.OnSubmit, new(async (category, cancellation) => await category.SaveChangesAsync(cancellation))},
         };
-        var result = await DialogService.Show<EditVoteCategoryDialog>("Edit Vote Category", parameters).Result;
+        var result = await (await DialogService.ShowAsync<EditVoteCategoryDialog>("Edit Vote Category", parameters)).Result;
         if (result?.Canceled == false && result.Data is VoteCategoryModel model)
         {
             voteCategory.SetModel(model);
@@ -165,7 +165,7 @@
             {x => x.Model, CreateVoteCategoryTemplate()},
             {x => x.OnSubmit, new(async (category, cancellation) => await Reviews.AddVoteCategory(category.GetModel(), cancellation))},
         };
-        await DialogService.Show<EditVoteCategoryDialog>("Add Vote Category", parameters).Result;
+        await DialogService.ShowAsync<EditVoteCategoryDialog>("Add Vote Category", parameters);
     }
 
     private async Task OnDeleteVoteCategoryClick(VoteCategoryViewModel voteCategory)
@@ -175,7 +175,7 @@
             {x => x.Text, $"Really delete vote category \"{voteCategory.Text}\"?"},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var result = await DialogService.Show<ConfirmDialog>("Delete Vote Category", parameters).Result;
+        var result = await (await DialogService.ShowAsync<ConfirmDialog>("Delete Vote Category", parameters)).Result;
         if (result?.Canceled == false)
         {
             await Reviews.DeleteVoteCategory(voteCategory.GetModel());

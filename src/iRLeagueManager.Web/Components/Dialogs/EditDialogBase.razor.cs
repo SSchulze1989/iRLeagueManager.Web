@@ -14,7 +14,7 @@ public class EditDialogBase<TViewModel, TModel> : MvvmComponentBase where TViewM
     protected TViewModel Vm { get; set; } = default!;
 
     [CascadingParameter]
-    MudDialogInstance MudDialog { get; set; } = default!;
+    IMudDialogInstance MudDialog { get; set; } = default!;
 
     [Parameter, EditorRequired]
     public TModel Model { get; set; } = default!;

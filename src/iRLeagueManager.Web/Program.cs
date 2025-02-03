@@ -48,7 +48,7 @@ builder.Services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
 
 builder.Services.AddMudServices(config =>
 {
-    config.PopoverOptions.Mode = PopoverMode.Legacy;
+    config.PopoverOptions.Mode = PopoverMode.Default;
     config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
     config.SnackbarConfiguration.PreventDuplicates = false;
     config.SnackbarConfiguration.NewestOnTop = false;

@@ -130,7 +130,7 @@
             {x => x.Model, new()},
             {x => x.OnSubmit, async (season, cancellation) => await League.AddSeason(season.GetModel(), cancellation)},
         };
-        var result = await DialogService.Show<EditSeasonDialog>("Add Season", parameters).Result;
+        var result = await (await DialogService.ShowAsync<EditSeasonDialog>("Add Season", parameters)).Result;
     }
 
     private async Task SeasonClick(SeasonViewModel season)
@@ -140,7 +140,7 @@
             {x => x.Model, season.CopyModel()},
             {x => x.OnSubmit, async (season, cancellation) => await season.SaveChangesAsync(cancellation)},
         };
-        var result = await DialogService.Show<EditSeasonDialog>("Edit Season", parameters).Result;
+        var result = await (await DialogService.ShowAsync<EditSeasonDialog>("Edit Season", parameters)).Result;
         if (result?.Canceled == false && result.Data is SeasonModel seasonModel)
         {
             season.SetModel(seasonModel);
@@ -154,7 +154,7 @@
             {x => x.Text, $"Really delete season \"{season.Name}\"?"},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var result = await DialogService.Show<ConfirmDialog>("Delete Season", parameters).Result;
+        var result = await (await DialogService.ShowAsync<ConfirmDialog>("Delete Season", parameters)).Result;
         if (result?.Canceled == false)
         {
             await League.DeleteSeason(season.GetModel());
@@ -175,7 +175,7 @@
             {x => x.OkButtonText, "Yes, select template"},
             {x => x.CancelButtonText, "No, start with empty league"},
         };
-        var result = await DialogService.Show<ConfirmDialog>("Select league template", parameters).Result;
+        var result = await (await DialogService.ShowAsync<ConfirmDialog>("Select league template", parameters)).Result;
         if (result?.Canceled == false)
         {
             // forward to select template page

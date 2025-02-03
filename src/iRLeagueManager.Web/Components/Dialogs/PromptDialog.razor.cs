@@ -9,7 +9,7 @@ public class PromptDialog<T> : ComponentBase, IDisposable
 {
     private bool disposedValue;
 
-    [CascadingParameter] protected MudDialogInstance MudDialog { get; set; } = default!;
+    [CascadingParameter] protected IMudDialogInstance MudDialog { get; set; } = default!;
     [Parameter] public T Value { get; set; } = default!;
     [Parameter] public Func<T?, CancellationToken, Task<bool>>? OnSubmit { get; set; }
     [Parameter] public Func<T?, CancellationToken, Task>? OnCancel { get; set; }

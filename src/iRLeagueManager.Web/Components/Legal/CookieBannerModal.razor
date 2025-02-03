@@ -5,13 +5,13 @@
         <CookiePolicy/>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Primary" OnClick=ContinueClick>Continue with required cookies</MudButton>
+        <MudButton Color="Color.Primary" OnClick=@(() => ContinueClick())>Continue with required cookies</MudButton>
     </DialogActions>
 </MudDialog>
 
 @code {
     [CascadingParameter]
-    private MudDialogInstance DialogInstance { get; set; } = default!;
+    private IMudDialogInstance DialogInstance { get; set; } = default!;
 
     protected override void OnInitialized()
     {

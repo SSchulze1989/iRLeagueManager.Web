@@ -93,7 +93,7 @@
             { x => x.LeagueMembers, LeagueMembers },
             { x => x.Teams, Teams },
         };
-        var dialog = await DialogService.Show<FilterConditionDialog>("Edit Filter", parameters).Result;
+        var dialog = await (await DialogService.ShowAsync<FilterConditionDialog>("Edit Filter", parameters)).Result;
         if (dialog is null || dialog.Canceled || dialog.Data is not FilterConditionModel model)
         {
             return;
@@ -143,7 +143,7 @@
             { x => x.LeagueMembers, LeagueMembers },
             { x => x.Teams, Teams },
         };
-        var dialog = await DialogService.Show<FilterConditionDialog>("Edit Filter", parameters).Result;
+        var dialog = await (await DialogService.ShowAsync<FilterConditionDialog>("Edit Filter", parameters)).Result;
         if (dialog is null || dialog.Canceled || dialog.Data is not FilterConditionModel model)
         {
             return;

@@ -342,7 +342,7 @@
             {x => x.IsTeamEvent, IsTeamEvent},
             {x => x.OnSubmit, async (review, cancellation) => await review.SaveChangesAsync(cancellation)},
         };
-        var result = await DialogService.Show<EditReviewResultDialog>("Edit Result", parameters).Result;
+        var result = await (await DialogService.ShowAsync<EditReviewResultDialog>("Edit Result", parameters)).Result;
         if (result?.Canceled == false && result.Data is ReviewModel reviewModel)
         {
             Review.SetModel(reviewModel);
@@ -359,7 +359,7 @@
             {x => x.IsTeamEvent, IsTeamEvent },
             {x => x.OnSubmit, async (comment, cancellation) => await Review.AddComment(comment.GetModel(), cancellation)},
         };
-        await DialogService.Show<EditCommentDialog>("Add Comment", parameters).Result;
+        await DialogService.ShowAsync<EditCommentDialog>("Add Comment", parameters);
         await InvokeAsync(StateHasChanged);
     }
 
@@ -374,7 +374,7 @@
             {
                 BackdropClick = true,
             };
-        var confirm = await DialogService.Show<ConfirmDialog>("Delete Comment", parameters, options).Result;
+        var confirm = await (await DialogService.ShowAsync<ConfirmDialog>("Delete Comment", parameters, options)).Result;
         if (confirm?.Canceled == false)
         {
             await Review.RemoveComment(comment);

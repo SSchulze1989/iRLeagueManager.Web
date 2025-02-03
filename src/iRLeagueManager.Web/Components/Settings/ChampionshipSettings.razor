@@ -158,7 +158,7 @@
         {
             { x => x.Value, (ChampSeason.ChampionshipName, ChampSeason.ChampionshipDisplayName) },
         };
-        var result = await DialogService.Show<DisplayNameDialog>("", parameters).Result;
+        var result = await (await DialogService.ShowAsync<DisplayNameDialog>("", parameters)).Result;
         if (result?.Canceled == false && result.Data is (string name, string displayName))
         {
             ChampSeason.ChampionshipName = name;
@@ -200,7 +200,7 @@
         {
             { x => x.Value, (pointConfig.Name, pointConfig.DisplayName)},
         };
-        var result = await DialogService.Show<DisplayNameDialog>("Add Point Configuration").Result;
+        var result = await (await DialogService.ShowAsync<DisplayNameDialog>("Add Point Configuration")).Result;
         if (result is null || result.Canceled || result.Data is not (string name, string displayName))
         {
             return;

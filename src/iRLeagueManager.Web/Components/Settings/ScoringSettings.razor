@@ -130,7 +130,7 @@
         {
             { x => x.Value, Scoring.PointRule.CopyModel() },
         };
-        var dialog = await DialogService.Show<PointSettingsDialog>($"Edit {Scoring.Name} Points", parameters).Result;
+        var dialog = await (await DialogService.ShowAsync<PointSettingsDialog>($"Edit {Scoring.Name} Points", parameters)).Result;
         if (dialog is null || dialog.Canceled || dialog.Data is not PointRuleModel model)
         {
             return;

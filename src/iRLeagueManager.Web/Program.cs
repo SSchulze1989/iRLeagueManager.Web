@@ -12,6 +12,9 @@ using MudBlazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Test warnings as errors
+int test = 1;
+
 builder.Logging.AddConfiguration(
     builder.Configuration.GetSection("Logging"));
 

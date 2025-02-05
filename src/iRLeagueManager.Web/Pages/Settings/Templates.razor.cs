@@ -62,7 +62,7 @@ public partial class Templates : LeagueComponentBase
             { x => x.AllowMarkup, true},
             { x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var result = await DialogService.Show<ConfirmDialog>("Apply Template", parameters).Result;
+        var result = await (await DialogService.ShowAsync<ConfirmDialog>("Apply Template", parameters)).Result;
         if (result?.Canceled == false)
         {
             await SubmitTemplateSelection(template);

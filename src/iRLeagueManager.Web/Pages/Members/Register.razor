@@ -57,7 +57,7 @@
                                 Label="I have read and understood the" 
                                 Color="Color.Primary" 
                                 Dense="true" 
-                                LabelPosition="LabelPosition.End"
+                                LabelPlacement="Placement.End"
                                 For="@(() => Model.PrivacyPolicyAgreeed)"/>
                             <MudLink Href="privacy" target="_blank">privacy policy</MudLink>
                         </MudStack>
@@ -65,7 +65,7 @@
                             <MudCheckBox @bind-Value="Model.TermsConditionsAgreed" 
                                 Label="I have read and accept the" 
                                 Color="Color.Primary" Dense="true" 
-                                LabelPosition=" LabelPosition.End" 
+                                LabelPlacement=" Placement.End" 
                                 For="@(() => Model.TermsConditionsAgreed)"/>
                             <MudLink Href="terms" target="_blank">terms and conditions</MudLink>
                         </MudStack>

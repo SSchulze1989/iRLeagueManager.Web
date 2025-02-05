@@ -50,7 +50,7 @@
                 parameters.Add(parameter.Key, parameter.Value);
             }
         }
-        var result = await DialogService.Show<TDialog>(Label, parameters).Result;
+        var result = await (await DialogService.ShowAsync<TDialog>(Label, parameters)).Result;
         if (result is null || result.Canceled || result.Data is not T dialogValue)
         {
             return;

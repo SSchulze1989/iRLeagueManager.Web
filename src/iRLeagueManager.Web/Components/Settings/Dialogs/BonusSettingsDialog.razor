@@ -23,7 +23,7 @@
                                     <MudSelect @bind-Value="bonus.Option"
                                                Label="Type"
                                                Placeholder="Select bonus type"
-                                               AnchorOrigin="Origin.BottomCenter">
+                                               AnchorOrigin="Origin.BottomLeft">
                                         @foreach (var option in BonusPointOption.Available)
                                         {
                                             <MudSelectItem Value="option">@option.Description</MudSelectItem>
@@ -86,7 +86,7 @@
                                    ValueChanged="@((BonusPointOption option) => SelectNewBonusOption(option))"
                                    Label="Type"
                                    Placeholder="Select bonus type"
-                                   AnchorOrigin="Origin.BottomCenter">
+                                   AnchorOrigin="Origin.BottomLeft">
                             @foreach (var option in BonusPointOption.Available)
                             {
                                 <MudSelectItem Value="option">@option.Description</MudSelectItem>

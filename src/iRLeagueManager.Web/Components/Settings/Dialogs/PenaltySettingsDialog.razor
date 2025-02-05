@@ -90,7 +90,7 @@
                            ValueChanged="@((PenaltyType? option) => SelectNewPenaltyType(option))"
                            Label="Type"
                            Placeholder="Select penalty type ..."
-                           AnchorOrigin="Origin.BottomCenter">
+                           AnchorOrigin="Origin.BottomLeft">
                     @foreach (var penaltyType in Enum.GetValues<PenaltyType>().Cast<PenaltyType?>())
                     {
                         <MudSelectItem Value="penaltyType" />

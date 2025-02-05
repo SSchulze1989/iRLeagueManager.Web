@@ -17,7 +17,7 @@ public partial class ChangeTeamsDialog : UtilityComponentBase
 
 
     [CascadingParameter]
-    MudDialogInstance ModalInstance { get; set; } = default!;
+    IMudDialogInstance ModalInstance { get; set; } = default!;
     [Parameter]
     public MemberInfoModel Member { get; set; } = default!;
     [Parameter]

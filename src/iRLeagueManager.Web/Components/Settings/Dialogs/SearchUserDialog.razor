@@ -27,7 +27,7 @@
 </MudDialog>
 
 @code {
-        [CascadingParameter] public MudDialogInstance DialogInstance { get; set; } = default!;
+        [CascadingParameter] public IMudDialogInstance DialogInstance { get; set; } = default!;
         [Parameter] public LeagueUsersViewModel LeagueUsers { get; set; } = default!;
 
     private UserModel? User { get; set; }

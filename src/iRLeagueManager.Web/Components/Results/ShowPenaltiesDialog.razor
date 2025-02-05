@@ -104,7 +104,7 @@
 
 @code {
     [CascadingParameter]
-    public MudDialogInstance DialogInstance { get; set; } = default!;
+    public IMudDialogInstance DialogInstance { get; set; } = default!;
     [Parameter]
     public bool CanEdit { get; set; } = false;
     [Parameter]
@@ -150,7 +150,7 @@
             {x => x.CanSelectDriver, false},
             {x => x.OnSubmit, async (p, ct) => await p.SaveChanges(ct)},
         };
-        await DialogService.Show<EditAddPenaltyDialog>("Edit penalty", parameters).Result;
+        await DialogService.ShowAsync<EditAddPenaltyDialog>("Edit penalty", parameters);
     }
 
     private async Task DeleteAddPenaltyAsync(PenaltyModel penalty)
@@ -160,7 +160,7 @@
             {x => x.Text, $"Really delete this penalty for {penalty.Member?.FirstName} {penalty.Member?.LastName}?"},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var confirmed = await DialogService.Show<ConfirmDialog>("Delete penalty", parameters).Result;
+        var confirmed = await (await DialogService.ShowAsync<ConfirmDialog>("Delete penalty", parameters)).Result;
         if (confirmed is null || confirmed.Canceled)
         {
             return;

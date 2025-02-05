@@ -109,7 +109,7 @@
                 FullWidth = true,
                 BackdropClick = false,
             };
-        var result = await DialogService.Show<EditTeamDialog>("Edit Team", parameters, options).Result;
+        var result = await (await DialogService.ShowAsync<EditTeamDialog>("Edit Team", parameters, options)).Result;
         if (result?.Canceled == false && result.Data is TeamModel model)
         {
             config.SetModel(model);
@@ -129,7 +129,7 @@
                 FullWidth = true,
                 BackdropClick = false,
             };
-        var result = await DialogService.Show<EditTeamDialog>("Add new Team", parameters, options).Result;
+        var result = await (await DialogService.ShowAsync<EditTeamDialog>("Add new Team", parameters, options)).Result;
     }
 
     private IEnumerable<MemberInfoModel> GetMembersWithoutTeam(IEnumerable<MemberInfoModel> members)
@@ -146,7 +146,7 @@
             {x => x.Text,  $"Really delete Team \"{team.Name}\"?"},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var result = await DialogService.Show<ConfirmDialog>("Delete Result Config", parameters).Result;
+        var result = await (await DialogService.ShowAsync<ConfirmDialog>("Delete Result Config", parameters)).Result;
         if (result is null || result.Canceled == false)
         {
             await vm.DeleteTeam(team.GetModel());

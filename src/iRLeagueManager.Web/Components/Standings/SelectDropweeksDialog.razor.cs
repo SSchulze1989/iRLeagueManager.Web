@@ -12,7 +12,7 @@ namespace iRLeagueManager.Web.Components;
 public partial class SelectDropweeksDialog : UtilityComponentBase
 {
     [Inject] LeagueApiService ApiService { get; init; } = default!;
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
 
     [Parameter] public IEnumerable<EventModel> Events { get; set; } = default!;
     [Parameter] public StandingsModel Standing { get; set; } = default!;

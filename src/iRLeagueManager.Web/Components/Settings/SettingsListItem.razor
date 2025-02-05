@@ -103,7 +103,7 @@
             { x => x.Items, ItemsSource.Cast<T?>() },
             { x => x.ToStringFunc, ToStringFunc },
         };
-        var result = await DialogService.Show<SelectPromptDialog<T?>>("Add Item", parameters).Result;
+        var result = await (await DialogService.ShowAsync<SelectPromptDialog<T?>>("Add Item", parameters)).Result;
         if (result is null || result.Canceled || result.Data is T item == false)
         {
             return;
@@ -122,7 +122,7 @@
         {
             { x => x.Text, $"Delete {itemsList[index]}?" },
         };
-        var result = await DialogService.Show<ConfirmDialog>("Delete item", parameters).Result;
+        var result = await (await DialogService.ShowAsync<ConfirmDialog>("Delete item", parameters)).Result;
         if (result is null || result.Canceled)
         {
             return;

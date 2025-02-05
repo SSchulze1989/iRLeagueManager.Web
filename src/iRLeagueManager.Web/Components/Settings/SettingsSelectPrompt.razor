@@ -52,7 +52,7 @@
                 NoHeader = string.IsNullOrEmpty(DialogHeader),
             };
 
-        var result = await DialogService.Show<SelectPromptDialog<T>>(DialogHeader, parameters: parameters, options: options).Result;
+        var result = await (await DialogService.ShowAsync<SelectPromptDialog<T>>(DialogHeader, parameters: parameters, options: options)).Result;
         if (result?.Canceled == false)
         {
             await ValueChanged.InvokeAsync((T?)result.Data);

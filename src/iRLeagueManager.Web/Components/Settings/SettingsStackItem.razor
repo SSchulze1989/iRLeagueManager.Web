@@ -5,7 +5,7 @@
 
 @if (IsVisible())
 {
-    <div class="@className" @onanimationend="AnimationEnd">
+    <div class="@className" @ontransitionend="AnimationEnd">
         @if (ItemIndex > 0)
         {
             <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="BackClick" />

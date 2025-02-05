@@ -103,7 +103,7 @@
             {x => x.Text, $"Remove role \"{role}\" from user \"{user.UserName}\""},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var confirm = await DialogService.Show<ConfirmDialog>("Confirm Remove Role", parameters).Result;
+        var confirm = await (await DialogService.ShowAsync<ConfirmDialog>("Confirm Remove Role", parameters)).Result;
         if (confirm is null || confirm.Canceled)
         {
             return false;
@@ -118,7 +118,7 @@
             {x => x.Text, $"Add role \"{role}\" to user \"{user.UserName}\""},
             {x => x.ButtonTypes, ButtonTypes.YesNo},
         };
-        var confirm = await DialogService.Show<ConfirmDialog>("Confirm Add Role", parameters).Result;
+        var confirm = await (await DialogService.ShowAsync<ConfirmDialog>("Confirm Add Role", parameters)).Result;
         if (confirm is null || confirm.Canceled)
         {
             return false;
@@ -132,6 +132,6 @@
         {
             {x => x.LeagueUsers, Users},
         };
-        await DialogService.Show<SearchUserDialog>("Search User", parameters).Result;
+        await DialogService.ShowAsync<SearchUserDialog>("Search User", parameters);
     }
 }

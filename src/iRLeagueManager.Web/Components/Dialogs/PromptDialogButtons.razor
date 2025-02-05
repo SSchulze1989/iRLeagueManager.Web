@@ -8,9 +8,9 @@
 }
 @if (OkClick.HasDelegate)
 {
-    <MudButton Color="Color.Primary" OnClick="OkClick" Disabled="DisableOkClick">
+    <ProgressButton Color="Color.Primary" OnClick="OkClick" Disabled="DisableOkClick" Loading="OkLoading">
         @OkText
-    </MudButton>
+    </ProgressButton>
 }
 
 @code {
@@ -24,6 +24,8 @@
     public EventCallback OkClick { get; set; }
     [Parameter]
     public EventCallback CancelClick { get; set; }
+    [Parameter]
+    public bool OkLoading { get; set; }
 
     protected override void OnParametersSet()
     {

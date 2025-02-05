@@ -11,17 +11,20 @@
                       Variant="Variant"
                       InputType="InputType.Text"
                       Placeholder="1234567"
-                      Clearable="true" 
+                      Clearable="true"
                       Error="hasError"
-                      ErrorText="@errorText"/>
+                      ErrorText="@errorText" 
+                      Disabled="Loading"/>
     </DialogContent>
     <DialogActions>
-        <PromptDialogButtons OkClick="Submit" OkText="Upload" CancelClick="Cancel"/>
+        <PromptDialogButtons OkClick="Submit" OkText="Upload" CancelClick="Cancel" DisableOkClick="Loading" OkLoading="Loading"/>
     </DialogActions>
 </MudDialog>
 
 @code {
     [Parameter] public EventModel Event { get; set; } = default!;
+
+    private bool Loading { get; set; }
 
     private bool hasError = false;
     private string errorText = string.Empty;
@@ -44,19 +47,28 @@
             return;
         }
 
-        var request = apiService.CurrentLeague
-            .Events()
-            .WithId(Event.Id)
-            .Results()
-            .Fetch()
-            .FromIracingSubSession(subsessionId)
-            .Post(CancellationToken);
-        var result = await request;
-        if (result.Success == false)
+        try
         {
-            hasError = true;
-            errorText = @"Fetching results from iracing api failed. Please check the subsession id and if the league results are available from public.
+            Loading = true;
+            var request = apiService.CurrentLeague
+                .Events()
+                .WithId(Event.Id)
+                .Results()
+                .Fetch()
+                .FromIracingSubSession(subsessionId)
+                .Post(CancellationToken);
+            var result = await request;
+            if (result.Success == false)
+            {
+                hasError = true;
+                errorText = @"Fetching results from iracing api failed. Please check the subsession id and if the league results are available from public.
 Please use JSON upload if this does not work";
+                return;
+            }
+        }
+        finally
+        {
+            Loading = false;
         }
 
         MudDialog.Close(Value);

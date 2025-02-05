@@ -1,6 +1,8 @@
 ﻿using iRLeagueApiCore.Client.Http;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 
 namespace iRLeagueManager.Web.Data;
 
@@ -66,6 +68,13 @@ internal sealed class BrowserProtectedStorageTokenStore : ITokenStore
         {
             logger.LogWarning("Could not read from local browser session: {Exception}", ex.GetType().Name);
             logger.LogDebug("Could not read from local browser session: {Exception}", ex);
+            return string.Empty;
+        }
+        catch (Exception ex) when (ex is CryptographicException or AntiforgeryValidationException)
+        {
+            logger.LogWarning("{Exception}", ex);
+            logger.LogWarning("Deleting locally stored identity token");
+            await localStore.DeleteAsync(tokenKey);
             return string.Empty;
         }
     }

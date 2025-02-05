@@ -16,7 +16,7 @@
                             <MudTextField Label="Username" Value="User.UserName" For="@(() => User.UserName)" Variant="Variant.Outlined" Disabled="true" />
                             <MudTextField Label="Firstname" @bind-Value="User.Firstname" For="@(() => User.Firstname)" Immediate="true" Variant="Variant.Outlined" />
                             <MudTextField Label="Lastname" @bind-Value="User.Lastname" For="@(() => User.Lastname)" Immediate="true" Variant="Variant.Outlined" />
-                            <MudCheckBox Label="Allow other users to view your firstname & lastname" @bind-Value="User.ShowFullname" Color="Color.Primary" LabelPosition="LabelPosition.End" />
+                            <MudCheckBox Label="Allow other users to view your firstname & lastname" @bind-Value="User.ShowFullname" Color="Color.Primary" LabelPlacement="Placement.End" />
                             <MudTextField Label="Email" @bind-Value="User.Email" For="@(() => User.Email)" Variant="Variant.Outlined" type="email" Disabled="true" />
                         </MudStack>
                     </EditForm>

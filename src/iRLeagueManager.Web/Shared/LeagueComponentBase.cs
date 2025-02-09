@@ -13,9 +13,6 @@ namespace iRLeagueManager.Web.Shared;
 
 public abstract partial class LeagueComponentBase : UtilityComponentBase
 {
-    [Inject]
-    public LeagueApiService ApiService { get; set; } = default!;
-
     private EventListViewModel eventList = default!;
 
     [CascadingParameter]

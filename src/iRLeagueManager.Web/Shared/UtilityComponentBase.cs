@@ -22,6 +22,8 @@ public class UtilityComponentBase : MvvmComponentBase
     protected IJSRuntime JsRuntime { get; set; } = default!;
     [Inject]
     protected SharedStateService Shared { get; set; } = default!;
+    [Inject]
+    public LeagueApiService ApiService { get; set; } = default!;
 
     private readonly CancellationTokenSource cancellationTokenSource = new();
     protected CancellationToken CancellationToken => cancellationTokenSource.Token;

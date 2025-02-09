@@ -12,10 +12,6 @@ namespace iRLeagueManager.Web.Components;
 
 public partial class ChangeTeamsDialog : UtilityComponentBase
 {
-    [Inject]
-    private LeagueApiService ApiService { get; set; } = default!;
-
-
     [CascadingParameter]
     MudDialogInstance ModalInstance { get; set; } = default!;
     [Parameter]

@@ -32,7 +32,7 @@
 @code {
     private List<string> errors = [];
 
-    private bool Loading => Value.Any(x => x.Loading);
+    private new bool Loading => Value.Any(x => x.Loading);
 
     private void ItemDropped(MudItemDropInfo<ChampSeasonViewModel> dropItem)
     {

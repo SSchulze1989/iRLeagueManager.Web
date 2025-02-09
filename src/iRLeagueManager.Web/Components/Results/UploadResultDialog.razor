@@ -2,7 +2,6 @@
 @using iRLeagueApiCore.Client.ResultsParsing
 @using iRLeagueApiCore.Common.Models
 @using System.Text.Json
-@inject LeagueApiService apiService
 @inherits PromptDialog<IBrowserFile>
 
 <MudDialog>
@@ -48,86 +47,9 @@
         <FormValidationMessage TValue=string Message=@ValidationMessage />
     </DialogContent>
     <DialogActions>
-        <PromptDialogButtons OkClick="Submit" OkText="Upload" CancelClick="Cancel" DisableOkClick=@(ParsingFailed || ParsedResult is null) />
+        <PromptDialogButtons OkClick="Submit" OkText="Upload" CancelClick="Cancel" DisableOkClick=@(Loading || ParsingFailed || ParsedResult is null) OkLoading="Loading" />
     </DialogActions>
 </MudDialog>
 
 @code {
-    [CascadingParameter]
-    public MudDialogInstance DialogInstance { get; set; } = default!;
-
-    [Parameter]
-    public EventModel Event { get; set; } = default!;
-
-    private bool FileLoading { get; set; } = false;
-
-    private bool ParsingFailed { get; set; } = false;
-
-    private bool Loading { get; set; } = false;
-
-    private ParseSimSessionResult? ParsedResult;
-
-    private string? ValidationMessage { get; set; }
-
-    protected override void OnParametersSet()
-    {
-        _ = Event ?? throw new InvalidOperationException($"Parameter {nameof(Event)} must have a value");
-    }
-
-    protected override async Task Submit()
-    {
-        if (ParsedResult is null || apiService.CurrentLeague is null)
-        {
-            return;
-        }
-
-        try
-        {
-            Loading = true;
-            var request = apiService.CurrentLeague.Events()
-                .WithId(Event.Id)
-                .Results()
-                .Upload()
-                .Post(ParsedResult, CancellationToken);
-            var result = await request;
-
-            if (result.Success == false)
-            {
-                var statusResult = result.ToStatusResult();
-                ValidationMessage = statusResult.Message;
-                return;
-            }
-
-            if (DialogInstance is not null)
-            {
-                DialogInstance.Close();
-            }
-        }
-        finally
-        {
-            Loading = false;
-        }
-    }
-
-    private async Task OnFileChanged(IBrowserFile file)
-    {
-        // try parse the json file
-        try
-        {
-            FileLoading = true;
-            ParsedResult = null;
-            var browserFile = file;
-            using var stream = browserFile.OpenReadStream(maxAllowedSize: 10240000);
-            ParsedResult = await JsonSerializer.DeserializeAsync<ParseSimSessionResult>(stream);
-            ParsingFailed = false;
-        }
-        catch (Exception ex) when (ex is IOException || ex is JsonException || ex is ArgumentNullException)
-        {
-            ParsingFailed = true;
-        }
-        finally
-        {
-            FileLoading = false;
-        }
-    }
 }

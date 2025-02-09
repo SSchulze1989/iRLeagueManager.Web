@@ -1,4 +1,5 @@
 ﻿@namespace iRLeagueManager.Web.Components
+@using System.Net
 @using iRLeagueApiCore.Common.Models
 @inject LeagueApiService apiService
 @inherits PromptDialog<string>
@@ -13,18 +14,16 @@
                       Placeholder="1234567"
                       Clearable="true"
                       Error="hasError"
-                      ErrorText="@errorText" 
-                      Disabled="Loading"/>
+                      ErrorText="@errorText"
+                      Disabled="Loading" />
     </DialogContent>
     <DialogActions>
-        <PromptDialogButtons OkClick="Submit" OkText="Upload" CancelClick="Cancel" DisableOkClick="Loading" OkLoading="Loading"/>
+        <PromptDialogButtons OkClick="Submit" OkText="Upload" CancelClick="Cancel" DisableOkClick="Loading" OkLoading="Loading" />
     </DialogActions>
 </MudDialog>
 
 @code {
     [Parameter] public EventModel Event { get; set; } = default!;
-
-    private bool Loading { get; set; }
 
     private bool hasError = false;
     private string errorText = string.Empty;
@@ -61,8 +60,12 @@
             if (result.Success == false)
             {
                 hasError = true;
-                errorText = @"Fetching results from iracing api failed. Please check the subsession id and if the league results are available from public.
-Please use JSON upload if this does not work";
+                errorText = result.HttpStatusCode switch
+                {
+                    HttpStatusCode.NotFound => @"Subsession id not found. Please check that the id is correct and that the results are visible to public",
+                    _ => @"Fetching results from iracing api failed. Please check that the id is correct and that the the results are visible to public.
+Please use JSON upload if this does not work",
+                };
                 return;
             }
         }

@@ -29,7 +29,7 @@ public sealed class SeasonsViewModel : LeagueViewModelBase<SeasonsViewModel>
             {
                 return;
             }
-            var seasons = (await ApiService.CurrentLeague.Seasons().Get()).EnsureSuccess();
+            var seasons = (await ApiService.CurrentLeague.Seasons().Get().ConfigureAwait(false)).EnsureSuccess();
             if (seasons == null)
             {
                 return;

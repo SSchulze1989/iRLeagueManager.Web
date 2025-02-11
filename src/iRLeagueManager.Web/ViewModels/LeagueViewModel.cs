@@ -66,7 +66,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
             Loading = true;
             var request = ApiService.Client.Leagues()
                 .WithName(CurrentLeague.Name)
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success && result.Content is LeagueModel leagueModel)
             {
@@ -91,14 +91,14 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
         {
             Loading = true;
             var request = CurrentLeague.Seasons()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success && result.Content is IEnumerable<SeasonModel> seasonModels)
             {
                 Seasons = new(seasonModels.Select(x => new SeasonViewModel(LoggerFactory, ApiService, x)));
                 ApiService.Shared.SeasonList = new(Seasons.Select(x => x.GetModel()));
             }
-            var currentSeason = await CurrentLeague.Seasons().Current().Get();
+            var currentSeason = await CurrentLeague.Seasons().Current().Get().ConfigureAwait(false);
             if (currentSeason.Success && currentSeason.Content is SeasonModel season)
             {
                 CurrentSeason = Seasons.FirstOrDefault(x => x.SeasonId == season.SeasonId);
@@ -126,7 +126,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
         {
             Loading = true;
             var request = CurrentLeague.Seasons()
-                .Post(season, cancellationToken);
+                .Post(season, cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success == false || result.Content is not SeasonModel newSeason)
             {
@@ -135,7 +135,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
             var scheduleRequest = CurrentLeague.Seasons()
                 .WithId(newSeason.SeasonId)
                 .Schedules()
-                .Post(new() { Name = "Schedule" }, cancellationToken);
+                .Post(new() { Name = "Schedule" }, cancellationToken).ConfigureAwait(false);
             await scheduleRequest;
             var activateSeasons = await ActivateChampSeasons(base.CurrentSeason?.Id, result.Content.SeasonId, cancellationToken);
             if (activateSeasons.IsSuccess == false) return activateSeasons;
@@ -162,7 +162,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
             var champSeasonsResult = await CurrentLeague.Seasons()
                 .WithId(previousSeasonId.Value)
                 .ChampSeasons()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (champSeasonsResult.Success == false || champSeasonsResult.Content is null)
             {
                 return champSeasonsResult.ToStatusResult();
@@ -173,7 +173,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
                     .WithId(seasonId.Value)
                     .Championships()
                     .WithId(champSeason.ChampionshipId)
-                    .Post(new(), cancellationToken);
+                    .Post(new(), cancellationToken).ConfigureAwait(false);
                 if (activateChampSeasonResult.Success == false || activateChampSeasonResult.Content is null)
                 {
                     return activateChampSeasonResult.ToStatusResult();
@@ -183,7 +183,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
                 var setDefaultResultConfig = await CurrentLeague
                     .ChampSeasons()
                     .WithId(activateChampSeasonResult.Content.ChampSeasonId)
-                    .Put(putChampSeason, cancellationToken);
+                    .Put(putChampSeason, cancellationToken).ConfigureAwait(false);
             }
             return StatusResult.SuccessResult();
         }
@@ -205,7 +205,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
             Loading = true;
             var request = CurrentLeague.Seasons()
                 .WithId(season.SeasonId)
-                .Delete(cancellationToken);
+                .Delete(cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success)
             {
@@ -226,7 +226,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
             Loading = true;
             var request = ApiService.Client.Leagues()
                 .WithId(LeagueId)
-                .Put(model, cancellationToken);
+                .Put(model, cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success && result.Content is not null)
             {
@@ -248,7 +248,7 @@ public sealed class LeagueViewModel : LeagueViewModelBase<LeagueViewModel, Leagu
             var result = await ApiService.Client.Leagues()
                 .WithId(LeagueId)
                 .Initialize()
-                .Post(cancellationToken);
+                .Post(cancellationToken).ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);

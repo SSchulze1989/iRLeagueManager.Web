@@ -47,7 +47,7 @@ public sealed class SeasonViewModel : LeagueViewModelBase<SeasonViewModel, Seaso
             {
                 return;
             }
-            var result = await ApiService.CurrentSeason.Get();
+            var result = await ApiService.CurrentSeason.Get().ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);
@@ -71,7 +71,7 @@ public sealed class SeasonViewModel : LeagueViewModelBase<SeasonViewModel, Seaso
             Loading = true;
             var request = ApiService.CurrentLeague.Seasons()
                 .WithId(SeasonId)
-                .Put(model, cancellationToken);
+                .Put(model, cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success && result.Content is SeasonModel seasonModel)
             {
@@ -99,7 +99,7 @@ public sealed class SeasonViewModel : LeagueViewModelBase<SeasonViewModel, Seaso
             var result = await ApiService.CurrentLeague
                 .Seasons()
                 .WithId(model.SeasonId)
-                .Put(model);
+                .Put(model).ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 model = result.Content;

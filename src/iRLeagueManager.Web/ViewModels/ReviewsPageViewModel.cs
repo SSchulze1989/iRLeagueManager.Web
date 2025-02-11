@@ -54,7 +54,7 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
 
             var leagueRequest = ApiService.Client.Leagues()
                 .WithName(ApiService.CurrentLeague.Name)
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             var leagueResult = await leagueRequest;
             if (leagueResult.Success == false || leagueResult.Content is null)
             {
@@ -68,7 +68,7 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
 
             var reviewsEndpoint = eventEndpoint
                 .Reviews();
-            var result = await reviewsEndpoint.Get(cancellationToken);
+            var result = await reviewsEndpoint.Get(cancellationToken).ConfigureAwait(false);
             if (result.Success == false || result.Content is null)
             {
                 return result.ToStatusResult();
@@ -79,7 +79,7 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
 
             var eventCars = await eventEndpoint
                 .Cars()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (eventCars.Success == false || eventCars.Content is null)
             {
                 return eventCars.ToStatusResult();
@@ -88,7 +88,7 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
 
             var protestsRequest = eventEndpoint
                 .Protests()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             var protestsResult = await protestsRequest;
             if (protestsResult.Success == false || protestsResult.Content is null)
             {
@@ -115,7 +115,7 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
         {
             Loading = true;
             var result = await CurrentLeague.Users()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 LeagueUsers = new(result.Content);
@@ -140,7 +140,7 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
             Loading = true;
             var result = await CurrentLeague
                 .VoteCategories()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (result.Success && result.Content is IEnumerable<VoteCategoryModel> models)
             {
                 VoteCategories = models.Select(x => new VoteCategoryViewModel(LoggerFactory, ApiService, x)).ToList();
@@ -167,7 +167,7 @@ public sealed class ReviewsPageViewModel : LeagueViewModelBase<ReviewsPageViewMo
                 .Sessions()
                 .WithId(sessionId)
                 .Protests()
-                .Post(protest, cancellationToken);
+                .Post(protest, cancellationToken).ConfigureAwait(false);
             var result = await request;
             return result.ToStatusResult();
         }

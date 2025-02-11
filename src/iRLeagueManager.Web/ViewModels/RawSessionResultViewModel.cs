@@ -48,7 +48,7 @@ public sealed class RawSessionResultViewModel : LeagueViewModelBase<RawSessionRe
                 .WithId(eventId)
                 .Results()
                 .Raw()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (!eventResult.Success || eventResult.Content is null)
             {
                 return eventResult.ToStatusResult();

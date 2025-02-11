@@ -115,7 +115,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
             Loading = true;
             var result = await CurrentSeason.Championships()
                 .WithId(championshipId)
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);
@@ -141,7 +141,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
             var result = await ApiService.CurrentLeague
                 .ChampSeasons()
                 .WithId(ChampSeasonId)
-                .Put(model, cancellationToken);
+                .Put(model, cancellationToken).ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);
@@ -170,7 +170,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
                 var result = await ApiService.CurrentLeague
                     .ResultConfigs()
                     .WithId(configInfo.ResultConfigId)
-                    .Get(cancellationToken);
+                    .Get(cancellationToken).ConfigureAwait(false);
                 if (result.Success == false || result.Content is null)
                 { 
                     return result.ToStatusResult();
@@ -199,7 +199,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
             var result = await CurrentLeague.ChampSeasons()
                 .WithId(model.ChampSeasonId)
                 .ResultConfigs()
-                .Post(config, cancellationToken);
+                .Post(config, cancellationToken).ConfigureAwait(false);
             if (result.Success == false || result.Content is null)
             {
                 return result.ToStatusResult();
@@ -233,7 +233,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
             Loading = true;
             var result = await CurrentLeague.ResultConfigs()
                 .WithId(config.ResultConfigId)
-                .Delete(cancellationToken);
+                .Delete(cancellationToken).ConfigureAwait(false);
             if (result.Success)
             {
                 return await LoadResultConfigs(cancellationToken);

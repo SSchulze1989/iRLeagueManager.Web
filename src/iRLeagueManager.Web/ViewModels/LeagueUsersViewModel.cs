@@ -24,7 +24,7 @@ public sealed class LeagueUsersViewModel : LeagueViewModelBase<LeagueUsersViewMo
         try
         {
             Loading = true;
-            var getUsersEndpoint = ApiService.CurrentLeague.Users().Get();
+            var getUsersEndpoint = ApiService.CurrentLeague.Users().Get().ConfigureAwait(false);
             var result = await getUsersEndpoint;
 
             if (result.Success == false || result.Content is null)
@@ -63,7 +63,7 @@ public sealed class LeagueUsersViewModel : LeagueViewModelBase<LeagueUsersViewMo
                 .Users()
                 .WithId(user.UserId)
                 .AddRole()
-                .Post(new() { RoleName = "Member" });
+                .Post(new() { RoleName = "Member" }).ConfigureAwait(false);
             var result = await request;
             if (result.Success)
             {

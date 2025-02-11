@@ -19,7 +19,7 @@ internal sealed class TrackListService
     {
         if (lastUpdate < (DateTime.UtcNow - updateInterval))
         {
-            var request = apiService.Client.Tracks().Get();
+            var request = apiService.Client.Tracks().Get().ConfigureAwait(false);
             var result = await request;
             if (result.Success && result.Content is not null)
             {

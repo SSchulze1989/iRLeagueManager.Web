@@ -29,7 +29,7 @@ public sealed class StandingsPageViewModel : LeagueViewModelBase<StandingsPageVi
             .Events()
             .WithId(eventId)
             .Standings()
-            .Get();
+            .Get().ConfigureAwait(false);
             var result = await request;
             if (result.Success && result.Content is not null)
             {
@@ -64,7 +64,7 @@ public sealed class StandingsPageViewModel : LeagueViewModelBase<StandingsPageVi
                 return SeasonNullResult();
             }
 
-            var request = ApiService.CurrentSeason.Standings().Get();
+            var request = ApiService.CurrentSeason.Standings().Get().ConfigureAwait(false);
             var result = await request;
             if (result.Success && result.Content is not null)
             {

@@ -49,7 +49,7 @@ public sealed class ReviewSettingsViewModel : LeagueViewModelBase<ReviewSettings
         {
             Loading = true;
             var request = CurrentLeague.VoteCategories()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success && result.Content is not null)
             {
@@ -115,7 +115,7 @@ public sealed class ReviewSettingsViewModel : LeagueViewModelBase<ReviewSettings
         {
             Loading = true;
             var request = CurrentLeague.VoteCategories()
-                .Post(voteCategory, cancellationToken);
+                .Post(voteCategory, cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success == false)
             {
@@ -141,7 +141,7 @@ public sealed class ReviewSettingsViewModel : LeagueViewModelBase<ReviewSettings
             Loading = true;
             var request = CurrentLeague.VoteCategories()
                 .WithId(voteCategory.Id)
-                .Delete(cancellationToken);
+                .Delete(cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success == false)
             {

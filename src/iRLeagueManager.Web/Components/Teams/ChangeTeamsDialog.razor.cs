@@ -111,7 +111,7 @@ public partial class ChangeTeamsDialog : UtilityComponentBase
             var request = ApiService.CurrentLeague.Seasons()
                 .WithId(seasonId)
                 .Results();
-            var result = await request.Get(CancellationToken);
+            var result = await request.Get(CancellationToken).ConfigureAwait(false);
 
             if (result.Success && result.Content is IEnumerable<SeasonEventResultModel> eventResults)
             {
@@ -142,7 +142,7 @@ public partial class ChangeTeamsDialog : UtilityComponentBase
         try
         {
             Loading = true;
-            var result = await ApiService.CurrentLeague.Teams().Get();
+            var result = await ApiService.CurrentLeague.Teams().Get().ConfigureAwait(false);
             if (result.Success && result.Content is IEnumerable<TeamModel> teams)
             {
                 Teams = teams.Select(x => new TeamInfoModel()
@@ -178,7 +178,7 @@ public partial class ChangeTeamsDialog : UtilityComponentBase
                 .WithId(selectResult.EventId)
                 .Results()
                 .Raw()
-                .Get(CancellationToken);
+                .Get(CancellationToken).ConfigureAwait(false);
             if (rawResultRequest.Success == false ||  rawResultRequest.Content is not RawEventResultModel rawEventResult)
             {
                 return rawResultRequest.ToStatusResult();
@@ -197,7 +197,7 @@ public partial class ChangeTeamsDialog : UtilityComponentBase
                 var modRowRequest = await ApiService.CurrentLeague
                     .Results()
                     .ModifyResultRow(row.ResultRowId)
-                    .Put(row, CancellationToken);
+                    .Put(row, CancellationToken).ConfigureAwait(false);
             }
 
             return StatusResult.SuccessResult();
@@ -223,7 +223,7 @@ public partial class ChangeTeamsDialog : UtilityComponentBase
                 .WithId(eventId)
                 .Results()
                 .Calculate()
-                .Post(CancellationToken);
+                .Post(CancellationToken).ConfigureAwait(false);
             return request.ToStatusResult();
         }
         finally

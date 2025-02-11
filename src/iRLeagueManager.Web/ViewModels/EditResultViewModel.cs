@@ -38,7 +38,7 @@ public sealed class EditResultViewModel : LeagueViewModelBase<EditResultViewMode
                 .WithId(eventId)
                 .Results()
                 .Raw();
-            var result = await request.Get(cancellationToken);
+            var result = await request.Get(cancellationToken).ConfigureAwait(false);
             if (!result.Success || result.Content is not RawEventResultModel model)
             {
                 return result.ToStatusResult();
@@ -47,7 +47,7 @@ public sealed class EditResultViewModel : LeagueViewModelBase<EditResultViewMode
 
             var loadMembers = await CurrentLeague
                 .Members()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (!loadMembers.Success || loadMembers.Content is null)
             {
                 return loadMembers.ToStatusResult();
@@ -56,7 +56,7 @@ public sealed class EditResultViewModel : LeagueViewModelBase<EditResultViewMode
 
             var loadTeams = await CurrentLeague
                 .Teams()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (!loadTeams.Success || loadTeams.Content is null)
             {
                 return loadTeams.ToStatusResult();
@@ -92,7 +92,7 @@ public sealed class EditResultViewModel : LeagueViewModelBase<EditResultViewMode
                 .WithId(model.EventId)
                 .Results()
                 .Raw()
-                .Put(model, cancellationToken);
+                .Put(model, cancellationToken).ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);

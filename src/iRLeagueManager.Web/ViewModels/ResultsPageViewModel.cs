@@ -41,7 +41,7 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
         LoadedSeasonId = ApiService.CurrentSeason.Id;
 
         var sessionsEndpoint = ApiService.CurrentSeason.Events();
-        var result = await sessionsEndpoint.Get();
+        var result = await sessionsEndpoint.Get().ConfigureAwait(false);
         if (result.Success == false || result.Content is null)
         {
             EventList.Clear();
@@ -70,7 +70,7 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
             if (selectedEvent == null)
             {
                 // Load event list first if event is not in current event list
-                var eventRequest = await eventEndpoint.Get();
+                var eventRequest = await eventEndpoint.Get().ConfigureAwait(false);
                 if (eventRequest.Success == false || eventRequest.Content is null)
                 {
                     return;
@@ -85,7 +85,7 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
             }
 
             var resultEndpoint = eventEndpoint.Results();
-            var requestResult = await resultEndpoint.Get();
+            var requestResult = await resultEndpoint.Get().ConfigureAwait(false);
             if (requestResult.Success == false || requestResult.Content is null)
             {
                 Results.Clear();
@@ -118,7 +118,7 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
             .WithId(SelectedEvent.EventId)
             .Results()
             .Calculate()
-            .Post(cancellationToken);
+            .Post(cancellationToken).ConfigureAwait(false);
             var result = await request;
 
             if (result.Success)
@@ -152,7 +152,7 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
             var request = ApiService.CurrentLeague.Events()
                 .WithId(SelectedEvent.EventId)
                 .Results()
-                .Delete(cancellationToken);
+                .Delete(cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success)
             {

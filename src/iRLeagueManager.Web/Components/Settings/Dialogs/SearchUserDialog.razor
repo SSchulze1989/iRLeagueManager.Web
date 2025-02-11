@@ -2,7 +2,7 @@
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueApiCore.Common.Models.Users
 @using iRLeagueManager.Web.ViewModels
-@inject LeagueApiService apiService
+@inherits UtilityComponentBase
 
 <MudDialog>
     <DialogContent>
@@ -11,12 +11,13 @@
                          DebounceInterval="500"
                          MinCharacters="2"
                          ToStringFunc="UserToString"
-                         Variant="Variant.Outlined">
+                         Variant="Variant.Outlined"
+                         ShowProgressIndicator="true">
             <ItemTemplate Context="user">
-                <DisplayUser User="user"/>
+                <DisplayUser User="user" />
             </ItemTemplate>
             <ItemSelectedTemplate Context="user">
-                <DisplayUser User="user" ShowUserName="false"/>
+                <DisplayUser User="user" ShowUserName="false" />
             </ItemSelectedTemplate>
         </MudAutocomplete>
     </DialogContent>
@@ -27,8 +28,8 @@
 </MudDialog>
 
 @code {
-        [CascadingParameter] public MudDialogInstance DialogInstance { get; set; } = default!;
-        [Parameter] public LeagueUsersViewModel LeagueUsers { get; set; } = default!;
+    [CascadingParameter] public MudDialogInstance DialogInstance { get; set; } = default!;
+    [Parameter] public LeagueUsersViewModel LeagueUsers { get; set; } = default!;
 
     private UserModel? User { get; set; }
 
@@ -38,20 +39,37 @@
         BlazorParameterNullException.ThrowIfNull(this, LeagueUsers);
     }
 
+    private async Task<StatusResult<IEnumerable<UserModel>>> PostSearchRequest(SearchModel search)
+    {
+        if (ApiService.CurrentLeague == null)
+        {
+            return LeagueNullResult<IEnumerable<UserModel>>();
+        }
+        try
+        {
+            Loading = true;
+            var result = await ApiService.Client
+                .Users()
+                .Search()
+                .Post(search).ConfigureAwait(false);
+            return result.ToContentStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
     private async Task<IEnumerable<UserModel?>> SearchUsers(string name, CancellationToken cancellationToken)
     {
-        if (apiService.CurrentLeague == null)
+        if (ApiService.CurrentLeague == null)
         {
             return Array.Empty<UserModel>();
         }
         var parts = name.Split(',', ';', ' ');
-        var model = new SearchModel() { SearchKeys = parts };
-        var request = apiService.Client
-            .Users()
-            .Search()
-            .Post(model);
-        var result = await request;
-        if (result.Success && result.Content is not null)
+        var search = new SearchModel() { SearchKeys = parts };
+        var result = await PostSearchRequest(search);
+        if (result.IsSuccess && result.Content is not null)
         {
             return result.Content;
         }

@@ -93,7 +93,7 @@ public abstract partial class LeagueComponentBase : UtilityComponentBase
         {
             var currentSeason = await ApiService.CurrentLeague.Seasons()
                 .Current()
-                .Get();
+                .Get().ConfigureAwait(false);
             if (currentSeason.Success && currentSeason.Content is not null)
             {
                 await ApiService.SetCurrentSeasonAsync(ApiService.CurrentLeague.Name, currentSeason.Content.SeasonId);

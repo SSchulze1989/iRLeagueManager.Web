@@ -37,7 +37,7 @@ public sealed class TeamViewModel : LeagueViewModelBase<TeamViewModel, TeamModel
             var request = ApiService.CurrentLeague
                 .Teams()
                 .WithId(TeamId)
-                .Put(model, cancellationToken);
+                .Put(model, cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success && result.Content is not null)
             {

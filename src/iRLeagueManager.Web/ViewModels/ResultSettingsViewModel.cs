@@ -45,7 +45,7 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
 
             var getChampionships = await ApiService.CurrentLeague
                 .Championships()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (getChampionships.Success == false || getChampionships.Content is null)
             {
                 return getChampionships.ToStatusResult();
@@ -54,7 +54,7 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
 
             var getChampSeasons = await ApiService.CurrentSeason
                 .ChampSeasons()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (getChampSeasons.Success == false || getChampSeasons.Content is null)
             {
                 return getChampSeasons.ToStatusResult();
@@ -84,7 +84,7 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
             // Post a new championship
             var postChampionship = new PostChampionshipModel() { Name = champSeason.ChampionshipName, DisplayName = champSeason.ChampionshipDisplayName };
             var postChampionshipResult = await CurrentLeague.Championships()
-                .Post(postChampionship, cancellationToken);
+                .Post(postChampionship, cancellationToken).ConfigureAwait(false);
             if (postChampionshipResult.Success == false || postChampionshipResult.Content is null)
             {
                 return postChampionshipResult.ToStatusResult();
@@ -93,7 +93,7 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
             // Post a champ season for the new championship and the current season
             var postChampSeasonResult = await CurrentSeason.Championships()
                 .WithId(postChampionshipResult.Content.ChampionshipId)
-                .Post(champSeason, cancellationToken);
+                .Post(champSeason, cancellationToken).ConfigureAwait(false);
             if (postChampSeasonResult.Success == false || postChampSeasonResult.Content is null)
             {
                 return postChampionshipResult.ToStatusResult();
@@ -110,7 +110,7 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
                     .ChampSeasons()
                     .WithId(postChampSeasonResult.Content.ChampSeasonId)
                     .ResultConfigs()
-                    .Post(resultConfigTemplate, cancellationToken);
+                    .Post(resultConfigTemplate, cancellationToken).ConfigureAwait(false);
                 if (postResultConfigResult.Success == false || postResultConfigResult.Content is null)
                 {
                     return postResultConfigResult.ToStatusResult();
@@ -122,7 +122,7 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
             // Update the champseason with data from model
             var putChampSeasonResult = await CurrentLeague.ChampSeasons()
                 .WithId(postChampSeasonResult.Content.ChampSeasonId)
-                .Put(champSeason, cancellationToken);
+                .Put(champSeason, cancellationToken).ConfigureAwait(false);
             if (putChampSeasonResult.Success == false || putChampSeasonResult.Content is null)
             {
                 return putChampSeasonResult.ToStatusResult();
@@ -143,7 +143,7 @@ public sealed class ResultSettingsViewModel : LeagueViewModelBase<ResultSettings
             Loading = true;
             var result = await CurrentLeague.Championships()
                 .WithId(championship.ChampionshipId)
-                .Delete(cancellationToken);
+                .Delete(cancellationToken).ConfigureAwait(false);
             if (result.Success == false)
             {
                 return result.ToStatusResult();

@@ -25,7 +25,7 @@ public sealed class SchedulesPageViewModel : LeagueViewModelBase<SchedulesPageVi
 
         //await Task.Delay(500);
 
-        var result = await ApiService.CurrentSeason.Schedules().Get();
+        var result = await ApiService.CurrentSeason.Schedules().Get().ConfigureAwait(false);
         if (result.Success == false || result.Content is null)
         {
             Schedules.Clear();

@@ -1,6 +1,5 @@
 ﻿@page "/members/{UserId}/confirm/{ConfirmationToken}"
-@inject LeagueApiService ApiService
-@inject NavigationManager NavigationManager
+@inherits UtilityComponentBase
 
 <MudContainer MaxWidth="MaxWidth.Small">
     <MudPaper Elevation="5" Class="pa-4">
@@ -23,7 +22,7 @@
         else
         {
             <MudStack Row="true" AlignItems="AlignItems.Center">
-                <MudProgressCircular Size="Size.Small" Color="Color.Default" Indeterminate="true"/>
+                <MudProgressCircular Size="Size.Small" Color="Color.Default" Indeterminate="true" />
                 <MudText>
                     Processing email confirmation ...
                 </MudText>
@@ -48,6 +47,24 @@
         BlazorParameterNullException.ThrowIfNull(this, ConfirmationToken);
     }
 
+    private async Task<StatusResult> SendConfirmationMail(string userId, string token)
+    {
+        try
+        {
+            Loading = true;
+            var result = await ApiService.Client
+                .Users()
+                .WithId(userId)
+                .ConfirmEmail(token)
+                .Post().ConfigureAwait(false);
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
@@ -56,12 +73,8 @@
             return;
         }
 
-        var result = await ApiService.Client
-            .Users()
-            .WithId(UserId)
-            .ConfirmEmail(ConfirmationToken)
-            .Post();
-        if (result.Success)
+        var result = await SendConfirmationMail(UserId, ConfirmationToken);
+        if (result.IsSuccess)
         {
             Success = true;
             await InvokeAsync(StateHasChanged);

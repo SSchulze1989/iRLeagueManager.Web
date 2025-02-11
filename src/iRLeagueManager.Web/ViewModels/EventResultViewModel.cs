@@ -40,11 +40,11 @@ public sealed class EventResultViewModel : LeagueViewModelBase<EventResultViewMo
             //var result = await CurrentLeague.Results()
             //    .WithId(ResultId)
             //    .Penalties()
-            //    .Get(cancellationToken);
+            //    .Get(cancellationToken).ConfigureAwait(false);
             var route = $"Results/{ResultId}/Penalties";
             var result = await CurrentLeague
                 .CustomEndpoint<IEnumerable<PenaltyModel>>(route)
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             return result.ToContentStatusResult();
         }
         finally 

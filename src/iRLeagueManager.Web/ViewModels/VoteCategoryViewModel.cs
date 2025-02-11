@@ -40,7 +40,7 @@ public sealed class VoteCategoryViewModel : LeagueViewModelBase<VoteCategoryView
             Loading = true;
             var request = ApiService.CurrentLeague.VoteCategories()
                 .WithId(model.Id)
-                .Put(model, cancellationToken);
+                .Put(model, cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success && result.Content is not null)
             {

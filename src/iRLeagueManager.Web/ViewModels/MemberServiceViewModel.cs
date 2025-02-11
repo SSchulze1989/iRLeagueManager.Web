@@ -22,7 +22,7 @@ public class MemberServiceViewModel : LeagueViewModelBase
         {
             Loading = true;
             var membersResult = await CurrentLeague.Members()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             return membersResult.ToContentStatusResult();
         }
         finally
@@ -42,7 +42,7 @@ public class MemberServiceViewModel : LeagueViewModelBase
         {
             Loading = true;
             var teamsResult = await CurrentLeague.Teams()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (teamsResult.Success == false || teamsResult.Content is null)
             {
                 return teamsResult.ToContentStatusResult(Enumerable.Empty<TeamModel>());

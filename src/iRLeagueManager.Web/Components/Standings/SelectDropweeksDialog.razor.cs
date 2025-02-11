@@ -58,19 +58,19 @@ public partial class SelectDropweeksDialog : UtilityComponentBase
             Loading = true;
             var requests = StandingRow.ResultRows
             .NotNull()
-                .Select(row =>
+                .Select(async row =>
                 {
-                    return ApiService.CurrentLeague.Standings()
+                    return await ApiService.CurrentLeague.Standings()
                         .WithId(Standing.StandingId)
                         .ResultRows()
                         .WithId(row.ResultRowId)
                         .DropweekOverride()
-                        .Get(cts.Token);
+                        .Get(cts.Token).ConfigureAwait(false);
                 })
             .ToList();
 
             // wait for parallel requests to finish
-            await Task.WhenAny(Task.WhenAll(requests), Task.Delay(5000));
+            await Task.WhenAny(Task.WhenAll(requests), Task.Delay(5000)).ConfigureAwait(false);
 
             if (requests.Any(x => x.IsCompleted == false))
             {
@@ -116,7 +116,7 @@ public partial class SelectDropweeksDialog : UtilityComponentBase
                 .ResultRows()
                 .WithId(scoredResultRowId)
                 .DropweekOverride()
-                .Delete(CancellationToken);
+                .Delete(CancellationToken).ConfigureAwait(false);
 
             return result.ToStatusResult();
         }
@@ -142,7 +142,7 @@ public partial class SelectDropweeksDialog : UtilityComponentBase
                 .ResultRows()
                 .WithId(scoredResultRowId)
                 .DropweekOverride()
-                .Put(model, CancellationToken);
+                .Put(model, CancellationToken).ConfigureAwait(false);
 
             return result.ToContentStatusResult();
         }
@@ -188,7 +188,7 @@ public partial class SelectDropweeksDialog : UtilityComponentBase
                 .WithId(eventId)
                 .Standings()
                 .Calculate()
-                .Post(CancellationToken);
+                .Post(CancellationToken).ConfigureAwait(false);
             return result.ToStatusResult();
         }
         finally

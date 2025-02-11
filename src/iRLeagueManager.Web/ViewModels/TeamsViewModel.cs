@@ -31,7 +31,7 @@ public sealed class TeamsViewModel : LeagueViewModelBase<TeamsViewModel>
             Loading = true;
             var request = ApiService.CurrentLeague
                 .Teams()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success && result.Content is not null)
             {
@@ -57,7 +57,7 @@ public sealed class TeamsViewModel : LeagueViewModelBase<TeamsViewModel>
             Loading = true;
             var request = ApiService.CurrentLeague
                 .Teams()
-                .Post(team, cancellationToken);
+                .Post(team, cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success)
             {
@@ -84,7 +84,7 @@ public sealed class TeamsViewModel : LeagueViewModelBase<TeamsViewModel>
             var request = ApiService.CurrentLeague
                 .Teams()
                 .WithId(model.TeamId)
-                .Delete(cancellationToken);
+                .Delete(cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success)
             {
@@ -110,7 +110,7 @@ public sealed class TeamsViewModel : LeagueViewModelBase<TeamsViewModel>
             Loading = false;
             var request = ApiService.CurrentLeague
                 .Members()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success && result.Content is not null)
             {

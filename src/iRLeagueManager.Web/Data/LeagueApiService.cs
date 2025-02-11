@@ -36,12 +36,12 @@ public sealed class LeagueApiService
         Shared.SeasonId = 0;
         Shared.SeasonName = string.Empty;
         Shared.SeasonFinished = true;
-        var leagueResult = await CurrentLeague.Get();
+        var leagueResult = await CurrentLeague.Get().ConfigureAwait(false);
         if (leagueResult.Success && leagueResult.Content is not null)
         {
             Shared.LeagueInfo = leagueResult.Content;
         }
-        var seasonResult = await CurrentLeague.Seasons().Get();
+        var seasonResult = await CurrentLeague.Seasons().Get().ConfigureAwait(false);
         if (seasonResult.Success && seasonResult.Content is not null)
         {
             var seasons = seasonResult.Content;
@@ -65,7 +65,7 @@ public sealed class LeagueApiService
             .WithId(seasonId);
 
         // get name and update state
-        var result = await CurrentSeason.Get();
+        var result = await CurrentSeason.Get().ConfigureAwait(false);
         if (result.Success && result.Content is not null)
         {
             var season = result.Content;
@@ -86,7 +86,7 @@ public sealed class LeagueApiService
         var eventRequestResult = await CurrentLeague
             .Events()
             .WithId(eventId)
-            .Get();
+            .Get().ConfigureAwait(false);
         if (eventRequestResult.Success == false || eventRequestResult.Content is null)
         {
             return;

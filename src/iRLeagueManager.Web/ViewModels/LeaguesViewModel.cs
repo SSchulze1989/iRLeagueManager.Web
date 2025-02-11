@@ -46,7 +46,7 @@ public sealed class LeaguesViewModel : LeagueViewModelBase<LeaguesViewModel>
             Loading = true;
             var result = await ApiService.Client
                 .Leagues()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 var leagueModels = result.Content;
@@ -69,7 +69,7 @@ public sealed class LeaguesViewModel : LeagueViewModelBase<LeaguesViewModel>
             Loading = true;
             var result = await ApiService.Client
                 .Leagues()
-                .Post(model, cancellationToken);
+                .Post(model, cancellationToken).ConfigureAwait(false);
             return result.ToContentStatusResult();
         }
         finally

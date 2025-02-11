@@ -132,7 +132,7 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
             var result = await CurrentLeague
                 .ResultConfigs()
                 .WithId(resultConfigId)
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (result.Success == false || result.Content is null)
             {
                 return result.ToStatusResult();
@@ -158,7 +158,7 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         }
 
         var request = CurrentSeason.ResultsConfigs()
-            .Get(cancellationToken);
+            .Get(cancellationToken).ConfigureAwait(false);
         var result = await request;
         if (result.Success && result.Content is not null)
         {
@@ -182,14 +182,14 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
         {
             Loading = true;
             var membersResult = await CurrentLeague.Members()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (membersResult.Success == false || membersResult.Content is null)
             {
                 return membersResult.ToStatusResult();
             }
             LeagueMembers = new(membersResult.Content);
             var teamsResult = await CurrentLeague.Teams()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (teamsResult.Success == false || teamsResult.Content is null)
             {
                 return teamsResult.ToStatusResult();
@@ -217,7 +217,7 @@ public sealed class ResultConfigViewModel : LeagueViewModelBase<ResultConfigView
             UpdateModelScorings();
             var request = ApiService.CurrentLeague.ResultConfigs()
                 .WithId(ResultConfigId)
-                .Put(model, cancellationToken);
+                .Put(model, cancellationToken).ConfigureAwait(false);
             var result = await request;
 
             if (result.Success && result.Content is not null)

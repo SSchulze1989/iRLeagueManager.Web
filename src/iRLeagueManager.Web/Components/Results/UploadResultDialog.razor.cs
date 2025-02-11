@@ -29,9 +29,23 @@ public partial class UploadResultDialog : PromptDialog<IBrowserFile>
         _ = Event ?? throw new InvalidOperationException($"Parameter {nameof(Event)} must have a value");
     }
 
+    private async Task<StatusResult> PostResultAsync(ParseSimSessionResult parsedResult)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+        var result = await ApiService.CurrentLeague.Events()
+                .WithId(Event.Id)
+                .Results()
+                .Upload()
+                .Post(parsedResult, CancellationToken).ConfigureAwait(false);
+        return result.ToStatusResult();
+    }
+
     protected override async Task Submit()
     {
-        if (ParsedResult is null || ApiService.CurrentLeague is null)
+        if (ParsedResult is null)
         {
             return;
         }
@@ -39,16 +53,11 @@ public partial class UploadResultDialog : PromptDialog<IBrowserFile>
         try
         {
             Loading = true;
-            var request = ApiService.CurrentLeague.Events()
-                .WithId(Event.Id)
-                .Results()
-                .Upload()
-                .Post(ParsedResult, CancellationToken);
-            var result = await request;
+            var result = await PostResultAsync(ParsedResult);
 
-            if (result.Success == false)
+            if (result.IsSuccess == false)
             {
-                var statusResult = result.ToStatusResult();
+                var statusResult = result;
                 ValidationMessage = statusResult.Message;
                 return;
             }

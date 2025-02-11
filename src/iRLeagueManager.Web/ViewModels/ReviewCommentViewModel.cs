@@ -67,7 +67,7 @@ public sealed class ReviewCommentViewModel : LeagueViewModelBase<ReviewCommentVi
             Loading = true;
             var request = ApiService.CurrentLeague.ReviewComments()
                 .WithId(CommentId)
-                .Put(model);
+                .Put(model).ConfigureAwait(false);
             var result = await request;
             if (result.Success == false || result.Content is null)
             {

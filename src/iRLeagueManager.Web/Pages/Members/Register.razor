@@ -10,7 +10,7 @@
         <MudPaper Elevation="5" Class="pa-4">
             <MudText Class="mb-2">Thank you for your registration!</MudText>
             <MudText>
-                An email with a confirmation link has been send to the given email address. Please make sure to check your spam folder if you cannot find any mail from us.<br/>
+                An email with a confirmation link has been send to the given email address. Please make sure to check your spam folder if you cannot find any mail from us.<br />
                 Please click the link in the email to finish up your registration and activate your account.
             </MudText>
         </MudPaper>
@@ -31,42 +31,42 @@
                         <MudTextField Label="Username" @bind-Value="@Model.Username" For="@(() => Model.Username)" Variant="Variant.Outlined" />
                         <MudTextField Label="Firstname" @bind-Value="@Model.Firstname" For="@(() => Model.Firstname)" Variant="Variant.Outlined" />
                         <MudTextField Label="Lastname" @bind-Value="@Model.Lastname" For="@(() => Model.Lastname)" Variant="Variant.Outlined" />
-                        <MudTextField Label="Email" 
-                            @bind-Value="@Model.Email" 
-                            For="@(() => Model.Email)" 
-                            InputType="InputType.Email" 
-                            Variant="Variant.Outlined"
-                            Adornment="Adornment.End"
-                            AdornmentIcon="@Icons.Material.Filled.AlternateEmail" />
-                        <MudTextField Label="Password" 
-                            @bind-Value="@Model.Password" 
-                            For="@(() => Model.Password)"
-                            InputType="PasswordType" 
-                            Adornment="Adornment.End"
-                            AdornmentIcon="@PasswordIcon"
-                            OnAdornmentClick="ToggleShowPassword"
-                            Variant="Variant.Outlined" />
+                        <MudTextField Label="Email"
+                        @bind-Value="@Model.Email"
+                        For="@(() => Model.Email)"
+                        InputType="InputType.Email"
+                        Variant="Variant.Outlined"
+                        Adornment="Adornment.End"
+                        AdornmentIcon="@Icons.Material.Filled.AlternateEmail" />
+                        <MudTextField Label="Password"
+                        @bind-Value="@Model.Password"
+                        For="@(() => Model.Password)"
+                        InputType="PasswordType"
+                        Adornment="Adornment.End"
+                        AdornmentIcon="@PasswordIcon"
+                        OnAdornmentClick="ToggleShowPassword"
+                        Variant="Variant.Outlined" />
                         <MudTextField Label="Confirm Password"
-                            @bind-Value="@Model.PasswordConfirm"
-                            For="@(() => Model.PasswordConfirm)"
-                            InputType="PasswordType"
-                            Variant="Variant.Outlined" />
-                        <MudDivider Class="my-2"/>
+                        @bind-Value="@Model.PasswordConfirm"
+                        For="@(() => Model.PasswordConfirm)"
+                        InputType="PasswordType"
+                        Variant="Variant.Outlined" />
+                        <MudDivider Class="my-2" />
                         <MudStack Row="true" AlignItems="AlignItems.Center">
-                            <MudCheckBox @bind-Value="Model.PrivacyPolicyAgreeed" 
-                                Label="I have read and understood the" 
-                                Color="Color.Primary" 
-                                Dense="true" 
-                                LabelPosition="LabelPosition.End"
-                                For="@(() => Model.PrivacyPolicyAgreeed)"/>
+                            <MudCheckBox @bind-Value="Model.PrivacyPolicyAgreeed"
+                            Label="I have read and understood the"
+                            Color="Color.Primary"
+                            Dense="true"
+                            LabelPosition="LabelPosition.End"
+                            For="@(() => Model.PrivacyPolicyAgreeed)" />
                             <MudLink Href="privacy" target="_blank">privacy policy</MudLink>
                         </MudStack>
                         <MudStack Row="true" AlignItems="AlignItems.Center">
-                            <MudCheckBox @bind-Value="Model.TermsConditionsAgreed" 
-                                Label="I have read and accept the" 
-                                Color="Color.Primary" Dense="true" 
-                                LabelPosition=" LabelPosition.End" 
-                                For="@(() => Model.TermsConditionsAgreed)"/>
+                            <MudCheckBox @bind-Value="Model.TermsConditionsAgreed"
+                            Label="I have read and accept the"
+                            Color="Color.Primary" Dense="true"
+                            LabelPosition=" LabelPosition.End"
+                            For="@(() => Model.TermsConditionsAgreed)" />
                             <MudLink Href="terms" target="_blank">terms and conditions</MudLink>
                         </MudStack>
                     </MudStack>
@@ -125,28 +125,32 @@
 
     private RegisterModel Model { get; set; } = new();
 
-    private async Task Submit()
+    private async Task<StatusResult> RegisterUser(RegisterModel user)
     {
+        var linkTemplate = $$"""{{NavigationManager.BaseUri}}members/{userId}/confirm/{token}""";
+
         try
         {
             Loading = true;
-            Success = false;
-            var linkTemplate = $$"""{{NavigationManager.BaseUri}}members/{userId}/confirm/{token}""";
             var result = await ApiService.Client
                 .Authenticate()
                 .Register()
                 .AddQueryParameter(x => x.Add("linkTemplate", linkTemplate))
-                .Post(Model);
-            if (result.Success)
-            {
-                Success = true;
-            }
-            ResultValidator?.ValidateResult(result.ToStatusResult());
+                .Post(user).ConfigureAwait(false);
+            return result.ToStatusResult();
         }
         finally
         {
             Loading = false;
         }
+    }
+
+    private async Task Submit()
+    {
+        Success = false;
+        var result = await RegisterUser(Model);
+        Success = result.IsSuccess;
+        ResultValidator?.ValidateResult(result);
     }
 
     private void ToggleShowPassword()

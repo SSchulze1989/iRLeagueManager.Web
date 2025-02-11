@@ -1,21 +1,20 @@
 ﻿@namespace iRLeagueManager.Web.Components
 @using System.Net
 @using iRLeagueApiCore.Common.Models
-@inject LeagueApiService apiService
 @inherits PromptDialog<string>
 
 <MudDialog>
     <DialogContent>
         <MudTextField @bind-Value="Value"
-                      Label="@Label"
-                      HelperText="@HelperText"
-                      Variant="Variant"
-                      InputType="InputType.Text"
-                      Placeholder="1234567"
-                      Clearable="true"
-                      Error="hasError"
-                      ErrorText="@errorText"
-                      Disabled="Loading" />
+        Label="@Label"
+        HelperText="@HelperText"
+        Variant="Variant"
+        InputType="InputType.Text"
+        Placeholder="1234567"
+        Clearable="true"
+        Error="hasError"
+        ErrorText="@errorText"
+        Disabled="Loading" />
     </DialogContent>
     <DialogActions>
         <PromptDialogButtons OkClick="Submit" OkText="Upload" CancelClick="Cancel" DisableOkClick="Loading" OkLoading="Loading" />
@@ -28,34 +27,23 @@
     private bool hasError = false;
     private string errorText = string.Empty;
 
-    protected override async Task Submit()
+    private async Task<StatusResult> FetchResults(int subsessionId) 
     {
-        hasError = false;
-        errorText = string.Empty;
-
-        if (apiService.CurrentLeague is null)
+        if (ApiService.CurrentLeague is null)
         {
-            MudDialog.Cancel();
-            return;
-        }
-
-        if (int.TryParse(Value, out int subsessionId) == false)
-        {
-            hasError = true;
-            errorText = "Subsession id must be a valid number";
-            return;
+            return LeagueNullResult();
         }
 
         try
         {
             Loading = true;
-            var request = apiService.CurrentLeague
+            var request = ApiService.CurrentLeague
                 .Events()
                 .WithId(Event.Id)
                 .Results()
                 .Fetch()
                 .FromIracingSubSession(subsessionId)
-                .Post(CancellationToken);
+                .Post(CancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success == false)
             {
@@ -66,14 +54,36 @@
                     _ => @"Fetching results from iracing api failed. Please check that the id is correct and that the the results are visible to public.
 Please use JSON upload if this does not work",
                 };
-                return;
             }
+            return result.ToStatusResult();
         }
         finally
         {
             Loading = false;
         }
+    }
 
-        MudDialog.Close(Value);
+    protected override async Task Submit()
+    {
+        hasError = false;
+        errorText = string.Empty;
+
+        if (int.TryParse(Value, out int subsessionId) == false)
+        {
+            hasError = true;
+            errorText = "Subsession id must be a valid number";
+            return;
+        }
+
+        var result = await FetchResults(subsessionId);
+
+        if (result.IsSuccess)
+        {
+            MudDialog.Close(Value);
+        }
+        else if (result.Status == LeagueNullResult().Status)
+        {
+            MudDialog.Cancel();
+        }
     }
 }

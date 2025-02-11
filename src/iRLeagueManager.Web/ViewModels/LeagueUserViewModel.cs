@@ -42,7 +42,7 @@ public sealed class LeagueUserViewModel : LeagueViewModelBase<LeagueUserViewMode
             .Users()
             .WithId(model.UserId)
             .AddRole()
-            .Post(addRoleModel);
+            .Post(addRoleModel).ConfigureAwait(false);
         var result = await request;
         if (result.Success && result.Content is not null)
         {
@@ -64,7 +64,7 @@ public sealed class LeagueUserViewModel : LeagueViewModelBase<LeagueUserViewMode
             .Users()
             .WithId(model.UserId)
             .RemoveRole()
-            .Post(addRoleModel);
+            .Post(addRoleModel).ConfigureAwait(false);
         var result = await request;
         if (result.Success && result.Content is not null)
         {

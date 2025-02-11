@@ -173,7 +173,7 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
         try
         {
             Loading = true;
-            var result = await ApiService.CurrentLeague.Events().WithId(eventId).Get(cancellationToken);
+            var result = await ApiService.CurrentLeague.Events().WithId(eventId).Get(cancellationToken).ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);
@@ -196,7 +196,7 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
         {
             Loading = true;
             var request = CurrentSeason.ResultsConfigs()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success && result.Content is not null)
             {
@@ -237,7 +237,7 @@ public sealed class EventViewModel : LeagueViewModelBase<EventViewModel, EventMo
             var result = await ApiService.CurrentLeague
                 .Events()
                 .WithId(model.Id)
-                .Put(model, cancellationToken);
+                .Put(model, cancellationToken).ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);

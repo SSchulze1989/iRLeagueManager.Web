@@ -47,7 +47,7 @@ public sealed class ScheduleViewModel : LeagueViewModelBase<ScheduleViewModel>
         try
         {
             Loading = true;
-            var result = await ApiService.CurrentLeague.Schedules().WithId(ScheduleId).Put(model, cancellationToken);
+            var result = await ApiService.CurrentLeague.Schedules().WithId(ScheduleId).Put(model, cancellationToken).ConfigureAwait(false);
 
             if (result.Success)
             {
@@ -72,7 +72,7 @@ public sealed class ScheduleViewModel : LeagueViewModelBase<ScheduleViewModel>
             return;
         }
 
-        var result = await ApiService.CurrentLeague.Schedules().WithId(ScheduleId).Get(cancellationToken);
+        var result = await ApiService.CurrentLeague.Schedules().WithId(ScheduleId).Get(cancellationToken).ConfigureAwait(false);
         if (result.Success == false || result.Content is null)
         {
             return;
@@ -124,7 +124,7 @@ public sealed class ScheduleViewModel : LeagueViewModelBase<ScheduleViewModel>
             Loading = true;
             var result = await CurrentSeason
                 .ResultsConfigs()
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 DefaultResultConfigs = result.Content
@@ -157,7 +157,7 @@ public sealed class ScheduleViewModel : LeagueViewModelBase<ScheduleViewModel>
 
         var request = ApiService.CurrentLeague.Events()
             .WithId(@event.EventId)
-            .Delete(cancellationToken);
+            .Delete(cancellationToken).ConfigureAwait(false);
         var result = await request;
         if (result.Success)
         {
@@ -174,7 +174,7 @@ public sealed class ScheduleViewModel : LeagueViewModelBase<ScheduleViewModel>
 
         //await Task.Delay(500);
 
-        var result = await ApiService.CurrentLeague.Schedules().WithId(ScheduleId).Events().Get(cancellationToken);
+        var result = await ApiService.CurrentLeague.Schedules().WithId(ScheduleId).Events().Get(cancellationToken).ConfigureAwait(false);
         if (result.Success == false || result.Content is null)
         {
             return;

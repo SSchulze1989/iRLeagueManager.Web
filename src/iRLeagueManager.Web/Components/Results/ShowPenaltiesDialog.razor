@@ -166,7 +166,7 @@
             return;
         }
         Vm.SetModel(penalty);
-        var result = await Vm.Delete();
+        var result = await Vm.Delete(CancellationToken);
         if (result.IsSuccess)
         {
             penalties = penalties.Where(x => x != penalty);

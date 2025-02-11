@@ -30,7 +30,7 @@ public class UserViewModel : LeagueViewModelBase<UserViewModel, PrivateUserModel
             Loading = true;
             var result = await ApiService.Client
                 .CustomEndpoint<PrivateUserModel>($"Users/{userId}")
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);
@@ -51,7 +51,7 @@ public class UserViewModel : LeagueViewModelBase<UserViewModel, PrivateUserModel
             var result = await ApiService.Client
                 .Users()
                 .WithId(UserId)
-                .Put(MapToPutUserModel(model), cancellationToken);
+                .Put(MapToPutUserModel(model), cancellationToken).ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);

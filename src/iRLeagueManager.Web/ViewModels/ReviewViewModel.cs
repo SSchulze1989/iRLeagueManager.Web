@@ -90,7 +90,7 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
         }
 
         // Upload comment
-        var result = await reviewEndpoint.ReviewComments().Post(postComment);
+        var result = await reviewEndpoint.ReviewComments().Post(postComment).ConfigureAwait(false);
         if (result.Success && result.Content is not null)
         {
             // Update comment list
@@ -117,7 +117,7 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
             .ReviewComments()
             .WithId(comment.CommentId);
 
-        var result = await commentEndpoint.Delete(cancellationToken);
+        var result = await commentEndpoint.Delete(cancellationToken).ConfigureAwait(false);
         if (result.Success)
         {
             model.ReviewComments = model.ReviewComments.Except(new[] { comment.GetModel() });
@@ -186,7 +186,7 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
                     .Reviews()
                     .WithId(ReviewId)
                     .MoveToSession(SessionId.Value);
-                var moveResult = await moveRequest.Post(cancellationToken);
+                var moveResult = await moveRequest.Post(cancellationToken).ConfigureAwait(false);
                 if (moveResult.Success == false)
                 {
                     return moveResult.ToStatusResult();
@@ -196,7 +196,7 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
             var request = ApiService.CurrentLeague
                 .Reviews()
                 .WithId(ReviewId)
-                .Put(model, cancellationToken);
+                .Put(model, cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success == false || result.Content is null)
             {
@@ -305,7 +305,7 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
             var endpoint = ApiService.CurrentLeague.Sessions()
                 .WithId(sessionId)
                 .Reviews();
-            var result = await endpoint.Post(model, cancellationToken);
+            var result = await endpoint.Post(model, cancellationToken).ConfigureAwait(false);
             if (result.Success == false)
             {
                 return result.ToStatusResult();
@@ -335,7 +335,7 @@ public sealed class ReviewViewModel : LeagueViewModelBase<ReviewViewModel, Revie
             Loading = true;
             var request = ApiService.CurrentLeague.Reviews()
                 .WithId(ReviewId)
-                .Delete(cancellationToken);
+                .Delete(cancellationToken).ConfigureAwait(false);
             var result = await request;
             return result.ToStatusResult();
         }

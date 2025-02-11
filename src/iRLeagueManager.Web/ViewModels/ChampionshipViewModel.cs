@@ -37,7 +37,7 @@ public sealed class ChampionshipViewModel : LeagueViewModelBase<ChampionshipView
             Loading = true;
             var result = await CurrentLeague.Championships()
                 .WithId(championshipId)
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);
@@ -63,7 +63,7 @@ public sealed class ChampionshipViewModel : LeagueViewModelBase<ChampionshipView
             var request = ApiService.CurrentLeague
                 .Championships()
                 .WithId(ChampionshipId)
-                .Put(model, cancellationToken);
+                .Put(model, cancellationToken).ConfigureAwait(false);
             var result = await request;
             if (result.Success && result.Content is not null)
             {
@@ -106,7 +106,7 @@ public sealed class ChampionshipViewModel : LeagueViewModelBase<ChampionshipView
             var result = await season
                 .Championships()
                 .WithId(ChampionshipId)
-                .Post(new(), cancellationToken);
+                .Post(new(), cancellationToken).ConfigureAwait(false);
             if (result.Success == false)
             {
                 return result.ToStatusResult();
@@ -114,7 +114,7 @@ public sealed class ChampionshipViewModel : LeagueViewModelBase<ChampionshipView
             var getChampionshipResult = await ApiService.CurrentLeague
                 .Championships()
                 .WithId(ChampionshipId)
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (getChampionshipResult.Success && getChampionshipResult.Content is not null)
             {
                 SetModel(getChampionshipResult.Content);
@@ -151,7 +151,7 @@ public sealed class ChampionshipViewModel : LeagueViewModelBase<ChampionshipView
             var result = await CurrentLeague
                 .ChampSeasons()
                 .WithId(champSeason.ChampSeasonId)
-                .Delete(cancellationToken);
+                .Delete(cancellationToken).ConfigureAwait(false);
             if (result.Success == false)
             {
                 return result.ToStatusResult();
@@ -159,7 +159,7 @@ public sealed class ChampionshipViewModel : LeagueViewModelBase<ChampionshipView
             var getChampionshipResult = await CurrentLeague
                 .Championships()
                 .WithId(ChampionshipId)
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (getChampionshipResult.Success && getChampionshipResult.Content is not null)
             {
                 SetModel(getChampionshipResult.Content);

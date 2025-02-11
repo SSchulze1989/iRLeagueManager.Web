@@ -35,7 +35,7 @@ public sealed class ProtestViewModel : LeagueViewModelBase<ProtestViewModel, Pro
             var request = ApiService.CurrentLeague
                 .Protests()
                 .WithId(ProtestId)
-                .Delete(cancellationToken);
+                .Delete(cancellationToken).ConfigureAwait(false);
             var result = await request;
             return result.ToStatusResult();
         }

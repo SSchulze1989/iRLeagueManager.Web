@@ -50,7 +50,7 @@ public sealed class AddPenaltyViewModel : LeagueViewModelBase<AddPenaltyViewMode
             var result = await CurrentLeague
                 .Penalties()
                 .WithId(AddPenaltyId)
-                .Put(model, cancellationToken);
+                .Put(model, cancellationToken).ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);
@@ -85,7 +85,7 @@ public sealed class AddPenaltyViewModel : LeagueViewModelBase<AddPenaltyViewMode
             var endpoint = CurrentLeague
                 .CustomEndpoint<PenaltyModel>(route);
             var result = await endpoint
-                .Post(model, cancellationToken);
+                .Post(model, cancellationToken).ConfigureAwait(false);
             if (result.Success && result.Content is not null)
             {
                 SetModel(result.Content);
@@ -111,7 +111,7 @@ public sealed class AddPenaltyViewModel : LeagueViewModelBase<AddPenaltyViewMode
             var result = await CurrentLeague
                 .Penalties()
                 .WithId(AddPenaltyId)
-                .Delete(cancellationToken);
+                .Delete(cancellationToken).ConfigureAwait(false);
             return result.ToStatusResult();
         }
         finally

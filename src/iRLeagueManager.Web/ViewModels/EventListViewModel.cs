@@ -51,7 +51,7 @@ public sealed class EventListViewModel : LeagueViewModelBase<EventListViewModel>
             }
 
             var sessionsEndpoint = ApiService.CurrentSeason.Events();
-            var result = await sessionsEndpoint.Get();
+            var result = await sessionsEndpoint.Get().ConfigureAwait(false);
             if (result.Success == false || result.Content is null)
             {
                 EventList.Clear();
@@ -84,7 +84,7 @@ public sealed class EventListViewModel : LeagueViewModelBase<EventListViewModel>
             var result = await ApiService.CurrentLeague
                 .Events()
                 .WithId(eventId)
-                .Get(cancellationToken);
+                .Get(cancellationToken).ConfigureAwait(false);
             if (result.Success == false || result.Content is null)
             {
                 return;

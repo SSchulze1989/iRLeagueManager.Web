@@ -59,7 +59,7 @@
     private void OnSharedStateChanged(object? sender, EventArgs e)
     {
         TimeZone = SharedState.LocalTimeZone;
-        _ = InvokeAsync(StateHasChanged);
+        InvokeAsync(StateHasChanged);
     }
 
     private async Task AllowEssentialCookies()

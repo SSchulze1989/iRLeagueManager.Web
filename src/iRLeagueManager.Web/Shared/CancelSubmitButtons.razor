@@ -68,6 +68,6 @@
 
     private async Task Cancel()
     {
-        await OnCancel.InvokeAsync();
+         await InvokeAsync(async () => await OnCancel.InvokeAsync());
     }
 }

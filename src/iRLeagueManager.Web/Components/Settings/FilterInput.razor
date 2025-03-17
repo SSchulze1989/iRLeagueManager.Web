@@ -116,7 +116,7 @@
 
     private void ConditionVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        ConditionChanged.InvokeAsync(Condition);
+        InvokeAsync(async () => await ConditionChanged.InvokeAsync(Condition));
     }
 
     private Type? GetColumnPropertyType(string name)
@@ -128,6 +128,6 @@
     private void ConditionPropertyChanged(string value)
     {
         Condition.ColumnPropertyName = value;
-        ConditionChanged.InvokeAsync(Condition);
+        InvokeAsync(async () => await ConditionChanged.InvokeAsync(Condition));
     }
 }

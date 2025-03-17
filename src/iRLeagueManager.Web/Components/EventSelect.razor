@@ -51,7 +51,7 @@
         set
         {
             EventList.Selected = value;
-            _ = SelectedChanged.InvokeAsync(value);
+            InvokeAsync(async () => await SelectedChanged.InvokeAsync(value));
         }
     }
 

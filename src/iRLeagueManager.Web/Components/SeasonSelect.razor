@@ -5,13 +5,13 @@
 @inject SharedStateService Shared
 
 <MudSelect @bind-Value="SelectedSeasonId"
-           Variant="Variant"
-           Disabled="Disabled"
-           Dense="true"
-           Margin="Margin.Dense"
-           Style="@Style"
-           @attributes=AdditionalAttributes
-           @onclick:stopPropagation>
+Variant="Variant"
+Disabled="Disabled"
+Dense="true"
+Margin="Margin.Dense"
+Style="@Style"
+@attributes=AdditionalAttributes
+@onclick:stopPropagation>
     @foreach (var season in Shared.SeasonList)
     {
         <MudSelectItem Value="@season.SeasonId">
@@ -54,7 +54,9 @@
             return;
         }
         await ApiService.SetCurrentSeasonAsync(Shared.LeagueName, seasonId);
-        await SeasonChanged.InvokeAsync(Shared.SeasonList.FirstOrDefault(x => x.SeasonId == seasonId));
+        await InvokeAsync(async () =>
+            await SeasonChanged.InvokeAsync(Shared.SeasonList.FirstOrDefault(x => x.SeasonId == seasonId))
+        );
     }
 
     private async void SharedStateChanged(object? sender, EventArgs e)
@@ -64,7 +66,9 @@
         await InvokeAsync(StateHasChanged);
         if (previousSeasonId != selectedSeasonId)
         {
-            await SeasonChanged.InvokeAsync(Shared.SeasonList.FirstOrDefault(x => x.SeasonId == selectedSeasonId));
+            await InvokeAsync(async () =>
+                await SeasonChanged.InvokeAsync(Shared.SeasonList.FirstOrDefault(x => x.SeasonId == selectedSeasonId))
+            );
         }
     }
 

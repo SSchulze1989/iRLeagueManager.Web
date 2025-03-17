@@ -107,7 +107,7 @@
         Filters = filters;
         if (FiltersChanged.HasDelegate)
         {
-            await FiltersChanged.InvokeAsync(Filters);
+            await InvokeAsync(async () => await FiltersChanged.InvokeAsync(Filters));
         }
     }
 

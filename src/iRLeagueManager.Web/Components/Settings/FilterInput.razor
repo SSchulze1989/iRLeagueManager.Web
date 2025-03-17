@@ -9,7 +9,8 @@
         <MudSelect Value="ConditionVm.ColumnPropertyName"
                    ValueChanged="@((string value) => ConditionPropertyChanged(value))"
                    Label="Property"
-                   Variant="Variant.Text">
+                   Variant="Variant.Text"
+                   AnchorOrigin="Origin.BottomCenter">
             @foreach (var name in ColumnNames)
             {
                 <MudSelectItem Value="@name">@name</MudSelectItem>
@@ -28,7 +29,8 @@
     <MudItem xs="2">
         <MudSelect @bind-Value="ConditionVm.Comparator"
                    Disabled="@(string.IsNullOrEmpty(ConditionVm.ColumnPropertyName))"
-                   Variant="Variant.Text">
+                   Variant="Variant.Text"
+                   Label=" ">
             @foreach (var compType in Enum.GetValues<ComparatorType>().Where(x => x != ComparatorType.InList))
             {
                 <MudSelectItem Value=@compType>@compType.GetText()</MudSelectItem>

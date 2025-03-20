@@ -66,7 +66,6 @@ internal sealed class BrowserProtectedStorageTokenStore : ITokenStore
         }
         catch (InvalidOperationException ex)
         {
-            logger.LogWarning("Could not read from local browser session: {Exception}", ex.GetType().Name);
             logger.LogDebug("Could not read from local browser session: {Exception}", ex);
             return string.Empty;
         }

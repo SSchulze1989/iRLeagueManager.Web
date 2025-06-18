@@ -18,7 +18,7 @@
                 <MudButton Color="Color.Primary" OnClick=OkClick>@OkButtonText</MudButton>
                 break;
             case ButtonTypes.OkCancel:
-                <MudButton Color="Color.Secondary" OnClick=CancelClick>@CancelButtonText</MudButton>    
+                <MudButton Color="Color.Secondary" OnClick=CancelClick>@CancelButtonText</MudButton>
                 <MudButton Color="Color.Primary" OnClick=OkClick>@OkButtonText</MudButton>
                 break;
             case ButtonTypes.YesNo:
@@ -30,12 +30,16 @@
                 <MudButton Color="Color.Secondary" OnClick=NoClick>No</MudButton>
                 <MudButton Color="Color.Primary" OnClick=OkClick>Yes</MudButton>
                 break;
+            case ButtonTypes.DeleteCancel:
+                <MudButton OnClick="CancelClick">Cancel</MudButton>
+                <MudButton Color="Color.Error" OnClick=OkClick>@OkButtonText</MudButton>
+                break;
         }
     </DialogActions>
 </MudDialog>
 
 @code {
-    [CascadingParameter] 
+    [CascadingParameter]
     MudDialogInstance ModalInstance { get; set; } = default!;
     [Parameter]
     public string Text { get; set; } = string.Empty;

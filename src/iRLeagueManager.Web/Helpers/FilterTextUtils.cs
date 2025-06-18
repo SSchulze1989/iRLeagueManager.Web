@@ -35,7 +35,7 @@ internal static class FilterTextUtils
         return value;
     }
 
-    private static string GetMemberName(string id, IEnumerable<MemberInfoModel> members)
+    private static string GetMemberName(string id, IEnumerable<MemberModel> members)
     {
         if (long.TryParse(id, out long idValue) == false)
         {
@@ -46,7 +46,7 @@ internal static class FilterTextUtils
         {
             return id;
         }
-        return $"{member.FirstName} {member.LastName}";
+        return $"{member.Firstname} {member.Lastname}";
     }
 
     private static string GetTeamName(string id, IEnumerable<TeamModel> teams)

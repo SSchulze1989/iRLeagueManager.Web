@@ -16,9 +16,9 @@ public class PromptDialog<T> : UtilityComponentBase, IDisposable
     [Parameter] public string? Label { get; set; }
     [Parameter] public string? HelperText { get; set; }
     [Parameter] public Variant Variant { get; set; } = Variant.Outlined;
-    [Parameter] public object? Validation { get; set; }
+    [Parameter] public Func<T, string>? Validation { get; set; }
 
-    private CancellationTokenSource Cts { get; } = new();
+    protected CancellationTokenSource Cts { get; } = new();
     protected StatusResultValidator? ResultValidator { get; set; }
 
     protected override void OnParametersSet()
@@ -29,6 +29,11 @@ public class PromptDialog<T> : UtilityComponentBase, IDisposable
 
     protected virtual async Task Submit()
     {
+        // validate
+        if (Validation is not null && !string.IsNullOrEmpty(Validation(Value)))
+        {
+            return;
+        }
         if (OnSubmit is null || await OnSubmit.Invoke(Value, Cts.Token))
         {
             MudDialog.Close(Value);

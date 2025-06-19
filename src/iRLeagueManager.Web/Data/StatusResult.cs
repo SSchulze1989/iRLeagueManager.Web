@@ -49,6 +49,19 @@ public class StatusResult
     {
         return new StatusResult(false, status, message, errors);
     }
+
+    public string GetErrorMessage()
+    {
+        if (ValidationErrors.Any())
+        {
+            return string.Join("; \n", ValidationErrors.Select(e => $"{e.Property}: {e.Error}"));
+        }
+        if (Errors.Any())
+        {
+            return string.Join("; \n", Errors.Select(e => e.ToString()));
+        }
+        return Message;
+    }
 }
 
 public class StatusResult<T> : StatusResult

@@ -71,9 +71,12 @@
         }
 
         window.clipboardCopy = {
-            copyText: function (text) {
+            copyText: function (text, showAlert = false) {
                 navigator.clipboard.writeText(text).then(function () {
-                    alert('"' + text + '"' + '\nCopied to clipboard!');
+                    if (showAlert)
+                    {
+                        alert('"' + text + '"' + '\nCopied to clipboard!');
+                    }
                 })
                     .catch(function (error) {
                         alert(error);
@@ -91,18 +94,30 @@
             var headerOffset = 4 * em;
             var elementPosition = element.getBoundingClientRect().top;
             var offsetPosition = elementPosition + window.scrollY - headerOffset;
-  
+
             window.scrollTo({
                  top: offsetPosition,
                  behavior: "smooth"
             });
         }
 
-        window.scrollPageToTop = (elementId) => {  
+        window.scrollPageToTop = (elementId) => {
             window.scrollTo({
                  top: 0,
                  behavior: "smooth"
             });
+        }
+
+        window.downloadFileFromStream = async (fileName, contentStreamReference) => {
+            const arrayBuffer = await contentStreamReference.arrayBuffer();
+            const blob = new Blob([arrayBuffer]);
+            const url = URL.createObjectURL(blob);
+            const anchorElement = document.createElement('a');
+            anchorElement.href = url;
+            anchorElement.download = fileName ?? '';
+            anchorElement.click();
+            anchorElement.remove();
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>

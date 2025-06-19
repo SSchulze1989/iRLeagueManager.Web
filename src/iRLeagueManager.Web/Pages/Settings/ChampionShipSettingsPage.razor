@@ -2,6 +2,7 @@
 @page "/{LeagueName}/Settings/Results/Championships/{ChampionshipId:long}/ResultConfigs/{ResultConfigId:long}"
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Rosters
 @using iRLeagueManager.Web.Components
 @inherits LeagueComponentBase
 @layout SettingsLayout
@@ -57,23 +58,25 @@
 
         <CascadingValue Value="LeagueMembers">
             <CascadingValue Value="Teams">
-                <SettingsStack @ref="SettingsStack">
-                    <SettingsStackItem Href="@($"{LeagueName}/Settings/Results/Championships/{ChampionshipId}")">
-                        <ChampionshipSettings ChampSeason="ChampSeason" />
-                    </SettingsStackItem>
-                    <SettingsStackItem Href="@($"{LeagueName}/Settings/Results/Championships/{ChampionshipId}/ResultConfigs/{ResultConfigId}")">
-                        @if (SelectedResultConfig is null)
-                        {
-                            <MudAlert Severity="Severity.Error" Elevation="5" Class="mb-3">
-                                Invalid Championship or Resultconfig id!
-                            </MudAlert>
-                        }
-                        else
-                        {
-                            <ResultConfigSettings Config="SelectedResultConfig" ChampSeason="ChampSeason" MultiplePointConfigs="ChampSeason.ResultConfigs.Count > 1" />
-                        }
-                    </SettingsStackItem>
-                </SettingsStack>
+                <CascadingValue Value="Rosters">
+                    <SettingsStack @ref="SettingsStack">
+                        <SettingsStackItem Href="@($"{LeagueName}/Settings/Results/Championships/{ChampionshipId}")">
+                            <ChampionshipSettings ChampSeason="ChampSeason" />
+                        </SettingsStackItem>
+                        <SettingsStackItem Href="@($"{LeagueName}/Settings/Results/Championships/{ChampionshipId}/ResultConfigs/{ResultConfigId}")">
+                            @if (SelectedResultConfig is null)
+                            {
+                                <MudAlert Severity="Severity.Error" Elevation="5" Class="mb-3">
+                                    Invalid Championship or Resultconfig id!
+                                </MudAlert>
+                            }
+                            else
+                            {
+                                <ResultConfigSettings Config="SelectedResultConfig" ChampSeason="ChampSeason" MultiplePointConfigs="ChampSeason.ResultConfigs.Count > 1" />
+                            }
+                        </SettingsStackItem>
+                    </SettingsStack>
+                </CascadingValue>
             </CascadingValue>
         </CascadingValue>
 
@@ -102,6 +105,7 @@
     private ResultConfigViewModel? SelectedResultConfig { get; set; }
     private IEnumerable<MemberModel> LeagueMembers { get; set; } = [];
     private IEnumerable<TeamModel> Teams { get; set; } = [];
+    private IEnumerable<RosterInfoModel> Rosters { get; set; } = [];
     private string Error { get; set; } = string.Empty;
 
     protected override void OnInitialized()
@@ -155,8 +159,9 @@
         {
             await ChampSeason.ResultConfigViewModels.First().LoadAvailableResultConfigs(CancellationToken);
         }
-        LeagueMembers = (await MemberService.GetLeagueMembers(CancellationToken)).Content ?? Enumerable.Empty<MemberModel>();
-        Teams = (await MemberService.GetLeagueTeams(CancellationToken)).Content ?? Enumerable.Empty<TeamModel>();
+        LeagueMembers = (await MemberService.GetLeagueMembers(CancellationToken)).Content ?? [];
+        Teams = (await MemberService.GetLeagueTeams(CancellationToken)).Content ?? [];
+        Rosters = (await MemberService.GetLeagueRosters(CancellationToken)).Content ?? [];
         UpdateBreadCrumb();
         await InvokeAsync(StateHasChanged);
     }

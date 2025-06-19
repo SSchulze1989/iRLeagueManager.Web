@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iRLeagueManager.Web", "src\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Projektmappenelemente", "Projektmappenelemente", "{A36C6547-B125-4391-9F6E-C41690F2AD97}"
 	ProjectSection(SolutionItems) = preProject
+		.github\workflows\dotnet_develop.yml = .github\workflows\dotnet_develop.yml
 		.github\workflows\dotnet_main.yml = .github\workflows\dotnet_main.yml
 		.github\workflows\dotnet_tag_release.yml = .github\workflows\dotnet_tag_release.yml
-		.github\workflows\dotnet_develop.yml = .github\workflows\dotnet_develop.yml
 	EndProjectSection
 EndProject
 Global

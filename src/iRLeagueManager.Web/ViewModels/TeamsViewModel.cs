@@ -114,7 +114,7 @@ public sealed class TeamsViewModel : LeagueViewModelBase<TeamsViewModel>
             var result = await request;
             if (result.Success && result.Content is not null)
             {
-                Members = new(result.Content);
+                Members = new(result.Content.Select(x => (MemberInfoModel)x));
             }
             return result.ToStatusResult();
         }

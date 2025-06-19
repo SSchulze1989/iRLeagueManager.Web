@@ -1,9 +1,9 @@
 ﻿using iRLeagueApiCore.Common.Enums;
 using iRLeagueApiCore.Common.Models;
+using iRLeagueApiCore.Common.Models.Rosters;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 using iRLeagueManager.Web.Shared;
-using System.Collections.Concurrent;
 
 namespace iRLeagueManager.Web.ViewModels;
 
@@ -26,6 +26,7 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
     public string ChampionshipName { get => model.ChampionshipName; set => SetP(model.ChampionshipName, value => model.ChampionshipName = value, value); }
     public string ChampionshipDisplayName { get => model.ChampionshipDisplayName; set => SetP(model.ChampionshipDisplayName, value => model.ChampionshipDisplayName = value, value); }
     public string SeasonName => model.SeasonName;
+    public RosterInfoModel? Roster { get => model.Roster; set => SetP(model.Roster, value => model.Roster = value, value); }
     public ResultKind ResultKind { get => model.ResultKind; set => SetP(model.ResultKind, value => model.ResultKind = value, value); }
     public IEnumerable<ResultFilterModel> Filters { get => model.Filters; set => SetP(model.Filters, value => model.Filters = value.ToList(), value); }
     public IEnumerable<FilterConditionModel> FilterConditions { get => model.Filters.Select(x => x.Condition); set => SetFilterConditions(value); }

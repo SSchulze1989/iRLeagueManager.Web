@@ -1,0 +1,294 @@
+﻿@page "/{LeagueName}/Settings/Rosters/{RosterId:long}"
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Rosters
+@using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.ViewModels
+@inherits LeagueComponentBase
+@layout MainLayout
+@inject RosterViewModel Roster
+@inject ILogger<ResultSettings> Logger
+@inject IDialogService DialogService
+@inject BreadCrumbService BreadCrumbService
+@attribute [Authorize]
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+    <PageTitle>
+        @Roster.Name - @LeagueName
+    </PageTitle>
+
+    <MudBreadcrumbs Items="BreadCrumbService.Items" />
+    <LoadingHeader Loading="Shared.Loading">
+        <HeaderText>
+            <MudStack Row="true" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.h5">Manage Roster</MudText>
+            </MudStack>
+        </HeaderText>
+    </LoadingHeader>
+
+    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
+        <Authorized>
+            <MemberTable Caption="@Roster.Name"
+                         LeagueMembers="RosterMembers"
+                         Teams="Teams"
+                         EditColumns="MemberTable.Columns.Team"
+                         RowBackup="RowBackup"
+                         RowCommit="RowCommit"
+                         RowReset="RowReset"
+                         RowsAdd="AddMembers"
+                         RowsDelete="RemoveMembers"
+                         Refresh="@(async () => await Refresh())" />
+        </Authorized>
+        <NotAuthorized>
+            You are not allowed here ...
+        </NotAuthorized>
+    </AuthorizeView>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public long RosterId { get; set; }
+
+    private IEnumerable<MemberModel> LeagueMembers { get; set; } = [];
+    private List<MemberModel> RosterMembers { get; set; } = [];
+    private IEnumerable<TeamInfoModel> Teams { get; set; } = [];
+
+    private MemberModel memberBeforeChange = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        await Roster.Load(RosterId, CancellationToken);
+        await LoadTeams(CancellationToken);
+        RosterMembers = await GetRosterMembers();
+        BreadCrumbService.Items = new List<BreadcrumbItem>()
+        {
+            new("Rosters", $"{LeagueName}/Settings/Rosters"),
+            new(Roster.Name, $"{LeagueName}/Settings/Rosters/{RosterId}"),
+        };
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task<StatusResult<IEnumerable<MemberModel>>> LoadMembers(CancellationToken cancellationToken)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult<IEnumerable<MemberModel>>([]);
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await ApiService.CurrentLeague.Members().Get(cancellationToken).ConfigureAwait(false);
+            return result.ToContentStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private async Task<StatusResult> LoadTeams(CancellationToken cancellationToken)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await ApiService.CurrentLeague.Teams().Get().ConfigureAwait(false);
+            if (result.Success && result.Content is IEnumerable<TeamModel> teams)
+            {
+                Teams = teams.Select(x => new TeamInfoModel()
+                    {
+                        Name = x.Name,
+                        TeamColor = x.TeamColor,
+                        TeamId = x.TeamId,
+                    });
+            }
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private async Task<StatusResult> SaveEntry(RosterEntryModel entry, CancellationToken cancellationToken)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+        try
+        {
+            Loading = true;
+            var result = await ApiService.CurrentLeague.Rosters()
+                .WithId(RosterId)
+                .Entries()
+                .WithId(entry.MemberId)
+                .Put(entry, cancellationToken)
+                .ConfigureAwait(false);
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private async Task<StatusResult> RemoveEntry(RosterEntryModel entry, CancellationToken cancellationToken)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+        try
+        {
+            Loading = true;
+            var result = await ApiService.CurrentLeague.Rosters()
+                .WithId(RosterId)
+                .Entries()
+                .WithId(entry.MemberId)
+                .Delete(cancellationToken)
+                .ConfigureAwait(false);
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private MemberModel GetRosterMember(RosterEntryInfoModel entry, IEnumerable<MemberModel> leagueMembers)
+    {
+        var member = leagueMembers.FirstOrDefault(x => x.MemberId == entry.MemberId);
+        if (member is null)
+        {
+            return new MemberModel()
+                {
+                    MemberId = entry.MemberId,
+                    Firstname = entry.Firstname,
+                    Lastname = entry.Lastname,
+                    TeamName = entry.TeamName,
+                    TeamId = entry.TeamId,
+                };
+        }
+        return member;
+    }
+
+    private async Task<List<MemberModel>> GetRosterMembers()
+    {
+        var loadLeagueMembers = await LoadMembers(CancellationToken);
+        if (!loadLeagueMembers.IsSuccess || loadLeagueMembers.Content is null)
+        {
+            Snackbar.Add("Failed to read league member data", Severity.Error);
+            return Roster.RosterEntries
+                .Select(x => new MemberModel()
+                    {
+                        MemberId = x.MemberId,
+                        Firstname = x.Firstname,
+                        Lastname = x.Lastname,
+                        TeamName = x.TeamName,
+                        TeamId = x.TeamId,
+                    }).ToList();
+        }
+
+        LeagueMembers = loadLeagueMembers.Content.ToList();
+        var rosterMembers = Roster.RosterEntries
+            .Select(x => GetRosterMember(x, LeagueMembers))
+            .ToList();
+        return rosterMembers;
+    }
+
+    private async Task Refresh()
+    {
+        await Roster.Load(RosterId, CancellationToken);
+        RosterMembers = await GetRosterMembers();
+    }
+
+    private async void RowCommit(MemberModel member)
+    {
+        var entry = new RosterEntryModel()
+            {
+                MemberId = member.MemberId,
+                TeamId = member.TeamId,
+            };
+        var result = await SaveEntry(entry, CancellationToken);
+        if (!result.IsSuccess)
+        {
+            Snackbar.Add($"SaveMember failed:\n{result.Message}", Severity.Error, config => { config.VisibleStateDuration = 3000; });
+        }
+    }
+
+    private void RowReset(MemberModel member)
+    {
+        if (memberBeforeChange.MemberId != member.MemberId)
+        {
+            return;
+        }
+        ModelHelper.CopyModelProperties(memberBeforeChange, member);
+        memberBeforeChange = new();
+    }
+
+    private void RowBackup(MemberModel member)
+    {
+        memberBeforeChange = ModelHelper.CopyModel(member);
+    }
+
+    private async Task AddMembers()
+    {
+        var parameters = new DialogParameters<SelectMembersDialog>()
+        {
+            {x => x.LeagueMembers, LeagueMembers},
+        };
+        var result = await DialogService.Show<SelectMembersDialog>("Add Members", parameters).Result;
+        if (result?.Canceled == true || result?.Data is not IEnumerable<MemberModel> addMembers)
+        {
+            return;
+        }
+        foreach (var member in addMembers)
+        {
+            var entry = new RosterEntryModel()
+                {
+                    MemberId = member.MemberId,
+                    TeamId = member.TeamId,
+                    Number = member.Number,
+                };
+            await SaveEntry(entry, CancellationToken);
+        }
+        await Refresh();
+    }
+
+    private async Task RemoveMembers(IEnumerable<MemberModel> members)
+    {
+        var parameters = new DialogParameters<ConfirmDialog>()
+        {
+            {x => x.AllowMarkup, true },
+            {x => x.Text, $@"Do you really want to remove these members from the roster:<br/>{string.Join(", ", members.Select(x => "<b>" + $"{x.Firstname} {x.Lastname}" + "</b>"))}"},
+            {x => x.OkButtonText, "Yes Remove"},
+            {x => x.ButtonTypes, ButtonTypes.DeleteCancel},
+        };
+        var result = await DialogService.Show<ConfirmDialog>("Remove Members", parameters).Result;
+        if (result?.Canceled == true || result?.Data is not bool remove || remove == false)
+        {
+            return;
+        }
+        foreach (var member in members)
+        {
+            var entry = new RosterEntryModel()
+                {
+                    MemberId = member.MemberId,
+                    TeamId = member.TeamId,
+                };
+            await RemoveEntry(entry, CancellationToken);
+        }
+        await Refresh();
+    }
+}

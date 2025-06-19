@@ -52,7 +52,7 @@ public sealed class EditResultViewModel : LeagueViewModelBase<EditResultViewMode
             {
                 return loadMembers.ToStatusResult();
             }
-            Members = loadMembers.Content.Cast<MemberInfoModel>().ToList();
+            Members = loadMembers.Content.Select(x => (MemberInfoModel)x).ToList();
 
             var loadTeams = await CurrentLeague
                 .Teams()

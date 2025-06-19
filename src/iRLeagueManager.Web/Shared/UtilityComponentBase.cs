@@ -24,6 +24,10 @@ public class UtilityComponentBase : MvvmComponentBase
     protected SharedStateService Shared { get; set; } = default!;
     [Inject]
     public LeagueApiService ApiService { get; set; } = default!;
+    [Inject]
+    public ILoggerFactory LoggerFactory { get; set; } = default!;
+    [Inject]
+    public ISnackbar Snackbar { get; set; } = default!;
 
     private readonly CancellationTokenSource cancellationTokenSource = new();
     protected CancellationToken CancellationToken => cancellationTokenSource.Token;
@@ -99,6 +103,12 @@ public class UtilityComponentBase : MvvmComponentBase
     protected async Task EnableTooltips()
     {
         await JsRuntime.InvokeVoidAsync("enableTooltips", "right");
+    }
+
+    protected async void CopyToClipboard(string text, bool showAlert = false)
+    {
+        await JsRuntime.InvokeVoidAsync("clipboardCopy.copyText", text, showAlert);
+        Snackbar.Add($"\"{text}\" copied to clipboard", Severity.Normal, config => { config.VisibleStateDuration = 2000; });
     }
 
     public static string GetFlagEmoji(string? countryCode)

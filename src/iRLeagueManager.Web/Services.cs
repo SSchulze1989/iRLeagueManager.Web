@@ -1,5 +1,6 @@
 ﻿using Ganss.Xss;
 using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Data.CsvExporter;
 using iRLeagueManager.Web.Shared;
 using iRLeagueManager.Web.ViewModels;
 using Markdig;
@@ -51,6 +52,8 @@ public static class Services
         services.TryAddTransient<AutoPenaltiesCollectionViewModel>();
         services.TryAddTransient<ResultFilterViewModel>();
         services.TryAddTransient<FilterConditionViewModel>();
+        services.TryAddTransient<MemberViewModel>();
+        services.TryAddTransient<RosterViewModel>();
         services.TryAddScoped<ResultsPageViewModel>();
         services.TryAddScoped<EditResultViewModel>();
         services.TryAddScoped<ResultSettingsViewModel>();
@@ -63,6 +66,15 @@ public static class Services
         services.TryAddScoped<TeamsViewModel>();
         services.TryAddScoped<BreadCrumbService>();
         services.TryAddScoped<MemberServiceViewModel>();
+        return services;
+    }
+
+    public static IServiceCollection AddExporters(this IServiceCollection services)
+    {
+        services.AddSingleton<IMemberListCsvGenerator, DefaultCsvGenerator>();
+        services.AddSingleton<ITeamListCsvGenerator, DefaultCsvGenerator>();
+        services.AddSingleton<IMemberListCsvGenerator, SdkGamingCsvGenerator>();
+        services.AddSingleton<ITeamListCsvGenerator, SdkGamingCsvGenerator>();
         return services;
     }
 }

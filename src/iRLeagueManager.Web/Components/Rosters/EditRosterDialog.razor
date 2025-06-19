@@ -1,0 +1,24 @@
+﻿@namespace iRLeagueManager.Web.Components  
+@using iRLeagueApiCore.Common.Models.Rosters  
+@inherits EditDialogBase<RosterViewModel, RosterModel>  
+
+<EditForm Model=Vm OnValidSubmit=Submit>  
+   <StatusResultValidator @ref=ResultValidator />  
+   <MudDialog>  
+       <DialogContent>  
+           <MudStack Spacing="2">  
+               <MudTextField Label="Roster Name" @bind-Value="Vm.Name" For="@(() => Vm.Name)" Required="true" Variant="Variant.Outlined" />  
+               <MudTextField Label="Description" @bind-Value="Vm.Description" For="@(() => Vm.Description)" Variant="Variant.Outlined" />  
+               <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />  
+           </MudStack>  
+       </DialogContent>  
+       <DialogActions>  
+           <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>  
+           <ProgressButton Color="Color.Primary" Loading="Vm.Loading" ButtonType="ButtonType.Submit">Save</ProgressButton>  
+       </DialogActions>  
+   </MudDialog>  
+</EditForm>  
+
+@code {  
+
+}

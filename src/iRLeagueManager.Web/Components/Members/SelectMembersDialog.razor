@@ -1,0 +1,55 @@
+﻿@using iRLeagueApiCore.Common.Models
+@namespace iRLeagueManager.Web.Components
+@inherits PromptDialog<IEnumerable<MemberModel>>
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="2">
+            <MultiSelectAutoComplete Label="Mitglieder suchen"
+            @bind-Values="Value"
+            SearchFunc="SearchMembers"
+            ToStringFunc="@(member => member is null ? string.Empty : $"{member.Firstname} {member.Lastname} ({member.IRacingId})")"
+            Variant="Variant.Outlined"
+            MaxItems="1000"
+            MinCharacters="2" />
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkClick="Submit" OkText="@OkText" CancelClick="Cancel" CancelText="@CancelText" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public IEnumerable<MemberModel> LeagueMembers { get; set; } = Enumerable.Empty<MemberModel>();
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, LeagueMembers);
+    }
+
+    private async Task<IEnumerable<MemberModel>> SearchMembers(string? searchString, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return await Task.FromResult(LeagueMembers);
+
+        var terms = searchString.ToLower().Split(',', ' ', ';')
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToArray();
+
+        return await Task.FromResult(
+            LeagueMembers.Where(x => MatchMemberSearchTerms(x, terms))
+        );
+    }
+
+    private bool MatchMemberSearchTerms(MemberModel member, params string[] terms)
+    {
+        var searchName = $"{member.Firstname} {member.Lastname}".ToLower();
+        var iracingId = member.IRacingId?.ToString() ?? string.Empty;
+        return terms.Any(term =>
+            searchName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+            iracingId.Contains(term, StringComparison.OrdinalIgnoreCase)
+        );
+    }
+}

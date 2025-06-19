@@ -1,0 +1,33 @@
+﻿@using iRLeagueApiCore.Common.Models
+@inherits EditDialogBase<MemberViewModel, MemberModel>
+
+<MudDialog>
+    <DialogContent>
+        <MudForm Model="Vm" @ref="form">
+            <MudStack Spacing="2">
+                <MudTextField Value="@($"{Vm.Firstname} {Vm.Lastname}")"
+                              Label="Name"
+                              Disabled="true" />
+                <MudTextField Value="@Vm.IRacingId"
+                              Label="iRacing Id"
+                              Disabled="true" />
+                <MudTextField @bind-Value="@Vm.Number"
+                              Label="Number"
+                              Mask="@(new PatternMask("000"))" />
+            </MudStack>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkText="Save" OkClick="Submit" DisableOkClick="@(Vm.Loading || !Vm.HasChanges)" CancelText="Cancel" CancelClick="Cancel" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudForm form = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        OnSubmit ??= async (vm, cancellationToken) => await vm.Save(cancellationToken);
+    }
+}

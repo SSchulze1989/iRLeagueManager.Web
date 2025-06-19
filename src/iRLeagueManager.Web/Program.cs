@@ -38,6 +38,7 @@ builder.Services.AddScoped<SharedStateService>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvicer>();
 builder.Services.AddTrackList();
 builder.Services.AddViewModels();
+builder.Services.AddExporters();
 builder.Services.AddSingleton<IAuthorizationHandler, ProfileHandler>();
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy(ProfileOwnerRequirement.Policy, policy => policy.AddRequirements(new ProfileOwnerRequirement()));

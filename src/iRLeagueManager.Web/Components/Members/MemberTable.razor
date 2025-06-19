@@ -1,0 +1,475 @@
+﻿@namespace iRLeagueManager.Web.Components
+@inherits UtilityComponentBase
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Data.CsvExporter
+@inject IDialogService DialogService
+@inject IJSRuntime JS
+
+<MudTable Items="LeagueMembers"
+          Filter="@(member => FilterFunc(member, searchString))"
+          CanCancelEdit="true"
+          EditTrigger="TableEditTrigger.EditButton"
+          RowEditCommit="@(o => InvokeWithType(o, RowCommit))"
+          RowEditCancel="@(o => InvokeWithType(o, RowReset))"
+          RowEditPreview="@(o => InvokeWithType(o, RowBackup))"
+          MultiSelection="allowMultiselect"
+          @bind-SelectedItems="selectedMembers">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">@Caption</MudText>
+        <MudSpacer />
+        <MudIconButton Class="mx-2"
+                       Size="Size.Small"
+                       Icon="@Icons.Material.Filled.Refresh"
+                       OnClick="Refresh" />
+        <MudTextField @bind-Value="searchString"
+                      Placeholder="Search"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      IconSize="Size.Medium"
+                      Class="mt-0"
+                      DebounceInterval="1000"
+                      Clearable="true" />
+        <MudMenu Icon="@Icons.Material.Filled.Menu" AnchorOrigin="Origin.TopLeft" TransformOrigin="Origin.TopRight">
+            <MudMenuItem Icon="@Icons.Material.Filled.Download" OnClick="ExportMemberListCsv">Export as CSV</MudMenuItem>
+        </MudMenu>
+    </ToolBarContent>
+    <ColGroup>
+        @if (allowMultiselect)
+        {
+            <col />
+        }
+        <col style="width: 20%" />
+        @if (showIracingIdColumn)
+        {
+            <col style="min-width:7em" />
+        }
+        @if (showNumberColumn)
+        {
+            <col style="min-width:5em" />
+        }
+        @if (showTeamColumn)
+        {
+            <col style="width:40%" />
+        }
+        @if (showDiscordColumn)
+        {
+            <col style="width:40%" />
+        }
+        @if (ShowProfileColumns)
+        {
+            foreach (var column in profileColumns)
+            {
+                <col style="min-width: 15em" />
+            }
+        }
+    </ColGroup>
+    <HeaderContent>
+        <MudTh>Name</MudTh>
+        @if (showIracingIdColumn)
+        {
+            <MudTh>IRacing-Id</MudTh>
+        }
+        @if (showNumberColumn)
+        {
+            <MudTh>Number</MudTh>
+        }
+        @if (showTeamColumn)
+        {
+            <MudTh>Team</MudTh>
+        }
+        @if (showDiscordColumn)
+        {
+            <MudTh>Discord-Id</MudTh>
+        }
+        @if (ShowProfileColumns)
+        {
+            foreach (var (column, show) in profileColumns)
+            {
+                @if (show)
+                {
+                    <MudTh>@column</MudTh>
+                }
+            }
+        }
+    </HeaderContent>
+    <RowTemplate Context="Member">
+        <MudTd>
+            <MudHighlighter Text="@($"{Member.Firstname} {Member.Lastname}")" HighlightedText="@searchString" />
+        </MudTd>
+        @if (showIracingIdColumn)
+        {
+            <MudTd>
+                <MudHighlighter Text="@Member.IRacingId" HighlightedText="@searchString" />
+            </MudTd>
+        }
+        @if (showNumberColumn)
+        {
+            <MudTd>
+                @(string.IsNullOrEmpty(Member.Number) ? "-" : $"#{Member.Number}")
+            </MudTd>
+        }
+        @if (showTeamColumn)
+        {
+            <MudTd>
+                <MudHighlighter Text="@Member.TeamName" HighlightedText="@searchString" />
+            </MudTd>
+        }
+        @if (showDiscordColumn)
+        {
+            <MudTd>
+                <MudStack Row="true">
+                    @if (string.IsNullOrEmpty(Member.DiscordId))
+                    {
+                        @("<->")
+                    }
+                    else
+                    {
+                        <MudButton OnClick="@(() => CopyToClipboard(Member.DiscordId))"
+                                   EndIcon="@Icons.Material.Filled.ContentCopy">
+                            @($"<{Member.DiscordId}>")
+                        </MudButton>
+                    }
+                </MudStack>
+            </MudTd>
+        }
+        @if (ShowProfileColumns)
+        {
+            foreach (var (column, show) in profileColumns)
+            {
+                @if (show)
+                {
+                    <MudTd>
+                        @Member.Profile.GetValueOrDefault(column, "")
+                    </MudTd>
+                }
+            }
+        }
+    </RowTemplate>
+    <RowEditingTemplate Context="Member">
+        <MudTd>
+            <MudHighlighter Text="@($"{Member.Firstname} {Member.Lastname}")" HighlightedText="@searchString" />
+        </MudTd>
+        @if (showIracingIdColumn)
+        {
+            <MudTd>
+                <MudHighlighter Text="@Member.IRacingId" HighlightedText="@searchString" />
+            </MudTd>
+        }
+        @if (showNumberColumn)
+        {
+            @if (EditColumns.HasFlag(Columns.Number))
+            {
+                <MudTd>
+                    <MudTextField @bind-Value="@Member.Number"
+                                  Mask="@(new PatternMask("000"))"
+                                  AdornmentText="#"
+                                  Adornment="Adornment.Start" />
+                </MudTd>
+            }
+            else
+            {
+                <MudTd>
+                    @(string.IsNullOrEmpty(Member.Number) ? "-" : $"#{Member.Number}")
+                </MudTd>
+            }
+        }
+        @if (showTeamColumn)
+        {
+            @if (EditColumns.HasFlag(Columns.Team))
+            {
+                <MudTd>
+                    <MudAutocomplete Value="@Teams.FirstOrDefault(x => x.TeamId == Member.TeamId)"
+                                     ValueChanged="@((TeamInfoModel team) => { Member.TeamId = team?.TeamId; Member.TeamName = team?.Name ?? ""; })"
+                                     ResetValueOnEmptyText="true"
+                                     SearchFunc="SearchTeam"
+                                     ToStringFunc="@(team => team?.Name)"
+                                     Clearable="true">
+                    </MudAutocomplete>
+                </MudTd>
+            }
+            else
+            {
+                <MudTd>
+                    <MudHighlighter Text="@Member.TeamName" HighlightedText="@searchString" />
+                </MudTd>
+            }
+        }
+        @if (showDiscordColumn)
+        {
+            @if (EditColumns.HasFlag(Columns.DiscordId))
+            {
+                <MudTd>
+                    <MudTextField @bind-Value="Member.DiscordId" />
+                </MudTd>
+            }
+            else
+            {
+                <MudStack Row="true">
+                    @if (string.IsNullOrEmpty(Member.DiscordId))
+                    {
+                        @:<->
+                    }
+                    else
+                    {
+                            <MudButton OnClick="@(() => CopyToClipboard(Member.DiscordId))"
+                                       EndIcon="@Icons.Material.Filled.ContentCopy">
+                            @($"<{Member.DiscordId}>")
+                            </MudButton>
+                    }
+                </MudStack>
+            }
+        }
+        @if (ShowProfileColumns)
+        {
+            foreach (var (column, show) in profileColumns)
+            {
+                @if (show)
+                {
+                    @if (EditColumns.HasFlag(Columns.Profile))
+                    {
+                        <MudTd>
+                            <MudTextField Value="Member.Profile.GetValueOrDefault(column)"
+                                          ValueChanged="@((string? value) => ProfileValueChanged(Member, column, value))"
+                                          Placeholder="@column"
+                                          Clearable="true" />
+                        </MudTd>
+                    }
+                    else
+                    {
+                        <MudTd>
+                            @Member.Profile.GetValueOrDefault(column, "")
+                        </MudTd>
+                    }
+                }
+            }
+        }
+    </RowEditingTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+<MudStack Row="true" Spacing="2">
+    @if (RowsAdd.HasDelegate)
+    {
+        <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="RowsAdd" Color="Color.Success">
+            Add Member
+        </MudButton>
+    }
+    @if (RowsDelete.HasDelegate)
+    {
+        <MudButton StartIcon="@Icons.Material.Filled.Remove" OnClick="@(() => RowsDelete.InvokeAsync(selectedMembers.ToList()))" Color="Color.Error" Disabled="selectedMembers.None()">
+            Remove Members
+        </MudButton>
+    }
+</MudStack>
+
+<MudText Typo="Typo.h5" Class="mt-2">Select columns</MudText>
+<MudStack Spacing="2" Row="true">
+    <MudSwitch Color="Color.Primary" Value="true" Disabled="true">Name</MudSwitch>
+    <MudSwitch Color="Color.Primary" @bind-Value="showIracingIdColumn">IRacingId</MudSwitch>
+    <MudSwitch Color="Color.Primary" @bind-Value="showNumberColumn">Number</MudSwitch>
+    <MudSwitch Color="Color.Primary" @bind-Value="showTeamColumn">Team</MudSwitch>
+    <MudSwitch Color="Color.Primary" @bind-Value="showDiscordColumn">DiscordId</MudSwitch>
+    @if (ShowProfileColumns)
+    {
+        @foreach (var (column, _) in profileColumns)
+        {
+            <MudStack Spacing="0" Row="true">
+                <MudSwitch Color="Color.Primary" @bind-Value="profileColumns[column]">@column</MudSwitch>
+                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteColumnClick(column))" Style="margin-left: -1em;" />
+            </MudStack>
+        }
+    }
+</MudStack>
+<MudButton OnClick="AddColumnClick">
+    Add column
+</MudButton>
+
+@code {
+    [Flags]
+    public enum Columns
+    {
+        IracingId = 1 << 0,
+        Number = 1 << 1,
+        Team = 1 << 2,
+        DiscordId = 1 << 3,
+        Profile = 1 << 4,
+    }
+
+    [Parameter] public string Caption { get; set; } = string.Empty;
+    [Parameter] public Columns EditColumns { get; set; } = Columns.Number | Columns.Team | Columns.DiscordId | Columns.Profile;
+    [Parameter, EditorRequired] public IEnumerable<MemberModel> LeagueMembers { get; set; } = default!;
+    [Parameter, EditorRequired] public IEnumerable<TeamInfoModel> Teams { get; set; } = default!;
+    [Parameter] public bool ShowProfileColumns { get; set; } = true;
+
+    [Parameter] public Action<MemberModel>? RowCommit { get; set; }
+    [Parameter] public Action<MemberModel>? RowReset { get; set; }
+    [Parameter] public Action<MemberModel>? RowBackup { get; set; }
+    [Parameter] public Action Refresh { get; set; } = () => { };
+
+    [Parameter] public EventCallback RowsAdd { get; set; }
+    [Parameter] public EventCallback<IEnumerable<MemberModel>> RowsDelete { get; set; }
+
+    private string searchString = string.Empty;
+
+    private bool showIracingIdColumn = true;
+    private bool showNumberColumn = true;
+    private bool showTeamColumn = true;
+    private bool showDiscordColumn = true;
+    private bool allowMultiselect = false;
+
+    private Dictionary<string, bool> profileColumns = [];
+
+    private HashSet<MemberModel> selectedMembers = new HashSet<MemberModel>();
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        allowMultiselect = RowsDelete.HasDelegate;
+        profileColumns = GetProfileColumns();
+    }
+
+    private async Task<IEnumerable<TeamInfoModel?>> SearchTeam(string term, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(term))
+        {
+            return await Task.FromResult(Teams);
+        }
+
+        var separatedTerms = term.Split(' ', ',')
+            .NotNull();
+        return Teams
+            .Where(team => separatedTerms.Any(x => team.Name.Contains(x, StringComparison.OrdinalIgnoreCase)))
+            .Cast<TeamInfoModel?>();
+    }
+
+    private Dictionary<string, bool> GetProfileColumns()
+    {
+        if (LeagueMembers is null || !LeagueMembers.Any())
+        {
+            return [];
+        }
+        var profileColumns = LeagueMembers
+            .SelectMany(member => member.Profile.Keys)
+            .Distinct()
+            .ToDictionary(k => k, v => true);
+        // Sort columns alphabetically
+        return profileColumns;
+    }
+
+    private bool FilterFunc(MemberModel member, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+        {
+            return true;
+        }
+        var fullName = $"{member.Firstname} {member.Lastname}";
+        if (fullName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        if (member.IRacingId.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        if (member.TeamName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void InvokeWithType<T>(object? o, Action<T>? memberAction)
+    {
+        if (o is not T member || memberAction is null)
+        {
+            return;
+        }
+
+        memberAction.Invoke(member);
+    }
+
+    private async Task ExportMemberListCsv()
+    {
+        var supportedExporters = ScopedServices.GetServices<IMemberListCsvGenerator>();
+        var parameters = new DialogParameters<RadioSelectPromptDialog<IMemberListCsvGenerator>>()
+        {
+            {x => x.Label, "CSV Exporter"},
+            {x => x.Value, supportedExporters.FirstOrDefault()},
+            {x => x.Items, supportedExporters},
+            {x => x.ToStringFunc, (exporter) => exporter?.GetName() ?? string.Empty},
+        };
+
+        var result = await DialogService.Show<RadioSelectPromptDialog<IMemberListCsvGenerator>>("Select CSV Exporter", parameters).Result;
+
+        if (result?.Canceled != false || result.Data is not IMemberListCsvGenerator exporter)
+        {
+            return;
+        }
+
+        var csv = exporter.ExportCsv(LeagueMembers);
+
+        using var stream = new MemoryStream();
+        using var writer = new StreamWriter(stream);
+        writer.Write(csv);
+        writer.Flush();
+        stream.Position = 0;
+        using var streamRef = new DotNetStreamReference(stream: stream);
+
+        await JS.InvokeVoidAsync("downloadFileFromStream", "memberList.csv", streamRef);
+    }
+
+    private void ProfileValueChanged(MemberModel member, string column, string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            member.Profile.Remove(column);
+            return;
+        }
+        member.Profile[column] = value;
+    }
+
+    private async Task AddColumnClick()
+    {
+        var parameters = new DialogParameters<TextPromptDialog<string>>()
+        {
+            {x => x.Label, "Column Name"},
+        };
+        var result = await DialogService.Show<TextPromptDialog<string>>("Add Column", parameters).Result;
+        if (result?.Canceled == false && result.Data is string columnName)
+        {
+            columnName = columnName.Trim();
+            if (!profileColumns.ContainsKey(columnName))
+            {
+                profileColumns.Add(columnName, true);
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task DeleteColumnClick(string columnName)
+    {
+        var parameters = new DialogParameters<ConfirmDialog>()
+        {
+            {x => x.AllowMarkup, true},
+            {x => x.Text, $"Do you really want to delete column <b>\"{columnName}\"</b>?<br/>This will also delete all data from this column."},
+            {x => x.ButtonTypes, ButtonTypes.YesNo},
+        };
+        var result = await DialogService.Show<ConfirmDialog>("Delete Column", parameters).Result;
+        if (result?.Canceled == false)
+        {
+            foreach (var member in LeagueMembers)
+            {
+                if (member.Profile.ContainsKey(columnName))
+                {
+                    // Remove column from member profile)
+                    member.Profile.Remove(columnName);
+                    RowCommit?.Invoke(member);
+                }
+            }
+            profileColumns.Remove(columnName);
+            StateHasChanged();
+        }
+    }
+}

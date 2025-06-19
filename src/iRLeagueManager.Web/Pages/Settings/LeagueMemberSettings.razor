@@ -1,0 +1,248 @@
+﻿@page "/{LeagueName}/Settings/Members"
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Rosters
+@using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.Components.Settings.Dialogs
+@using iRLeagueManager.Web.ViewModels
+@using System.Text.RegularExpressions
+@inherits LeagueComponentBase
+@layout MainLayout
+@inject ILogger<ResultSettings> Logger
+@inject IDialogService DialogService
+@attribute [Authorize]
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+    <PageTitle>
+        League Members - @LeagueName
+    </PageTitle>
+    <LoadingHeader Loading="Shared.Loading">
+    </LoadingHeader>
+
+    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
+        <Authorized>
+            <MemberTable Caption="League Members"
+                         LeagueMembers="LeagueMembers"
+                         Teams="Teams"
+                         RowBackup="RowBackup"
+                         RowCommit="RowCommit"
+                         RowReset="RowReset"
+                         Refresh="@(async () => await LoadFromCurrentLeague(CancellationToken))"
+                         RowsAdd="AddNewLeagueMember" />
+        </Authorized>
+        <NotAuthorized>
+            You are not allowed here ...
+        </NotAuthorized>
+    </AuthorizeView>
+</MudContainer>
+
+@code {
+    private List<MemberModel> LeagueMembers { get; set; } = [];
+    private IEnumerable<TeamInfoModel> Teams { get; set; } = [];
+
+    MemberModel memberBeforeChange = new();
+
+    private async Task<StatusResult> LoadFromCurrentLeague(CancellationToken cancellationToken)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var loadLeagueMembers = await ApiService.CurrentLeague.Members()
+                .Get(cancellationToken)
+                .ConfigureAwait(false);
+            if (!loadLeagueMembers.Success || loadLeagueMembers.Content is not IEnumerable<MemberModel> leagueMembers)
+            {
+                return loadLeagueMembers.ToStatusResult();
+            }
+            LeagueMembers = leagueMembers.ToList();
+
+            return StatusResult.SuccessResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private async Task<StatusResult> LoadTeams(CancellationToken cancellationToken)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await ApiService.CurrentLeague.Teams().Get().ConfigureAwait(false);
+            if (result.Success && result.Content is IEnumerable<TeamModel> teams)
+            {
+                Teams = teams.Select(x => new TeamInfoModel()
+                    {
+                        Name = x.Name,
+                        TeamColor = x.TeamColor,
+                        TeamId = x.TeamId,
+                    });
+            }
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    public async Task<StatusResult> SaveMember(MemberModel member, CancellationToken cancellationToken)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await ApiService.CurrentLeague.Members()
+                .WithId(member.MemberId)
+                .Put(member, cancellationToken)
+                .ConfigureAwait(false);
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private async Task<StatusResult<MemberModel>> FetchMemberProfile(string iracingId, CancellationToken cancellationToken)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult<MemberModel>();
+        }
+        try
+        {
+            Loading = true;
+            var result = await ApiService.CurrentLeague.Members()
+                .FetchProfileFromIracing(iracingId)
+                .Post(cancellationToken)
+                .ConfigureAwait(false);
+            return result.ToContentStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private async Task<StatusResult> AddMember(string iracingId, CancellationToken cancellationToken)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+        try
+        {
+            Loading = true;
+            var result = await ApiService.CurrentLeague.Members()
+                .AddMemberFromIracing(iracingId)
+                .Post(cancellationToken)
+                .ConfigureAwait(false);
+            if (result.Success && result.Content is MemberModel newMember)
+            {
+                LeagueMembers.Insert(0, newMember);
+            }
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        await LoadTeams(CancellationToken);
+        await LoadFromCurrentLeague(CancellationToken);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async void RowCommit(MemberModel member)
+    {
+        var result = await SaveMember(member, CancellationToken);
+        if (!result.IsSuccess)
+        {
+            Snackbar.Add($"SaveMember failed:\n{result.Message}", Severity.Error, config => { config.VisibleStateDuration = 3000; });
+        }
+    }
+
+    private void RowReset(MemberModel member)
+    {
+        if (memberBeforeChange.MemberId != member.MemberId)
+        {
+            return;
+        }
+        ModelHelper.CopyModelProperties(memberBeforeChange, member);
+        memberBeforeChange = new();
+    }
+
+    private void RowBackup(MemberModel member)
+    {
+        memberBeforeChange = ModelHelper.CopyModel(member);
+    }
+
+    private async Task AddNewLeagueMember()
+    {
+        var fetcMembersParameters = new DialogParameters<TextPromptDialog<string>>()
+        {
+            {x => x.Label, "Iracing customer id"},
+            {x => x.OkText, "Check Id" },
+            {x => x.CancelText, "Cancel" },
+            {x => x.Validation, (string value) => !Regex.Match(value, @"^\d+$").Success ? "Please enter a valid iRacing customer id (only numbers)" : ""},
+            {x => x.OnSubmit, ConfirmAddLeagueMember},
+        };
+        await DialogService.Show<TextPromptDialog<string>>("Add League Member", fetcMembersParameters).Result;
+    }
+
+    private async Task<bool> ConfirmAddLeagueMember(string? iracingId, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(iracingId))
+        {
+            Snackbar.Add("Please enter a valid iRacing customer id", Severity.Error, config => { config.VisibleStateDuration = 3000; });
+            return false;
+        }
+        var fetchMember = await FetchMemberProfile(iracingId, cancellationToken);
+        if (!fetchMember.IsSuccess || fetchMember.Content is null)
+        {
+            Snackbar.Add($"Failed to fetch member profile for {iracingId}:\n{fetchMember.Message}:\n{fetchMember.GetErrorMessage()}", Severity.Error, config => { config.VisibleStateDuration = 3000; });
+            return false;
+        }
+        var member = fetchMember.Content;
+        var parameters = new DialogParameters<ConfirmDialog>()
+        {
+            {x => x.Text, $"Do you really want to add {member.Firstname} {member.Lastname} ({member.IRacingId}) as a new member?" },
+        };
+        var result = await DialogService.Show<ConfirmDialog>("Confirm Add Member", parameters).Result;
+        if (result?.Canceled != false)
+        {
+            return false;
+        }
+        var addResult = await AddMember(member.IRacingId, cancellationToken);
+        if (!addResult.IsSuccess)
+        {
+            Snackbar.Add($"Failed to add member {member.Firstname} {member.Lastname} ({member.IRacingId}):\n{addResult.GetErrorMessage()}", Severity.Error, config => { config.VisibleStateDuration = 3000; });
+            return false;
+        }
+        return true;
+    }
+}

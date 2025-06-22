@@ -26,28 +26,55 @@
 
 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
     <Authorized>
-        <MudTable Items="Rosters">
-            <HeaderContent>
-                <MudTh>Name</MudTh>
-                <MudTh>Description</MudTh>
-                <MudTh></MudTh>
-                <MudTh>Actions</MudTh>
-            </HeaderContent>
-            <RowTemplate Context="Roster">
-                <MudTd>
-                    <MudLink Href="@GetLeagueLink($"settings/Rosters/{Roster.RosterId}")">@Roster.Name</MudLink>
-                </MudTd>
-                <MudTd>@Roster.Description</MudTd>
-                <MudTd>Driver count: @Roster.EntryCount</MudTd>
-                <MudTd>
-                    <MudStack Row="true" Spacing="2">
-                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Edit" OnClick="@(() => EditRosterClick(Roster))"/>
-                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" Color="Color.Error" />
-                    </MudStack>
-                </MudTd>
-            </RowTemplate>
-        </MudTable>
-        <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="AddRosterClick">Add Roster</MudButton>
+        <MudStack Spacing="5">
+            <div>
+                <MudTable Items="Rosters">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Description</MudTh>
+                        <MudTh>Info</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate Context="Roster">
+                        <MudTd>
+                            <MudLink Href="@GetLeagueLink($"settings/Rosters/{Roster.RosterId}")">@Roster.Name</MudLink>
+                        </MudTd>
+                        <MudTd>@Roster.Description</MudTd>
+                        <MudTd>Driver count: @Roster.EntryCount</MudTd>
+                        <MudTd>
+                            <MudStack Row="true" Spacing="2">
+                                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Edit" OnClick="@(() => EditRosterClick(Roster))" />
+                                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Archive" OnClick="@(() => ArchiveRosterClick(Roster))" />
+                            </MudStack>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+                <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="AddRosterClick">Add Roster</MudButton>
+            </div>
+            @if (ArchivedRosters.Count > 0)
+            {
+                <MudExpansionPanel Text="Archived Rosters">
+                    <MudTable Items="ArchivedRosters" Elevation="0" Breakpoint="Breakpoint.None">
+                        <HeaderContent>
+                            <MudTh>Name</MudTh>
+                            <MudTh>Description</MudTh>
+                            <MudTh>Info</MudTh>
+                            <MudTh></MudTh>
+                        </HeaderContent>
+                        <RowTemplate Context="Roster">
+                            <MudTd>@Roster.Name</MudTd>
+                            <MudTd>@Roster.Description</MudTd>
+                            <MudTd>Driver count: @Roster.EntryCount</MudTd>
+                            <MudTd>
+                                <MudStack Row="true" Spacing="2">
+                                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Unarchive" OnClick="@(() => UnarchiveRosterClick(Roster))" />
+                                </MudStack>
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudExpansionPanel>
+            }
+        </MudStack>
     </Authorized>
     <NotAuthorized>
         You are not allowed here ...
@@ -59,6 +86,7 @@
     public long? RosterId { get; set; }
 
     private List<RosterInfoModel> Rosters { get; set; } = [];
+    private List<RosterInfoModel> ArchivedRosters { get; set; } = [];
 
     private async Task<StatusResult> AddRoster(string? name, CancellationToken cancellationToken)
     {
@@ -106,8 +134,71 @@
                 return loadRosters.ToStatusResult();
             }
             Rosters = rosters.ToList();
+            var loadArchivedRosters = await ApiService.CurrentLeague.Rosters()
+                .AddQueryParameter(x => x.Add("include_archived", true))
+                .Get(cancellationToken)
+                .ConfigureAwait(false);
+            if (!loadArchivedRosters.Success || loadArchivedRosters.Content is not IEnumerable<RosterInfoModel> archivedRosters)
+            {
+                return loadArchivedRosters.ToStatusResult();
+            }
+            ArchivedRosters = archivedRosters
+                .Where(x => Rosters.None(y => y.RosterId == x.RosterId))
+                .ToList();
 
             return StatusResult.SuccessResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    public async Task<StatusResult> ArchiveRoster(long rosterId, CancellationToken cancellationToken = default)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+
+        try
+        {
+            Loading = true;
+            var result = await ApiService.CurrentLeague.Rosters()
+                .WithId(rosterId)
+                .Delete(cancellationToken)
+                .ConfigureAwait(false);
+            return result.ToStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    public async Task<StatusResult> UnarchiveRoster(RosterInfoModel roster, CancellationToken cancellationToken = default)
+    {
+        if (ApiService.CurrentLeague is null)
+        {
+            return LeagueNullResult();
+        }
+        try
+        {
+            Loading = true;
+            var loadArchivedRoster = await ApiService.CurrentLeague.Rosters()
+                .WithId(roster.RosterId)
+                .Get(cancellationToken)
+                .ConfigureAwait(false);
+            if (!loadArchivedRoster.Success || loadArchivedRoster.Content is not RosterModel archivedRoster)
+            {
+                return loadArchivedRoster.ToStatusResult();
+            }
+            var unarchiveRoster = await ApiService.CurrentLeague.Rosters()
+                .WithId(roster.RosterId)
+                .Put(archivedRoster, cancellationToken)
+                .ConfigureAwait(false);
+
+            return unarchiveRoster.ToStatusResult();
         }
         finally
         {
@@ -149,11 +240,11 @@
     private async Task EditRosterClick(RosterInfoModel roster)
     {
         var rosterModel = new RosterModel()
-        {
+            {
                 Description = roster.Description,
                 Name = roster.Name,
                 RosterId = roster.RosterId,
-        };
+            };
         var parameters = new DialogParameters<EditRosterDialog>()
         {
             {x => x.Model, rosterModel},
@@ -164,5 +255,37 @@
         {
             await LoadFromCurrentLeague(CancellationToken);
         }
+    }
+
+    private async Task ArchiveRosterClick(RosterInfoModel roster)
+    {
+        var parameters = new DialogParameters<ConfirmDialog>()
+        {
+            { x => x.Text, $"Really archive roster {roster.Name}? This will remove it from the list of active rosters but it will still keep the results." },
+            { x => x.ButtonTypes, ButtonTypes.YesNo },
+        };
+        var result = await DialogService.Show<ConfirmDialog>("Archive Roster", parameters).Result;
+        if (result?.Canceled != false)
+        {
+            return;
+        }
+        var deleteResult = await ArchiveRoster(roster.RosterId, CancellationToken);
+        if (!deleteResult.IsSuccess)
+        {
+            Snackbar.Add(deleteResult.GetErrorMessage(), Severity.Error);
+            return;
+        }
+        await LoadFromCurrentLeague(CancellationToken);
+    }
+
+    private async Task UnarchiveRosterClick(RosterInfoModel roster)
+    {
+        var result = await UnarchiveRoster(roster, CancellationToken);
+        if (!result.IsSuccess)
+        {
+            Snackbar.Add(result.GetErrorMessage(), Severity.Error);
+            return;
+        }
+        await LoadFromCurrentLeague(CancellationToken);
     }
 }

@@ -12,7 +12,7 @@ public sealed class RosterViewModel : LeagueViewModelBase<RosterViewModel, Roste
     {
     }
 
-    public RosterViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, RosterModel model) 
+    public RosterViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, RosterModel model)
         : base(loggerFactory, apiService, model)
     {
     }

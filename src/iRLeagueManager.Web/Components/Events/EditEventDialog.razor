@@ -186,8 +186,8 @@
     private Task<IEnumerable<ResultConfigInfoModel>> SearchResultConfigs(string? name, CancellationToken cancellationToken)
     {
         var searchConfigs = ResultConfigs
-            .Where(x => Vm.ResultConfigs.None(y => y?.ResultConfigId == x.ResultConfigId))
-            .Where(x => Vm.ResultConfigs.None(y => y?.ChampSeasonId == x.ChampSeasonId));
+            .Where(x => Vm.ResultConfigs.None(y => y.ResultConfigId == x.ResultConfigId))
+            .Where(x => Vm.ResultConfigs.None(y => y.ChampSeasonId == x.ChampSeasonId));
         if (string.IsNullOrEmpty(name) == false)
         {
             searchConfigs = searchConfigs.Where(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase) || x.DisplayName.Contains(name, StringComparison.OrdinalIgnoreCase));

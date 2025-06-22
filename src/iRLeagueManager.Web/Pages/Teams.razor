@@ -2,12 +2,14 @@
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.Data.CsvExporter
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
 @layout MainLayout
 @inject TeamsViewModel vm
 @inject LeagueApiService apiService
 @inject IDialogService DialogService
+@inject IJSRuntime JS
 
 <PageTitle>
     Settings - @LeagueName
@@ -31,6 +33,9 @@
                               Immediate="true"
                               Clearable="true"
                               DebounceInterval="300" />
+                <MudMenu Icon="@Icons.Material.Filled.Menu" AnchorOrigin="Origin.TopLeft" TransformOrigin="Origin.TopRight">
+                    <MudMenuItem Icon="@Icons.Material.Filled.Download" OnClick="ExportTeamsListCsv">Export as CSV</MudMenuItem>
+                </MudMenu>
             </HeaderActions>
         </LoadingHeader>
         @foreach (var team in Bind(vm, x => x.Teams).Where(FilterTeams).OrderBy(x => x.Name))
@@ -172,5 +177,35 @@
             await vm.LoadFromLeagueAsync();
         }
         await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ExportTeamsListCsv()
+    {
+        var supportedExporters = ScopedServices.GetServices<ITeamListCsvGenerator>();
+        var parameters = new DialogParameters<RadioSelectPromptDialog<ITeamListCsvGenerator>>()
+        {
+            {x => x.Label, "CSV Exporter"},
+            {x => x.Value, supportedExporters.FirstOrDefault()},
+            {x => x.Items, supportedExporters},
+            {x => x.ToStringFunc, (exporter) => exporter?.GetName() ?? string.Empty},
+        };
+
+        var result = await DialogService.Show<RadioSelectPromptDialog<ITeamListCsvGenerator>>("Select CSV Exporter", parameters).Result;
+
+        if (result?.Canceled != false || result.Data is not ITeamListCsvGenerator exporter)
+        {
+            return;
+        }
+
+        var csv = exporter.ExportCsv(vm.Teams.Select(x => x.GetModel()));
+
+        using var stream = new MemoryStream();
+        using var writer = new StreamWriter(stream);
+        writer.Write(csv);
+        writer.Flush();
+        stream.Position = 0;
+        using var streamRef = new DotNetStreamReference(stream: stream);
+
+        await JS.InvokeVoidAsync("downloadFileFromStream", "teamList.csv", streamRef);
     }
 }

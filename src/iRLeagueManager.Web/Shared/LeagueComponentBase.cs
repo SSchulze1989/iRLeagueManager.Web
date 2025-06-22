@@ -1,13 +1,7 @@
-﻿using iRLeagueApiCore.Common;
-using iRLeagueManager.Web.Data;
-using iRLeagueManager.Web.Extensions;
+﻿using iRLeagueManager.Web.Exceptions;
 using iRLeagueManager.Web.ViewModels;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Routing;
-using Microsoft.JSInterop;
-using MvvmBlazor.Components;
 using System.ComponentModel;
-using System.Net;
 
 namespace iRLeagueManager.Web.Shared;
 
@@ -49,6 +43,7 @@ public abstract partial class LeagueComponentBase : UtilityComponentBase
 
     protected override void OnParametersSet()
     {
+        BlazorParameterNullException.ThrowIfNull(this, EventList, cascading: true);
         if (SeasonId == null && EventId == null && Shared.SeasonId != 0)
         {
             SeasonId = Shared.SeasonId;
@@ -170,8 +165,13 @@ public abstract partial class LeagueComponentBase : UtilityComponentBase
         return GetRoleString(Shared.LeagueName, roleNames);
     }
 
-    protected async void CopyToClipboard(string text)
+    /// <summary>
+    /// Get a link to a resource in the current league
+    /// </summary>
+    /// <param name="relativeUrl">part of the url relative to the link. E.g "Results" for "/{LeagueName}/Results"</param>
+    /// <returns></returns>
+    protected string GetLeagueLink(string relativeUrl)
     {
-        await JsRuntime.InvokeVoidAsync("clipboardCopy.copyText", text);
+        return $"/{Shared.LeagueName}/{relativeUrl}";
     }
 }

@@ -167,7 +167,7 @@
     private string GetMemberNameById(string memberId)
     {
         var member = LeagueMembers.FirstOrDefault(x => x.MemberId.ToString() == memberId);
-        return member != null ? $"{member.FirstName} {member.LastName} ({member.IRacingId})" : memberId;
+        return member != null ? $"{member.Firstname} {member.Lastname} ({member.IRacingId})" : memberId;
     }
 
     private string GetTeamNameById(string teamId)
@@ -208,7 +208,7 @@
 
     private bool MatchMemberSearchTerms(MemberModel member, params string[] terms)
     {
-        var searchName = member.FirstName + member.LastName;
+        var searchName = member.Firstname + member.Lastname;
         var iracingId = member.IRacingId.ToString();
         return terms
         .Any(x => searchName.Contains(x, StringComparison.OrdinalIgnoreCase) ||

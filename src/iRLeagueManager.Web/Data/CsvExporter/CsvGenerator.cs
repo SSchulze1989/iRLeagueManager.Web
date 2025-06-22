@@ -1,0 +1,63 @@
+﻿using System.Text;
+
+namespace iRLeagueManager.Web.Data.CsvExporter;
+
+internal sealed class CsvGenerator<T> where T : notnull
+{
+    private readonly string delimiter = ";";
+
+    public List<CsvColumn<T>> Columns { get; } = [];
+
+    public CsvGenerator(string delimiter = ";")
+    {
+        this.delimiter = delimiter;
+    }
+
+    public CsvGenerator<T> AddColumn(string header)
+    {
+        return AddColumn(header, x => x?.ToString() ?? string.Empty);
+    }
+
+    public CsvGenerator<T> AddColumn(string header, Func<T, string> valueFunc)
+    {
+        if (string.IsNullOrEmpty(header))
+        {
+            throw new ArgumentException("Header cannot be null or empty", nameof(header));
+        }
+        if (valueFunc == null)
+        {
+            throw new ArgumentNullException(nameof(valueFunc));
+        }
+        Columns.Add(new CsvColumn<T>(header, valueFunc));
+        return this;
+    }
+
+    public string GenerateHeader()
+    {
+        return string.Join(delimiter, Columns.Select(c => c.Header));
+    }
+
+    public string GenerateRow(T item)
+    {
+        if (item == null)
+        {
+            throw new ArgumentNullException(nameof(item));
+        }
+        return string.Join(delimiter, Columns.Select(c => c.ValueFunc(item)));
+    }
+
+    public string GenerateCsv(IEnumerable<T> items)
+    {
+        if (items == null)
+        {
+            throw new ArgumentNullException(nameof(items));
+        }
+        var csvBuilder = new StringBuilder();
+        csvBuilder.AppendLine(GenerateHeader());
+        foreach (var item in items)
+        {
+            csvBuilder.AppendLine(GenerateRow(item));
+        }
+        return csvBuilder.ToString();
+    }
+}

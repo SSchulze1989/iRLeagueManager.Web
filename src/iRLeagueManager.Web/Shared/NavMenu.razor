@@ -26,6 +26,8 @@
                     <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person" Href="@GetLeagueLink("settings/Users")">Users</MudNavLink>
                     <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Calculate" Href="@GetLeagueLink("settings/Results")">Results</MudNavLink>
                     <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.LocalPolice" Href="@GetLeagueLink("settings/Reviews")">Reviews</MudNavLink>
+                    <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.TableChart" Href="@GetLeagueLink("settings/Members")">Members</MudNavLink>
+                    <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.TableChart" Href="@GetLeagueLink("settings/Rosters")">Rosters</MudNavLink>
                 </MudNavGroup>   
             </Authorized>
         </AuthorizeView>
@@ -96,11 +98,6 @@
             return MenuSection.Reviews;
         }
         return MenuSection.None;
-    }
-
-    private string GetLeagueLink(string href)
-    {
-        return $"./{Shared.LeagueName}/{href}";
     }
 
     private async Task OnSeasonChanged(SeasonModel? season)

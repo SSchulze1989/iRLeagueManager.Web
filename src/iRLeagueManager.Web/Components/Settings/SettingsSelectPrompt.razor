@@ -13,7 +13,8 @@
               IconColor="IconColor"
               OnClick="Click"
               Disabled="Disabled"
-              Delete="Delete" />
+              Delete="Delete" 
+              Placeholder="@Placeholder" />
 
 @code {
     [Parameter, EditorRequired] public T Value { get; set; } = default!;
@@ -26,7 +27,7 @@
     [Parameter] public bool Clearable { get; set; } = false;
     [Parameter] public string Placeholder { get; set; } = string.Empty;
 
-    private string ValueString => ToStringFunc(Value) ?? Placeholder;
+    private string ValueString => ToStringFunc(Value);
 
     protected override void OnParametersSet()
     {

@@ -117,7 +117,7 @@ public partial class EditResultTable
     }
 
     private IEnumerable<MemberInfoModel> GetMembersNotInResult() =>
-        Members.Where(x => SessionResult.ResultRows.None(row => x.MemberId == row?.MemberId));
+        Members.Where(x => SessionResult.ResultRows.None(row => x.MemberId == row.MemberId));
 
     private void MoveRowUp(RawResultRowViewModel row)
     {

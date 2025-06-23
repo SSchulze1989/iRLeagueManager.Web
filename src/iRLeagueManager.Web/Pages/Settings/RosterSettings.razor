@@ -31,7 +31,7 @@
             <MemberTable Caption="@Roster.Name"
                          LeagueMembers="RosterMembers"
                          Teams="Teams"
-                         EditColumns="MemberTable.Columns.Team"
+                         EditColumns="MemberTable.Columns.Team | MemberTable.Columns.Profile"
                          RowBackup="RowBackup"
                          RowCommit="RowCommit"
                          RowReset="RowReset"
@@ -64,7 +64,7 @@
         }
         await Roster.Load(RosterId, CancellationToken);
         await LoadTeams(CancellationToken);
-        RosterMembers = await GetRosterMembers();
+        RosterMembers = GetRosterMembers();
         BreadCrumbService.Items = new List<BreadcrumbItem>()
         {
             new("Rosters", $"{LeagueName}/Settings/Rosters"),
@@ -166,43 +166,37 @@
         }
     }
 
-    private MemberModel GetRosterMember(RosterEntryInfoModel entry, IEnumerable<MemberModel> leagueMembers)
+    private MemberModel GetRosterMember(RosterMemberModel rosterMember)
     {
-        var member = leagueMembers.FirstOrDefault(x => x.MemberId == entry.MemberId);
-        if (member is null)
+        var member = new MemberModel()
+            {
+                MemberId = rosterMember.MemberId,
+                Firstname = rosterMember.Member.Firstname,
+                Lastname = rosterMember.Member.Lastname,
+                TeamName = rosterMember.TeamName,
+                TeamId = rosterMember.TeamId,
+                Number = rosterMember.Member.Number,
+                IRacingId = rosterMember.Member.IRacingId,
+                DiscordId = rosterMember.Member.DiscordId,
+                CountryFlag = rosterMember.Member.CountryFlag,
+                Profile = rosterMember.Profile,
+            };
+
+        // combine member and roster profile data
+        foreach(var column in rosterMember.Member.Profile)
         {
-            return new MemberModel()
-                {
-                    MemberId = entry.MemberId,
-                    Firstname = entry.Firstname,
-                    Lastname = entry.Lastname,
-                    TeamName = entry.TeamName,
-                    TeamId = entry.TeamId,
-                };
+            if (!member.Profile.ContainsKey(column.Key))
+            {
+                member.Profile.Add(column.Key, column.Value);
+            }
         }
         return member;
     }
 
-    private async Task<List<MemberModel>> GetRosterMembers()
+    private List<MemberModel> GetRosterMembers()
     {
-        var loadLeagueMembers = await LoadMembers(CancellationToken);
-        if (!loadLeagueMembers.IsSuccess || loadLeagueMembers.Content is null)
-        {
-            Snackbar.Add("Failed to read league member data", Severity.Error);
-            return Roster.RosterEntries
-                .Select(x => new MemberModel()
-                    {
-                        MemberId = x.MemberId,
-                        Firstname = x.Firstname,
-                        Lastname = x.Lastname,
-                        TeamName = x.TeamName,
-                        TeamId = x.TeamId,
-                    }).ToList();
-        }
-
-        LeagueMembers = loadLeagueMembers.Content.ToList();
         var rosterMembers = Roster.RosterEntries
-            .Select(x => GetRosterMember(x, LeagueMembers))
+            .Select(x => GetRosterMember(x))
             .ToList();
         return rosterMembers;
     }
@@ -210,7 +204,7 @@
     private async Task Refresh()
     {
         await Roster.Load(RosterId, CancellationToken);
-        RosterMembers = await GetRosterMembers();
+        RosterMembers = GetRosterMembers();
     }
 
     private async void RowCommit(MemberModel member)
@@ -219,6 +213,7 @@
             {
                 MemberId = member.MemberId,
                 TeamId = member.TeamId,
+                Profile = member.Profile,
             };
         var result = await SaveEntry(entry, CancellationToken);
         if (!result.IsSuccess)

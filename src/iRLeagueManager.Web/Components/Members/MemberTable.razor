@@ -352,6 +352,7 @@
         var profileColumns = LeagueMembers
             .SelectMany(member => member.Profile.Keys)
             .Distinct()
+            .Order()
             .ToDictionary(k => k, v => true);
         // Sort columns alphabetically
         return profileColumns;

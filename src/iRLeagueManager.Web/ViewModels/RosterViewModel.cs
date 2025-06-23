@@ -20,7 +20,7 @@ public sealed class RosterViewModel : LeagueViewModelBase<RosterViewModel, Roste
     public long RosterId { get => model.RosterId; }
     public string Name { get => model.Name; set => SetP(model.Name, value => model.Name = value, value); }
     public string Description { get => model.Description; set => SetP(model.Description, value => model.Description = value, value); }
-    public IEnumerable<RosterEntryInfoModel> RosterEntries { get => model.RosterEntries; set => SetP(model.RosterEntries, value => model.RosterEntries = value, value); }
+    public IEnumerable<RosterMemberModel> RosterEntries { get => model.RosterEntries; set => SetP(model.RosterEntries, value => model.RosterEntries = value, value); }
 
     public async Task<StatusResult> Load(long rosterId, CancellationToken cancellationToken = default)
     {

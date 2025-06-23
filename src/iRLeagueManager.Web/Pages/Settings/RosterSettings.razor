@@ -64,6 +64,7 @@
         }
         await Roster.Load(RosterId, CancellationToken);
         await LoadTeams(CancellationToken);
+        await LoadMembers(CancellationToken);
         RosterMembers = GetRosterMembers();
         BreadCrumbService.Items = new List<BreadcrumbItem>()
         {
@@ -73,18 +74,22 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task<StatusResult<IEnumerable<MemberModel>>> LoadMembers(CancellationToken cancellationToken)
+    private async Task<StatusResult> LoadMembers(CancellationToken cancellationToken)
     {
         if (ApiService.CurrentLeague is null)
         {
-            return LeagueNullResult<IEnumerable<MemberModel>>([]);
+            return LeagueNullResult();
         }
 
         try
         {
             Loading = true;
             var result = await ApiService.CurrentLeague.Members().Get(cancellationToken).ConfigureAwait(false);
-            return result.ToContentStatusResult();
+            if (result.Success && result.Content is not null)
+            {
+                LeagueMembers = result.Content.ToList();
+            }
+            return result.ToStatusResult();
         }
         finally
         {
@@ -103,9 +108,9 @@
         {
             Loading = true;
             var result = await ApiService.CurrentLeague.Teams().Get().ConfigureAwait(false);
-            if (result.Success && result.Content is IEnumerable<TeamModel> teams)
+            if (result.Success && result.Content is not null)
             {
-                Teams = teams.Select(x => new TeamInfoModel()
+                Teams = result.Content.Select(x => new TeamInfoModel()
                     {
                         Name = x.Name,
                         TeamColor = x.TeamColor,

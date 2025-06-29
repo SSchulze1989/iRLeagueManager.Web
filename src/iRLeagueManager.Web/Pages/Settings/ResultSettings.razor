@@ -39,10 +39,17 @@
                 </MudButton>
             </MudStack>
             <MudPaper Elevation="5">
+                @{
+                    var showRosters = Vm.CurrentChampSeasons.Any(x => x.Roster != null);
+                }
                 <MudTable Items="Vm.Championships.Where(x => x.IsActive && x.CurrentChampSeason is not null)" Striped="true" Hover="true" Elevation="0" Breakpoint="Breakpoint.None">
                     <HeaderContent>
                         <MudTh>Name</MudTh>
                         <MudTh>Type</MudTh>
+                        @if (showRosters)
+                        {
+                            <MudTh>Roster</MudTh>
+                        }
                         <MudTh>Point Configs</MudTh>
                         <MudTh></MudTh>
                     </HeaderContent>
@@ -58,6 +65,12 @@
                         <MudTd DataLabel="Type">
                             @champSeason?.ResultKind
                         </MudTd>
+                        @if (showRosters)
+                        {
+                            <MudTd>
+                                @champSeason?.Roster?.Name
+                            </MudTd>
+                        }
                         <MudTd DataLabel="Point Configs">
                             @if (champSeason is not null)
                             {

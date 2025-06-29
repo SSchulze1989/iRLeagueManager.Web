@@ -2,7 +2,6 @@
 
 namespace iRLeagueManager.Web.Data.CsvExporter;
 
-public interface ITeamListCsvGenerator : ICsvGenerator
+public interface ITeamListCsvGenerator : ICsvGenerator<IEnumerable<TeamModel>>
 {
-    public string ExportCsv(IEnumerable<TeamModel> teams);
 }

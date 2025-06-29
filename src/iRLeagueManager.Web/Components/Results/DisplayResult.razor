@@ -275,6 +275,6 @@
         {
             return;
         }
-        await ResultsPageVm.LoadFromEventAsync(ResultsPageVm.SelectedEvent.EventId);
+        await ResultsPageVm.LoadFromEventAsync(ResultsPageVm.SelectedEvent.EventId, CancellationToken);
     }
 }

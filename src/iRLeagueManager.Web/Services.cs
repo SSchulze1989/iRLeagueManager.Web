@@ -71,10 +71,18 @@ public static class Services
 
     public static IServiceCollection AddExporters(this IServiceCollection services)
     {
-        services.AddSingleton<IMemberListCsvGenerator, DefaultCsvGenerator>();
-        services.AddSingleton<ITeamListCsvGenerator, DefaultCsvGenerator>();
-        services.AddSingleton<IMemberListCsvGenerator, SdkGamingCsvGenerator>();
-        services.AddSingleton<ITeamListCsvGenerator, SdkGamingCsvGenerator>();
+        var defaultCsvGenerator = new DefaultCsvGenerator();
+        services.AddSingleton<IMemberListCsvGenerator>(defaultCsvGenerator);
+        services.AddSingleton<ITeamListCsvGenerator>(defaultCsvGenerator);
+        services.AddSingleton<IStandingsCsvGenerator>(defaultCsvGenerator);
+        services.AddSingleton<IGridCsvExporter>(defaultCsvGenerator);
+        services.AddSingleton<IRosterListCsvExporter>(defaultCsvGenerator);
+        var sdkCsvGenerator = new SdkGamingCsvGenerator();
+        services.AddSingleton<IMemberListCsvGenerator>(sdkCsvGenerator);
+        services.AddSingleton<ITeamListCsvGenerator>(sdkCsvGenerator);
+        services.AddSingleton<IStandingsCsvGenerator>(sdkCsvGenerator);
+        services.AddSingleton<IGridCsvExporter>(sdkCsvGenerator);
+        services.AddSingleton<IRosterListCsvExporter>(sdkCsvGenerator);
         return services;
     }
 }

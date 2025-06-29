@@ -4,14 +4,14 @@ using iRLeagueApiCore.Common.Models.Standings;
 
 namespace iRLeagueManager.Web.Data.CsvExporter;
 
-public class DefaultCsvGenerator : IMemberListCsvGenerator, ITeamListCsvGenerator, IStandingsCsvGenerator
+public class DefaultCsvGenerator : IMemberListCsvGenerator, ITeamListCsvGenerator, IStandingsCsvGenerator, IGridCsvExporter, IRosterListCsvExporter
 {
     public string GetName()
     {
         return "Default CSV";
     }
 
-    string IMemberListCsvGenerator.ExportCsv(IEnumerable<MemberModel> members)
+    string ICsvGenerator<IEnumerable<MemberModel>>.ExportCsv(IEnumerable<MemberModel> members)
     {
         var generator = new CsvGenerator<MemberModel>()
             .AddColumn("MemberId", x => x.MemberId.ToString())
@@ -29,7 +29,7 @@ public class DefaultCsvGenerator : IMemberListCsvGenerator, ITeamListCsvGenerato
         return generator.GenerateCsv(members);
     }
 
-    string ITeamListCsvGenerator.ExportCsv(IEnumerable<TeamModel> teams)
+    string ICsvGenerator<IEnumerable<TeamModel>>.ExportCsv(IEnumerable<TeamModel> teams)
     {
         var generator = new CsvGenerator<TeamModel>()
             .AddColumn("TeamId", x => x.TeamId.ToString())
@@ -41,7 +41,7 @@ public class DefaultCsvGenerator : IMemberListCsvGenerator, ITeamListCsvGenerato
         return generator.GenerateCsv(teams);
     }
 
-    string IStandingsCsvGenerator.ExportCsv(StandingsModel standings)
+    string ICsvGenerator<StandingsModel>.ExportCsv(StandingsModel standings)
     {
         var generator = new CsvGenerator<StandingRowModel>()
             .AddColumn("Position", x => x.Position.ToString())
@@ -53,5 +53,32 @@ public class DefaultCsvGenerator : IMemberListCsvGenerator, ITeamListCsvGenerato
             .AddColumn("Races", x => x.Races.ToString())
             .AddColumn("Wins", x => x.Wins.ToString());
         return generator.GenerateCsv(standings.StandingRows);
+    }
+
+    private record GridRowModel(RosterModel Roster, RosterMemberModel Entry);
+
+    string ICsvGenerator<IEnumerable<RosterModel>>.ExportCsv(IEnumerable<RosterModel> data)
+    {
+        var rows = data.SelectMany(roster => roster.RosterEntries.Select(entry => new GridRowModel(roster, entry))).ToList();
+        var generator = new CsvGenerator<GridRowModel>()
+            .AddColumn("RosterId", x => x.Roster.RosterId.ToString())
+            .AddColumn("RosterName", x => x.Roster.Name ?? string.Empty)
+            .AddColumn("MemberId", x => x.Entry.MemberId.ToString())
+            .AddColumn("Firstname", x => x.Entry.Member.Firstname)
+            .AddColumn("Lastname", x => x.Entry.Member.Lastname)
+            .AddColumn("TeamId", x => x.Entry.TeamId?.ToString() ?? string.Empty)
+            .AddColumn("TeamName", x => x.Entry.TeamName ?? string.Empty)
+            .AddColumn("Number", x => x.Entry.Member.Number ?? string.Empty);
+        return generator.GenerateCsv(rows);
+    }
+
+    string ICsvGenerator<IEnumerable<RosterInfoModel>>.ExportCsv(IEnumerable<RosterInfoModel> data)
+    {
+        var generator = new CsvGenerator<RosterInfoModel>()
+            .AddColumn("RosterId", x => x.RosterId.ToString())
+            .AddColumn("Name", x => x.Name)
+            .AddColumn("Description", x => x.Description ?? string.Empty)
+            .AddColumn("EntryCount", x => x.EntryCount.ToString());
+        return generator.GenerateCsv(data);
     }
 }

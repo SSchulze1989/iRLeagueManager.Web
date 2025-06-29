@@ -2,7 +2,6 @@
 
 namespace iRLeagueManager.Web.Data.CsvExporter;
 
-public interface IStandingsCsvGenerator
+public interface IStandingsCsvGenerator : ICsvGenerator<StandingsModel>
 {
-    public string ExportCsv(StandingsModel standings);
 }

@@ -1,4 +1,5 @@
-﻿using iRLeagueManager.Web.Data;
+﻿using iRLeagueApiCore.Common.Models.Rosters;
+using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
 
 namespace iRLeagueManager.Web.ViewModels;
@@ -10,6 +11,7 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
     {
         this.eventList = eventList.EventList;
         results = [];
+        rosters = [];
     }
 
     private long? loadedSeasonId;
@@ -30,7 +32,10 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
 
     public event Action<EventViewModel?>? SelectedSessionChanged;
 
-    public async Task LoadEventListAsync()
+    private List<RosterModel> rosters;
+    public List<RosterModel> Rosters { get => rosters; set => Set(ref rosters, value); }
+
+    public async Task LoadEventListAsync(CancellationToken cancellationToken)
     {
         if (ApiService.CurrentSeason == null)
         {
@@ -41,7 +46,7 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
         LoadedSeasonId = ApiService.CurrentSeason.Id;
 
         var sessionsEndpoint = ApiService.CurrentSeason.Events();
-        var result = await sessionsEndpoint.Get().ConfigureAwait(false);
+        var result = await sessionsEndpoint.Get(cancellationToken).ConfigureAwait(false);
         if (result.Success == false || result.Content is null)
         {
             EventList.Clear();
@@ -53,7 +58,7 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
         OnPropertyChanged(nameof(SelectedEvent));
     }
 
-    public async Task LoadFromEventAsync(long eventId)
+    public async Task LoadFromEventAsync(long eventId, CancellationToken cancellationToken)
     {
         if (ApiService.CurrentLeague == null)
         {
@@ -69,8 +74,8 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
 
             if (selectedEvent == null)
             {
-                // Load event list first if event is not in current event list
-                var eventRequest = await eventEndpoint.Get().ConfigureAwait(false);
+                // Load event list first if event is not in current event list  
+                var eventRequest = await eventEndpoint.Get(cancellationToken).ConfigureAwait(false);
                 if (eventRequest.Success == false || eventRequest.Content is null)
                 {
                     return;
@@ -80,19 +85,25 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
                 {
                     await ApiService.SetCurrentSeasonAsync(ApiService.CurrentLeague.Name, @event.SeasonId);
                 }
-                await LoadEventListAsync();
+                await LoadEventListAsync(cancellationToken);
                 selectedEvent = EventList.FirstOrDefault(x => x.EventId == eventId);
             }
 
             var resultEndpoint = eventEndpoint.Results();
-            var requestResult = await resultEndpoint.Get().ConfigureAwait(false);
-            if (requestResult.Success == false || requestResult.Content is null)
+            var requestResult = await resultEndpoint.Get(cancellationToken).ConfigureAwait(false);
+            Results.Clear();
+            if (requestResult.Success && requestResult.Content is not null)
             {
-                Results.Clear();
-                return;
+                var results = requestResult.Content;
+                Results = new ObservableCollection<EventResultViewModel>(results.Select(x => new EventResultViewModel(LoggerFactory, ApiService, x)));
             }
-            var results = requestResult.Content;
-            Results = new ObservableCollection<EventResultViewModel>(results.Select(x => new EventResultViewModel(LoggerFactory, ApiService, x)));
+
+            var rosters = await eventEndpoint.Rosters().Get(cancellationToken).ConfigureAwait(false);
+            Rosters.Clear();
+            if (rosters.Success && rosters.Content is not null)
+            {
+                Rosters = rosters.Content.ToList();
+            }
         }
         finally
         {
@@ -115,16 +126,16 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
         {
             Loading = true;
             var request = ApiService.CurrentLeague.Events()
-            .WithId(SelectedEvent.EventId)
-            .Results()
-            .Calculate()
-            .Post(cancellationToken).ConfigureAwait(false);
+                .WithId(SelectedEvent.EventId)
+                .Results()
+                .Calculate()
+                .Post(cancellationToken).ConfigureAwait(false);
             var result = await request;
 
             if (result.Success)
             {
-                await Task.Delay(2000);
-                await LoadFromEventAsync(SelectedEvent.EventId);
+                await Task.Delay(2000, cancellationToken);
+                await LoadFromEventAsync(SelectedEvent.EventId, cancellationToken);
             }
 
             return result.ToStatusResult();
@@ -156,7 +167,7 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
             var result = await request;
             if (result.Success)
             {
-                await LoadFromEventAsync(SelectedEvent.EventId);
+                await LoadFromEventAsync(SelectedEvent.EventId, cancellationToken);
             }
             return result.ToStatusResult();
         }
@@ -166,12 +177,12 @@ public sealed class ResultsPageViewModel : LeagueViewModelBase<ResultsPageViewMo
         }
     }
 
-    private async Task OnSelectedSessionChanged(EventViewModel? @event)
+    private async Task OnSelectedSessionChanged(EventViewModel? @event, CancellationToken cancellationToken = default)
     {
         SelectedSessionChanged?.Invoke(@event);
         if (@event != null)
         {
-            await LoadFromEventAsync(@event.EventId);
+            await LoadFromEventAsync(@event.EventId, cancellationToken);
         }
     }
 }

@@ -8,11 +8,14 @@
 @using Microsoft.Extensions.Primitives
 @using System.Linq.Expressions
 @using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Rosters
 @using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.Data.CsvExporter
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
 @inject ResultsPageViewModel vm
 @inject IDialogService DialogService
+@inject IJSRuntime JS
 
 <PageTitle>
     Results - @LeagueName
@@ -39,29 +42,35 @@
                 <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
                     <Authorized>
                         <MudStack Row="true" Justify="Justify.FlexEnd" Style="flex-grow: 1">
-                            @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
-                            {
-                                <MudMenu Icon="@Icons.Material.Filled.Menu">
+                            <MudMenu Icon="@Icons.Material.Filled.Menu">
+                                @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
+                                {
                                     <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => NavigateTo($"{GetCurrentResultLink()}/Edit"))">
                                         Edit Raw Results
                                     </MudMenuItem>
                                     <MudMenuItem Icon="@Icons.Material.Filled.Loop" OnClick="TriggerCalculation">
                                         Calculate
                                     </MudMenuItem>
-                                    @if (vm.Results.Count > 1)
-                                    {
-                                        <MudMenuItem Icon="@Icons.Material.Filled.CompareArrows" OnClick="ChangeTabOrder">
-                                            Change tab order
-                                        </MudMenuItem>
-                                    }
-                                    @if (vm.Results.Count > 0)
-                                    {
-                                        <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="@Color.Error" OnClick=DeleteResultsClick>
-                                            Clear Calculated Results
-                                        </MudMenuItem>
-                                    }
-                                </MudMenu>
-                            }
+                                }
+                                @if (vm.Rosters.Count > 0)
+                                {
+                                    <MudMenuItem Icon="@Icons.Material.Filled.Download" OnClick="ExportGrid">
+                                        Export Grid as CSV
+                                    </MudMenuItem>
+                                }
+                                @if (vm.Results.Count > 1)
+                                {
+                                    <MudMenuItem Icon="@Icons.Material.Filled.CompareArrows" OnClick="ChangeTabOrder">
+                                        Change tab order
+                                    </MudMenuItem>
+                                }
+                                @if (vm.Results.Count > 0)
+                                {
+                                    <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="@Color.Error" OnClick=DeleteResultsClick>
+                                        Clear Calculated Results
+                                    </MudMenuItem>
+                                }
+                            </MudMenu>
                         </MudStack>
                     </Authorized>
                 </AuthorizeView>
@@ -173,7 +182,7 @@
     {
         if (@event?.EventId != null)
         {
-            await vm.LoadFromEventAsync(@event.EventId);
+            await vm.LoadFromEventAsync(@event.EventId, CancellationToken);
             var resultCount = vm.Results.Count();
             if (SelectedTabIndex < 0)
             {
@@ -211,7 +220,7 @@
         if (result?.Canceled == false)
         {
             await Task.Delay(2000);
-            await vm.LoadFromEventAsync(@event.Id);
+            await vm.LoadFromEventAsync(@event.Id, CancellationToken);
         }
     }
 
@@ -230,7 +239,7 @@
         if (result?.Canceled == false)
         {
             await Task.Delay(2000);
-            await vm.LoadFromEventAsync(@event.Id);
+            await vm.LoadFromEventAsync(@event.Id, CancellationToken);
         }
     }
 
@@ -240,7 +249,7 @@
         {
             return;
         }
-        await vm.TriggerCalculation();
+        await vm.TriggerCalculation(CancellationToken);
     }
 
     private async Task ChangeTabOrder()
@@ -253,7 +262,7 @@
         var result = await DialogService.Show<ReorderChampionshipsDialog>("Change tab order", parameters).Result;
         if (result?.Canceled == false && Event is not null)
         {
-            await vm.LoadFromEventAsync(Event.EventId);
+            await vm.LoadFromEventAsync(Event.EventId, CancellationToken);
         }
     }
 
@@ -272,7 +281,7 @@
         var result = await DialogService.Show<ConfirmDialog>("Delete Results", parameters).Result;
         if (result?.Canceled == false)
         {
-            await vm.DeleteEventResults();
+            await vm.DeleteEventResults(CancellationToken);
         }
     }
 
@@ -298,5 +307,99 @@
             return GetCurrentSeasonLatestResultLink();
         }
         return $"{NavigationManager.BaseUri}{LeagueName}/Results/Events/{Event.EventId}";
+    }
+
+    private async Task ExportGrid()
+    {
+        if (vm.Rosters is null || vm.Rosters.Count == 0)
+        {
+            return;
+        }
+        var supportedGridExporters = ScopedServices.GetServices<IGridCsvExporter>().ToDictionary(k => k.GetName(), v => v);
+        var supportedRosterExporters = ScopedServices.GetServices<IRosterListCsvExporter>().ToDictionary(k => k.GetName(), v => v);
+        var supportedTeamExporters = ScopedServices.GetServices<ITeamListCsvGenerator>().ToDictionary(k => k.GetName(), v => v);
+        var supportedExporters = supportedGridExporters.Keys
+            .Concat(supportedRosterExporters.Keys)
+            .Concat(supportedTeamExporters.Keys)
+            .Distinct()
+            .Select(key => new
+            {
+                Grid = supportedGridExporters.GetValueOrDefault(key)!,
+                Roster = supportedRosterExporters.GetValueOrDefault(key)!,
+                Team = supportedTeamExporters.GetValueOrDefault(key)!
+            })
+            .Where(x => x.Grid != null && x.Roster != null && x.Team != null)
+            .ToDictionary(k => k.Grid.GetName(), v => v);
+        var parameters = new DialogParameters<RadioSelectPromptDialog<string>>()
+        {
+            {x => x.Label, "CSV Exporter"},
+            {x => x.Value, supportedExporters.Keys.FirstOrDefault()},
+            {x => x.Items, supportedExporters.Keys},
+        };
+
+        var result = await DialogService.Show<RadioSelectPromptDialog<string>>("Select CSV Exporter", parameters).Result;
+
+        if (result?.Canceled != false || result.Data is not string exporter)
+        {
+            return;
+        }
+
+        var selectedExporters = supportedExporters.GetValueOrDefault(exporter);
+        if (selectedExporters is null)
+        {
+            return;
+        }
+
+        using var zipStream = new MemoryStream();
+        using (var archive = new System.IO.Compression.ZipArchive(zipStream, System.IO.Compression.ZipArchiveMode.Create, true))
+        {
+            // Export Teams
+            {
+                var teams = vm.Rosters
+                    .SelectMany(x => x.RosterEntries)
+                    .Where(x => x.TeamId != null)
+                    .Select(x => new TeamModel(){
+                            Name = x.TeamName,
+                            TeamColor = x.TeamColor,
+                            TeamId = x.TeamId!.Value,
+                    })
+                    .DistinctBy(x => x.TeamId)
+                    .ToList();
+                var csv = selectedExporters.Team.ExportCsv(teams);
+                var entry = archive.CreateEntry($"event_{vm.SelectedEvent?.EventId}_teams.csv");
+                using var entryStream = entry.Open();
+                using var writer = new StreamWriter(entryStream);
+                writer.Write(csv);
+            }
+
+            // Export Rosters
+            {
+                var rosterInfos = vm.Rosters.Select(x => new RosterInfoModel()
+                    {
+                        Description = x.Description,
+                        RosterId = x.RosterId,
+                        EntryCount = x.RosterEntries.Count(),
+                        Name = x.Name,
+                    });
+                var csv = selectedExporters.Roster.ExportCsv(rosterInfos);
+                var entry = archive.CreateEntry($"event_{vm.SelectedEvent?.EventId}_rosters.csv");
+                using var entryStream = entry.Open();
+                using var writer = new StreamWriter(entryStream);
+                writer.Write(csv);
+            }
+
+            // Export Grid
+            {
+                var csv = selectedExporters.Grid.ExportCsv(vm.Rosters);
+                var entry = archive.CreateEntry($"event_{vm.SelectedEvent?.EventId}_drivers.csv");
+                using var entryStream = entry.Open();
+                using var writer = new StreamWriter(entryStream);
+                writer.Write(csv);
+            }
+        }
+
+        zipStream.Position = 0;
+        using var zipStreamRef = new DotNetStreamReference(stream: zipStream);
+        await JS.InvokeVoidAsync("downloadFileFromStream", $"event_{vm.SelectedEvent?.EventId}_grid.zip", zipStreamRef);
     }
 }

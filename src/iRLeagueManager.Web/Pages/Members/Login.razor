@@ -22,7 +22,7 @@
                 <DataAnnotationsValidator />
                 <StatusResultValidator @ref=ResultValidator />
                 <MudStack Row="false" Spacing="2" AlignItems="AlignItems.Start">
-                    <MudTextField Label="Username" @bind-Value="model.Username" For="@(() => model.Username)" Variant="Variant.Outlined" FullWidth="true"/>
+                    <MudTextField Label="Username or Email" @bind-Value="model.Username" For="@(() => model.Username)" Variant="Variant.Outlined" FullWidth="true" />
                     <MudTextField Label="Password" @bind-Value="model.Password" For="@(() => model.Password)" Variant="Variant.Outlined" FullWidth="true" InputType="PasswordType" AdornmentIcon="@PasswordIcon" Adornment="Adornment.End" OnAdornmentClick="ToggleShowPassword"/>
                     <FormValidationMessage TValue=string Message=@ResultValidator?.ErrorMessage />
                     @if (ResendConfirmation)

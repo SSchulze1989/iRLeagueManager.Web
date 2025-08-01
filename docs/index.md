@@ -21,7 +21,8 @@ Oftentimes leagues implement some kind of penalty system that also needs to be a
 
 **iRLeagueManager is providing such a service for scoring and hosting your league results all-in-one.**
 
-> <img src="https://user-images.githubusercontent.com/57634354/210998860-b9859c2f-2d07-4d4d-8981-0b47242aba51.png" width="75%" />  
+![iRleagueManager Page](getting-started/img/homepage_light.png#only-light)
+![iRleagueManager Page](getting-started/img/homepage_dark.png#only-dark)
 
 Once configured the software can generate results and standings, apply penalty points and publish to your website all with the click of one button, 
 you can generate extensive statistics and metrics spanning over years of races with minimal amount of effort and the build in reviews and stewarding 
@@ -46,6 +47,7 @@ A list of supported features by now. The app is in constant development and more
 - Role based user access: Manage admins, organizers and stewards through the role based access system
 - Review system  
     - Register incidents and discuss with other stewards before finalizing the results  
-      > <img src="https://user-images.githubusercontent.com/57634354/211000455-c8b03fc2-0635-4981-81ca-a22907711891.png" width="75%" />
+      ![Reviews](getting-started/img/reviews_demo_light.png#only-light)
+      ![Reviews](getting-started/img/reviews_demo_dark.png#only-dark)
     - Automatic penalty points for incident categories
     - Protest form to let drivers report incidents from the previous race  

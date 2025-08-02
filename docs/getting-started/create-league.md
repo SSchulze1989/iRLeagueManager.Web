@@ -28,8 +28,10 @@ For example you could enter **My Awesome Race League** as the name and **awesome
 
 After entering your name you will be forwarded to the league settings page immediately. 
 
-!!! warning
-    If you are not automatically forwarded please navigate manually to **https://irleaguemanager.net/[strong-name]/settings/league**.
+!!! note "Redirection to League Settings"
+    
+    If you are not automatically forwarded please navigate to the settings page manually in the main navigation menu.  
+    **Settings** -> **League**
 
 If you visit your league settings page for the first time you will be asked to select a league template.
 
@@ -45,9 +47,14 @@ After selecting a template you will be able to see the basic league settings pag
 ![League Settings](img/league_settings_light.png#only-light){width="600px"}
 ![League Settings](img/league_settings_dark.png#only-dark){width="600px"}
 
-!!! note
-    Your newly create league will be hidden for other visitors first. 
+!!! note "League Visibility"
+
+    Your newly create league will be hidden for other visitors at first. 
     Once you are done with the initial configuration you can make it visible to the public by clicking on the **Make Public** button at the top of the page.
+    This will allow other users to find your league in the league listing.
+
+    ![Make League Public](img/make_league_public_light.png#only-light)
+    ![Make League Public](img/make_league_public_dark.png#only-dark)
 
 ## First season
 

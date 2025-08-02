@@ -2,30 +2,38 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://irleaguemanager.net/</loc>
-         <lastmod>2025-07-14</lastmod>
+         <lastmod>2025-08-02</lastmod>
     </url>
     <url>
          <loc>https://irleaguemanager.net/getting-started/create-account/</loc>
-         <lastmod>2025-07-14</lastmod>
+         <lastmod>2025-08-02</lastmod>
     </url>
     <url>
          <loc>https://irleaguemanager.net/getting-started/create-league/</loc>
-         <lastmod>2025-07-14</lastmod>
+         <lastmod>2025-08-02</lastmod>
     </url>
     <url>
-         <loc>https://irleaguemanager.net/getting-started/events-and-results/</loc>
-         <lastmod>2025-07-14</lastmod>
+         <loc>https://irleaguemanager.net/getting-started/create-schedule/</loc>
+         <lastmod>2025-08-02</lastmod>
+    </url>
+    <url>
+         <loc>https://irleaguemanager.net/getting-started/overview/</loc>
+         <lastmod>2025-08-02</lastmod>
+    </url>
+    <url>
+         <loc>https://irleaguemanager.net/getting-started/upload-results/</loc>
+         <lastmod>2025-08-02</lastmod>
     </url>
     <url>
          <loc>https://irleaguemanager.net/settings/championships/</loc>
-         <lastmod>2025-07-14</lastmod>
+         <lastmod>2025-08-02</lastmod>
     </url>
     <url>
          <loc>https://irleaguemanager.net/settings/general/</loc>
-         <lastmod>2025-07-14</lastmod>
+         <lastmod>2025-08-02</lastmod>
     </url>
     <url>
          <loc>https://irleaguemanager.net/settings/users/</loc>
-         <lastmod>2025-07-14</lastmod>
+         <lastmod>2025-08-02</lastmod>
     </url>
 </urlset>

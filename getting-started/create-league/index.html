@@ -14,11 +14,11 @@
         <link rel="prev" href="../create-account/">
       
       
-        <link rel="next" href="../events-and-results/">
+        <link rel="next" href="../create-schedule/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
     
     
       
@@ -26,7 +26,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -47,6 +47,8 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -294,6 +296,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../create-account/" class="md-nav__link">
         
   
@@ -376,9 +401,27 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#first-season-and-schedule" class="md-nav__link">
+  <a href="#selecting-a-league-template" class="md-nav__link">
     <span class="md-ellipsis">
-      First season and schedule
+      Selecting a league template
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-league-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic League Settings
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#first-season" class="md-nav__link">
+    <span class="md-ellipsis">
+      First season
     </span>
   </a>
   
@@ -400,12 +443,35 @@
   
   
     <li class="md-nav__item">
-      <a href="../events-and-results/" class="md-nav__link">
+      <a href="../create-schedule/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Events & Results
+    Create Schedule
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upload-results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Upload Results
     
   </span>
   
@@ -573,9 +639,27 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#first-season-and-schedule" class="md-nav__link">
+  <a href="#selecting-a-league-template" class="md-nav__link">
     <span class="md-ellipsis">
-      First season and schedule
+      Selecting a league template
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-league-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic League Settings
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#first-season" class="md-nav__link">
+    <span class="md-ellipsis">
+      First season
     </span>
   </a>
   
@@ -598,27 +682,50 @@
 
 
 <h1 id="create-league">Create League</h1>
-<h3 id="create-your-own-league">Create your own league</h3>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Creating your league is not possible through the UI yet.
-If you want to have a league created please write a request to <a href="mailto:simon@irleaguemanager.net">simon@irleaguemanager.net</a></p>
+<h2 id="create-your-own-league">Create your own league</h2>
+<p>Make sure you are logged in to the iRLeagueManager webapp. You can see your user name in the top right corner of the page.</p>
+<p><img alt="User Status" src="../img/user_status_light.png#only-light" width="450px" />
+<img alt="User Status" src="../img/user_status_dark.png#only-dark" width="450px" /></p>
+<p>To create your own league click on the <strong>Create League</strong> on the bottom of the iRleagueManager main page:</p>
+<p><img alt="Create League Button" src="../img/create_league_button_light.png#only-light" width="600px" />
+<img alt="Create League Button" src="../img/create_league_button_dark.png#only-dark" width="600px" /></p>
+<p>Or head directly to <a href="https://irleaguemanager.net/createleague">https://irleaguemanager.net/createleague</a>.</p>
+<p>First you will be asked to enter a name and optionally a more concise <strong>Strong name</strong> for your league. </p>
+<p>The strong name has to be unique and will serve as a part of the address to your league pages. 
+Therefore the <strong>Strong name</strong> should be short an can only contain characters that are valid in a URL.</p>
+<p>For example you could enter <strong>My Awesome Race League</strong> as the name and <strong>awesome-league</strong> as the strong name.</p>
+<p><img alt="Create League Form" src="../img/create_league_light.png#only-light" width="500px" />
+<img alt="Create League Form" src="../img/create_league_dark.png#only-dark" width="500px" /></p>
+<h2 id="selecting-a-league-template">Selecting a league template</h2>
+<p>After entering your name you will be forwarded to the league settings page immediately. </p>
+<div class="admonition note">
+<p class="admonition-title">Redirection to League Settings</p>
+<p>If you are not automatically forwarded please navigate to the settings page manually in the main navigation menu.<br />
+<strong>Settings</strong> -&gt; <strong>League</strong></p>
 </div>
-<h3 id="first-season-and-schedule">First season and schedule</h3>
-<p>By default a new league already has a default season and schedule configured:</p>
-<blockquote>
-<p><img alt="Screenshot" src="../img/Screenshot%202023-04-03%20153420.png" /></p>
-</blockquote>
-<p>If you want to change the name of the season you can do so by navigating to the settings page
-Menu -&gt; <em>LeagueName</em> -&gt; Settings</p>
-<blockquote>
-<p><img alt="Screenshot" src="../img/Screenshot%202023-04-03%20154555.png" width="300" /></p>
-</blockquote>
-<p>On the settings page, click on the Season shown in the list and it will open a new Modal where you can change the name.</p>
-<blockquote>
-<p><img alt="Screenshot" src="../img/Screenshot%202023-04-03%20155059.png" /></p>
-</blockquote>
-<p>Type in the name you want and click "Save" to apply the changes.</p>
+<p>If you visit your league settings page for the first time you will be asked to select a league template.</p>
+<p><img alt="League Template Selection" src="../img/select_league_template_light.png#only-light" width="450px" />
+<img alt="League Template Selection" src="../img/select_league_template_dark.png#only-dark" width="450px" /></p>
+<p>You can decide to chose one of the existing templates or start with a blank league. For new users it is recommended to start with a template because the most important settings are already configured for you.</p>
+<h2 id="basic-league-settings">Basic League Settings</h2>
+<p>After selecting a template you will be able to see the basic league settings page. Here you can configure the displayed league name, add a description and manage your seasons.</p>
+<p><img alt="League Settings" src="../img/league_settings_light.png#only-light" width="600px" />
+<img alt="League Settings" src="../img/league_settings_dark.png#only-dark" width="600px" /></p>
+<div class="admonition note">
+<p class="admonition-title">League Visibility</p>
+<p>Your newly create league will be hidden for other visitors at first. 
+Once you are done with the initial configuration you can make it visible to the public by clicking on the <strong>Make Public</strong> button at the top of the page.
+This will allow other users to find your league in the league listing.</p>
+<p><img alt="Make League Public" src="../img/make_league_public_light.png#only-light" />
+<img alt="Make League Public" src="../img/make_league_public_dark.png#only-dark" /></p>
+</div>
+<h2 id="first-season">First season</h2>
+<p>By default a new league already has a default season with an empty schedule configured:</p>
+<p>If you want to change the name of the season you can do so change this on the league settings page. 
+Simply click on the name of the Season and it will open a popup where you can change the name.</p>
+<p><img alt="Change Season Name" src="../img/change_season_name_light.png#only-light" width="450px" />
+<img alt="Change Season Name" src="../img/change_season_name_dark.png#only-dark" width="450px" /></p>
+<p>Next you should create your Schedule for the season.</p>
 
 
 
@@ -676,7 +783,7 @@ Menu -&gt; <em>LeagueName</em> -&gt; Settings</p>
       <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.path", "navigation.top"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      <script src="../../assets/javascripts/bundle.50899def.min.js"></script>
       
     
   </body>

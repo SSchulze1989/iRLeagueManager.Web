@@ -3,9 +3,11 @@ site_url: https://irleaguemanager.net
 nav:
     - Home: index.md
     - 'Getting Started':
+      - 'Overview': getting-started/overview.md
       - 'Create Account': getting-started/create-account.md
       - 'Create League': getting-started/create-league.md
-      - 'Events & Results': getting-started/events-and-results.md
+      - 'Create Schedule': getting-started/create-schedule.md
+      - 'Upload Results': getting-started/upload-results.md
     - 'Advanced Settings': 
       - 'General': settings/general.md
       - 'Users': settings/users.md
@@ -50,5 +52,8 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+
+extra_css:
+  - stylesheets/extra.css
 
 

@@ -1,23 +1,16 @@
 # Welcome to iRLeagueManager
 
-Your home for league administration!  
-A powerful web based scoring tool for iRacing leagues that offers a fast and reliable league database, support for many race types and scoring configurations and a 
-built in stewarding system.
+Your ultimate solution for league administration!
+iRLeagueManager is a powerful, web-based scoring platform built specifically for iRacing leagues. Experience seamless league management with a fast and reliable database, advanced support for all race types and scoring formats, and an integrated stewarding system - all designed to save you time and elevate your league to the next level.
 
-!!! note
-    Registration has not opened yet but you can already try it out if you join my discord and shoot me a message:  
-    [https://discord.gg/XUG2kad](https://discord.gg/XUG2kad)
+!!! note ":simple-discord: Support on Discord"
+    For support, questions, or to report issues, please join our Discord server:  
+    [IRLM Discord Server](https://discord.gg/XUG2kad)
 
 ### Description
-Online sim racing has gained strong popularity among hobbyists and professionals alike and iRacing is one of the leading platforms for competitive racing.
-Many people choose to organize private hosted races in leagues to stir up the competition, recreate historical championships or just to have fun with friends.
+Online sim racing has become increasingly popular among both hobbyists and professionals, with iRacing standing out as one of the leading platforms for competitive racing. Many participants choose to organize private leagues, whether to enhance the spirit of competition, recreate historic championships, or simply enjoy racing with friends.
 
-While iRacing does provide support for leagues and league scoring the capabilities fall short compared to the variety of race formats and points calculation formats 
-that people want to implement for their league.
-As a result, many chose to export the results from iRacing and use a 3rd party solution to manage and host their scorings. Solutions range from using spreadsheets 
-up to full scale result hosters.
-Managing spreadsheets can be a tedious and time consuming task and as the leagues grow the workload for keeping up with current and past results will grow larger. 
-Oftentimes leagues implement some kind of penalty system that also needs to be accounted for through points deduction or time penalties.
+Although iRacing offers basic support for leagues and scoring, its features are limited compared to the wide range of race formats and points systems that many leagues wish to use. As a result, organizers often export results from iRacing and rely on third-party solutions to manage and host their scoring. These solutions can range from simple spreadsheets to comprehensive result hosting platforms. However, managing spreadsheets can quickly become tedious and time-consuming, especially as leagues grow and the volume of results increases. Additionally, many leagues implement their own penalty systems, which require further manual adjustments for points deductions or time penalties.
 
 **iRLeagueManager is providing such a service for scoring and hosting your league results all-in-one.**
 
@@ -30,24 +23,28 @@ system gives a home to after race discussions about incidents and can also apply
 Finally you can either use the webapp directly to share the results with the world or if you already have a league webpage use the API to publish the data in real time.
 
 ### Features
-A list of supported features by now. The app is in constant development and more features will be added over time. If you miss something for your league don't hesitate to open up a feature request.
 
-- Automated scoring and standings calculation
-- Support for heat races, team races and multiclass formats.
-    - Flexible scoring configurations for a variety of use cases including
-        - Different points calculations methods
-        - Multiple result configurations per event (eg. Pro/AM or Multiclass scoring)
-        - Filters to generate custom result set
-    - Customizable sorting
-    - Bonus points (position, pole, least incidents ...)
-    - Automated penalty points for incidents
-- Fully open REST API: access 100% of your league data and publish them to your own webpage
-  > Access documentation at: [https://irleaguemanager.net/irleagueapi/swagger/index.html](https://irleaguemanager.net/irleagueapi/swagger/index.html)
-  > Checkout [https://github.com/SSchulze1989/iRLeagueApiCore](https://github.com/SSchulze1989/iRLeagueApiCore)
-- Role based user access: Manage admins, organizers and stewards through the role based access system
-- Review system  
-    - Register incidents and discuss with other stewards before finalizing the results  
-      ![Reviews](getting-started/img/reviews_demo_light.png#only-light)
-      ![Reviews](getting-started/img/reviews_demo_dark.png#only-dark)
-    - Automatic penalty points for incident categories
-    - Protest form to let drivers report incidents from the previous race  
+*   **Highly Flexible Scoring Configurations**  
+    iRLeagueManager supports a wide variety of race formats, including heat races, team races, and multiclass events. You can define multiple result configurations per event (e.g., Pro/AM or multiclass scoring), use custom filters to generate result sets, and apply different points calculation methods-all within the same platform.
+
+*	**Automated Standings and Penalty Management**  
+    The system automates the calculation of standings and the application of penalty points, including bonus points (for position, pole, least incidents, etc.) and automatic penalties for incidents. This reduces manual work and ensures consistent results.
+
+*	**Integrated Stewarding and Review System**  
+    iRLeagueManager includes a built-in review system for registering incidents, discussing them with other stewards, and finalizing results. It also supports automatic penalty points based on incident categories and provides a protest form for drivers to report incidents.
+
+*	**Open REST API**  
+    The platform offers a fully open REST API, allowing you to access 100% of your league data and integrate it with your own website or tools in real time.
+
+*	**Role-Based Access Control**  
+    Manage different user roles (admins, organizers, stewards) with a robust role-based access system, ensuring the right people have the right permissions.
+
+*	**User-Friendly Web Interface**  
+    The web-based interface is designed for ease of use, enabling league administrators to configure, manage, and publish results with minimal effort.
+
+*	**Comprehensive Statistics and Metrics**  
+    Generate extensive statistics and metrics spanning years of races, helping you analyze performance and trends over time.
+
+*	**All-in-One Solution**  
+    Unlike many other tools that require exporting data to spreadsheets or using multiple platforms, iRLeagueManager provides an integrated environment for scoring, results hosting, reviews, and data publishing.
+    These features make iRLeagueManager a powerful and flexible choice for league administrators who want to streamline their scoring and results management processes.

@@ -84,7 +84,10 @@
 
     protected override void Dispose(bool disposing)
     {
-        Result.HasChanged -= OnResultChanged;
+        if (disposing)
+        {
+            Result.HasChanged -= OnResultChanged;
+        }
         base.Dispose(disposing);
     }
 

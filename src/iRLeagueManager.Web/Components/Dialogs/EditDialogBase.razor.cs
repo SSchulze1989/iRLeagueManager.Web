@@ -75,7 +75,7 @@ public class EditDialogBase<TViewModel, TModel> : MvvmComponentBase where TViewM
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing == false)
+        if (disposing)
         {
             Cts.Cancel();
             Cts.Dispose();

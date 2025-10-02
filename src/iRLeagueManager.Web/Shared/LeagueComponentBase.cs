@@ -142,7 +142,7 @@ public abstract partial class LeagueComponentBase : UtilityComponentBase
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing == false)
+        if (disposing)
         {
             EventList.PropertyChanged -= OnEventListPropertyChanged;
         }

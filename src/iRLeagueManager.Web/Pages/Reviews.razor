@@ -350,7 +350,10 @@
 
     protected override void Dispose(bool disposing)
     {
-        NavigationManager.LocationChanged -= OnLocationChanged;
+        if (disposing)
+        {
+            NavigationManager.LocationChanged -= OnLocationChanged;
+        }
         base.Dispose(disposing);
     }
 
@@ -374,6 +377,6 @@
         {
             return GetCurrentSeasonLatestReviewLink();
         }
-        return $"{NavigationManager}{LeagueName}/Reviews/Events/{Event.EventId}";
+        return $"{NavigationManager.BaseUri}{LeagueName}/Reviews/Events/{Event.EventId}";
     }
 }

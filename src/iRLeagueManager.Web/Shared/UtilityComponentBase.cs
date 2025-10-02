@@ -62,7 +62,7 @@ public class UtilityComponentBase : MvvmComponentBase
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing == false)
+        if (disposing)
         {
             locationChangingHandler?.Dispose();
             cancellationTokenSource.Cancel();

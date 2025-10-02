@@ -14,7 +14,7 @@
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudStack Spacing="2">
-        <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+        <LoadingHeader Loading="vm.Loading">
             <HeaderText>
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Style="margin-left: -0.5em">
                     <MudMenu Icon="@Icons.Material.Outlined.Link" AnchorOrigin="Origin.BottomLeft">
@@ -28,13 +28,13 @@
 
         <AuthorizeView Roles=@(GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer))>
             <Authorized>
-                @foreach (var schedule in @Bind(vm, x => x.Schedules))
+                @foreach (var schedule in vm.Schedules)
                 {
                     <DisplaySchedule Schedule="schedule" ReadOnly=Shared.SeasonFinished DisplayHeader="@(vm.Schedules.Count > 1)" />
                 }
             </Authorized>
             <NotAuthorized>
-                @foreach (var schedule in @Bind(vm, x => x.Schedules))
+                @foreach (var schedule in vm.Schedules)
                 {
                     <DisplaySchedule Schedule="schedule" ReadOnly="true" DisplayHeader="@(vm.Schedules.Count > 1)" />
                 }

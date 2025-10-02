@@ -17,7 +17,7 @@
     Settings - @LeagueName
 </PageTitle>
 
-<LoadingHeader Loading="@Bind(League, x => x.Loading)">
+<LoadingHeader Loading="League.Loading">
     <HeaderText>
         <MudText Typo="Typo.h5">League Settings</MudText>
     </HeaderText>
@@ -61,7 +61,7 @@
                         <SettingsSection @bind-Expanded="seasonsExpanded"
                                          Text="All Seasons"
                                          HelperText="@(seasonsExpanded ? "Collapse" : "Expand")">
-                            @foreach ((var season, var index) in Bind(League, x => x.Seasons).Select((x, i) => (x, i)))
+                            @foreach ((var season, var index) in League.Seasons.Select((x, i) => (x, i)))
                             {
                                 <MudListItem T="string" Class="py-0 pe-8" OnClick="@(() => SeasonClick(season))">
                                     <MudElement HtmlTag="div" Class="d-flex align-center">
@@ -95,7 +95,7 @@
     private bool showLeagueHiddenAlert = true;
     private bool seasonsExpanded = false;
 
-    private new bool Loading => Bind(League, x => x.Loading);
+    private new bool Loading => League.Loading;
 
     private StatusResultValidator? ResultValidator { get; set; }
 

@@ -2,9 +2,6 @@
 using iRLeagueApiCore.Client.Endpoints.Seasons;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Shared;
-using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Logging;
-using MvvmBlazor.ViewModel;
 using System.Runtime.CompilerServices;
 
 namespace iRLeagueManager.Web.ViewModels;

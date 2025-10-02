@@ -38,7 +38,7 @@
                 </MudMenu>
             </HeaderActions>
         </LoadingHeader>
-        @foreach (var team in Bind(vm, x => x.Teams).Where(FilterTeams).OrderBy(x => x.Name))
+        @foreach (var team in vm.Teams.Where(FilterTeams).OrderBy(x => x.Name))
         {
             <MudCard Elevation="5">
                 <MudCardHeader Style="@($"color: {team.TeamColor}")">
@@ -181,7 +181,7 @@
 
     private async Task ExportTeamsListCsv()
     {
-        var supportedExporters = ScopedServices.GetServices<ITeamListCsvGenerator>();
+        var supportedExporters = ServiceProvider.GetServices<ITeamListCsvGenerator>();
         var parameters = new DialogParameters<RadioSelectPromptDialog<ITeamListCsvGenerator>>()
         {
             {x => x.Label, "CSV Exporter"},

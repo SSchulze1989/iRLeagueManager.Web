@@ -16,7 +16,7 @@
 </PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large">
-    <LoadingHeader Loading=@Bind(ReviewsVm, x => x.Loading)>
+    <LoadingHeader Loading="ReviewsVm.Loading">
         <HeaderText>
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Style="margin-left: -0.5em">
                 <MudMenu Icon="@Icons.Material.Outlined.Link" AnchorOrigin="Origin.BottomLeft">
@@ -43,7 +43,7 @@
                 <MudTabPanel Text="Protests" OnClick="@(() => NavigateTo(GetTabLink(1)))" />
             </MudTabs>
         }
-        <CascadingValue Value=@Bind(ReviewsVm, x => x.EventCars)>
+        <CascadingValue Value=ReviewsVm.EventCars>
             <CascadingValue Value=ReviewsVm.LeagueUsers>
                 <CascadingValue Value=ReviewsVm.LeagueUsers.AsEnumerable()>
                     <CascadingValue Value=ReviewsVm.VoteCategories.AsEnumerable()>
@@ -59,7 +59,7 @@
                                     }
                                     <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
                                         <Authorized>
-                                            @foreach (var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
+                                            @foreach (var review in OrderReviews(ReviewsVm.Reviews))
                                             {
                                                 <ReviewCard Review=review
                                                 Selected=@(review.ReviewId == SelectedReviewId)
@@ -78,7 +78,7 @@
                                             }
                                         </Authorized>
                                         <NotAuthorized>
-                                            @foreach (var review in OrderReviews(@Bind(ReviewsVm, x => x.Reviews)))
+                                            @foreach (var review in OrderReviews(ReviewsVm.Reviews))
                                             {
                                                 <ReviewCard Review=review Selected=@(review.ReviewId == SelectedReviewId) />
                                             }
@@ -94,7 +94,7 @@
                                     }
                                     <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)>
                                         <Authorized>
-                                            @foreach (var protest in @Bind(ReviewsVm, x => x.Protests))
+                                            @foreach (var protest in ReviewsVm.Protests)
                                             {
                                                 <ProtestCard Protest=protest
                                                 ReadOnly=@ReadOnly
@@ -103,7 +103,7 @@
                                             }
                                         </Authorized>
                                         <NotAuthorized>
-                                            @foreach (var protest in @Bind(ReviewsVm, x => x.Protests))
+                                            @foreach (var protest in ReviewsVm.Protests)
                                             {
                                                 <ProtestCard Protest=protest />
                                             }

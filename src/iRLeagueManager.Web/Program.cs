@@ -26,7 +26,6 @@ builder.Services.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName,
     config.DefaultRequestHeaders.UserAgent.ParseAdd($"iRLeagueManager/{Assembly.GetEntryAssembly()!.GetName().Version!.Major}.{Assembly.GetEntryAssembly()!.GetName().Version!.Minor}.{Assembly.GetEntryAssembly()!.GetName().Version!.Build} (iRLeaguemanager Web App)");
 });
 builder.Services.AddBlazoredLocalStorage();
-builder.Services.AddMvvm();
 builder.Services.AddLeagueApiService();
 
 builder.Services.AddLeagueApiClient(config => config

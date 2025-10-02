@@ -111,13 +111,14 @@ public abstract class LeagueViewModelBase : ViewModelBase, IDisposable
     {
         if (!disposedValue)
         {
-            disposedValue = true;
-        }
+            if (disposing)
+            {
+                Cts.Cancel();
+                Cts.Dispose();
+                Loading = false;
+            }
 
-        if (!disposing)
-        {
-            Cts.Dispose();
-            Loading = false;
+            disposedValue = true;
         }
     }
 

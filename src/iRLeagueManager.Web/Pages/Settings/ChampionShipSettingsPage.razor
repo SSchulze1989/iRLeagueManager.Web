@@ -249,4 +249,13 @@
     {
         InvokeAsync(StateHasChanged);
     }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            ChampSeason.HasChanged -= OnHasChanged;
+        }
+        base.Dispose(disposing);
+    }
 }

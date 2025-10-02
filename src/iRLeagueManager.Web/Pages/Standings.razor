@@ -144,7 +144,7 @@
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing == false)
+        if (disposing)
         {
             NavigationManager.LocationChanged -= OnLocationChanged;
         }

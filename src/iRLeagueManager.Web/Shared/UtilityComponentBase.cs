@@ -75,6 +75,12 @@ public class UtilityComponentBase : MvvmComponentBase
         base.Dispose(disposing);
     }
 
+    protected override ValueTask DisposeAsyncCore()
+    {
+        Dispose(disposing: true);
+        return base.DisposeAsyncCore();
+    }
+
     public string GetRoleString(string? leagueName, params string[] roleNames)
     {
         IEnumerable<string> roles = new[] { "Admin" };

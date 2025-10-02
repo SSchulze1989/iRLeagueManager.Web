@@ -14,7 +14,7 @@
 </PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large">
-    <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+    <LoadingHeader Loading="vm.Loading">
         <HeaderText>
             <MudText Typo="Typo.h5">Leagues</MudText>
         </HeaderText>
@@ -29,12 +29,12 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var league in @Bind(vm, x => x.Leagues))
+                @foreach (var league in vm.Leagues)
                 {
                     <tr>
                         <td class="pa-0">
                             <MudLink Class="d-block ma-0 py-2 px-4" Href="@league.LeagueName" tabindex="-1">
-                                @Bind(league, x => x.LeagueId)
+                                @league.LeagueId
                             </MudLink>
                         </td>
                         <td class="pa-0">

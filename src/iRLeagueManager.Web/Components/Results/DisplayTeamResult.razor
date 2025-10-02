@@ -2,11 +2,11 @@
 @using System.Linq.Expressions
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.ViewModels
-@inherits MvvmComponentBase
+@inherits UtilityComponentBase
 
-<div class="card my-2" id="results-session-@Bind(Result, x => x.SessionName)">
+<div class="card my-2" id="results-session-@Result.SessionName">
     <div class="card-header">
-        @Bind(Result, x => x.SessionName)
+        @Result.SessionName
     </div>
     <div class="card-body">
         <table class="table table-sm table-striped table-hover">

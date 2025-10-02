@@ -144,7 +144,7 @@
                     <MudCardActions>
                         <MudButton OnClick=Submit Color="Color.Primary">
                             <MudStack Row="true">
-                                @if (Bind(ReviewsVm, x => x.Loading))
+                                @if (ReviewsVm.Loading)
                                 {
                                     <MudProgressCircular Size="Size.Small" Indeterminate="true" />
                                 }

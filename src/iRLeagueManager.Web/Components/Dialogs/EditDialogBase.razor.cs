@@ -4,11 +4,10 @@ using iRLeagueManager.Web.Shared;
 using iRLeagueManager.Web.ViewModels;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
-using MvvmBlazor.Components;
 
 namespace iRLeagueManager.Web.Components;
 
-public class EditDialogBase<TViewModel, TModel> : MvvmComponentBase where TViewModel : LeagueViewModelBase<TViewModel, TModel> where TModel : class
+public class EditDialogBase<TViewModel, TModel> : UtilityComponentBase where TViewModel : LeagueViewModelBase<TViewModel, TModel> where TModel : class
 {
     [Inject]
     protected TViewModel Vm { get; set; } = default!;
@@ -28,7 +27,7 @@ public class EditDialogBase<TViewModel, TModel> : MvvmComponentBase where TViewM
 
     protected CancellationTokenSource Cts { get; } = new();
     protected StatusResultValidator? ResultValidator { get; set; }
-    protected bool Loading => Vm.Loading;
+    protected new bool Loading => Vm.Loading;
     protected bool HasChanged => Vm.HasChanges;
     protected virtual bool DisableSave => !AllowSafeUnchanged && !HasChanged;
 

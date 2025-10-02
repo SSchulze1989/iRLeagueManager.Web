@@ -17,7 +17,7 @@
 </PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
-    <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+    <LoadingHeader Loading="vm.Loading">
         <HeaderText>
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Style="margin-left: -0.5em">
                 <MudMenu Icon="@Icons.Material.Outlined.Link" AnchorOrigin="Origin.BottomLeft">
@@ -36,7 +36,7 @@
     </LoadingHeader>
 
     <MudElement HtmlTag="div" Class="mt-3">
-        @if (@Bind(vm, x => x.Standings).Count == 0)
+        @if (vm.Standings.Count == 0)
         {
             <MudPaper Elevation="5" Class="py-4 px-6">
                 <MudText Typo="Typo.h5">No Standings</MudText>
@@ -47,7 +47,7 @@
             @if (vm.Standings.Count > 1)
             {
                 <MudTabs @bind-ActivePanelIndex="SelectedStandingIndex" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
-                    @foreach ((var standing, var i) in @Bind(vm, x => x.Standings).Select((x, i) => (x, i)))
+                    @foreach ((var standing, var i) in vm.Standings.Select((x, i) => (x, i)))
                     {
                         <MudTabPanel Text="@standing.Name">
                             <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">

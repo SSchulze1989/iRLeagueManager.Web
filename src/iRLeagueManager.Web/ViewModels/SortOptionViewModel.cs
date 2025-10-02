@@ -4,7 +4,7 @@ using MudBlazor;
 
 namespace iRLeagueManager.Web.ViewModels;
 
-public sealed class SortOptionViewModel : MvvmBlazor.ViewModel.ViewModelBase
+public sealed class SortOptionViewModel : ViewModelBase
 {
     private SortOptions model;
 

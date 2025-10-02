@@ -11,7 +11,7 @@
     Settings - @LeagueName
 </PageTitle>
 
-<LoadingHeader Loading="@Bind(Users, x => x.Loading)">
+<LoadingHeader Loading="Users.Loading">
     <HeaderText>
         <MudText Typo="Typo.h5">User Settings</MudText>
     </HeaderText>
@@ -32,7 +32,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var user in @Bind(Users, x => x.LeagueUsers))
+                    @foreach (var user in Users.LeagueUsers)
                     {
                         <tr>
                             <td>

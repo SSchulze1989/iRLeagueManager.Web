@@ -393,7 +393,7 @@
 
     private async Task ExportMemberListCsv()
     {
-        var supportedExporters = ScopedServices.GetServices<IMemberListCsvGenerator>();
+        var supportedExporters =  ServiceProvider.GetServices<IMemberListCsvGenerator>();
         var parameters = new DialogParameters<RadioSelectPromptDialog<IMemberListCsvGenerator>>()
         {
             {x => x.Label, "CSV Exporter"},

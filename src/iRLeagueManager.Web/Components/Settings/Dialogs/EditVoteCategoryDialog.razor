@@ -36,7 +36,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
-        <ProgressButton Color="Color.Primary" OnClick="Submit" Loading="Bind(Vm, x => x.Loading)" Indeterminate="true">Save</ProgressButton>
+        <ProgressButton Color="Color.Primary" OnClick="Submit" Loading="Vm.Loading" Indeterminate="true">Save</ProgressButton>
     </DialogActions>
 </MudDialog>
 

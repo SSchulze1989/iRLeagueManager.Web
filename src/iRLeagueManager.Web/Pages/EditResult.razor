@@ -13,7 +13,7 @@
 </PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
-    <LoadingHeader Loading=@Bind(Result, x => x.Loading)>
+    <LoadingHeader Loading="Result.Loading">
         <HeaderText>
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Style="margin-left: -0.5em">
                 <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Href="@($"/{LeagueName}/Results/Events/{EventId}")" />
@@ -22,7 +22,7 @@
         </HeaderText>
     </LoadingHeader>
 
-    <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+    <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)">
         <Authorized>
             <MudAlert Severity="Severity.Warning">
                 Editing the raw results is permanent. Please take care when editing your leagues results.

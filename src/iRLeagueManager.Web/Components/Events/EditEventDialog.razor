@@ -63,7 +63,7 @@
                 <MudItem xs="12">
                     <MudField Label="Race Sessions" Variant="Variant.Outlined" HelperText="@SessionHelperText">
                         <MudStack Spacing="2" AlignItems="AlignItems.Center">
-                            @foreach (var session in Bind(Vm, x => x.Races))
+                            @foreach (var session in Vm.Races)
                             {
                                 <div class="d-flex align-end">
                                     <MudGrid>

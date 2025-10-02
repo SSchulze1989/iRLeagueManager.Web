@@ -5,9 +5,7 @@
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueApiCore.Common.Models.Users;
 @using iRLeagueManager.Web.ViewModels
-@inherits MvvmComponentBase
-@inject IJSRuntime JsRuntime
-@inject NavigationManager NavigationManager
+@inherits UtilityComponentBase
 @inject IDialogService DialogService
 
 <CascadingValue Value="InvolvedCars">
@@ -151,7 +149,7 @@
                                         </MudCardHeader>
                                         <MudCardContent>
                                             <MudChipSet T="string" ReadOnly="true" Class="d-flex gap-2 flex-wrap">
-                                                @foreach (var vote in @Bind(Review, x => x.CountedVotes))
+                                                @foreach (var vote in Review.CountedVotes)
                                                 {
                                                     var atFault = VoteAtFaultToString(vote.Vote);
                                                     <MudBadge Content="@vote.Count" Overlap="true" Color="Color.Primary">
@@ -184,10 +182,10 @@
                                 </MudCardHeader>
                                 <MudCardContent>
                                     <MudText Typo="Typo.body2" Class="ps-2" Style="white-space: pre-wrap;">
-                                        @Bind(Review, x => x.ResultText)
+                                        @Review.ResultText
                                     </MudText>
                                     <MudChipSet T="string" ReadOnly="true" Class="d-flex gap-0 flex-wrap">
-                                        @foreach (var vote in Bind(Review, x => x.Votes))
+                                        @foreach (var vote in Review.Votes)
                                         {
                                             var atFault = VoteAtFaultToString(vote);
                                             <MudChip Label="true" Size="ChipSize" Color="Color.Error">
@@ -201,7 +199,7 @@
                             {
                                 <MudDivider />
                                 <MudStack Spacing="1">
-                                    @foreach (var (comment, index) in Bind(Review, x => x.Comments).Select((x, i) => (x, i)))
+                                    @foreach (var (comment, index) in Review.Comments.Select((x, i) => (x, i)))
                                     {
                                         @if (index > 0)
                                         {
@@ -214,7 +212,7 @@
                                     }
                                 </MudStack>
                             }
-                            @if (IsSteward && Bind(Review, x => x.Comments).Any(x => x.AuthorUserId == UserId) == false)
+                            @if (IsSteward && Review.Comments.Any(x => x.AuthorUserId == UserId) == false)
                             {
                                 <MudButton StartIcon="@Icons.Material.Outlined.AddComment"
                                 Color="Color.Tertiary" Class="ma-2"
@@ -245,7 +243,7 @@
                         </MudItem>
                         <MudItem xs="10" Class="py-1 d-flex align-center">
                             <MudChipSet T="string" ReadOnly="true">
-                                @foreach (var vote in Bind(Review, x => x.Votes))
+                                @foreach (var vote in Review.Votes)
                                 {
                                     var atFault = VoteAtFaultToString(vote);
                                     <MudChip Label="true" Size="ChipSize" Color="Color.Error">
@@ -411,11 +409,6 @@
     {
         var url = NavigationManager.GetUriWithQueryParameter("reviewId", Review.ReviewId);
         await JsRuntime.InvokeVoidAsync("clipboardCopy.copyText", url);
-    }
-
-    protected async Task ScrollToElementId(string id)
-    {
-        await JsRuntime.InvokeVoidAsync("scrollPageElementToTop", id);
     }
 
     private IEnumerable<EventCarInfoModel> GetInvolvedCars()

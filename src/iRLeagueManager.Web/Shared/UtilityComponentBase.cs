@@ -5,16 +5,14 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.JSInterop;
 using MudBlazor;
-using MvvmBlazor.Components;
 using System.Net;
-using System.Threading;
 
 namespace iRLeagueManager.Web.Shared;
 
 /// <summary>
 /// Base class for components that require access to enhanced utility functions but do not need the overhead of initializing a full <see cref="LeagueComponentBase"/>
 /// </summary>
-public class UtilityComponentBase : MvvmComponentBase
+public class UtilityComponentBase : ComponentBase, IDisposable
 {
     [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;
@@ -28,6 +26,8 @@ public class UtilityComponentBase : MvvmComponentBase
     public ILoggerFactory LoggerFactory { get; set; } = default!;
     [Inject]
     public ISnackbar Snackbar { get; set; } = default!;
+    [Inject]
+    public IServiceProvider ServiceProvider { get; set; } = default!;
 
     private readonly CancellationTokenSource cancellationTokenSource = new();
     protected CancellationToken CancellationToken => cancellationTokenSource.Token;
@@ -35,6 +35,8 @@ public class UtilityComponentBase : MvvmComponentBase
     private IDisposable? locationChangingHandler;
 
     private bool loading;
+    private bool disposedValue;
+
     public bool Loading
     {
         get => loading;
@@ -60,27 +62,6 @@ public class UtilityComponentBase : MvvmComponentBase
         InvokeAsync(StateHasChanged);
     }
 
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            locationChangingHandler?.Dispose();
-            cancellationTokenSource.Cancel();
-            cancellationTokenSource.Dispose();
-            Shared.StateChanged -= SharedStateChanged;
-            NavigationManager.LocationChanged -= OnLocationChanged;
-            Loading = false;
-        }
-
-        base.Dispose(disposing);
-    }
-
-    protected override ValueTask DisposeAsyncCore()
-    {
-        Dispose(disposing: true);
-        return base.DisposeAsyncCore();
-    }
-
     public string GetRoleString(string? leagueName, params string[] roleNames)
     {
         IEnumerable<string> roles = new[] { "Admin" };
@@ -98,7 +79,7 @@ public class UtilityComponentBase : MvvmComponentBase
 
     protected async Task ScrollToElementId(string id)
     {
-        await JsRuntime.InvokeVoidAsync("scrollToElementId", id);
+        await JsRuntime.InvokeVoidAsync("scrollPageElementToTop", id);
     }
 
     protected async Task ScrollToElement(ElementReference reference)
@@ -217,4 +198,32 @@ public class UtilityComponentBase : MvvmComponentBase
 
     protected static StatusResult<T> LeagueNullResult<T>(T? content = default) =>
         StatusResult<T>.FailedResult("League Null", content, $"{nameof(LeagueApiService)}.{nameof(LeagueApiService.CurrentSeason)}", []);
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                if (disposing)
+                {
+                    locationChangingHandler?.Dispose();
+                    cancellationTokenSource.Cancel();
+                    cancellationTokenSource.Dispose();
+                    Shared.StateChanged -= SharedStateChanged;
+                    NavigationManager.LocationChanged -= OnLocationChanged;
+                    Loading = false;
+                }
+            }
+
+            disposedValue = true;
+        }
+    }
+
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 }

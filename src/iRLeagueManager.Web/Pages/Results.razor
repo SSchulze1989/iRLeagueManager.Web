@@ -23,7 +23,7 @@
 
 <CascadingValue Value="vm">
     <MudContainer MaxWidth="MaxWidth.ExtraLarge">
-        <LoadingHeader Loading=@Bind(vm, x => x.Loading)>
+        <LoadingHeader Loading="vm.Loading">
             <HeaderText>
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Style="margin-left: -0.5em">
                     <MudMenu Icon="@Icons.Material.Outlined.Link" AnchorOrigin="Origin.BottomLeft">
@@ -78,7 +78,7 @@
         </LoadingHeader>
 
         <MudElement HtmlTag="div" Class="mt-3">
-            @if (@Bind(vm, x => x.Results)?.Count == 0)
+            @if (vm.Results is null || vm.Results.Count == 0)
             {
                 <MudPaper Elevation="5" Class="py-4 px-6">
                     <MudText Typo="Typo.h5">No Results</MudText>
@@ -89,11 +89,11 @@
                 @if (vm.Results.Count > 1)
                 {
                     <MudTabs @bind-ActivePanelIndex="SelectedTabIndex" Elevation="2" MinimumTabWidth="@(Breakpoint is Breakpoint.Xs or Breakpoint.Sm ? "60px" : "160px")">
-                        @foreach ((var eventResult, var i) in @Bind(vm, x => x.Results).Select((x, i) => (x, i)))
+                        @foreach ((var eventResult, var i) in vm.Results.Select((x, i) => (x, i)))
                         {
                             <MudTabPanel Text="@eventResult.Name">
                                 <MudStack Class="gap-2 pt-2">
-                                    @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
+                                    @foreach (var result in eventResult.SessionResults.OrderByDescending(x => x.SessionNr))
                                     {
                                         <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
                                             <Authorized>
@@ -113,7 +113,7 @@
                 {
                     var eventResult = vm.Results.First();
                     <MudStack Class="gap-2">
-                        @foreach (var result in @Bind(eventResult, x => x.SessionResults).OrderByDescending(x => x.SessionNr))
+                        @foreach (var result in eventResult.SessionResults.OrderByDescending(x => x.SessionNr))
                         {
                             <AuthorizeView Roles="@GetRoleString(LeagueRoles.Admin, LeagueRoles.Steward)">
                                 <Authorized>
@@ -254,7 +254,7 @@
 
     private async Task ChangeTabOrder()
     {
-        var settingsViewModel = RootServiceProvider.GetRequiredService<ResultSettingsViewModel>();
+        var settingsViewModel = ServiceProvider.GetRequiredService<ResultSettingsViewModel>();
         await settingsViewModel.LoadFromCurrentSeasonAsync(CancellationToken);
         var parameters = new DialogParameters<ReorderChampionshipsDialog>() {
             { x => x.Value, settingsViewModel.CurrentChampSeasons.ToList() }
@@ -315,9 +315,9 @@
         {
             return;
         }
-        var supportedGridExporters = ScopedServices.GetServices<IGridCsvExporter>().ToDictionary(k => k.GetName(), v => v);
-        var supportedRosterExporters = ScopedServices.GetServices<IRosterListCsvExporter>().ToDictionary(k => k.GetName(), v => v);
-        var supportedTeamExporters = ScopedServices.GetServices<ITeamListCsvGenerator>().ToDictionary(k => k.GetName(), v => v);
+        var supportedGridExporters = ServiceProvider.GetServices<IGridCsvExporter>().ToDictionary(k => k.GetName(), v => v);
+        var supportedRosterExporters = ServiceProvider.GetServices<IRosterListCsvExporter>().ToDictionary(k => k.GetName(), v => v);
+        var supportedTeamExporters = ServiceProvider.GetServices<ITeamListCsvGenerator>().ToDictionary(k => k.GetName(), v => v);
         var supportedExporters = supportedGridExporters.Keys
             .Concat(supportedRosterExporters.Keys)
             .Concat(supportedTeamExporters.Keys)

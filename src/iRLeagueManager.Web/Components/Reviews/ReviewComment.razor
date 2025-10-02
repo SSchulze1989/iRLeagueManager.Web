@@ -4,7 +4,7 @@
 @using iRLeagueApiCore.Common.Models.Reviews
 @using iRLeagueApiCore.Common.Models.Users;
 @using iRLeagueManager.Web.ViewModels
-@inherits MvvmComponentBase
+@inherits UtilityComponentBase
 @inject IDialogService DialogService
 
 <MudStack Spacing="2" Class="px-4 py-2">
@@ -25,10 +25,10 @@
         }
     </div>
     <MudText Style="white-space: pre-wrap" Typo="Typo.body2" Class="ps-2">
-        @Bind(Comment, x=> x.Text)
+        @Comment.Text
     </MudText>
     <MudChipSet T="string" ReadOnly="true">
-        @foreach (var vote in Bind(Comment, x => x.Votes))
+        @foreach (var vote in Comment.Votes)
         {
             var atFault = VoteAtFaultToString(vote);
             <MudChip Label="true" Size="ChipSize" Color="Color.Warning">

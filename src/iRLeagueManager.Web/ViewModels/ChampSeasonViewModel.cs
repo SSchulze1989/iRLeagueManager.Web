@@ -206,14 +206,22 @@ public sealed class ChampSeasonViewModel : LeagueViewModelBase<ChampSeasonViewMo
                 return result.ToStatusResult();
             }
             config = result.Content;
-            model.ResultConfigs.Add(new ResultConfigInfoModel()
+            var configInfo = new ResultConfigInfoModel()
             {
                 Name = config.Name,
                 DisplayName = config.DisplayName,
                 LeagueId = config.LeagueId,
                 ResultConfigId = config.ResultConfigId,
-            });
+            };
+            model.ResultConfigs.Add(configInfo);
             ResultConfigViewModels.Add(new(LoggerFactory, ApiService, result.Content));
+            
+            if (ResultConfigs.Count == 1)
+            {
+                DefaultResultConfig = configInfo;
+                return await SaveChangesAsync(cancellationToken);
+            }
+
             return StatusResult.SuccessResult();
         }
         finally

@@ -6,11 +6,15 @@
 @using Microsoft.EntityFrameworkCore.Query
 @using Microsoft.Extensions.Primitives
 @using System.Linq.Expressions
+@using System.Text
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.Data.CsvExporter
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
 @inject StandingsPageViewModel vm
+@inject IDialogService DialogService
+@inject IJSRuntime JS
 
 <PageTitle>
     Standings - @LeagueName
@@ -32,6 +36,16 @@
         </HeaderText>
         <HeaderActions>
             <EventSelect />
+            <MudStack Row="true" Justify="Justify.FlexEnd" Style="flex-grow: 1">
+                <MudMenu Icon="@Icons.Material.Filled.Menu">
+                    @if (vm.Standings.Count > 0)
+                    {
+                        <MudMenuItem Icon="@Icons.Material.Filled.Download" OnClick="ExportStandings">
+                            Export Current Standings as CSV
+                        </MudMenuItem>
+                    }
+                </MudMenu>
+            </MudStack>
         </HeaderActions>
     </LoadingHeader>
 
@@ -173,5 +187,56 @@
             return;
         }
         await vm.LoadFromEventAsync(Event.EventId);
+    }
+
+    private async Task ExportStandings()
+    {
+        if (vm.Standings.Count == 0)
+        {
+            return;
+        }
+        var currentStandings = vm.Standings.ElementAtOrDefault(SelectedStandingIndex);
+        if (currentStandings is null)
+        {
+            return;
+        }
+
+        var supportedExporters = ServiceProvider.GetServices<IStandingsCsvGenerator>().ToDictionary(k => k.GetName(), v => v);
+        var parameters = new DialogParameters<RadioSelectPromptDialog<string>>()
+        {
+            {x => x.Label, "CSV Exporter"},
+            {x => x.Value, supportedExporters.Keys.FirstOrDefault()},
+            {x => x.Items, supportedExporters.Keys},
+        };
+
+        var result = await DialogService.Show<RadioSelectPromptDialog<string>>("Select CSV Exporter", parameters).Result;
+        if (result?.Canceled != false || result.Data is not string exporter)
+        {
+            return;
+        }
+
+        var selectedExporter = supportedExporters.GetValueOrDefault(exporter);
+        if (selectedExporter is null)
+        {
+            return;
+        }
+
+        var csvData = selectedExporter.ExportCsv(currentStandings);
+
+        using var stream = new MemoryStream();
+        using var writer = new StreamWriter(stream);
+        writer.Write(csvData);
+        writer.Flush();
+        stream.Position = 0;
+        using var streamRef = new DotNetStreamReference(stream: stream);
+
+        var filenameBuilder = new StringBuilder();
+        filenameBuilder.Append($"event_{Event?.EventId}_");
+        if (vm.Standings.Count > 1)
+        {
+            filenameBuilder.Append($"{currentStandings.Name.Replace(" ", "-")}_");
+        }
+        var filename = filenameBuilder.Append("standings.csv").ToString();
+        await JS.InvokeVoidAsync("downloadFileFromStream", filename, streamRef);
     }
 }

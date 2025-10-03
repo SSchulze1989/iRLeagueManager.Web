@@ -1,10 +1,11 @@
 ﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueApiCore.Common.Models.Rosters;
 using iRLeagueApiCore.Common.Models.Standings;
+using iRLeagueManager.Web.Extensions;
 
 namespace iRLeagueManager.Web.Data.CsvExporter;
 
-public class DefaultCsvGenerator : IMemberListCsvGenerator, ITeamListCsvGenerator, IStandingsCsvGenerator, IGridCsvExporter, IRosterListCsvExporter
+public class DefaultCsvGenerator : IMemberListCsvGenerator, ITeamListCsvGenerator, IStandingsCsvGenerator, IGridCsvExporter, IRosterListCsvExporter, IResultsCsvGenerator
 {
     public string GetName()
     {
@@ -46,12 +47,16 @@ public class DefaultCsvGenerator : IMemberListCsvGenerator, ITeamListCsvGenerato
         var generator = new CsvGenerator<StandingRowModel>()
             .AddColumn("Position", x => x.Position.ToString())
             .AddColumn("MemberId", x => x.MemberId?.ToString() ?? string.Empty)
-            .AddColumn("Firstname", x => x.Firstname)
-            .AddColumn("Lastname", x => x.Lastname)
+            .AddColumn("Name", x => $"{x.Firstname} {x.Lastname}")
             .AddColumn("TeamName", x => x.TeamName ?? string.Empty)
-            .AddColumn("TotalPoints", x => x.TotalPoints.ToString())
+            .AddColumn("Points", x => x.TotalPoints.ToString())
+            .AddColumn("Penalties", x => x.PenaltyPoints.ToString())
+            .AddColumn("Total Points", x => x.TotalPoints.ToString())
             .AddColumn("Races", x => x.Races.ToString())
-            .AddColumn("Wins", x => x.Wins.ToString());
+            .AddColumn("Poles", x => x.PolePositions.ToString())
+            .AddColumn("Wins", x => x.Wins.ToString())
+            .AddColumn("Podiums", x => x.Top3.ToString())
+            .AddColumn("Incidents", x => x.Incidents.ToString());
         return generator.GenerateCsv(standings.StandingRows);
     }
 
@@ -80,5 +85,28 @@ public class DefaultCsvGenerator : IMemberListCsvGenerator, ITeamListCsvGenerato
             .AddColumn("Description", x => x.Description ?? string.Empty)
             .AddColumn("EntryCount", x => x.EntryCount.ToString());
         return generator.GenerateCsv(data);
+    }
+
+    public string ExportCsv(ResultModel data)
+    {
+        var generator = new CsvGenerator<ResultRowModel>()
+            .AddColumn("Position", x => x.FinalPosition.ToString())
+            .AddColumn("Start", x => x.StartPosition.ToString())
+            .AddColumn("Name", x => $"{x.Firstname} {x.Lastname}")
+            .AddColumn("Team", x => x.TeamName ?? string.Empty)
+            .AddColumn("Qualy Lap", x => x.QualifyingTime.LapTimeString())
+            .AddColumn("Fastest Lap", x => x.FastestLapTime.LapTimeString())
+            .AddColumn("Avg. Lap", x => x.AvgLapTime.LapTimeString())
+            .AddColumn("Interval", x => $"+{(x.Interval.Laps == 0 ? x.Interval.Time.LapTimeString() : $"{ x.Interval.Laps}Laps")}")
+            .AddColumn("Laps Compl.", x => x.CompletedLaps.ToString())
+            .AddColumn("Race Points", x => x.RacePoints.ToString())
+            .AddColumn("Bonus Points", x => x.BonusPoints.ToString())
+            .AddColumn("Penalty Points", x => x.PenaltyPoints.ToString())
+            .AddColumn("Total Points", x => x.TotalPoints.ToString())
+            .AddColumn("Irating", x => x.OldIrating.ToString())
+            .AddColumn("Incidents", x => x.Incidents.ToString())
+            .AddColumn("Status", x => x.Status.ToString())
+            .AddColumn("Laps Led", x => x.LeadLaps.ToString());
+        return generator.GenerateCsv(data.ResultRows);
     }
 }

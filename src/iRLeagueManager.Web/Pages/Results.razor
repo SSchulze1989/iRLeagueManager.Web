@@ -42,47 +42,49 @@
                 <EventSelect />
                 <MudStack Row="true" Justify="Justify.FlexEnd" Style="flex-grow: 1">
                     <MudMenu Icon="@Icons.Material.Filled.Menu">
-                        <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
-                            <Authorized>
-                                @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
-                                {
-                                    <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => NavigateTo($"{GetCurrentResultLink()}/Edit"))">
-                                        Edit Raw Results
-                                    </MudMenuItem>
-                                    <MudMenuItem Icon="@Icons.Material.Filled.Loop" OnClick="TriggerCalculation">
-                                        Calculate
-                                    </MudMenuItem>
-                                }
-                            </Authorized>
-                        </AuthorizeView>
-                        @if (vm.Results.Count > 0)
-                        {
-                            <MudMenuItem Icon="@Icons.Material.Filled.Download" OnClick="ExportResults">
-                                Export Current Result as CSV
-                            </MudMenuItem>
-                        }
-                        <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
-                            <Authorized>
-                                @if (vm.Rosters.Count > 0)
-                                {
-                                    <MudMenuItem Icon="@Icons.Material.Filled.Download" OnClick="ExportGrid">
-                                        Export Grid as CSV
-                                    </MudMenuItem>
-                                }
-                                @if (vm.Results.Count > 1)
-                                {
-                                    <MudMenuItem Icon="@Icons.Material.Filled.CompareArrows" OnClick="ChangeTabOrder">
-                                        Change tab order
-                                    </MudMenuItem>
-                                }
-                                @if (vm.Results.Count > 0)
-                                {
-                                    <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="@Color.Error" OnClick=DeleteResultsClick>
-                                        Clear Calculated Results
-                                    </MudMenuItem>
-                                }
-                            </Authorized>
-                        </AuthorizeView>
+                        <CascadingAuthenticationState>
+                            <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+                                <Authorized>
+                                    @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
+                                    {
+                                        <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => NavigateTo($"{GetCurrentResultLink()}/Edit"))">
+                                            Edit Raw Results
+                                        </MudMenuItem>
+                                        <MudMenuItem Icon="@Icons.Material.Filled.Loop" OnClick="TriggerCalculation">
+                                            Calculate
+                                        </MudMenuItem>
+                                    }
+                                </Authorized>
+                            </AuthorizeView>
+                            @if (vm.Results.Count > 0)
+                            {
+                                <MudMenuItem Icon="@Icons.Material.Filled.Download" OnClick="ExportResults">
+                                    Export Current Result as CSV
+                                </MudMenuItem>
+                            }
+                            <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+                                <Authorized>
+                                    @if (vm.Rosters.Count > 0)
+                                    {
+                                        <MudMenuItem Icon="@Icons.Material.Filled.Download" OnClick="ExportGrid">
+                                            Export Grid as CSV
+                                        </MudMenuItem>
+                                    }
+                                    @if (vm.Results.Count > 1)
+                                    {
+                                        <MudMenuItem Icon="@Icons.Material.Filled.CompareArrows" OnClick="ChangeTabOrder">
+                                            Change tab order
+                                        </MudMenuItem>
+                                    }
+                                    @if (vm.Results.Count > 0)
+                                    {
+                                        <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="@Color.Error" OnClick=DeleteResultsClick>
+                                            Clear Calculated Results
+                                        </MudMenuItem>
+                                    }
+                                </Authorized>
+                            </AuthorizeView>
+                        </CascadingAuthenticationState>
                     </MudMenu>
                 </MudStack>
             </HeaderActions>

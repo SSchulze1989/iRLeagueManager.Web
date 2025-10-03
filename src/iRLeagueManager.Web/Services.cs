@@ -75,6 +75,7 @@ public static class Services
         services.AddSingleton<IMemberListCsvGenerator>(defaultCsvGenerator);
         services.AddSingleton<ITeamListCsvGenerator>(defaultCsvGenerator);
         services.AddSingleton<IStandingsCsvGenerator>(defaultCsvGenerator);
+        services.AddSingleton<IResultsCsvGenerator>(defaultCsvGenerator);
         services.AddSingleton<IGridCsvExporter>(defaultCsvGenerator);
         services.AddSingleton<IRosterListCsvExporter>(defaultCsvGenerator);
         var sdkCsvGenerator = new SdkGamingCsvGenerator();

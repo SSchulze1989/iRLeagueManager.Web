@@ -7,6 +7,7 @@
 @using Microsoft.EntityFrameworkCore.Query
 @using Microsoft.Extensions.Primitives
 @using System.Linq.Expressions
+@using System.Text
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueApiCore.Common.Models.Rosters
 @using iRLeagueManager.Web.Components
@@ -39,10 +40,10 @@
             </HeaderText>
             <HeaderActions>
                 <EventSelect />
-                <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
-                    <Authorized>
-                        <MudStack Row="true" Justify="Justify.FlexEnd" Style="flex-grow: 1">
-                            <MudMenu Icon="@Icons.Material.Filled.Menu">
+                <MudStack Row="true" Justify="Justify.FlexEnd" Style="flex-grow: 1">
+                    <MudMenu Icon="@Icons.Material.Filled.Menu">
+                        <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+                            <Authorized>
                                 @if (vm.SelectedEvent?.HasResult == true && SharedState.SeasonFinished == false)
                                 {
                                     <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => NavigateTo($"{GetCurrentResultLink()}/Edit"))">
@@ -52,6 +53,16 @@
                                         Calculate
                                     </MudMenuItem>
                                 }
+                            </Authorized>
+                        </AuthorizeView>
+                        @if (vm.Results.Count > 0)
+                        {
+                            <MudMenuItem Icon="@Icons.Material.Filled.Download" OnClick="ExportResults">
+                                Export Current Result as CSV
+                            </MudMenuItem>
+                        }
+                        <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+                            <Authorized>
                                 @if (vm.Rosters.Count > 0)
                                 {
                                     <MudMenuItem Icon="@Icons.Material.Filled.Download" OnClick="ExportGrid">
@@ -70,10 +81,10 @@
                                         Clear Calculated Results
                                     </MudMenuItem>
                                 }
-                            </MudMenu>
-                        </MudStack>
-                    </Authorized>
-                </AuthorizeView>
+                            </Authorized>
+                        </AuthorizeView>
+                    </MudMenu>
+                </MudStack>
             </HeaderActions>
         </LoadingHeader>
 
@@ -309,6 +320,69 @@
         return $"{NavigationManager.BaseUri}{LeagueName}/Results/Events/{Event.EventId}";
     }
 
+    private async Task ExportResults()
+    {
+        if (vm.Results is null || vm.Results.Count == 0)
+        {
+            return;
+        }
+
+        var currentResult = vm.Results.ElementAtOrDefault(SelectedTabIndex);
+        if (currentResult is null)
+        {
+            return;
+        }
+
+        var supportedExporters = ServiceProvider.GetServices<IResultsCsvGenerator>().ToDictionary(k => k.GetName(), v => v);
+        var parameters = new DialogParameters<RadioSelectPromptDialog<string>>()
+        {
+            {x => x.Label, "CSV Exporter"},
+            {x => x.Value, supportedExporters.Keys.FirstOrDefault()},
+            {x => x.Items, supportedExporters.Keys},
+        };
+
+        var result = await DialogService.Show<RadioSelectPromptDialog<string>>("Select CSV Exporter", parameters).Result;
+        if (result?.Canceled != false || result.Data is not string exporter)
+        {
+            return;
+        }
+
+        var selectedExporter = supportedExporters.GetValueOrDefault(exporter);
+        if (selectedExporter is null)
+        {
+            return;
+        }
+
+        using var zipStream = new MemoryStream();
+        using (var archive = new System.IO.Compression.ZipArchive(zipStream, System.IO.Compression.ZipArchiveMode.Create, true))
+        {
+            foreach (var sessionResult in currentResult.SessionResults)
+            {
+                var csv = selectedExporter.ExportCsv(sessionResult.GetModel());
+                var filenameBuilder = new StringBuilder();
+                filenameBuilder.Append($"event_{vm.SelectedEvent?.EventId}_");
+                if (vm.Results.Count > 1)
+                {
+                    filenameBuilder.Append($"{currentResult.Name.Replace(" ", "-")}_");
+                }
+                if (currentResult.SessionResults.Count > 1)
+                {
+                    filenameBuilder.Append($"{sessionResult.SessionName.Replace(" ", "-")}_");
+                }
+                filenameBuilder.Append("results.csv");
+                var filename = filenameBuilder.ToString();
+                var entry = archive.CreateEntry(filename);
+                using var entryStream = entry.Open();
+                using var writer = new StreamWriter(entryStream);
+                writer.Write(csv);
+            }
+        }
+
+        zipStream.Position = 0;
+        using var zipStreamRef = new DotNetStreamReference(stream: zipStream);
+        await JS.InvokeVoidAsync("downloadFileFromStream", $"event_{vm.SelectedEvent?.EventId}_grid.zip", zipStreamRef);
+    }
+
     private async Task ExportGrid()
     {
         if (vm.Rosters is null || vm.Rosters.Count == 0)
@@ -358,10 +432,11 @@
                 var teams = vm.Rosters
                     .SelectMany(x => x.RosterEntries)
                     .Where(x => x.TeamId != null)
-                    .Select(x => new TeamModel(){
-                            Name = x.TeamName,
-                            TeamColor = x.TeamColor,
-                            TeamId = x.TeamId!.Value,
+                    .Select(x => new TeamModel()
+                    {
+                        Name = x.TeamName,
+                        TeamColor = x.TeamColor,
+                        TeamId = x.TeamId!.Value,
                     })
                     .DistinctBy(x => x.TeamId)
                     .ToList();
@@ -375,12 +450,12 @@
             // Export Rosters
             {
                 var rosterInfos = vm.Rosters.Select(x => new RosterInfoModel()
-                    {
-                        Description = x.Description,
-                        RosterId = x.RosterId,
-                        EntryCount = x.RosterEntries.Count(),
-                        Name = x.Name,
-                    });
+                {
+                    Description = x.Description,
+                    RosterId = x.RosterId,
+                    EntryCount = x.RosterEntries.Count(),
+                    Name = x.Name,
+                });
                 var csv = selectedExporters.Roster.ExportCsv(rosterInfos);
                 var entry = archive.CreateEntry($"event_{vm.SelectedEvent?.EventId}_rosters.csv");
                 using var entryStream = entry.Open();

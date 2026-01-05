@@ -1,8 +1,8 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 as build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 as build
 WORKDIR /source
 COPY . .
 RUN dotnet restore src/iRLeagueManager.Web -r linux-x64
-RUN dotnet publish src/iRLeagueManager.Web -r linux-x64 -o /app
+RUN dotnet publish src/iRLeagueManager.Web -r linux-x64 -c Debug -o /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble-chiseled-extra
 WORKDIR /app

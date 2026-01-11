@@ -1,105 +1,137 @@
 ﻿@namespace iRLeagueManager.Web.Components
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
+@inherits UtilityComponentBase
 
-<MudTable Items="ResultRows.OrderBy(x => x.FinishPosition)"
-          Class="py-4 px-6"
-          Striped="true"
-          Bordered="true"
-          Dense="true"
-          CanCancelEdit="true"
-          RowEditCancel="@(row => ((RawResultRowViewModel)row).Reset())"
-          RowEditCommit="@(row => ApplyRowChanges((RawResultRowViewModel)row))"
-          OnCommitEditClick="@(() => InvokeAsync(StateHasChanged))"
-          Loading="SessionResult.Loading">
-    <ColGroup>
-        <col style="width: 5em;" />
-        <col style="width: 5em;" />
-        <col style="width: 25%;" />
-        <col style="width: 5em;" />
-        <col style="width: 5em;" />
-        <col style="width: 5em;" />
-        <col style="width: 8em;" />
-        <col style="width: 12em" />
-        <col style="width: 12em" />
-        <col style="width: 6em;" />
-        <col style="width: 10em" />
-    </ColGroup>
-    <HeaderContent>
-        <MudTh>Position</MudTh>
-        <MudTh>Start Position</MudTh>
-        <MudTh>Member</MudTh>
-        <MudTh>Car Nr.</MudTh>
-        <MudTh>Points</MudTh>
-        <MudTh>Compl. Laps</MudTh>
-        <MudTh>Lead Laps</MudTh>
-        <MudTh>Interval</MudTh>
-        <MudTh>Fastest Lap</MudTh>
-        <MudTh>Incidents</MudTh>
-        <MudTh>Status</MudTh>
-    </HeaderContent>
-    <RowTemplate Context="Row">
-        @{
-            var index = ResultRows.IndexOf(Row);
+<MudDataGrid T="RawResultRowViewModel"
+             Items="ResultRows"
+             ReadOnly="false"
+             Class="py-4 px-6"
+             Striped="true"
+             Bordered="true"
+             Dense="true"
+             CanCancelEdit="true"
+             SortMode="SortMode.None"
+             EditMode="DataGridEditMode.Cell"
+             EditTrigger="DataGridEditTrigger.Manual"
+             StartedEditingItem="StartedEditingItem"
+             CanceledEditingItem="CanceledEditingItem"
+             CommittedItemChanges="CommittedItemChanges"
+             ShowMenuIcon="true"
+             RowsPerPage="25"
+             Loading="SessionResult.Loading"
+             Hideable="true">
+    <Columns>
+        <PropertyColumn Title="Position" Property="x => x.FinishPosition" CellStyle="width: 3em;" Editable="false" Style="pl-0" Hideable="false">
+            <CellTemplate Context="Cell">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                    <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="@(Cell.Item == LastEditedItem ? Color.Warning : Color.Transparent)"
+                             Class="ma-0" />
+                    <MudStack Spacing="0">
+                        <MudButton Variant="Variant.Text"
+                                   @onclick="() => MoveItemUp(Cell.Item)"
+                                   Disabled="@(Cell.Item.FinishPosition <= 1)"
+                                   tabindex="-1"
+                                   Class="pa-0"
+                                   Style="min-width: unset; min-height: unset; margin: -2px 0px -2px 0px;">
+                            <MudIcon Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" />
+                        </MudButton>
+
+                        <MudButton Variant="Variant.Text"
+                                   @onclick="() => MoveItemDown(Cell.Item)"
+                                   Disabled="@(Cell.Item.FinishPosition >= ResultRows.Count)"
+                                   tabindex="-1"
+                                   Class="pa-0"
+                                   Style="min-width: unset; min-height: unset; margin: -2px 0px -2px 0px;">
+                            <MudIcon Icon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" />
+                        </MudButton>
+                    </MudStack>
+                    @Cell.Item.FinishPosition
+                </MudStack>
+            </CellTemplate>
+        </PropertyColumn>
+        @foreach (var column in columns)
+        {
+            switch (column)
+            {
+                case EditColumn<RawResultRowViewModel, int> tColumn:
+                    <PropertyColumn Title="@tColumn.Title" Property="tColumn.Property" Editable="tColumn.Editable" @bind-Hidden="column.Hidden" />
+                    break;
+                case EditColumn<RawResultRowViewModel, TimeSpan> tColumn:
+                    <PropertyColumn Title="@tColumn.Title" Property="tColumn.Property" Editable="tColumn.Editable" @bind-Hidden="column.Hidden">
+                        <EditTemplate Context="Cell">
+                            <MudTextField T="TimeSpan" Value="@(tColumn.GetValue(Cell.Item))" ValueChanged="@(value => tColumn.SetValue(Cell.Item, value))" Mask="@(new PatternMask("00:00:00.000"))" />
+                        </EditTemplate>
+                    </PropertyColumn>
+                    break;
+                case EditColumn<RawResultRowViewModel, double> tColumn:
+                    <PropertyColumn Title="@tColumn.Title" Property="tColumn.Property" Editable="tColumn.Editable" @bind-Hidden="column.Hidden" />
+                    break;
+                case EditColumn<RawResultRowViewModel, string> tColumn:
+                    <PropertyColumn Title="@tColumn.Title" Property="tColumn.Property" Editable="tColumn.Editable" @bind-Hidden="column.Hidden" />
+                    break;
+                case EditColumn<RawResultRowViewModel, long> tColumn:
+                    @if (tColumn.Title == "Member")
+                    {
+                        <PropertyColumn Title="@tColumn.Title" Property="tColumn.Property" Editable="tColumn.Editable" @bind-Hidden="column.Hidden">
+                            <EditTemplate Context="Cell">
+                                <MudAutocomplete @bind-Value="Cell.Item.MemberId"
+                                                 SearchFunc="SearchMembers"
+                                                 ToStringFunc="GetMemberNameFromId"
+                                                 MaxItems="100" />
+                            </EditTemplate>
+                        </PropertyColumn>
+                    }
+                    else
+                    {
+                        <PropertyColumn Title="@tColumn.Title" Property="tColumn.Property" Editable="tColumn.Editable" @bind-Hidden="column.Hidden" />
+                    }
+                    break;
+                case EditColumn<RawResultRowViewModel, long?> tColumn:
+                    if (tColumn.Title == "Team")
+                    {
+                        <PropertyColumn Title="@tColumn.Title" Property="tColumn.Property" Editable="tColumn.Editable" @bind-Hidden="column.Hidden">
+                            <EditTemplate Context="Cell">
+                                <MudAutocomplete @bind-Value="Cell.Item.TeamId"
+                                                 SearchFunc="SearchTeams"
+                                                 ToStringFunc="GetTeamNameFromId"
+                                                 MaxItems="100"
+                                                 ResetValueOnEmptyText="true"
+                                                 Clearable="true" />
+                            </EditTemplate>
+                        </PropertyColumn>
+                    }
+                    break;
+                case EditColumn<RawResultRowViewModel, RaceStatus> tColumn:
+                    <PropertyColumn Title="Status" Property="tColumn.Property" Editable="tColumn.Editable" @bind-Hidden="column.Hidden">
+                        <EditTemplate Context="Cell">
+                            <MudSelect @bind-Value="Cell.Item.Status">
+                                @foreach (var status in Enum.GetValues<RaceStatus>())
+                                {
+                                    <MudSelectItem Value="status" />
+                                }
+                            </MudSelect>
+                        </EditTemplate>
+                    </PropertyColumn>
+                    break;
+                default:
+                    break;
+            }
         }
-        <MudTd DataLabel="Position">@Row.FinishPosition</MudTd>
-        <MudTd DataLabel="Start Position">@Row.StartPosition</MudTd>
-        <MudTd DataLabel="Member">@GetMemberNameFromId(Row.MemberId)</MudTd>
-        <MudTd DataLabel="Car Nr.">@Row.CarNumber</MudTd>
-        <MudTd DataLabel="Points">@Row.RacePoints</MudTd>
-        <MudTd DataLabel="Completed Laps">@Row.CompletedLaps</MudTd>
-        <MudTd DataLabel="Lead Laps">@Row.LeadLaps</MudTd>
-        <MudTd DataLabel="Interval">@Row.Interval.LapTimeString()</MudTd>
-        <MudTd DataLabel="Fastest Lap">@Row.FastestLapTime.LapTimeString()</MudTd>
-        <MudTd DataLabel="Incidents">@Row.Incidents</MudTd>
-        <MudTd DataLabel="Status">@Row.Status</MudTd>
-    </RowTemplate>
-    <RowEditingTemplate Context="Row">
-        <MudTd DataLabel="Position">
-            <MudNumericField @bind-Value="Row.FinishPosition" />
-        </MudTd>
-        <MudTd DataLabel="Start Position">
-            <MudNumericField @bind-Value="Row.StartPosition" />
-        </MudTd>
-        <MudTd DataLabel="Member">
-            <MudAutocomplete Label="Members"
-                             @bind-Value="Row.MemberId"
-                             SearchFunc="SearchMembers"
-                             ToStringFunc="GetMemberNameFromId"
-                             Variant="Variant.Outlined"
-                             MaxItems="1000" />
-        </MudTd>
-        <MudTd DataLabel="Car Nr.">
-            <MudTextField @bind-Value="Row.CarNumber" MaxLength="3" />
-        </MudTd>
-        <MudTd DataLabel="Points">
-            <MudNumericField @bind-Value="Row.RacePoints" />
-        </MudTd>
-        <MudTd DataLabel="Completed Laps">
-            <MudNumericField @bind-Value="Row.CompletedLaps" />
-        </MudTd>
-        <MudTd DataLabel="Lead Laps">
-            <MudNumericField @bind-Value="Row.LeadLaps" />
-        </MudTd>
-        <MudTd DataLabel="Interval">
-            <MudTextField @bind-Value="Row.Interval" />
-        </MudTd>
-        <MudTd DataLabel="Fastest Lap">
-            <MudTextField @bind-Value="Row.FastestLapTime" />
-        </MudTd>
-        <MudTd DataLabel="Incidents">
-            <MudNumericField @bind-Value="Row.Incidents" />
-        </MudTd>
-        <MudTd DataLabel="Status">
-            <MudSelect @bind-Value="Row.Status" FullWidth="true">
-                @foreach (var status in Enum.GetValues<RaceStatus>())
-                {
-                    <MudSelectItem Value="status">@status</MudSelectItem>
-                }
-            </MudSelect>
-        </MudTd>
-    </RowEditingTemplate>
-</MudTable>
+        <TemplateColumn>
+            <EditTemplate Context="Cell">
+                <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Size="Size.Small" OnClick="@(() => RemoveRowClick(Cell.Item))"/>
+            </EditTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager />
+    </PagerContent>
+    <ToolBarContent>
+        <MudSpacer />
+        <MudButton OnClick="AddRowClick">Add Row</MudButton>
+    </ToolBarContent>
+</MudDataGrid>
 
 @code {
 

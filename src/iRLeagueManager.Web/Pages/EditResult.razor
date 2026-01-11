@@ -33,7 +33,7 @@
                 var sessionName = Event?.Sessions.FirstOrDefault(x => x.SessionId == sessionResult.SessionId)?.Name;
                 <MudElement HtmlTag="div" Class="mt-3">
                     <MudText Typo="Typo.h6">@sessionName</MudText>
-                    <EditResultTable SessionResult="sessionResult" Members="Result.Members" />
+                    <EditResultTable SessionResult="sessionResult" Members="Result.Members" Teams="Result.Teams"/>
                     @if (sessionResult.HasChanges)
                     {
                         <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" Class="m-2">
@@ -61,10 +61,13 @@
 </MudContainer>
 
 @code {
+    private bool hasSavedChanges = false;
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
         Result.HasChanged += OnResultChanged;
+        RegisterLocationChangingHandler();
     }
 
     private void OnResultChanged(object? sender, EventArgs e)
@@ -91,6 +94,67 @@
         base.Dispose(disposing);
     }
 
+    protected override async ValueTask OnLocationChanging(LocationChangingContext context)
+    {
+        // Do nothing when viewmodel has no changes or navigation on same page
+        var staysOnPage = context.TargetLocation.Contains($"{LeagueName}/Results/Events/{EventId}/Edit");
+        var allowNavigation = staysOnPage;
+        if (allowNavigation)
+        {
+            await base.OnLocationChanging(context);
+            return;
+        }
+
+        // If viewmodel has changes: Cancel navigation and display message
+        var sessionResultsHaveChanges = Result.SessionResults.Any(x => x.HasChanges);
+        if (sessionResultsHaveChanges)
+        {
+            var cancelNavigation = await CancelNavigationOnUnsavedChanges();
+            if (cancelNavigation)
+            {
+                context.PreventNavigation();
+                return;
+            }
+        }
+
+        // If changes have been saved: ask for calculation of results
+        if (hasSavedChanges)
+        {
+            await AskCalculateResults();
+        }
+    }
+
+    private async Task AskCalculateResults()
+    {
+        var dialogParameters = new DialogParameters<ConfirmDialog>()
+        {
+            { x => x.ButtonTypes, ButtonTypes.YesNo },
+        };
+        var confirmDialog = await DialogService.Show<ConfirmDialog>("Calculate results?", dialogParameters).Result;
+        if (confirmDialog?.Canceled != false)
+        {
+            return;
+        }
+        await Result.CalculateResults(CancellationToken);
+    }
+
+    private async Task<bool> CancelNavigationOnUnsavedChanges()
+    {
+        var dialogParameters = new DialogParameters<ConfirmDialog>()
+        {
+            { x => x.Text, "You have unsaved changes. Are you sure you want to leave this page? Unsaved changes will be lost." },
+            { x => x.ButtonTypes, ButtonTypes.YesNo },
+        };
+        var confirmDialog = await DialogService.Show<ConfirmDialog>("Unsaved changes", dialogParameters).Result;
+        if (confirmDialog?.Canceled == false)
+        {
+            // User confirmed navigation: Reset changes and navigate to target location
+            Result.SessionResults.ForEach(x => x.Reset());
+            return false; // allow navigation
+        }
+        return true; // cancel navigation
+    }
+
     private async Task SaveSessionResult(RawSessionResultViewModel sessionResult)
     {
         if (Event is null)
@@ -102,16 +166,6 @@
         {
             return;
         }
-
-        var dialogParameters = new DialogParameters<ConfirmDialog>()
-        {
-            { x => x.ButtonTypes, ButtonTypes.YesNo },
-        };
-        var confirmDialog = await DialogService.Show<ConfirmDialog>("Calculate results?", dialogParameters).Result;
-        if (confirmDialog?.Canceled != false)
-        {
-            return;
-        }
-        await Result.CalculateResults(CancellationToken);
+        hasSavedChanges = true;
     }
 }

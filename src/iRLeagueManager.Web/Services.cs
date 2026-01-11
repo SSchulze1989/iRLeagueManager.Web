@@ -54,6 +54,7 @@ public static class Services
         services.TryAddTransient<FilterConditionViewModel>();
         services.TryAddTransient<MemberViewModel>();
         services.TryAddTransient<RosterViewModel>();
+        services.TryAddTransient<RawResultRowViewModel>();
         services.TryAddScoped<ResultsPageViewModel>();
         services.TryAddScoped<EditResultViewModel>();
         services.TryAddScoped<ResultSettingsViewModel>();

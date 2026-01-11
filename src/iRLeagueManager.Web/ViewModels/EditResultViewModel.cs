@@ -23,6 +23,7 @@ public sealed class EditResultViewModel : LeagueViewModelBase<EditResultViewMode
     private List<RawSessionResultViewModel> sessionResults = [];
     public List<RawSessionResultViewModel> SessionResults { get => sessionResults; set => Set(ref sessionResults, value); }
 
+
     public async Task<StatusResult> Load(long eventId, CancellationToken cancellationToken = default)
     {
         if (CurrentLeague is null)
@@ -114,6 +115,7 @@ public sealed class EditResultViewModel : LeagueViewModelBase<EditResultViewMode
                 ParentViewModel = this,
             })
             .ToList();
+
     }
 
     public async Task<StatusResult> CalculateResults(CancellationToken cancellationToken)

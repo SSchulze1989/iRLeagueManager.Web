@@ -1,12 +1,13 @@
 ﻿using iRLeagueApiCore.Common.Models;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Extensions;
+using System.Threading.Tasks;
 
 namespace iRLeagueManager.Web.ViewModels;
 
 public sealed class RawSessionResultViewModel : LeagueViewModelBase<RawSessionResultViewModel, RawSessionResultModel>
 {
-    public RawSessionResultViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, RawSessionResultModel model) 
+    public RawSessionResultViewModel(ILoggerFactory loggerFactory, LeagueApiService apiService, RawSessionResultModel model)
         : base(loggerFactory, apiService, model)
     {
     }
@@ -15,16 +16,24 @@ public sealed class RawSessionResultViewModel : LeagueViewModelBase<RawSessionRe
 
     public long SessionId { get => model.SessionId; }
 
-    private List<RawResultRowViewModel> resultRows = [];
-    public List<RawResultRowViewModel> ResultRows { get => resultRows; set => Set(ref resultRows, value); }
+    private ObservableCollection<RawResultRowViewModel> resultRows = [];
+    public ObservableCollection<RawResultRowViewModel> ResultRows { get => resultRows; set => Set(ref resultRows, value); }
 
     protected override void SetModel(RawSessionResultModel model)
     {
         base.SetModel(model);
-        ResultRows = model.ResultRows
-            .Select(x => new RawResultRowViewModel(LoggerFactory, ApiService, x))
-            .ToList();
+        SetRows(model.ResultRows);
         modelCopy = CopyModel();
+    }
+
+    private void SetRows(IEnumerable<RawResultRowModel> rows)
+    {
+        ResultRows = new (rows
+            .Select(x => new RawResultRowViewModel(LoggerFactory, ApiService, x)
+            {
+                ParentViewModel = this,
+            })
+            .ToList());
     }
 
     public void Reset()
@@ -70,7 +79,7 @@ public sealed class RawSessionResultViewModel : LeagueViewModelBase<RawSessionRe
                 .WithId(eventId)
                 .Results()
                 .Raw()
-                .Put(eventResult.Content, cancellationToken);
+                .Put(eventResult.Content, cancellationToken).ConfigureAwait(false);
             if (!putResult.Success || putResult.Content is null)
             {
                 return putResult.ToStatusResult();
@@ -89,5 +98,61 @@ public sealed class RawSessionResultViewModel : LeagueViewModelBase<RawSessionRe
         {
             Loading = false;
         }
+    }
+
+    private void RefreshFinishedPositions()
+    {
+        for (int i = 0; i < ResultRows.Count; i++)
+        {
+            var row = ResultRows[i];
+            row.FinishPosition = i + 1;
+        }
+    }
+
+    private async Task<StatusResult<MemberModel>> GetMemberIracingIdAsync(long memberId, CancellationToken cancellationToken)
+    {
+        if (CurrentLeague is null)
+        {
+            return LeagueNullResult<MemberModel>(new());
+        }
+        try
+        {
+            var membersResult = await CurrentLeague
+                .Members()
+                .WithId(memberId)
+                .Get(cancellationToken)
+                .ConfigureAwait(false);
+            return membersResult.ToContentStatusResult();
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    public async Task AddRow(RawResultRowModel row)
+    {
+        // get the members iracing id for the new row
+        var member = await GetMemberIracingIdAsync(row.MemberId, CancellationToken.None);
+        if (member.IsSuccess && member.Content is not null)
+        {
+            row.IRacingId = member.Content.IRacingId;
+        }
+
+        model.ResultRows = [.. model.ResultRows, row];
+        ResultRows.Add(new RawResultRowViewModel(LoggerFactory, ApiService, row)
+        {
+            ParentViewModel = this,
+        });
+        RefreshFinishedPositions();
+        Changed();
+    }
+
+    public void RemoveRow(RawResultRowViewModel row)
+    {
+        ResultRows.Remove(row);
+        model.ResultRows = ResultRows.Select(x => x.GetModel());
+        RefreshFinishedPositions();
+        Changed();
     }
 }

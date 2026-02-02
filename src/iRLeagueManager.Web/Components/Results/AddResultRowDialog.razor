@@ -1,0 +1,159 @@
+﻿@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@inherits EditDialogBase<RawResultRowViewModel, RawResultRowModel>
+
+<MudDialog>
+    <DialogContent>
+        <MudForm Model="Vm">
+            <MudStack Spacing="1">
+                @foreach (var column in Columns.Where(x => x.Editable))
+                {
+                    switch (column)
+                    {
+                        case EditResultTable.EditColumn<RawResultRowViewModel, int> tColumn:
+                            <MudNumericField T="int" Label="@tColumn.Title" Value="@(tColumn.GetValue(Vm))" ValueChanged="@(value => tColumn.SetValue(Vm, value))" Variant="Variant.Outlined" Disabled="@(!tColumn.Editable)" />
+                            break;
+                        case EditResultTable.EditColumn<RawResultRowViewModel, TimeSpan> tColumn:
+                            <MudTextField T="TimeSpan" Label="@tColumn.Title" Value="@(tColumn.GetValue(Vm))" ValueChanged="@(value => tColumn.SetValue(Vm, value))" Mask="@(new PatternMask("00:00:00.000"))" Variant="Variant.Outlined" Disabled="@(!tColumn.Editable)" />
+                            break;
+                        case EditResultTable.EditColumn<RawResultRowViewModel, double> tColumn:
+                            <MudNumericField T="double" Label="@tColumn.Title" Value="@(tColumn.GetValue(Vm))" ValueChanged="@(value => tColumn.SetValue(Vm, value))" Variant="Variant.Outlined" Disabled="@(!tColumn.Editable)" />
+                            break;
+                        case EditResultTable.EditColumn<RawResultRowViewModel, string> tColumn:
+                            <MudTextField T="string" Label="@tColumn.Title" Value="@(tColumn.GetValue(Vm))" ValueChanged="@(value => tColumn.SetValue(Vm, value))" Variant="Variant.Outlined" Disabled="@(!tColumn.Editable)" />
+                            break;
+                        case EditResultTable.EditColumn<RawResultRowViewModel, long> tColumn:
+                            @if (tColumn.Title == "Member")
+                            {
+                                <MudAutocomplete T="long"
+                                                 Label="@tColumn.Title"
+                                                 @bind-Value="Vm.MemberId"
+                                                 SearchFunc="SearchMembers"
+                                                 ToStringFunc="GetMemberNameFromId"
+                                                 MaxItems="100"
+                                                 Variant="Variant.Outlined"
+                                                 ReadOnly="@(!tColumn.Editable)" />
+                            }
+                            else
+                            {
+                                <MudNumericField T="long" Label="@tColumn.Title" Value="@(tColumn.GetValue(Vm))" ValueChanged="@(value => tColumn.SetValue(Vm, value))" Variant="Variant.Outlined" Disabled="@(!tColumn.Editable)" />
+                            }
+                            break;
+                        case EditResultTable.EditColumn<RawResultRowViewModel, long?> tColumn:
+                            if (tColumn.Title == "Team")
+                            {
+
+                                <MudAutocomplete Label="@tColumn.Title"
+                                                 @bind-Value="Vm.TeamId"
+                                                 SearchFunc="SearchTeams"
+                                                 ToStringFunc="GetTeamNameFromId"
+                                                 MaxItems="100"
+                                                 ResetValueOnEmptyText="true"
+                                                 Clearable="true"
+                                                 Variant="Variant.Outlined"
+                                                 ReadOnly="@(!tColumn.Editable)" />
+                            }
+                            else
+                            {
+                                <MudNumericField T="long?" Label="@tColumn.Title" Value="@(tColumn.GetValue(Vm))" ValueChanged="@(value => tColumn.SetValue(Vm, value))" Variant="Variant.Outlined" Disabled="@(!tColumn.Editable)" />
+                            }
+                            break;
+                        case EditResultTable.EditColumn<RawResultRowViewModel, RaceStatus> tColumn:
+                            <MudSelect Label="@tColumn.Title" @bind-Value="Vm.Status" Variant="Variant.Outlined" ReadOnly="@(!tColumn.Editable)">
+                                @foreach (var status in Enum.GetValues<RaceStatus>())
+                                {
+                                    <MudSelectItem Value="status" />
+                                }
+                            </MudSelect>
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            </MudStack>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <PromptDialogButtons OkClick="Submit" OkText="Add" CancelClick="Cancel" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter, EditorRequired] public RawSessionResultViewModel SessionResult { get; set; } = default!;
+    [Parameter, EditorRequired] public List<EditResultTable.EditColumn<RawResultRowViewModel>> Columns { get; set; }
+    [Parameter, EditorRequired] public IEnumerable<MemberInfoModel> Members { get; set; } = default!;
+    [Parameter, EditorRequired] public IEnumerable<TeamInfoModel> Teams { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        BlazorParameterNullException.ThrowIfNull(this, Columns);
+    }
+
+    private async Task<IEnumerable<long>> SearchMembers(string search, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(search))
+        {
+            return await Task.FromResult(GetMembersNotInResult().Select(x => x.MemberId));
+        }
+
+        var terms = search.ToLower().Split(',', ' ', ';')
+        .Where(x => string.IsNullOrWhiteSpace(x) == false)
+            .ToArray();
+        return await Task.FromResult(GetMembersNotInResult()
+            .Where(x => MatchMemberSearchTerms(x, terms))
+            .Select(x => x.MemberId));
+    }
+
+    private string GetMemberNameFromId(long memberId)
+    {
+        var member = Members.FirstOrDefault(x => x.MemberId == memberId);
+        if (member is null)
+        {
+            return "";
+        }
+
+        return $"{member.FirstName} {member.LastName}";
+    }
+
+    private static bool MatchMemberSearchTerms(MemberInfoModel member, params string[] terms)
+    {
+        var searchName = member.FirstName + member.LastName;
+        return terms.Any(x => searchName.Contains(x, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private IEnumerable<MemberInfoModel> GetMembersNotInResult() =>
+        Members.Where(x => SessionResult.ResultRows.None(row => x.MemberId == row.MemberId));
+
+    private async Task<IEnumerable<long?>> SearchTeams(string search, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(search))
+        {
+            return await Task.FromResult(Teams.Select(x => x.TeamId).Cast<long?>());
+        }
+
+        var terms = search.ToLower().Split(',', ' ', ';')
+        .Where(x => string.IsNullOrWhiteSpace(x) == false)
+            .ToArray();
+        return await Task.FromResult(Teams
+            .Where(x => MatchTeamSearchTerms(x, terms))
+            .Select(x => x.TeamId)
+            .Cast<long?>());
+    }
+
+    private string GetTeamNameFromId(long? teamId)
+    {
+        var team = Teams.FirstOrDefault(x => x.TeamId == teamId.GetValueOrDefault());
+        if (team is null)
+        {
+            return "";
+        }
+
+        return team.Name;
+    }
+
+    private static bool MatchTeamSearchTerms(TeamInfoModel team, params string[] terms)
+    {
+        return terms.Any(x => team.Name.Contains(x, StringComparison.OrdinalIgnoreCase));
+    }
+}

@@ -18,6 +18,7 @@
         var displayStartPos = resultRows.Any(x => x.StartPosition != 0);
         var displayChange = displayStartPos;
         var displayQualyLap = resultRows.Any(x => x.QualifyingTime > TimeSpan.FromSeconds(1));
+        var displayTeams = resultRows.Any(x => x.TeamId > 0);
     }
     <ResultTable Data=Result.ResultRows>
         <HeaderTemplate>

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using iRLeagueManager.Web.Shared;
 using iRLeagueManager.Web.Extensions;
+using iRLeagueApiCore.Client.Endpoints;
 
 namespace iRLeagueManager.Web.Components;
 
@@ -188,6 +189,7 @@ public partial class SelectDropweeksDialog : UtilityComponentBase
                 .WithId(eventId)
                 .Standings()
                 .Calculate()
+                .AddQueryParameter(x => x.Add("skipNotifications", true))
                 .Post(CancellationToken).ConfigureAwait(false);
             return result.ToStatusResult();
         }

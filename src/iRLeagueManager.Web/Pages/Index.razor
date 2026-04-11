@@ -21,7 +21,44 @@
     </LoadingHeader>
 
     <MudPaper Elevation="1">
-        <MudSimpleTable Dense="true" Hover="true">
+        <MudTable Items="@vm.Leagues"
+                  Hover="false"
+                  Bordered="false"
+                  Striped="true"
+                  Filter="@FilterLeagues"
+                  Breakpoint="Breakpoint.None">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Find your league</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchString"
+                              Placeholder="Search"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Class="mt-0" DebounceInterval="800"
+                              Immediate="true" 
+                              Clearable="true"/>
+            </ToolBarContent>
+            <ColGroup>
+                <col style="width: 12%" />
+                <col style="" />
+            </ColGroup>
+            <HeaderContent>
+                <MudTh>Id</MudTh>
+                <MudTh>Name</MudTh>
+            </HeaderContent>
+            <RowTemplate Context="League">
+                <MudTd DataLabel="Id">@League.LeagueId</MudTd>
+                <MudTd DataLabel="Name">
+                    <MudLink Href="@($"/{League.LeagueName}")">
+                        @GetLeagueName(League)
+                    </MudLink>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+        @* <MudSimpleTable Dense="true" Hover="true">
             <thead>
                 <tr>
                     <th>Id</th>
@@ -45,14 +82,42 @@
                     </tr>
                 }
             </tbody>
-        </MudSimpleTable>
+        </MudSimpleTable> *@
     </MudPaper>
     <MudButton StartIcon="@Icons.Material.Filled.Add" Href="/createleague" FullWidth="true">Create League</MudButton>
 </MudContainer>
 
 @code {
+    private string searchString = "";
+
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
         return vm.OnAfterRenderAsync(firstRender);
+    }
+
+    private bool FilterLeagues(LeagueViewModel league)
+    {
+        return string.IsNullOrEmpty(searchString)
+            || league.LeagueName.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+            || league.NameFull.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+            || league.LeagueId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void NavigateToLeague(LeagueViewModel? league)
+    {
+        if (league is null)
+        {
+            return;
+        }
+        NavigationManager.NavigateTo($"/{league.LeagueName}");
+    }
+
+    public static string GetLeagueName(LeagueViewModel league)
+    {
+        if (string.IsNullOrEmpty(league.NameFull))
+        {
+            return league.LeagueName;
+        }
+        return league.NameFull;
     }
 }

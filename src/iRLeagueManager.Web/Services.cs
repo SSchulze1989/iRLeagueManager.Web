@@ -15,7 +15,6 @@ public static class Services
         services.TryAddScoped(config => 
             new MarkdownPipelineBuilder()
                 .UseAdvancedExtensions()
-                .UseBootstrap()
                 .Build());
         services.TryAddScoped(config =>
             new HtmlSanitizer());

@@ -286,12 +286,17 @@
         {
             return;
         }
+        var dialogText = $"""
+            Really clear results for event ""{@event.Name} - {@event.Date.GetValueOrDefault().ToString(@"dd.MM.yyyy")}""?<br/>
+            This will also remove all added penalties and bonus points.
+            """;
         var parameters = new DialogParameters<ConfirmDialog>()
         {
-            { x => x.Text, $"Really delete result for event \"{@event.Name} - {@event.Date.GetValueOrDefault().ToString(@"dd.MM.yyyy")}\"?" },
+            { x => x.Text, dialogText },
             { x => x.ButtonTypes, ButtonTypes.YesNo },
+            { x => x.AllowMarkup, true },
         };
-        var result = await DialogService.Show<ConfirmDialog>("Delete Results", parameters).Result;
+        var result = await DialogService.Show<ConfirmDialog>("Clear Results", parameters).Result;
         if (result?.Canceled == false)
         {
             await vm.DeleteEventResults(CancellationToken);

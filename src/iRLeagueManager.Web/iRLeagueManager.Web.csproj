@@ -8,6 +8,7 @@
     <UserSecretsId>aspnet-iRLeagueManager.Web-2B05F9DC-55A3-49D1-BD64-31507000EDF3</UserSecretsId>
     <Configurations>Debug;Release;</Configurations>
 	<LangVersion>12</LangVersion>
+	<Features>use-roslyn-tokenizer=true</Features>
   </PropertyGroup>
 
   <ItemGroup>

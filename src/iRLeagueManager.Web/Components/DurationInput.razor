@@ -1,0 +1,94 @@
+﻿@inherits MudTextField<TimeSpan?>
+
+<MudTextField Label="@Label" Value="Value" ValueChanged="ValueChanged" InputType="InputType.Text" Mask="durationMask" Variant="Variant" Converter="durationConverter" Placeholder="--:--" />
+
+@code {
+    private PatternMask durationMask = new PatternMask("XX:XX")
+    {
+        MaskChars = new[] { new MaskChar('X', @"[0-9]") },
+        Placeholder = '-',
+        CleanDelimiters = false,
+    };
+
+    private MudBlazor.Converter<TimeSpan?, string> durationConverter = new MudBlazor.Converter<TimeSpan?, string>()
+    {
+        GetFunc = str =>
+        {
+            if (string.IsNullOrWhiteSpace(str))
+            {
+                return null;
+            }
+
+            str = str.Trim();
+
+            // Handle hh:mm format
+            if (str.Contains(':'))
+            {
+                var parts = str.Split(':');
+                if (parts.Length == 2 && int.TryParse(parts[0], out var hours) && int.TryParse(parts[1], out var minutes))
+                {
+                    if (hours >= 0 && minutes >= 0 && minutes < 60)
+                    {
+                        return new TimeSpan(hours, minutes, 0);
+                    }
+                }
+                return null;
+            }
+
+            // Handle numeric-only formats: 0 (h), 00 (hh), 000 (hhm), 0000 (hhmm)
+            if (!int.TryParse(str, out var numValue) || numValue < 0)
+            {
+                return null;
+            }
+
+
+            {
+                int hours, minutes;
+                switch (str.Length)
+                {
+                    case 1:
+                        // Single digit: 0 = 0 hours
+                        hours = numValue;
+                        minutes = 0;
+                        break;
+                    case 2:
+                        // Two digits: 00 = 00 hours
+                        hours = numValue;
+                        minutes = 0;
+                        break;
+                    case 3:
+                        // Three digits: 000 = 00 hours 0 minutes
+                        hours = numValue / 10;
+                        minutes = numValue % 10;
+                        break;
+                    case 4:
+                        // Four digits: 0000 = 00 hours 00 minutes
+                        hours = numValue / 100;
+                        minutes = numValue % 100;
+                        break;
+                    default:
+                        return null;
+                }
+
+                if (minutes >= 60)
+                {
+                    return null;
+                }
+
+                return new TimeSpan(hours, minutes, 0);
+            }
+        },
+        SetFunc = time =>
+        {
+            if (time == null || time <= TimeSpan.Zero)
+            {
+                return string.Empty;
+            }
+
+            int hours = (int)time.Value.TotalHours;
+            int minutes = time.Value.Minutes;
+
+            return $"{hours:D2}:{minutes:D2}";
+        }
+    };
+}

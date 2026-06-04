@@ -71,7 +71,7 @@
                                             <MudTextField Label="Session Name" @bind-Value="session.Name" Variant="Variant.Text" />
                                         </MudItem>
                                         <MudItem xs="4">
-                                            <MudTextField Label="Duration" @bind-Value="session.Duration" InputType="InputType.Time" Variant="Variant.Text" />
+                                            <DurationInput @bind-Value="session.Duration" Label="Duration" Variant="Variant.Text" />
                                         </MudItem>
                                         <MudItem xs="4">
                                             <MudNumericField Label="Laps" @bind-Value="session.Laps" Variant="Variant.Text" />

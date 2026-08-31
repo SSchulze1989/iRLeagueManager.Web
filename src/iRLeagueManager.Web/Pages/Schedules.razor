@@ -46,7 +46,7 @@
 @code {
     [Parameter]
     [SupplyParameterFromQuery(Name = "embed")]
-    public bool Embed { get; set; }
+    public bool? Embed { get; set; } = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

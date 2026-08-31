@@ -39,6 +39,14 @@ public interface IAuthenticationService
 
 internal sealed class AuthenticationService : IAuthenticationService
 {
+    /// <summary>
+    /// Claim type used to carry the iRLeagueManager API's own id token inside the
+    /// first-party JWT so that a Blazor circuit can later use it to authenticate
+    /// <see cref="iRLeagueApiCore.Client.ILeagueApiClient"/> requests to the external API
+    /// (see <see cref="BrowserProtectedStorageTokenStore"/>).
+    /// </summary>
+    public const string ApiIdTokenClaimType = "irl_api_id_token";
+
     private const string DefaultExpirationMinutes = "60";
 
     private readonly ILogger<AuthenticationService> logger;
@@ -115,6 +123,12 @@ internal sealed class AuthenticationService : IAuthenticationService
         // the claims describing the authenticated user (id, name, roles, ...).
         var apiToken = tokenHandler.ReadJwtToken(loginResponse.AccessToken);
         var identity = new ClaimsIdentity(apiToken.Claims, authenticationType: JwtBearerDefaults.AuthenticationScheme);
+        if (string.IsNullOrEmpty(loginResponse.IdToken) == false)
+        {
+            // Preserved so a Blazor circuit can hydrate BrowserProtectedStorageTokenStore
+            // and keep ILeagueApiClient authenticated against the external API.
+            identity.AddClaim(new Claim(ApiIdTokenClaimType, loginResponse.IdToken));
+        }
         var principal = new ClaimsPrincipal(identity);
         logger.LogDebug("Created claims principal for user {UserName} from API login response",
             principal.Identity?.Name);

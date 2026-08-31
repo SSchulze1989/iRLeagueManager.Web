@@ -100,9 +100,12 @@ internal sealed class BrowserProtectedStorageTokenStore : ITokenStore
     public async Task SetIdTokenAsync(string token)
     {
         var oldToken = inMemoryIdToken;
-        logger.LogDebug("Set token to local browser session: {Token}", token);
+        logger.LogDebug("Set token to local browser session");
         await localStore.SetAsync(tokenKey, token);
-        inMemoryIdToken = token;
+        // force re-evaluation of expiration/login state for the newly set token instead of
+        // only validating tokens that were read back from local storage
+        IsLoggedIn = false;
+        await ValidateToken(token);
 
         if (inMemoryIdToken != oldToken)
         {

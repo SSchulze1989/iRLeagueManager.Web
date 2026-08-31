@@ -1,9 +1,14 @@
 ﻿@using System.Globalization;
+@using iRLeagueApiCore.Client.Http;
+@using iRLeagueManager.Web.Data;
 @using iRLeagueManager.Web.ViewModels
+@using Microsoft.AspNetCore.Components.Authorization;
 @inject EventListViewModel EventList
 @inject LeagueApiService ApiService
 @inject SharedStateService SharedState
 @inject IJSRuntime JsRuntime
+@inject ITokenStore TokenStore
+@inject AuthenticationStateProvider AuthStateProvider
 
 <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" Theme="TestTheme" />
 <MudPopoverProvider />
@@ -91,7 +96,38 @@
         {
             _isDarkMode = await _mudThemeProvider!.GetSystemPreference();
             await _mudThemeProvider.WatchSystemPreference(OnSystemPreferenceChanged);
+            await SyncExternalApiTokenAsync();
             StateHasChanged();
+        }
+    }
+
+    /// <summary>
+    /// Hydrates <see cref="ITokenStore"/> (backing <see cref="ApiService"/>'s
+    /// <c>ILeagueApiClient</c>) with the iRLeagueManager API's id token carried in the
+    /// cookie-based login claims, so calls to the external API remain authenticated after
+    /// logging in via the "/api/auth/login" endpoint. This has to happen after the first
+    /// render since it relies on JS interop (ProtectedLocalStorage) which is not available
+    /// while the page is still prerendering.
+    /// </summary>
+    private async Task SyncExternalApiTokenAsync()
+    {
+        if (ApiService.Client.IsLoggedIn)
+        {
+            return;
+        }
+
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var apiIdToken = authState.User.FindFirst(AuthenticationService.ApiIdTokenClaimType)?.Value;
+            if (string.IsNullOrEmpty(apiIdToken) == false)
+            {
+                await TokenStore.SetIdTokenAsync(apiIdToken);
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // JS interop is unexpectedly still unavailable, nothing to do here.
         }
     }
 

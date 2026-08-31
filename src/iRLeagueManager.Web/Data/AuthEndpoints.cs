@@ -36,15 +36,15 @@ internal static class AuthEndpoints
                 statusCode: (int)response.StatusCode);
         }
 
-        var login = await response.Content.ReadFromJsonAsync<LoginResponse>(cancellationToken: cancellationToken);
-        if (string.IsNullOrWhiteSpace(login.IdToken) || string.IsNullOrWhiteSpace(login.AccessToken))
+        LoginResponse? login = await response.Content.ReadFromJsonAsync<LoginResponse?>(cancellationToken: cancellationToken);
+        if (login is null || string.IsNullOrWhiteSpace(login.Value.IdToken) || string.IsNullOrWhiteSpace(login.Value.AccessToken))
         {
             logger.LogError("Authentication API returned an incomplete token response for {UserName}", request.Username);
             return Results.Problem(statusCode: StatusCodes.Status502BadGateway);
         }
 
-        context.Response.Cookies.Append(CookieTokenStore.IdTokenCookieName, login.IdToken, CreateCookieOptions(login.Expires));
-        context.Response.Cookies.Append(CookieTokenStore.AccessTokenCookieName, login.AccessToken, CreateCookieOptions(login.Expires));
+        context.Response.Cookies.Append(CookieTokenStore.IdTokenCookieName, login.Value.IdToken, CreateCookieOptions(login.Value.Expires));
+        context.Response.Cookies.Append(CookieTokenStore.AccessTokenCookieName, login.Value.AccessToken, CreateCookieOptions(login.Value.Expires));
         logger.LogInformation("Login succeeded for {UserName}", request.Username);
         return Results.Ok(new AuthResponse(true));
     }

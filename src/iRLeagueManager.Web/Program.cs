@@ -21,7 +21,9 @@ builder.Logging.AddConfiguration(
     builder.Configuration.GetSection("Logging"));
 
 // Add services to the container.
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ServerAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthJsInterop>();
 //builder.Services.AddRazorPages();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

@@ -1,12 +1,11 @@
 ﻿@page "/members/login"
 @using System.ComponentModel.DataAnnotations
-@using iRLeagueApiCore.Client
-@using iRLeagueApiCore.Client.Http
-@using iRLeagueApiCore.Common.Responses;
+@using iRLeagueManager.Web.Data
 @using iRLeagueManager.Web.Extensions
-@inject IConfiguration configuration
-@inject ILeagueApiClient ApiClient
+@using iRLeagueManager.Web.Shared
+@inject AuthJsInterop AuthInterop
 @inject NavigationManager NavigationManager
+@inject ILogger<Login> Logger
 @attribute [AllowAnonymous]
 
 <MudContainer MaxWidth="MaxWidth.Small">
@@ -88,30 +87,40 @@
 
     public async Task OnValidSubmit()
     {
-        if (ApiClient.IsLoggedIn == false)
+        try
         {
-            try 
+            Loading = true;
+            ResendConfirmation = false;
+
+            var jsResult = await AuthInterop.PostAsync("api/auth/login", new { username = model.Username, password = model.Password });
+            if (jsResult.Success)
             {
-                Loading = true;
-                ResendConfirmation = false;
-                var result = await ApiClient.LogIn(model.Username, model.Password);
-                if (result.Success == false)
-                {
-                    ResultValidator?.ValidateResult(result.ToStatusResult());
-                    if (result.ToStatusResult().Message == "MailConfirm")
-                    {
-                        ResendConfirmation = true;
-                    }
-                    return;
-                }
+                Logger.LogInformation("Login succeeded for user {UserName}", model.Username);
                 var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";
                 NavigationManager.NavigateTo(returnUrl, forceLoad: true);
+                return;
             }
-            finally
-            {
-                Loading = false;
-            }
+
+            Logger.LogWarning("Login failed for user {UserName} with status code {StatusCode}", model.Username, jsResult.Status);
+            ResultValidator?.ValidateResult(MapToStatusResult(jsResult));
         }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private static StatusResult MapToStatusResult(AuthJsResult jsResult)
+    {
+        if (jsResult.Status == 401)
+        {
+            return new StatusResult(false, StatusResult.Unauthorized);
+        }
+
+        var message = jsResult.Status == 0
+            ? "Could not reach the server. Please try again later."
+            : jsResult.Body?.Message ?? "An unexpected error occurred. Please try again later.";
+        return StatusResult.FailedResult(StatusResult.ServerError, message, new object[] { message });
     }
 
     private void ToggleShowPassword()

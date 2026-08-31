@@ -24,7 +24,7 @@ public partial class Results
     public int SelectedTabIndexParam { get; set; } = 0;
     [Parameter]
     [SupplyParameterFromQuery(Name = "embed")]
-    public bool? Embed { get; set; } = false;
+    public bool Embed { get; set; } = false;
 
     private int selectedTabIndex;
     private int SelectedTabIndex

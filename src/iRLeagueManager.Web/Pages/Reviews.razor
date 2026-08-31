@@ -177,11 +177,11 @@
 
     [Parameter]
     [SupplyParameterFromQuery(Name = "embed")]
-    public bool? Embed { get; set; } = false;
+    public bool Embed { get; set; } = false;
 
     private string UserId { get; set; } = string.Empty;
 
-    private bool ReadOnly => Shared.SeasonFinished || Embed != false; 
+    private bool ReadOnly => Shared.SeasonFinished || Embed;
 
     private IEnumerable<VoteCategoryModel> AvailableVoteCategories = Array.Empty<VoteCategoryModel>();
 

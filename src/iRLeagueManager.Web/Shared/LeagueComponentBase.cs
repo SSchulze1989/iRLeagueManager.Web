@@ -144,7 +144,10 @@ public abstract partial class LeagueComponentBase : UtilityComponentBase
     {
         if (disposing)
         {
-            EventList.PropertyChanged -= OnEventListPropertyChanged;
+            if (EventList is not null)
+            {
+                EventList.PropertyChanged -= OnEventListPropertyChanged;
+            }
         }
 
         base.Dispose(disposing);

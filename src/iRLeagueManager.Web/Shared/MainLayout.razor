@@ -10,15 +10,17 @@
     @if (embedded == false)
     {
         <Header />
-    }
-    <MudMainContent Class="@(embedded ? "page embedded" : "page")">
-        <div class="@(embedded ? "embedded-page" : "my-2 pt-2")">
+        <MudMainContent Class="page">
+            <div class="my-2 pt-2">
+                @Body
+            </div>
+        </MudMainContent>
+        <Footer />
+    } else
+    {
+        <div class="embedded-page">
             @Body
         </div>
-    </MudMainContent>
-    @if (embedded == false)
-    {
-        <Footer />
     }
 </MudLayout>
 

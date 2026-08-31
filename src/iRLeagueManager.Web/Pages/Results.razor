@@ -144,18 +144,21 @@
                 }
             }
         </MudElement>
-
-        <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
-            <Authorized>
-                @if (SharedState.SeasonFinished == false)
-                {
-                    <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" Class="mt-2">
-                        <MudButton OnClick=UploadButtonClick>Upload Result</MudButton>
-                        <MudButton OnClick="FetchResultsClick">Fetch from SubsessionId</MudButton>
-                    </MudButtonGroup>
-                }
-            </Authorized>
-        </AuthorizeView>
+        
+        @if (Embed == false)
+        {
+            <AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer)>
+                <Authorized>
+                    @if (SharedState.SeasonFinished == false)
+                    {
+                        <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" Class="mt-2">
+                            <MudButton OnClick=UploadButtonClick>Upload Result</MudButton>
+                            <MudButton OnClick="FetchResultsClick">Fetch from SubsessionId</MudButton>
+                        </MudButtonGroup>
+                    }
+                </Authorized>
+            </AuthorizeView>
+        }
     </MudContainer>
 </CascadingValue>
 

@@ -34,7 +34,10 @@ public partial class Results
             if (selectedTabIndex != value)
             {
                 selectedTabIndex = value;
-                NavigationManager.NavigateTo(GetTabLink(value), replace: true);
+                if (Embed == false)
+                {
+                    NavigationManager.NavigateTo(GetTabLink(value), replace: true);
+                }
             }
         }
     }
@@ -64,10 +67,13 @@ public partial class Results
             {
                 selectedTabIndex = resultCount - 1;
             }
-            var navUri = $"/{LeagueName}/Results/Events/{@event.EventId}";
-            bool replace = NavigationManager.Uri.Contains($"/Events/") == false || NavigationManager.Uri.Contains(navUri);
-            navUri = $"{navUri}?{resultTabParam}={SelectedTabIndex}";
-            NavigateTo(navUri, replace: replace);
+            if (Embed == false)
+            {
+                var navUri = $"/{LeagueName}/Results/Events/{@event.EventId}";
+                bool replace = NavigationManager.Uri.Contains($"/Events/") == false || NavigationManager.Uri.Contains(navUri);
+                navUri = $"{navUri}?{resultTabParam}={SelectedTabIndex}";
+                NavigateTo(navUri, replace: replace);
+            }
         }
     }
 

@@ -76,7 +76,7 @@ public static class AuthEndpoints
             return Results.Unauthorized();
         }
 
-        var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>(cancellationToken: cancellationToken);
+        LoginResponse loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>(cancellationToken: cancellationToken);
         if (string.IsNullOrEmpty(loginResponse.AccessToken))
         {
             logger.LogWarning("Login response for user {UserName} did not contain an access token", request.Username);
@@ -94,7 +94,7 @@ public static class AuthEndpoints
     private static IResult Logout(HttpContext httpContext, ILoggerFactory loggerFactory)
     {
         var logger = loggerFactory.CreateLogger("AuthEndpoints");
-        httpContext.Response.Cookies.Delete(JwtCookieMiddleware.CookieName, GetCookieOptions(httpContext));
+        httpContext.Response.Cookies.Delete(JwtCookieMiddleware.CookieName, GetCookieOptions());
         logger.LogInformation("User logged out");
         return Results.Ok(new { success = true });
     }
@@ -139,10 +139,10 @@ public static class AuthEndpoints
 
     private static void SetAccessTokenCookie(HttpContext httpContext, string jwt)
     {
-        httpContext.Response.Cookies.Append(JwtCookieMiddleware.CookieName, jwt, GetCookieOptions(httpContext));
+        httpContext.Response.Cookies.Append(JwtCookieMiddleware.CookieName, jwt, GetCookieOptions());
     }
 
-    private static CookieOptions GetCookieOptions(HttpContext httpContext)
+    private static CookieOptions GetCookieOptions()
     {
         return new CookieOptions
         {

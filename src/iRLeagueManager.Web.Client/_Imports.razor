@@ -1,7 +1,25 @@
-﻿@using System.Net.Http.Json
+﻿@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.AspNetCore.Components.WebAssembly.Http
 @using Microsoft.JSInterop
+@using iRLeagueManager.Web
+@using iRLeagueManager.Web.Data
+@using iRLeagueManager.Web.Shared
+@using iRLeagueManager.Web.Extensions
+@using iRLeagueApiCore.Common
+@using iRLeagueApiCore.Client
+@using iRLeagueApiCore.Client.Endpoints
+@using iRLeagueManager.Web.ViewModels
+@using iRLeagueManager.Web.Exceptions
+@using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.Helpers
+@using System.Collections.ObjectModel;
+@using System.Collections.Generic;
+@using MudBlazor;

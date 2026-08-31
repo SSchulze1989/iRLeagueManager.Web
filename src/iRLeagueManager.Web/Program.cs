@@ -122,7 +122,11 @@ app.MapAuthEndpoints();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(iRLeagueManager.Web.Client._Imports).Assembly);
+    // The Client project shares the "iRLeagueManager.Web" root namespace with this project
+    // (so moved files keep their original namespaces), so a Client-only type (a page that
+    // only exists in the Client assembly) is used here to identify that assembly rather than
+    // "_Imports", which would otherwise ambiguously resolve to this project's own type.
+    .AddAdditionalAssemblies(typeof(iRLeagueManager.Web.Pages.Results).Assembly);
 app.UseRequestLocalization(new RequestLocalizationOptions()
     .AddSupportedCultures(["en-US", "de"])
     .AddSupportedUICultures(["en-US", "de"]));

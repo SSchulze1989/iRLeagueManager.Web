@@ -7,7 +7,7 @@ using System.Web;
 
 namespace iRLeagueManager.Web.Extensions;
 
-internal static class LeagueApiClientExtensions
+public static class LeagueApiClientExtensions
 {
     public static T? EnsureSuccess<T>(this ClientActionResult<T> clientActionResult)
     {

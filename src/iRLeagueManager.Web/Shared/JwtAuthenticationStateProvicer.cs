@@ -9,12 +9,24 @@ internal sealed class JwtAuthenticationStateProvicer : AuthenticationStateProvid
 {
     private readonly JwtSecurityTokenHandler tokenHandler = new();
     private readonly IAsyncTokenProvider tokenStore;
-    private string lastToken = string.Empty;
+    private readonly ClaimsPrincipal? cookieUser;
 
-    public JwtAuthenticationStateProvicer(IAsyncTokenProvider tokenStore)
+    public JwtAuthenticationStateProvicer(IAsyncTokenProvider tokenStore, IHttpContextAccessor httpContextAccessor)
     {
         this.tokenStore = tokenStore;
         tokenStore.TokenChanged += TokenStore_TokenChanged;
+
+        // HttpContext is only reliably available while the initial HTTP request that
+        // establishes the Blazor circuit is still being processed, so it is captured here
+        // in the constructor rather than read lazily later on. By this point
+        // JwtCookieMiddleware has already translated the "X-Access-Token" HttpOnly cookie
+        // into an "Authorization: Bearer" header (if present) and the JWT bearer
+        // authentication handler has populated HttpContext.User accordingly.
+        var httpContextUser = httpContextAccessor.HttpContext?.User;
+        if (httpContextUser?.Identity?.IsAuthenticated == true)
+        {
+            cookieUser = httpContextUser;
+        }
     }
 
     private void TokenStore_TokenChanged(object? sender, EventArgs e)
@@ -24,6 +36,14 @@ internal sealed class JwtAuthenticationStateProvicer : AuthenticationStateProvid
 
     private async Task<ClaimsPrincipal> GetTokenUser()
     {
+        // Prefer the cookie based login state established by the "/api/auth/*" endpoints.
+        if (cookieUser is not null)
+        {
+            return cookieUser;
+        }
+
+        // Fall back to the legacy browser-storage based token flow for backwards
+        // compatibility with any code path that still populates it directly.
         var idToken = await tokenStore.GetIdTokenAsync();
         if (string.IsNullOrEmpty(idToken))
         {

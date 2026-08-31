@@ -1,12 +1,23 @@
 ﻿@page "/members/logout"
 @inject LeagueApiService apiService
 @inject NavigationManager navigationManager
+@inject Shared.AuthJsInterop AuthInterop
+@inject ILogger<Logout> Logger
 @using iRLeagueManager.Web.Extensions
 
 @code {
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender == false)
+        {
+            return;
+        }
+
+        await AuthInterop.PostAsync("api/auth/logout");
+        // Also clear any token still held by the legacy browser-storage based token store.
         await apiService.Client.LogOut();
+        Logger.LogInformation("User logged out");
+
         var returnUrl = navigationManager.QueryString("returnUrl") ?? "";
         navigationManager.NavigateTo(returnUrl, forceLoad:true);
     }

@@ -19,6 +19,7 @@ public sealed class LoginRedirect : ComponentBase
         {
             // redirect to original page
             NavigationManager.NavigateTo(NavigationManager.Uri);
+            return;
         }
 
         // redirect to login page

@@ -5,6 +5,17 @@ using System.Security.Claims;
 
 namespace iRLeagueManager.Web.Shared;
 
+/// <summary>
+/// Server-only authentication state provider. It depends on <see cref="IHttpContextAccessor"/>
+/// to read the cookie-authenticated <see cref="System.Security.Claims.ClaimsPrincipal"/>
+/// populated by <c>JwtCookieMiddleware</c>/the JWT bearer handler, which is only available
+/// while handling the HTTP request that starts a Blazor Server circuit. It also falls back to
+/// <see cref="IAsyncTokenProvider"/> (backed by <c>BrowserProtectedStorageTokenStore</c>,
+/// itself Server-only since it depends on <c>ProtectedLocalStorage</c> JS interop that
+/// requires an active circuit). Because of these dependencies, this provider must keep
+/// running under an <c>InteractiveServer</c> render mode; it is not WebAssembly-compatible
+/// (see Phase 2b notes in <c>App.razor</c>).
+/// </summary>
 internal sealed class JwtAuthenticationStateProvicer : AuthenticationStateProvider, IDisposable
 {
     private readonly JwtSecurityTokenHandler tokenHandler = new();

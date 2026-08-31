@@ -7,6 +7,7 @@ using iRLeagueManager.Web.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
+using Microsoft.AspNetCore.Components.WebAssembly.Server;
 using Microsoft.AspNetCore.HttpOverrides;
 using System.Reflection;
 using System.Text;
@@ -26,7 +27,8 @@ builder.Services.AddScoped<ServerAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthJsInterop>();
 //builder.Services.AddRazorPages();
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents()
+    .AddInteractiveWebAssemblyComponents();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName, config =>
 {
@@ -102,6 +104,11 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+else
+{
+    // Enables browser debugging of the WebAssembly runtime (Phase 2b).
+    app.UseWebAssemblyDebugging();
+}
 
 app.UseJwtCookieMiddleware();
 app.UseAuthentication();
@@ -113,7 +120,9 @@ app.UseAntiforgery();
 app.MapAuthEndpoints();
 
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+    .AddInteractiveServerRenderMode()
+    .AddInteractiveWebAssemblyRenderMode()
+    .AddAdditionalAssemblies(typeof(iRLeagueManager.Web.Client._Imports).Assembly);
 app.UseRequestLocalization(new RequestLocalizationOptions()
     .AddSupportedCultures(["en-US", "de"])
     .AddSupportedUICultures(["en-US", "de"]));

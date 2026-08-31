@@ -53,7 +53,8 @@
     private void UpdateEmbedMode(string uri)
     {
         var query = QueryHelpers.ParseQuery(new Uri(uri).Query);
-        embedded = query.TryGetValue("embed", out var embed) && bool.TryParse(embed, out var value) && value;
+        embedded = query.TryGetValue("embed", out var embed)
+            && (embed.Count == 0 || string.IsNullOrWhiteSpace(embed[0]) || bool.TryParse(embed[0], out var value) && value);
     }
 
     private void Reload()

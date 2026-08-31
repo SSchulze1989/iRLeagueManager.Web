@@ -73,7 +73,8 @@ public static class AuthEndpoints
         if (response.IsSuccessStatusCode == false)
         {
             logger.LogWarning("Login failed for user {UserName}: {StatusCode}", request.Username, response.StatusCode);
-            return Results.Unauthorized();
+            var upstreamMessage = await TryReadUpstreamMessageAsync(response, cancellationToken);
+            return Results.Json(new { message = upstreamMessage }, statusCode: StatusCodes.Status401Unauthorized);
         }
 
         LoginResponse loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>(cancellationToken: cancellationToken);
@@ -127,6 +128,23 @@ public static class AuthEndpoints
         return Results.Ok(new { success = true });
     }
 
+    /// <summary>
+    /// Best-effort attempt to extract the upstream API's error message (e.g. "MailConfirm"
+    /// for accounts pending email confirmation) so that it can be relayed to the client.
+    /// </summary>
+    private static async Task<string?> TryReadUpstreamMessageAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var errorBody = await response.Content.ReadFromJsonAsync<UpstreamErrorResponse>(cancellationToken: cancellationToken);
+            return errorBody?.Message;
+        }
+        catch (Exception ex) when (ex is System.Text.Json.JsonException or NotSupportedException or IOException)
+        {
+            return null;
+        }
+    }
+
     private static IResult GetStatus(HttpContext httpContext)
     {
         var isAuthenticated = httpContext.User.Identity?.IsAuthenticated ?? false;
@@ -155,3 +173,5 @@ public static class AuthEndpoints
 }
 
 public sealed record LoginRequest(string Username, string Password);
+
+file sealed record UpstreamErrorResponse(string? Message);

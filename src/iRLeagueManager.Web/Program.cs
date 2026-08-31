@@ -1,12 +1,17 @@
 using Blazored.LocalStorage;
 using iRLeagueManager.Web;
 using iRLeagueManager.Web.Data;
+using iRLeagueManager.Web.Endpoints;
+using iRLeagueManager.Web.Middleware;
 using iRLeagueManager.Web.Shared;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.HttpOverrides;
 using System.Reflection;
+using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
 using MudBlazor.Services;
 using MudBlazor;
 
@@ -35,6 +40,28 @@ builder.Services.AddLeagueApiClient(config => config
 builder.Services.AddScoped<ClientLocalTimeProvider>();
 builder.Services.AddScoped<SharedStateService>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvicer>();
+builder.Services.AddScoped<IAuthenticationService, iRLeagueManager.Web.Data.AuthenticationService>();
+
+// Cookie-based JWT authentication (Phase 1): the JWT stored in the HttpOnly
+// "X-Access-Token" cookie is translated into a bearer token by JwtCookieMiddleware
+// and validated here using the same signing configuration used to create it.
+var jwtSection = builder.Configuration.GetSection("Jwt");
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var secret = jwtSection["Secret"] ?? throw new InvalidOperationException("Jwt:Secret configuration value is missing.");
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtSection["Issuer"],
+            ValidateAudience = true,
+            ValidAudience = jwtSection["Audience"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(1),
+        };
+    });
 builder.Services.AddTrackList();
 builder.Services.AddViewModels();
 builder.Services.AddExporters();
@@ -74,10 +101,14 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseJwtCookieMiddleware();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+
+app.MapAuthEndpoints();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

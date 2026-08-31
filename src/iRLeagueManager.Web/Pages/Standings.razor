@@ -10,6 +10,7 @@
 @using iRLeagueApiCore.Common.Models
 @using iRLeagueManager.Web.Components
 @using iRLeagueManager.Web.Data.CsvExporter
+@using iRLeagueManager.Web.Extensions
 @using iRLeagueManager.Web.ViewModels
 @inherits LeagueComponentBase
 @inject StandingsPageViewModel vm
@@ -105,7 +106,7 @@
     public int SelectedStandingIndexParam { get; set; } = 0;
     [Parameter]
     [SupplyParameterFromQuery(Name = "embed")]
-    public bool Embed { get; set; }
+    public bool? Embed { get; set; }
 
     private int selectedStandingIndex;
     public int SelectedStandingIndex
@@ -116,10 +117,7 @@
             if (selectedStandingIndex != value)
             {
                 selectedStandingIndex = value;
-                if (Embed == false)
-                {
-                    NavigationManager.NavigateTo(GetTabLink(value), replace: true);
-                }
+                NavigationManager.NavigateTo(GetTabLink(value), replace: true);
             }
         }
     }
@@ -152,20 +150,25 @@
             {
                 selectedStandingIndex = standingsCount - 1;
             }
-            if (Embed == false)
-            {
-                var navUri = $"/{LeagueName}/Standings/Events/{@event.EventId}";
-                bool replace = NavigationManager.Uri.Contains($"/Events/") == false || NavigationManager.Uri.Contains(navUri);
-                navUri = $"{navUri}?{standingTabParam}={standingIndex}";
-                NavigationManager.NavigateTo(navUri, replace: replace);
-            }
+            var navUri = NavigationManager.BuildUriWithMergedQuery($"/{LeagueName}/Standings/Events/{@event.EventId}", GetQueryParameters(standingIndex));
+            bool replace = NavigationManager.ShouldReplaceNavigation(navUri);
+            NavigationManager.NavigateTo(navUri, replace: replace);
         }
     }
 
     private string GetTabLink(int index)
     {
-        var url = NavigationManager.GetUriWithQueryParameter(standingTabParam, index);
+        var currentPath = new Uri(NavigationManager.Uri).AbsolutePath;
+        var url = NavigationManager.BuildUriWithMergedQuery(currentPath, GetQueryParameters(index));
         return url;
+    }
+
+    private IReadOnlyDictionary<string, object?> GetQueryParameters(int? standingIndex = null)
+    {
+        return new Dictionary<string, object?>
+        {
+            { standingTabParam, standingIndex ?? SelectedStandingIndex },
+        };
     }
 
     protected override void Dispose(bool disposing)

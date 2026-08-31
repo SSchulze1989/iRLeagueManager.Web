@@ -3,6 +3,7 @@ using iRLeagueApiCore.Common.Models.Rosters;
 using iRLeagueManager.Web.Components;
 using iRLeagueManager.Web.Data;
 using iRLeagueManager.Web.Data.CsvExporter;
+using iRLeagueManager.Web.Extensions;
 using iRLeagueManager.Web.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -23,7 +24,7 @@ public partial class Results
     public int SelectedTabIndexParam { get; set; } = 0;
     [Parameter]
     [SupplyParameterFromQuery(Name = "embed")]
-    public bool Embed { get; set; }
+    public bool? Embed { get; set; }
 
     private int selectedTabIndex;
     private int SelectedTabIndex
@@ -34,10 +35,7 @@ public partial class Results
             if (selectedTabIndex != value)
             {
                 selectedTabIndex = value;
-                if (Embed == false)
-                {
-                    NavigationManager.NavigateTo(GetTabLink(value), replace: true);
-                }
+                NavigationManager.NavigateTo(GetTabLink(value), replace: true);
             }
         }
     }
@@ -67,20 +65,25 @@ public partial class Results
             {
                 selectedTabIndex = resultCount - 1;
             }
-            if (Embed == false)
-            {
-                var navUri = $"/{LeagueName}/Results/Events/{@event.EventId}";
-                bool replace = NavigationManager.Uri.Contains($"/Events/") == false || NavigationManager.Uri.Contains(navUri);
-                navUri = $"{navUri}?{resultTabParam}={SelectedTabIndex}";
-                NavigateTo(navUri, replace: replace);
-            }
+            var navUri = NavigationManager.BuildUriWithMergedQuery($"/{LeagueName}/Results/Events/{@event.EventId}", GetQueryParameters());
+            bool replace = NavigationManager.ShouldReplaceNavigation(navUri);
+            NavigateTo(navUri, replace: replace);
         }
     }
 
     private string GetTabLink(int index)
     {
-        var url = NavigationManager.GetUriWithQueryParameter(resultTabParam, index);
+        var currentPath = new Uri(NavigationManager.Uri).AbsolutePath;
+        var url = NavigationManager.BuildUriWithMergedQuery(currentPath, GetQueryParameters(index));
         return url;
+    }
+
+    private IReadOnlyDictionary<string, object?> GetQueryParameters(int? tabIndex = null)
+    {
+        return new Dictionary<string, object?>
+        {
+            { resultTabParam, tabIndex ?? SelectedTabIndex },
+        };
     }
 
     private async Task UploadButtonClick()

@@ -1,5 +1,7 @@
 ﻿using iRLeagueApiCore.Client.Results;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -54,7 +56,9 @@ internal sealed class AuthenticationService : IAuthenticationService
         var jwtSection = configuration.GetSection("Jwt");
         var issuer = jwtSection["Issuer"];
         var audience = jwtSection["Audience"];
-        var expirationMinutes = double.Parse(jwtSection["ExpirationMinutes"] ?? DefaultExpirationMinutes);
+        var expirationMinutes = double.TryParse(jwtSection["ExpirationMinutes"], NumberStyles.Number, CultureInfo.InvariantCulture, out var parsedMinutes)
+            ? parsedMinutes
+            : double.Parse(DefaultExpirationMinutes, CultureInfo.InvariantCulture);
         var signingCredentials = GetSigningCredentials(jwtSection);
 
         var expires = DateTime.UtcNow.AddMinutes(expirationMinutes);
@@ -110,7 +114,7 @@ internal sealed class AuthenticationService : IAuthenticationService
         // The access token issued by the iRLeagueManager API already contains
         // the claims describing the authenticated user (id, name, roles, ...).
         var apiToken = tokenHandler.ReadJwtToken(loginResponse.AccessToken);
-        var identity = new ClaimsIdentity(apiToken.Claims, authenticationType: "bearer");
+        var identity = new ClaimsIdentity(apiToken.Claims, authenticationType: JwtBearerDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
         logger.LogDebug("Created claims principal for user {UserName} from API login response",
             principal.Identity?.Name);

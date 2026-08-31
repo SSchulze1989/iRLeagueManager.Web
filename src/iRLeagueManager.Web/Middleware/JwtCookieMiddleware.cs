@@ -26,8 +26,9 @@ public sealed class JwtCookieMiddleware
             context.Request.Cookies.TryGetValue(CookieName, out var token) &&
             string.IsNullOrWhiteSpace(token) == false)
         {
+            var sanitizedPath = context.Request.Path.ToString().Replace("\r", string.Empty).Replace("\n", string.Empty);
             logger.LogDebug("Found {CookieName} cookie, setting Authorization header for request {Path}",
-                CookieName, context.Request.Path);
+                CookieName, sanitizedPath);
             context.Request.Headers.Authorization = new StringValues("Bearer " + token);
         }
 

@@ -24,19 +24,21 @@ internal sealed class JwtAuthenticationStateProvicer : AuthenticationStateProvid
 
     private async Task<ClaimsPrincipal> GetTokenUser()
     {
-        var idToken = await tokenStore.GetIdTokenAsync();
-        if (string.IsNullOrEmpty(idToken))
-        {
-            return GetAnonymous();
-        }
         var accessToken = await tokenStore.GetAccessTokenAsync();
         if (string.IsNullOrEmpty(accessToken))
         {
             return GetAnonymous();
         }
-        var jwtSecurityToken = tokenHandler.ReadJwtToken(accessToken);
-        var identity = new ClaimsIdentity(jwtSecurityToken.Claims, "bearer");
-        return new ClaimsPrincipal(identity);
+        try
+        {
+            var jwtSecurityToken = tokenHandler.ReadJwtToken(accessToken);
+            var identity = new ClaimsIdentity(jwtSecurityToken.Claims, "bearer");
+            return new ClaimsPrincipal(identity);
+        }
+        catch (ArgumentException)
+        {
+            return GetAnonymous();
+        }
     }
 
     private static ClaimsPrincipal GetAnonymous()

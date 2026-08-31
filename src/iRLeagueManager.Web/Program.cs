@@ -5,6 +5,7 @@ using iRLeagueManager.Web.Shared;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Components;
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using MudBlazor.Services;
@@ -25,12 +26,22 @@ builder.Services.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName,
 {
     config.DefaultRequestHeaders.UserAgent.ParseAdd($"iRLeagueManager/{Assembly.GetEntryAssembly()!.GetName().Version!.Major}.{Assembly.GetEntryAssembly()!.GetName().Version!.Minor}.{Assembly.GetEntryAssembly()!.GetName().Version!.Build} (iRLeaguemanager Web App)");
 });
+builder.Services.AddHttpClient("AuthApi", config =>
+{
+    config.BaseAddress = new Uri(builder.Configuration["APIServer"] ?? throw new InvalidOperationException("Missing APIServer configuration."));
+    config.DefaultRequestHeaders.UserAgent.ParseAdd($"iRLeagueManager/{Assembly.GetEntryAssembly()!.GetName().Version!.Major}.{Assembly.GetEntryAssembly()!.GetName().Version!.Minor}.{Assembly.GetEntryAssembly()!.GetName().Version!.Build} (iRLeaguemanager Web App)");
+});
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri(sp.GetRequiredService<NavigationManager>().BaseUri)
+});
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddLeagueApiService();
 
 builder.Services.AddLeagueApiClient(config => config
     .UseBaseAddress(builder.Configuration["APIServer"] ?? string.Empty)
-    .UseTokenStore<BrowserProtectedStorageTokenStore>());
+    .UseTokenStore<CookieTokenStore>());
 
 builder.Services.AddScoped<ClientLocalTimeProvider>();
 builder.Services.AddScoped<SharedStateService>();
@@ -74,11 +85,12 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseAuthorization();
-
 app.UseStaticFiles();
+app.UseMiddleware<JwtCookieMiddleware>();
+app.UseAuthorization();
 app.UseAntiforgery();
 
+app.MapAuthEndpoints();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 app.UseRequestLocalization(new RequestLocalizationOptions()

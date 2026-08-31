@@ -1,4 +1,4 @@
-﻿@namespace iRLeagueManager.Web.Components
+@namespace iRLeagueManager.Web.Components
 @using iRLeagueApiCore.Common.Models.Standings
 @using iRLeagueApiCore.Common.Models
 @inherits UtilityComponentBase
@@ -88,7 +88,7 @@
 </div>
 
 @code {
-    [CascadingParameter]
+    [Inject]
     private EventListViewModel EventList { get; set; } = default!;
     [Parameter(CaptureUnmatchedValues = true)]
     public IDictionary<string, object>? AdditionalAttributes { get; set; }
@@ -105,7 +105,7 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        BlazorParameterNullException.ThrowIfNull(this, EventList, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, EventList);
         BlazorParameterNullException.ThrowIfNull(this, Refresh);
         raceEvents = GetStandingEvents();
     }

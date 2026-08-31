@@ -9,7 +9,13 @@ public abstract partial class LeagueComponentBase : UtilityComponentBase
 {
     private EventListViewModel eventList = default!;
 
-    [CascadingParameter]
+    /// <summary>
+    /// Resolved from DI instead of a <see cref="CascadingParameter"/> so that pages which are
+    /// their own render mode boundary (e.g. <c>@rendermode="InteractiveAuto"</c>) still receive a
+    /// valid instance: cascading values provided by ancestors outside the boundary (e.g.
+    /// <c>Routes.razor</c>) are not propagated across render mode boundaries.
+    /// </summary>
+    [Inject]
     public EventListViewModel EventList
     {
         get => eventList;
@@ -43,7 +49,7 @@ public abstract partial class LeagueComponentBase : UtilityComponentBase
 
     protected override void OnParametersSet()
     {
-        BlazorParameterNullException.ThrowIfNull(this, EventList, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, EventList);
         if (SeasonId == null && EventId == null && Shared.SeasonId != 0)
         {
             SeasonId = Shared.SeasonId;

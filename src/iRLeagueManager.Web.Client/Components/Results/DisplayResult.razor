@@ -1,4 +1,4 @@
-﻿@namespace iRLeagueManager.Web.Components
+@namespace iRLeagueManager.Web.Components
 @using System.Linq.Expressions
 @using iRLeagueApiCore.Common.Enums
 @using iRLeagueApiCore.Common.Models
@@ -152,7 +152,7 @@
 </MudElement>
 
 @code {
-    [CascadingParameter]
+    [Inject]
     private EventListViewModel EventList { get; set; } = default!;
     [CascadingParameter]
     private ResultsPageViewModel? ResultsPageVm { get; set; }
@@ -172,7 +172,7 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        BlazorParameterNullException.ThrowIfNull(this, EventList, cascading: true);
+        BlazorParameterNullException.ThrowIfNull(this, EventList);
         BlazorParameterNullException.ThrowIfNull(this, Result);
         isTeamResult = Result.ResultRows.Any(x => x.MemberId == null);
         showDisqualification = Result.ResultRows.Any(x => x.Status == RaceStatus.Disqualified);

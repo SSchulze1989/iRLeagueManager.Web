@@ -1,4 +1,4 @@
-﻿@namespace iRLeagueManager.Web.Components
+@namespace iRLeagueManager.Web.Components
 @using System.Collections.Specialized
 @using System.Globalization
 @using System.Collections.ObjectModel
@@ -40,7 +40,7 @@
     public LeagueApiService ApiService { get; set; } = default!;
 
     private EventListViewModel? eventListPrivate;
-    [CascadingParameter]
+    [Inject]
     public EventListViewModel EventList { get; set; } = default!;
 
     private List<EventViewModel> Events => EventList.EventList;

@@ -43,9 +43,11 @@ internal sealed class AuthenticationService : IAuthenticationService
     /// Claim type used to carry the iRLeagueManager API's own id token inside the
     /// first-party JWT so that a Blazor circuit can later use it to authenticate
     /// <see cref="iRLeagueApiCore.Client.ILeagueApiClient"/> requests to the external API
-    /// (see <see cref="BrowserProtectedStorageTokenStore"/>).
+    /// (see <see cref="BrowserProtectedStorageTokenStore"/>). Shared with the Client project
+    /// (see <see cref="AuthConstants.ApiIdTokenClaimType"/>) so both projects agree on the
+    /// claim type name.
     /// </summary>
-    public const string ApiIdTokenClaimType = "irl_api_id_token";
+    public const string ApiIdTokenClaimType = AuthConstants.ApiIdTokenClaimType;
 
     private const string DefaultExpirationMinutes = "60";
 

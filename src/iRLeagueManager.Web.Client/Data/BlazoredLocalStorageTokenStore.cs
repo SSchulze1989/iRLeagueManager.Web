@@ -1,0 +1,151 @@
+﻿using Blazored.LocalStorage;
+using iRLeagueApiCore.Client.Http;
+using System.IdentityModel.Tokens.Jwt;
+
+namespace iRLeagueManager.Web.Data;
+
+/// <summary>
+/// WebAssembly-compatible <see cref="ITokenStore"/> implementation used by the Client
+/// project's <c>ILeagueApiClient</c> registration. It mirrors the Server-only
+/// <c>BrowserProtectedStorageTokenStore</c>, but stores the id token via
+/// <see cref="ILocalStorageService"/> (Blazored.LocalStorage) instead of
+/// <c>ProtectedLocalStorage</c>, since the latter requires a Blazor Server circuit and is
+/// not available when running in the browser via WebAssembly.
+/// </summary>
+public sealed class BlazoredLocalStorageTokenStore : ITokenStore
+{
+    private readonly ILogger<BlazoredLocalStorageTokenStore> logger;
+    private readonly ILocalStorageService localStore;
+
+    private const string tokenKey = "idToken";
+
+    private string inMemoryIdToken = string.Empty;
+    private string inMemoryAccessToken = string.Empty;
+
+    public event EventHandler? TokenChanged;
+    public event EventHandler? TokenExpired;
+
+    public bool IsLoggedIn { get; private set; }
+    private bool AccessTokenExpired { get; set; } = false;
+    public DateTime IdTokenExpires { get; private set; }
+    public DateTime AccessTokenExpires { get; private set; }
+
+    public BlazoredLocalStorageTokenStore(ILogger<BlazoredLocalStorageTokenStore> logger, ILocalStorageService localStorage)
+    {
+        this.logger = logger;
+        this.localStore = localStorage;
+    }
+
+    public async Task ClearTokensAsync()
+    {
+        var tokenValue = inMemoryIdToken;
+
+        logger.LogDebug("Clear token in local browser store");
+        IsLoggedIn = false;
+        inMemoryIdToken = string.Empty;
+        inMemoryAccessToken = string.Empty;
+        await localStore.RemoveItemAsync(tokenKey);
+        if (inMemoryIdToken != tokenValue)
+        {
+            TokenChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public async Task<string> GetIdTokenAsync()
+    {
+        if (string.IsNullOrEmpty(inMemoryIdToken) == false)
+        {
+            return inMemoryIdToken;
+        }
+
+        logger.LogDebug("Reading token from local browser store");
+        try
+        {
+            var token = await localStore.GetItemAsync<string>(tokenKey);
+            if (string.IsNullOrEmpty(token) == false)
+            {
+                return await ValidateToken(token);
+            }
+            IsLoggedIn = false;
+            return string.Empty;
+        }
+        catch (InvalidOperationException ex)
+        {
+            logger.LogDebug("Could not read from local browser session: {Exception}", ex);
+            return string.Empty;
+        }
+    }
+
+    private async Task<string> ValidateToken(string? token)
+    {
+        if (IsLoggedIn == false)
+        {
+            // set expiration date
+            IdTokenExpires = ExtractExpirationDate(token);
+        }
+
+        // check if token is still valid
+        if (IdTokenExpires < DateTime.UtcNow.AddMinutes(5))
+        {
+            await ClearTokensAsync();
+            logger.LogInformation("Token read from token store has expired");
+            return string.Empty;
+        }
+        IsLoggedIn = true;
+        return inMemoryIdToken = token ?? string.Empty;
+    }
+
+    public async Task SetIdTokenAsync(string token)
+    {
+        var oldToken = inMemoryIdToken;
+        logger.LogDebug("Set token to local browser session");
+        await localStore.SetItemAsync(tokenKey, token);
+        // force re-evaluation of expiration/login state for the newly set token instead of
+        // only validating tokens that were read back from local storage
+        IsLoggedIn = false;
+        await ValidateToken(token);
+
+        if (inMemoryIdToken != oldToken)
+        {
+            TokenChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public async Task SetAccessTokenAsync(string token)
+    {
+        inMemoryAccessToken = token;
+        AccessTokenExpired = false;
+
+        if (string.IsNullOrEmpty(inMemoryAccessToken) == false)
+        {
+            // set expiration date
+            var jwtToken = new JwtSecurityTokenHandler().ReadToken(inMemoryAccessToken);
+            AccessTokenExpires = jwtToken.ValidTo;
+        }
+
+        TokenChanged?.Invoke(this, EventArgs.Empty);
+        await Task.CompletedTask;
+    }
+
+    public async Task<string> GetAccessTokenAsync()
+    {
+        if (AccessTokenExpires <= DateTime.UtcNow && string.IsNullOrEmpty(inMemoryAccessToken) == false && AccessTokenExpired == false)
+        {
+            AccessTokenExpired = true;
+            TokenExpired?.Invoke(this, EventArgs.Empty);
+        }
+        return await Task.FromResult(inMemoryAccessToken);
+    }
+
+    private static DateTime ExtractExpirationDate(string? token)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jsonToken = handler.ReadJwtToken(token);
+        if (jsonToken.Claims.Any(x => x.Type == "exp"))
+        {
+            var expSeconds = Convert.ToInt64(jsonToken.Claims.First(x => x.Type == "exp").Value);
+            return new DateTime(1970, 1, 1).AddSeconds(expSeconds);
+        }
+        return DateTime.MinValue;
+    }
+}

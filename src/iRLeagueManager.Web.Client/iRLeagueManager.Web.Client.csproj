@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+    <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
+    <LangVersion>12</LangVersion>
+    <Features>use-roslyn-tokenizer=true</Features>
+    <!-- Keep the same root namespace as the Server project so that files moved here
+         (which relied on the implicit folder-based namespace, e.g. Components/Results/*)
+         keep resolving to iRLeagueManager.Web.Components.Results etc. without edits. -->
+    <RootNamespace>iRLeagueManager.Web</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+    <PackageReference Include="CoreCLR-NCalc" Version="3.1.253" />
+    <PackageReference Include="HtmlSanitizer" Version="9.0.892" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.8" />
+    <PackageReference Include="iRLeagueApiCore.Client" Version="0.17.10" />
+    <PackageReference Include="iRLeagueApiCore.Common" Version="0.17.10" />
+    <PackageReference Include="Markdig" Version="1.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.8" />
+    <PackageReference Include="MudBlazor" Version="7.15.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+</Project>

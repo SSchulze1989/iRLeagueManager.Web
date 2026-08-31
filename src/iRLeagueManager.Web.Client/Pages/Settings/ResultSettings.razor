@@ -1,0 +1,252 @@
+﻿@page "/{LeagueName}/Settings/Results"
+@rendermode InteractiveAuto
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.ViewModels
+@inherits LeagueComponentBase
+@layout SettingsLayout
+@inject ResultSettingsViewModel Vm
+@inject ILogger<ResultSettings> Logger
+@inject IDialogService DialogService
+@inject BreadCrumbService BreadCrumbService
+@attribute [Authorize]
+
+<PageTitle>
+    Settings - @LeagueName
+</PageTitle>
+
+<MudBreadcrumbs Items="BreadCrumbService.Items" />
+<LoadingHeader Loading="Shared.Loading">
+    <HeaderText>
+        <MudStack Row="true" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h5">Result Settings</MudText>
+            <MudSpacer />
+            <MudElement HtmlTag="div" Style="max-width: 28em" Class="d-flex flex-grow-1">
+                <SeasonSelect SeasonChanged="SeasonChanged" Variant="Variant.Outlined" />
+            </MudElement>
+        </MudStack>
+    </HeaderText>
+</LoadingHeader>
+
+<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
+    <Authorized>
+        <MudText Typo="Typo.h6" Class="mt-2 px-2">Championships</MudText>
+        <MudStack Spacing="5">
+            <MudStack Row="true" Justify="Justify.FlexEnd">
+                <MudButton Variant="Variant.Text"
+                           OnClick="ReorderClick">
+                    Change order
+                </MudButton>
+            </MudStack>
+            <MudPaper Elevation="5">
+                @{
+                    var showRosters = Vm.CurrentChampSeasons.Any(x => x.Roster != null);
+                }
+                <MudTable Items="Vm.Championships.Where(x => x.IsActive && x.CurrentChampSeason is not null)" Striped="true" Hover="true" Elevation="0" Breakpoint="Breakpoint.None">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Type</MudTh>
+                        @if (showRosters)
+                        {
+                            <MudTh>Roster</MudTh>
+                        }
+                        <MudTh>Point Configs</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate Context=row>
+                        @{
+                            var champSeason = row.CurrentChampSeason;
+                        }
+                        <MudTd DataLabel="Name">
+                            <MudLink Href="@($"{LeagueName}/Settings/Results/Championships/{row.ChampionshipId}")">
+                                @row.Name
+                            </MudLink>
+                        </MudTd>
+                        <MudTd DataLabel="Type">
+                            @champSeason?.ResultKind
+                        </MudTd>
+                        @if (showRosters)
+                        {
+                            <MudTd>
+                                @champSeason?.Roster?.Name
+                            </MudTd>
+                        }
+                        <MudTd DataLabel="Point Configs">
+                            @if (champSeason is not null)
+                            {
+                                @:@string.Join(", ", champSeason.ResultConfigs.Select(x => x.Name))
+                            }
+                        </MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Outlined.Archive" Color="Color.Default" OnClick="@(() => ArchiveChampionshipClick(row))" />
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+            <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="OnAddChampionshipClick">
+                Add Championship
+            </MudButton>
+
+            @if (Vm.Championships.Any(x => !x.IsActive))
+            {
+                <MudExpansionPanel Text="Archived Championships">
+                    <MudTable Items="Vm.Championships.Where(x => !x.IsActive)" Elevation="0" Breakpoint="Breakpoint.None">
+                        <HeaderContent>
+                            <MudTh>Name</MudTh>
+                            <MudTh>Type</MudTh>
+                            <MudTh>Point Configs</MudTh>
+                            <MudTh></MudTh>
+                            <MudTh></MudTh>
+                        </HeaderContent>
+                        <RowTemplate Context=row>
+                            @{
+                                var champSeason = Vm.CurrentChampSeasons.FirstOrDefault(x => x.ChampionshipId == row.ChampionshipId);
+                            }
+                            <MudTd DataLabel="Name">
+                                <MudLink Href="@($"{LeagueName}/Settings/Results/Championships/{row.ChampionshipId}")">
+                                    @row.Name
+                                </MudLink>
+                            </MudTd>
+                            <MudTd DataLabel="Type">
+                                @champSeason?.ResultKind
+                            </MudTd>
+                            <MudTd DataLabel="Point Configs">
+                                @if (champSeason is not null)
+                                {
+                                    @:@string.Join(", ", champSeason.ResultConfigs.Select(x => x.Name))
+                                }
+                            </MudTd>
+                            <MudTd>
+                                <MudIconButton Icon="@Icons.Material.Outlined.Unarchive" Color="Color.Default" OnClick="@(() => UnArchiveChampionshipClick(row))" />
+                                <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="@(() => OnDeleteChampionshipClick(row))" />
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudExpansionPanel>
+            }
+        </MudStack>
+    </Authorized>
+    <NotAuthorized>
+        You are not allowed here ...
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        await Vm.LoadFromCurrentSeasonAsync(CancellationToken);
+        BreadCrumbService.Items = new List<BreadcrumbItem>()
+        {
+            new("Championships", $"{LeagueName}/Settings/Results")
+        };
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task HandleSubmit()
+    {
+        Logger.LogInformation("Handle submit called!");
+        if (Vm.Selected == null)
+        {
+            return;
+        }
+        await Task.FromResult(true);
+    }
+
+    private async Task OnChampionshipClick(ChampSeasonViewModel champSeason)
+    {
+        NavigationManager.NavigateTo($"/{LeagueName}/Settings/Results/Championships/{champSeason.ChampionshipId}");
+        await Task.CompletedTask;
+    }
+
+    private async Task OnDeleteChampionshipClick(ChampionshipViewModel championship)
+    {
+        var parameters = new DialogParameters<ConfirmDialog>()
+        {
+            { x => x.Text, $"Really delete championship {championship.Name}? This will also remove all settings from previous seasons but it will still keep the results." },
+            { x => x.ButtonTypes, ButtonTypes.YesNo },
+        };
+        var result = await DialogService.Show<ConfirmDialog>("Delete Championship", parameters).Result;
+        if (result?.Canceled == false)
+        {
+            await Vm.DeleteChampionship(championship.GetModel(), CancellationToken);
+        }
+    }
+
+    private async Task OnAddChampionshipClick()
+    {
+        var championship = CreateChampionshipFromTemplate();
+        var parameters = new DialogParameters<DisplayNameDialog>();
+        var result = await DialogService.Show<DisplayNameDialog>("Create Championship", parameters).Result;
+        if (result is null || result.Canceled || result.Data is not (string name, string displayName))
+        {
+            return;
+        }
+        championship.ChampionshipName = name;
+        championship.ChampionshipDisplayName = displayName;
+        await Vm.AddChampionship(championship, cancellationToken: CancellationToken);
+        await Vm.LoadFromCurrentSeasonAsync(CancellationToken);
+    }
+
+    private ResultConfigModel CreateConfigFromTemplate()
+    {
+        return new()
+            {
+                Name = "New Config",
+                DisplayName = "New Config",
+                Scorings = new List<ScoringModel>()
+            {
+                new()
+                {
+                    Name = "Race",
+                    PointRule = new()
+                    {
+                        PointsSortOptions = new[] { SortOptions.IntvlAsc },
+                        FinalSortOptions = new[] { SortOptions.TotalPtsDesc, SortOptions.PenPtsAsc }
+                    }
+                }
+            },
+            };
+    }
+
+    private ChampSeasonModel CreateChampionshipFromTemplate()
+    {
+        return new()
+            {
+                ChampionshipName = "",
+                ChampionshipDisplayName = "",
+                StandingConfig = new(),
+            };
+    }
+
+    private async Task ArchiveChampionshipClick(ChampionshipViewModel championship)
+    {
+        await championship.DeactivateForCurrentSeasonAsync(cancellationToken: CancellationToken);
+    }
+
+    private async Task UnArchiveChampionshipClick(ChampionshipViewModel championship)
+    {
+        await championship.ActivateForSeasonAsync(cancellationToken: CancellationToken);
+    }
+
+    private async Task SeasonChanged()
+    {
+        await Vm.LoadFromCurrentSeasonAsync(CancellationToken);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ReorderClick()
+    {
+        var parameters = new DialogParameters<ReorderChampionshipsDialog>()
+        {
+            { x => x.Value, Vm.CurrentChampSeasons.ToList() },
+        };
+        await DialogService.Show<ReorderChampionshipsDialog>("Reorder Championships", parameters).Result;
+        await Vm.LoadFromCurrentSeasonAsync(CancellationToken);
+    }
+}

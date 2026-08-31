@@ -1,0 +1,16 @@
+﻿@page "/{LeagueName}/settings"
+@rendermode InteractiveAuto
+@inject NavigationManager NavigationManager
+
+@code {
+    [Parameter]
+    public string LeagueName { get; set; } = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        if (string.IsNullOrEmpty(LeagueName) == false)
+        {
+            NavigationManager.NavigateTo($"/{LeagueName}/settings/league");
+        }
+    }
+}

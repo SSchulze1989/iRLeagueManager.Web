@@ -7,6 +7,7 @@ using iRLeagueManager.Web.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
+using Microsoft.AspNetCore.Components.WebAssembly.Server;
 using Microsoft.AspNetCore.HttpOverrides;
 using System.Reflection;
 using System.Text;
@@ -26,7 +27,8 @@ builder.Services.AddScoped<ServerAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthJsInterop>();
 //builder.Services.AddRazorPages();
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents()
+    .AddInteractiveWebAssemblyComponents();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName, config =>
 {
@@ -102,6 +104,11 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+else
+{
+    // Enables browser debugging of the WebAssembly runtime (Phase 2b).
+    app.UseWebAssemblyDebugging();
+}
 
 app.UseJwtCookieMiddleware();
 app.UseAuthentication();
@@ -113,7 +120,13 @@ app.UseAntiforgery();
 app.MapAuthEndpoints();
 
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+    .AddInteractiveServerRenderMode()
+    .AddInteractiveWebAssemblyRenderMode()
+    // The Client project shares the "iRLeagueManager.Web" root namespace with this project
+    // (so moved files keep their original namespaces), so a Client-only type (a page that
+    // only exists in the Client assembly) is used here to identify that assembly rather than
+    // "_Imports", which would otherwise ambiguously resolve to this project's own type.
+    .AddAdditionalAssemblies(typeof(iRLeagueManager.Web.Pages.Results).Assembly);
 app.UseRequestLocalization(new RequestLocalizationOptions()
     .AddSupportedCultures(["en-US", "de"])
     .AddSupportedUICultures(["en-US", "de"]));

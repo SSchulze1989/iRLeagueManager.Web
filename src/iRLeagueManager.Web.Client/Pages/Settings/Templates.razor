@@ -1,0 +1,52 @@
+﻿@page "/{LeagueName}/Settings/Templates"
+@rendermode InteractiveAuto
+@layout SettingsLayout
+@inherits LeagueComponentBase
+@attribute [Authorize]
+
+<PageTitle>
+    Select Template - @LeagueName
+</PageTitle>
+
+<LoadingHeader Loading="Loading">
+    <HeaderText>
+        <MudText Typo="Typo.h5">Select Template</MudText>
+    </HeaderText>
+</LoadingHeader>
+
+<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin, LeagueRoles.Organizer) Context="AuthContext">
+    <Authorized>
+        <MudPaper Elevation="5" Class="mt-2">
+            <MudList T="string">
+                @foreach (var ((template, (title, description)), index) in TemplatesAvailable.WithIndex())
+                {
+                    @if (index > 0)
+                    {
+                        <MudDivider />
+                    }
+                    <MudListItem Disabled="Loading"
+                                 OnClick="@(() => OnTemplateSelect(template))">
+                        <h5>@title</h5>
+                        <p>
+                            @((MarkupString)description)
+                        </p>
+                    </MudListItem>
+                }
+            </MudList>
+        </MudPaper>
+    </Authorized>
+    <NotAuthorized>
+        You are not allowed here ...
+    </NotAuthorized>
+</AuthorizeView>
+
+@if (string.IsNullOrEmpty(Status) == false)
+{
+    <label>@Status: @Message</label>
+    @foreach (var error in Errors)
+    {
+        <p>
+            @error
+        </p>
+    }
+}

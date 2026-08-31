@@ -1,0 +1,221 @@
+﻿@page "/{LeagueName}/Settings/League"
+@rendermode InteractiveAuto
+@using Markdig;
+@using iRLeagueApiCore.Common.Enums
+@using iRLeagueApiCore.Common.Models
+@using iRLeagueApiCore.Common.Models.Reviews
+@using iRLeagueManager.Web.Components
+@using iRLeagueManager.Web.ViewModels
+@inherits LeagueComponentBase
+@layout SettingsLayout
+@inject LeagueViewModel League
+@inject LeagueApiService apiService
+@inject MarkdownPipeline MarkdownPipeline
+@inject IDialogService DialogService
+@attribute [Authorize]
+
+<PageTitle>
+    Settings - @LeagueName
+</PageTitle>
+
+<LoadingHeader Loading="League.Loading">
+    <HeaderText>
+        <MudText Typo="Typo.h5">League Settings</MudText>
+    </HeaderText>
+</LoadingHeader>
+
+<AuthorizeView Roles=@GetRoleString(LeagueRoles.Admin) Context="AuthContext">
+    <Authorized>
+        @if (League.LeaguePublic != LeaguePublicSetting.PublicListed && showLeagueHiddenAlert)
+        {
+            <MudAlert Class="mt-4" Elevation="5" Severity="Severity.Warning" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="@(() => showLeagueHiddenAlert = false)">
+                Your league is still hidden. Others can access your league if they have the link but it will not be listed
+                <MudLink Color="Color.Primary" OnClick="MakePublicListed">Make public</MudLink>
+            </MudAlert>
+        }
+        <EditForm Model="League" OnValidSubmit="SaveChanges">
+            <StatusResultValidator @ref="ResultValidator" />
+            <MudStack Spacing="1" Class="mt-2">
+                <SettingsTopSection Header="General">
+                    <SettingsTextPrompt Label="Display Name"
+                                        @bind-Value="League.NameFull" />
+                    <SettingsPromptItem Label="Description"
+                                        HelperText="Enter a description displayed on your league home page. Supports Markdown"
+                                        T="string"
+                                        TDialog="LeagueDescriptionDialog"
+                                        @bind-Value="League.Description">
+                        <MudElement HtmlTag="div" Style="overflow-x: clip; overflow-y: auto; min-height: 4em; max-height: 20em; width: 100%;">
+                            @((MarkupString)RenderDescriptionPreview(League.Description))
+                        </MudElement>
+                    </SettingsPromptItem>
+                </SettingsTopSection>
+
+                <SettingsTopSection Header="Seasons">
+                    @if (League.CurrentSeason != null)
+                    {
+                        <SettingsItem HelperText="Current Season" OnClick="() => SeasonClick(League.CurrentSeason)">
+                            <SeasonPreview Season="League.CurrentSeason" Class="d-flex gap-2 align-center" />
+                        </SettingsItem>
+                    }
+                    @if (League.Seasons.Count > 1)
+                    {
+                        <SettingsSection @bind-Expanded="seasonsExpanded"
+                                         Text="All Seasons"
+                                         HelperText="@(seasonsExpanded ? "Collapse" : "Expand")">
+                            @foreach ((var season, var index) in League.Seasons.Select((x, i) => (x, i)))
+                            {
+                                <MudListItem T="string" Class="py-0 pe-8" OnClick="@(() => SeasonClick(season))">
+                                    <MudElement HtmlTag="div" Class="d-flex align-center">
+                                        <SeasonPreview Season="season" Class="d-flex gap-2 align-center" />
+                                        <MudSpacer />
+                                        <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="@(() => DeleteSeasonClick(season))" Class="flex-grow-0" />
+                                    </MudElement>
+                                </MudListItem>
+                            }
+                            <SettingsItem Icon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="AddSeasonClick">Add Season</SettingsItem>
+                        </SettingsSection>
+                    }
+                    else
+                    {
+                        <MudListItem T="string">
+                            <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="AddSeasonClick" Class="ms-4">Add Season</MudButton>
+                        </MudListItem>
+                    }
+                </SettingsTopSection>
+            </MudStack>
+        </EditForm>
+    </Authorized>
+    <NotAuthorized>
+        <MudPaper Elevation="5" Class="p-4">
+            You are not allowed here ...
+        </MudPaper>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private bool showLeagueHiddenAlert = true;
+    private bool seasonsExpanded = false;
+
+    private new bool Loading => League.Loading;
+
+    private StatusResultValidator? ResultValidator { get; set; }
+
+    private EventCallback OnChangeDebounced;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        OnChangeDebounced = EventCallback.Factory.Create(this, DebounceWrapper.Debounce(OnChanged, 500));
+        League.HasChanged += OnVmChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender == false)
+        {
+            return;
+        }
+        await League.LoadCurrent();
+        await League.LoadSeasons();
+        if (League.IsInitialized == false)
+        {
+            await ShowApplyTemplatesModal();
+        }
+    }
+
+    private async Task AddSeasonClick()
+    {
+        var parameters = new DialogParameters<EditSeasonDialog>()
+        {
+            {x => x.Model, new()},
+            {x => x.OnSubmit, async (season, cancellation) => await League.AddSeason(season.GetModel(), cancellation)},
+        };
+        var result = await DialogService.Show<EditSeasonDialog>("Add Season", parameters).Result;
+    }
+
+    private async Task SeasonClick(SeasonViewModel season)
+    {
+        var parameters = new DialogParameters<EditSeasonDialog>()
+        {
+            {x => x.Model, season.CopyModel()},
+            {x => x.OnSubmit, async (season, cancellation) => await season.SaveChangesAsync(cancellation)},
+        };
+        var result = await DialogService.Show<EditSeasonDialog>("Edit Season", parameters).Result;
+        if (result?.Canceled == false && result.Data is SeasonModel seasonModel)
+        {
+            season.SetModel(seasonModel);
+        }
+    }
+
+    private async Task DeleteSeasonClick(SeasonViewModel season)
+    {
+        var parameters = new DialogParameters<ConfirmDialog>()
+        {
+            {x => x.Text, $"Really delete season \"{season.Name}\"?"},
+            {x => x.ButtonTypes, ButtonTypes.YesNo},
+        };
+        var result = await DialogService.Show<ConfirmDialog>("Delete Season", parameters).Result;
+        if (result?.Canceled == false)
+        {
+            await League.DeleteSeason(season.GetModel());
+        }
+    }
+
+    private string RenderDescriptionPreview(string markdown)
+    {
+        return Markdig.Markdown.ToHtml(markdown, MarkdownPipeline);
+    }
+
+    private async Task ShowApplyTemplatesModal()
+    {
+        var parameters = new DialogParameters<ConfirmDialog>()
+        {
+            {x => x.Text, "Welcome to your new league. To speed up your setup process you can select the basic settings from a template"},
+            {x => x.ButtonTypes, ButtonTypes.OkCancel},
+            {x => x.OkButtonText, "Yes, select template"},
+            {x => x.CancelButtonText, "No, start with empty league"},
+        };
+        var result = await DialogService.Show<ConfirmDialog>("Select league template", parameters).Result;
+        if (result?.Canceled == false)
+        {
+            // forward to select template page
+            NavigateTo($"/{LeagueName}/Settings/Templates", returnUrl: GetReturnUrl());
+            return;
+        }
+        await League.InitializeLeague(CancellationToken);
+    }
+
+    private async Task MakePublicListed()
+    {
+        League.LeaguePublic = LeaguePublicSetting.PublicListed;
+        await League.SaveChangesAsync(CancellationToken);
+    }
+
+    private void OnVmChanged(object? sender, EventArgs e)
+    {
+        InvokeAsync(OnChangeDebounced.InvokeAsync);
+    }
+
+    private async Task OnChanged()
+    {
+        await SaveChanges();
+    }
+
+    private async Task SaveChanges()
+    {
+        if (League.HasChanges)
+        {
+            await League.SaveChangesAsync(CancellationToken);
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            League.HasChanged -= OnVmChanged;
+        }
+        base.Dispose(disposing);
+    }
+}

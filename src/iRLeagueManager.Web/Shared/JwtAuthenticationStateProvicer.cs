@@ -1,19 +1,39 @@
 ﻿using iRLeagueApiCore.Client.Http;
+using iRLeagueManager.Web.Data;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Web;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace iRLeagueManager.Web.Shared;
 
+/// <summary>
+/// Server-only authentication state provider. It depends on <see cref="IHttpContextAccessor"/>
+/// to read the cookie-authenticated <see cref="System.Security.Claims.ClaimsPrincipal"/>
+/// populated by <c>JwtCookieMiddleware</c>/the JWT bearer handler, which is only available
+/// while handling the HTTP request that starts a Blazor Server circuit. It also falls back to
+/// <see cref="IAsyncTokenProvider"/> (backed by <c>BrowserProtectedStorageTokenStore</c>,
+/// itself Server-only since it depends on <c>ProtectedLocalStorage</c> JS interop that
+/// requires an active circuit). Because of these dependencies, this provider must keep
+/// running under an <c>InteractiveServer</c> render mode; it is not WebAssembly-compatible.
+/// It additionally persists a minimal snapshot of the authenticated user (see
+/// <see cref="UserInfo"/>) via <see cref="PersistentComponentState"/> so that the Client
+/// (WebAssembly) project's <c>PersistentAuthenticationStateProvider</c> can pick up the same
+/// authenticated user for <c>InteractiveAuto</c> pages once WebAssembly takes over.
+/// </summary>
 internal sealed class JwtAuthenticationStateProvicer : AuthenticationStateProvider, IDisposable
 {
     private readonly JwtSecurityTokenHandler tokenHandler = new();
     private readonly IAsyncTokenProvider tokenStore;
     private readonly ClaimsPrincipal? cookieUser;
+    private readonly PersistentComponentState persistentComponentState;
+    private readonly PersistingComponentStateSubscription persistingSubscription;
 
-    public JwtAuthenticationStateProvicer(IAsyncTokenProvider tokenStore, IHttpContextAccessor httpContextAccessor)
+    public JwtAuthenticationStateProvicer(IAsyncTokenProvider tokenStore, IHttpContextAccessor httpContextAccessor, PersistentComponentState persistentComponentState)
     {
         this.tokenStore = tokenStore;
+        this.persistentComponentState = persistentComponentState;
         tokenStore.TokenChanged += TokenStore_TokenChanged;
 
         // HttpContext is only reliably available while the initial HTTP request that
@@ -27,6 +47,30 @@ internal sealed class JwtAuthenticationStateProvicer : AuthenticationStateProvid
         {
             cookieUser = httpContextUser;
         }
+
+        // Persist a minimal snapshot of the authenticated user (id, name, roles, external API
+        // id token) so that the Client (WebAssembly) project's PersistentAuthenticationStateProvider
+        // can reconstruct an equivalent ClaimsPrincipal once InteractiveAuto pages switch over
+        // to WebAssembly, without needing its own copy of the cookie/JWT auth pipeline.
+        persistingSubscription = persistentComponentState.RegisterOnPersisting(PersistUserInfoAsync, RenderMode.InteractiveWebAssembly);
+    }
+
+    private Task PersistUserInfoAsync()
+    {
+        if (cookieUser?.Identity?.IsAuthenticated != true || IsExpired(cookieUser))
+        {
+            return Task.CompletedTask;
+        }
+
+        var userInfo = new UserInfo
+        {
+            UserId = cookieUser.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? cookieUser.FindFirst(ClaimTypes.Sid)?.Value ?? string.Empty,
+            Name = cookieUser.Identity.Name ?? string.Empty,
+            Roles = cookieUser.FindAll(ClaimTypes.Role).Select(c => c.Value).ToArray(),
+            ApiIdToken = cookieUser.FindFirst(AuthConstants.ApiIdTokenClaimType)?.Value,
+        };
+        persistentComponentState.PersistAsJson(UserInfo.PersistenceKey, userInfo);
+        return Task.CompletedTask;
     }
 
     private void TokenStore_TokenChanged(object? sender, EventArgs e)
@@ -101,5 +145,6 @@ internal sealed class JwtAuthenticationStateProvicer : AuthenticationStateProvid
     void IDisposable.Dispose()
     {
         tokenStore.TokenChanged -= TokenStore_TokenChanged;
+        persistingSubscription.Dispose();
     }
 }

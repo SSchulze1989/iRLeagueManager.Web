@@ -25,6 +25,7 @@
     <PackageReference Include="iRLeagueApiCore.Common" Version="0.17.10" />
     <PackageReference Include="Markdig" Version="1.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.8" />
@@ -37,6 +38,10 @@
     <PackageReference Include="MudBlazor" Version="7.15.0" />
     <PackageReference Include="System.Formats.Asn1" Version="8.0.1" />
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\iRLeagueManager.Web.Client\iRLeagueManager.Web.Client.csproj" />
   </ItemGroup>
 
 </Project>

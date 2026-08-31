@@ -102,6 +102,10 @@
             }
 
             Logger.LogWarning("Login failed for user {UserName} with status code {StatusCode}", model.Username, jsResult.Status);
+            if (jsResult.Status == 401 && jsResult.Body?.Message == "MailConfirm")
+            {
+                ResendConfirmation = true;
+            }
             ResultValidator?.ValidateResult(MapToStatusResult(jsResult));
         }
         finally
@@ -114,7 +118,7 @@
     {
         if (jsResult.Status == 401)
         {
-            return new StatusResult(false, StatusResult.Unauthorized);
+            return new StatusResult(false, StatusResult.Unauthorized, jsResult.Body?.Message ?? string.Empty);
         }
 
         var message = jsResult.Status == 0

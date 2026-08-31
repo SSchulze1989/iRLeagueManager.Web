@@ -16,6 +16,10 @@ main {
     flex: 1;
 }
 
+.embedded-page {
+    padding: 0;
+}
+
 .sidebar {
     background: #283747;
     color: #d7d7d7;

@@ -21,6 +21,8 @@
 </PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
+    @if (Embed == false)
+    {
     <LoadingHeader Loading="vm.Loading">
         <HeaderText>
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Style="margin-left: -0.5em">
@@ -48,6 +50,7 @@
             </MudStack>
         </HeaderActions>
     </LoadingHeader>
+    }
 
     <MudElement HtmlTag="div" Class="mt-3">
         @if (vm.Standings.Count == 0)
@@ -100,6 +103,9 @@
     [Parameter]
     [SupplyParameterFromQuery(Name = standingTabParam)]
     public int SelectedStandingIndexParam { get; set; } = 0;
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "embed")]
+    public bool Embed { get; set; }
 
     private int selectedStandingIndex;
     public int SelectedStandingIndex

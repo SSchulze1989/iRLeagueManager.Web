@@ -15,17 +15,13 @@
     <HeadOutlet @rendermode="InteractiveAuto" />
 </head>
 <body>
-    @* Routes stays on InteractiveServer (Phase 2b): all page/route components currently
-       live only in this Server project's assembly, which is never downloaded to the
-       browser. Setting this to InteractiveAuto/InteractiveWebAssembly today would let the
-       WebAssembly runtime attempt to load a component type it can never resolve once it
-       switches over from the initial server-rendered fallback, breaking navigation instead
-       of gracefully falling back. HeadOutlet above is safe as InteractiveAuto because its
-       type ships as part of the WebAssembly runtime itself. WebAssembly hosting is enabled
-       server-side (see Program.cs/iRLeagueManager.Web.Client) so that components can be
-       migrated into iRLeagueManager.Web.Client (and set to InteractiveAuto/WebAssembly
-       individually) in a future phase. *@
-    <Routes @rendermode="InteractiveServer" />
+    @* Rendering mode is set per-page (see each page's @rendermode directive) rather than
+       fixed here, so InteractiveServer and InteractiveAuto pages can coexist: Members/auth
+       pages and a few others stay InteractiveServer, while the responsive pages moved into
+       iRLeagueManager.Web.Client (Results, Standings, Reviews, Teams, Schedules/EditResult,
+       Settings/*) use InteractiveAuto so they can render via WebAssembly, falling back to
+       Server rendering automatically if WASM is unavailable. *@
+    <Routes />
 
     <div id="blazor-error-ui">
         @if (Env.IsDevelopment())

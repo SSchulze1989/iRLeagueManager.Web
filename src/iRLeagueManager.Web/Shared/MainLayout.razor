@@ -5,13 +5,19 @@
 <PageTitle>iRLeagueManager.Web</PageTitle>
 
 <MudLayout>
-    <Header />
-    <MudMainContent Class="page">
-        <div class="my-2 pt-2">
+    @if (IsEmbed == false)
+    {
+        <Header />
+    }
+    <MudMainContent Class="@(IsEmbed ? "page embed" : "page")">
+        <div class="@(IsEmbed ? "" : "my-2 pt-2")">
             @Body
         </div>
     </MudMainContent>
-    <Footer />
+    @if (IsEmbed == false)
+    {
+        <Footer />
+    }
 </MudLayout>
 
 @code {
@@ -24,9 +30,17 @@
     //public long? SeasonId { get; set; }
     //public long? EventId { get; set; }
 
+    /// <summary>
+    /// When set via the "embed" query parameter (e.g. "?embed=true"), hides the main layout
+    /// (header/footer/navigation) so only the page content (e.g. results) remains visible.
+    /// Intended for embedding pages such as Results/Standings as an iframe on another website.
+    /// </summary>
+    public bool IsEmbed { get; set; }
+
     protected override void OnParametersSet()
     {
         LeagueName = (string?)RouteData?.RouteValues?.GetValueOrDefault("LeagueName");
+        IsEmbed = NavigationManager.QueryParameter<bool>("embed");
         ErrorBoundary?.Recover();
     }
 

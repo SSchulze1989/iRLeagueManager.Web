@@ -1,4 +1,5 @@
 ﻿using iRLeagueManager.Web.Exceptions;
+using iRLeagueManager.Web.Extensions;
 using iRLeagueManager.Web.ViewModels;
 using Microsoft.AspNetCore.Components;
 using System.ComponentModel;
@@ -37,6 +38,13 @@ public abstract partial class LeagueComponentBase : UtilityComponentBase
     protected bool HasRendered { get; set; } = false;
     protected EventViewModel? Event => EventList?.Selected;
 
+    /// <summary>
+    /// Set via the "embed" query parameter (e.g. "?embed=true") to indicate that the page is
+    /// embedded (e.g. as an iframe) and should hide navigation elements that are not part of
+    /// the page content itself.
+    /// </summary>
+    protected bool IsEmbed { get; private set; }
+
     protected virtual void RedirectUrl()
     {
     }
@@ -44,6 +52,7 @@ public abstract partial class LeagueComponentBase : UtilityComponentBase
     protected override void OnParametersSet()
     {
         BlazorParameterNullException.ThrowIfNull(this, EventList, cascading: true);
+        IsEmbed = NavigationManager.QueryParameter<bool>("embed");
         if (SeasonId == null && EventId == null && Shared.SeasonId != 0)
         {
             SeasonId = Shared.SeasonId;

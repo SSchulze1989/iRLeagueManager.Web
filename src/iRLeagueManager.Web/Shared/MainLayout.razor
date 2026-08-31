@@ -1,17 +1,27 @@
 ﻿@using System.Security.Claims;
+@using Microsoft.AspNetCore.WebUtilities
+@implements IDisposable
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 
 <PageTitle>iRLeagueManager.Web</PageTitle>
 
 <MudLayout>
-    <Header />
-    <MudMainContent Class="page">
-        <div class="my-2 pt-2">
+    @if (embedded == false)
+    {
+        <Header />
+        <MudMainContent Class="page">
+            <div class="my-2 pt-2">
+                @Body
+            </div>
+        </MudMainContent>
+        <Footer />
+    } else
+    {
+        <div class="embedded-page">
             @Body
         </div>
-    </MudMainContent>
-    <Footer />
+    }
 </MudLayout>
 
 @code {
@@ -21,17 +31,41 @@
     private ErrorBoundary? ErrorBoundary { get; set; }
 
     public string? LeagueName { get; set; }
-    //public long? SeasonId { get; set; }
-    //public long? EventId { get; set; }
+    private bool embedded;
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+        UpdateEmbedMode(NavigationManager.Uri);
+    }
 
     protected override void OnParametersSet()
     {
         LeagueName = (string?)RouteData?.RouteValues?.GetValueOrDefault("LeagueName");
+        UpdateEmbedMode(NavigationManager.Uri);
         ErrorBoundary?.Recover();
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        UpdateEmbedMode(e.Location);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateEmbedMode(string uri)
+    {
+        var query = QueryHelpers.ParseQuery(new Uri(uri).Query);
+        embedded = query.TryGetValue("embed", out var embed)
+            && (embed.Count == 0 || string.IsNullOrWhiteSpace(embed[0]) || bool.TryParse(embed[0], out var value) && value);
     }
 
     private void Reload()
     {
         NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }

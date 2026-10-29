@@ -104,7 +104,8 @@
             {
                 <SettingsSection Text="Conditions for Points"
                                  HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
-                    <FilterTable @bind-Filters="ChampSeason.ResultConfigViewModels.First().FiltersForPoints" />
+                    <FilterTable @bind-Filters="ChampSeason.ResultConfigViewModels.First().FiltersForPoints"
+                                 ColumnNames="FilterConditionDialog.PointFilterColumnNames" />
                 </SettingsSection>
             }
         </SettingsTopSection>

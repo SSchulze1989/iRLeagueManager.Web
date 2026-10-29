@@ -145,6 +145,10 @@
         "Team",
     };
 
+    public static string[] PointFilterColumnNames { get; } = DefaultColumnNames
+        .Append("StartPositionInGroup")
+        .ToArray();
+
     public static MatchedValueAction[] DefaultActions { get; } = new[]
     {
         MatchedValueAction.Keep,
@@ -228,6 +232,10 @@
 
     private Type? GetColumnPropertyType(string name)
     {
+        if (name == "StartPositionInGroup")
+        {
+            return typeof(double);
+        }
         var property = typeof(ResultRowModel).GetProperty(name);
         return property?.PropertyType;
     }

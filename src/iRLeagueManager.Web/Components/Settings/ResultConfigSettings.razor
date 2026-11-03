@@ -72,8 +72,7 @@
                              @bind-Expanded="filtersExpanded"
                              InitiallyExpanded="false"
                              HelperText="Add conditions for who can score points (e.g: Driver must at least drive xx% race distance...)">
-                <FilterTable @bind-Filters="Config.FiltersForPoints"
-                             ColumnNames="FilterConditionDialog.PointFilterColumnNames" />
+                <FilterTable @bind-Filters="Config.FiltersForPoints" />
             </SettingsSection>
             @if (MultiplePointConfigs)
             {

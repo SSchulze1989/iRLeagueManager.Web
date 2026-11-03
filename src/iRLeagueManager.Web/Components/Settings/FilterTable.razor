@@ -64,7 +64,6 @@
 
     [Parameter, EditorRequired] public IEnumerable<FilterConditionModel> Filters { get; set; } = default!;
     [Parameter] public EventCallback<IEnumerable<FilterConditionModel>> FiltersChanged { get; set; }
-    [Parameter] public IEnumerable<string> ColumnNames { get; set; } = FilterConditionDialog.DefaultColumnNames;
 
     private IList<FilterConditionModel> filtersList = new List<FilterConditionModel>();
 
@@ -93,7 +92,6 @@
             { x => x.Value, ModelHelper.CopyModel(condition) },
             { x => x.LeagueMembers, LeagueMembers },
             { x => x.Teams, Teams },
-            { x => x.ColumnNames, ColumnNames },
         };
         var dialog = await DialogService.Show<FilterConditionDialog>("Edit Filter", parameters).Result;
         if (dialog is null || dialog.Canceled || dialog.Data is not FilterConditionModel model)
@@ -144,7 +142,6 @@
             { x => x.Value, new() },
             { x => x.LeagueMembers, LeagueMembers },
             { x => x.Teams, Teams },
-            { x => x.ColumnNames, ColumnNames },
         };
         var dialog = await DialogService.Show<FilterConditionDialog>("Edit Filter", parameters).Result;
         if (dialog is null || dialog.Canceled || dialog.Data is not FilterConditionModel model)

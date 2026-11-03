@@ -228,6 +228,10 @@
 
     private Type? GetColumnPropertyType(string name)
     {
+        if (name == "StartPositionInGroup")
+        {
+            return typeof(double);
+        }
         var property = typeof(ResultRowModel).GetProperty(name);
         return property?.PropertyType;
     }
